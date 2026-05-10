@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resume-backend-deployment
+  labels:
+    app: resume-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: resume-backend
+  template:
+    metadata:
+      labels:
+        app: resume-backend
+    spec:
+      containers:
+      - name: resume-backend
+        image: mukund463/resume-backend:latest
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - secretRef:
+            name: resume-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: resume-backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resume-frontend-deployment
+  labels:
+    app: resume-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: resume-frontend
+  template:
+    metadata:
+      labels:
+        app: resume-frontend
+    spec:
+      containers:
+      - name: resume-frontend
+        image: mukund463/resume-frontend:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: resume-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
