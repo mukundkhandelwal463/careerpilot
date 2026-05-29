@@ -52,6 +52,32 @@ variable "gemini_api_key" {
   default     = ""   # Set via TF_VAR_gemini_api_key env var or terraform.tfvars
 }
 
+variable "smtp_user" {
+  description = "SMTP user email (sensitive)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "smtp_pass" {
+  description = "SMTP password / app password (sensitive)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "mail_sender" {
+  description = "SMTP mail sender address"
+  type        = string
+  default     = ""
+}
+
+variable "google_client_id" {
+  description = "Google Client ID for OAuth login"
+  type        = string
+  default     = ""
+}
+
 # ── Security Group (Firewall Rules) ───────────────────────────
 resource "aws_security_group" "resume_sg" {
   name        = "resume-screener-sg"
@@ -183,10 +209,14 @@ resource "aws_instance" "resume_server" {
     # Create .env file from secrets (replace with real values)
     cat > backend/.env << 'ENVFILE'
     GEMINI_API_KEY=${var.gemini_api_key}
-    SMTP_SERVER=smtp.gmail.com
-    SMTP_PORT=587
+    GOOGLE_CLIENT_ID=${var.google_client_id}
     SECRET_KEY=airesume-secret-key-2026
     FLASK_ENV=production
+    SMTP_SERVER=smtp.gmail.com
+    SMTP_PORT=587
+    SMTP_USER=${var.smtp_user}
+    SMTP_PASS=${var.smtp_pass}
+    MAIL_SENDER=${var.mail_sender}
     ENVFILE
 
     # Start all services
