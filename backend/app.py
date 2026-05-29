@@ -151,8 +151,15 @@ CORS(app, supports_credentials=True)
 is_local_dev = os.environ.get("FLASK_ENV") != "production" and (
     os.environ.get("MYSQLHOST") in {None, "", "127.0.0.1", "localhost"}
 )
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax" if is_local_dev else "None"
-app.config["SESSION_COOKIE_SECURE"] = False if is_local_dev else True
+
+env_secure = os.environ.get("SESSION_COOKIE_SECURE")
+if env_secure is not None:
+    secure_cookies = env_secure.lower() == "true"
+else:
+    secure_cookies = not is_local_dev
+
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax" if not secure_cookies else "None"
+app.config["SESSION_COOKIE_SECURE"] = secure_cookies
 
 try:
     from database import db, User, Resume, OTP
