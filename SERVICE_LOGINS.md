@@ -15,6 +15,7 @@
 | **Railway** | https://railway.app | PaaS deployment + MySQL | $5/month credit |
 | **Render** | https://render.com | PaaS deployment | Free tier |
 | **Grafana Cloud** | https://grafana.com/auth/sign-up | Hosted dashboards | Free |
+| **Jenkins** | Local (`http://localhost:8080`) | Local CI/CD pipeline automation | Free |
 
 ---
 
@@ -195,6 +196,24 @@ Password: resume123
 3. Add your AWS credentials as Environment Variables in the workspace
 4. Run `terraform login` locally
 5. Runs automatically via CLI or GitHub Actions
+
+---
+
+## 🔷 9. Jenkins — CI/CD Pipeline Automation (Local)
+
+**URL:** http://localhost:8080
+
+### Steps:
+1. Run Jenkins locally on port `8080`.
+2. Retrieve the initial admin password from `C:\ProgramData\Jenkins\.jenkins\secrets\initialAdminPassword` (or bypass/reset it by modifying `<useSecurity>false</useSecurity>` in `config.xml` and restarting the service).
+3. Create your administrator account.
+4. Configure required credentials in Jenkins:
+   - Go to `Manage Jenkins` → `Credentials` → `System` → `Global credentials`.
+   - Add **Username with password** credential:
+     - ID: `dockerhub-creds`
+     - Username: Your Docker Hub username
+     - Password: Your Docker Hub Access Token (or password)
+5. Create a new Pipeline job named `Resume-Screener-Pipeline` pointing to your Git repository to automatically build, test, and deploy the application.
 
 ---
 
