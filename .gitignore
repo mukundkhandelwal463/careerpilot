@@ -23,3 +23,7 @@ node_modules/
 dist/
 client/node_modules/
 client/dist/
+
+# Prometheus / Grafana data
+data/
+

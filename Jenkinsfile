@@ -37,13 +37,26 @@ pipeline {
             }
         }
 
-        stage('Deploy Containers') {
+        stage('Deploy Locally') {
             steps {
                 bat 'docker rm -f resume-backend resume-frontend resume-prometheus resume-grafana 2>nul || exit 0'
-                bat 'docker network rm resume_screener_resume-network 2>nul || exit 0'
-                bat 'docker network rm resume-screener-pipeline_resume-network 2>nul || exit 0'
-                bat "docker run -d --name resume-backend -p 5000:5000 %BACKEND_IMAGE%:latest"
-                bat "docker run -d --name resume-frontend -p 3000:80 %FRONTEND_IMAGE%:latest"
+                bat 'docker network rm resume-network 2>nul || exit 0'
+                bat 'docker network create resume-network 2>nul || exit 0'
+                bat "docker run -d --name resume-backend --network resume-network --network-alias backend -p 5000:5000 %BACKEND_IMAGE%:latest"
+                bat "docker run -d --name resume-frontend --network resume-network -p 3000:80 %FRONTEND_IMAGE%:latest"
+            }
+        }
+
+        stage('Deploy to AWS EC2') {
+            steps {
+                bat '''
+                    copy "C:\\Users\\Mukund\\PycharmProjects\\Resume_Screener\\terraform\\resume-screener-key.pem" ec2-key.pem /Y
+                    icacls ec2-key.pem /reset
+                    icacls ec2-key.pem /inheritance:r
+                    icacls ec2-key.pem /grant:r "%USERNAME%:(R)"
+                    ssh -i ec2-key.pem -o StrictHostKeyChecking=no ec2-user@3.111.51.80 "cd /app && git pull origin main && /usr/local/bin/docker-compose up -d --build"
+                    del ec2-key.pem
+                '''
             }
         }
     }

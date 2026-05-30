@@ -8,8 +8,6 @@
 #   docker-compose logs -f backend  ← follow backend logs
 # ==============================================================
 
-version: '3.8'
-
 services:
 
   # ─────────────────────────────────────────────────────────────
@@ -70,7 +68,7 @@ services:
   # UI: http://localhost:9090
   # ─────────────────────────────────────────────────────────────
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.53.0
     container_name: resume-prometheus
     ports:
       - "9090:9090"
@@ -91,7 +89,7 @@ services:
   # UI: http://localhost:3001  (admin / resume123)
   # ─────────────────────────────────────────────────────────────
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.1.0
     container_name: resume-grafana
     ports:
       - "3001:3000"
