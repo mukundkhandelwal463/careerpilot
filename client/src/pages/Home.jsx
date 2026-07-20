@@ -83,11 +83,6 @@ const Home = () => {
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
-  // Smooth Scroll Docking Effect: Laptop glides down into Feature Spotlight right side on scroll!
-  const laptopY = useTransform(scrollYProgress, [0, 0.22], [0, 480]);
-  const laptopX = useTransform(scrollYProgress, [0, 0.22], [0, 210]);
-  const laptopScale = useTransform(scrollYProgress, [0, 0.22], [1, 0.65]);
-
   return (
     <div ref={containerRef} className="page-shell" style={{ position: 'relative', overflowX: 'hidden' }}>
       {/* Top Scroll Indicator */}
@@ -237,17 +232,14 @@ const Home = () => {
 
             </div>
 
-            {/* ── DEAD-CENTERED LAPTOP MOCKUP (GLIDES DOWN INTO SPOTLIGHT RIGHT SLOT ON SCROLL) ── */}
+            {/* ── DEAD-CENTERED LAPTOP MOCKUP DISPLAY ── */}
             <motion.div 
               style={{
-                x: laptopX,
-                y: laptopY,
-                scale: laptopScale,
                 position: 'relative',
                 margin: '0 auto',
                 width: '100%',
                 maxWidth: '780px',
-                zIndex: 30
+                zIndex: 10
               }}
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -483,7 +475,7 @@ const Home = () => {
 
         </section>
 
-        {/* INTERACTIVE FEATURE SPOTLIGHT SECTION (TARGET CONTAINER DOCK FOR LAPTOP ON SCROLL) */}
+        {/* INTERACTIVE FEATURE SPOTLIGHT SECTION WITH REAL LAPTOP MOCKUP DISPLAY INSIDE */}
         <section style={{ padding: '60px 0 80px', position: 'relative' }}>
           <div style={{
             display: 'grid',
@@ -547,21 +539,82 @@ const Home = () => {
               </Link>
             </div>
 
-            {/* Target Drop Zone Container where Laptop Docks on Scroll */}
-            <div style={{
-              height: '360px',
-              borderRadius: '24px',
-              border: '2px dashed rgba(16,185,129,0.25)',
-              background: 'rgba(15,23,42,0.02)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative'
-            }}>
-              <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600, fontStyle: 'italic' }}>
-                ✨ Live Laptop AI Workspace Docks Here
-              </span>
-            </div>
+            {/* REAL LAPTOP MOCKUP DISPLAYING THE ATS FEATURE SCREENER INSIDE */}
+            <motion.div 
+              whileHover={{ y: -6, scale: 1.02 }}
+              transition={{ duration: 0.3 }}
+              style={{ width: '100%', maxWidth: '520px', margin: '0 auto' }}
+            >
+              <div style={{
+                background: '#1c2427',
+                borderRadius: '20px 20px 8px 8px',
+                padding: '10px 10px 16px 10px',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.22)',
+                border: '2px solid #334155'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#475569' }} />
+                </div>
+
+                {/* LAPTOP SCREEN SHOWING THE ATS FEATURE INSIDE */}
+                <div style={{
+                  background: '#0f172a',
+                  borderRadius: '12px',
+                  padding: '16px 18px',
+                  color: '#ffffff',
+                  height: '320px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  border: '1px solid rgba(255,255,255,0.08)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#10b981', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <BarChart3 className="size-4 text-emerald-400" /> ATS Match Engine
+                    </span>
+                    <span style={{ fontSize: '0.65rem', background: 'rgba(16,185,129,0.15)', color: '#34d399', padding: '3px 8px', borderRadius: '8px', fontWeight: 700 }}>
+                      85% Optimal
+                    </span>
+                  </div>
+
+                  {/* Conic ATS Gauge */}
+                  <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Overall Score</span>
+                      <strong style={{ fontSize: '0.82rem', color: '#10b981' }}>85% (ATS Ready ✔)</strong>
+                    </div>
+                    <div style={{ width: '100%', height: '8px', background: '#1e293b', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: '85%', height: '100%', background: 'linear-gradient(90deg, #10b981, #34d399)' }} />
+                    </div>
+                  </div>
+
+                  {/* Gemini AI Suggested Keywords inside Laptop */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Gemini AI Recommended Keywords:
+                    </span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                      {['PyTorch', 'Scikit-learn', 'Random Forest', 'TF-IDF', 'NLP Pipelines', 'Feature Engineering'].map((kw, i) => (
+                        <span key={i} style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)', padding: '2px 8px', borderRadius: '10px', fontSize: '0.68rem', fontWeight: 600 }}>
+                          + {kw}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Laptop Base Stand */}
+              <div style={{
+                height: '12px',
+                width: '108%',
+                marginLeft: '-4%',
+                background: 'linear-gradient(to bottom, #475569, #1e293b)',
+                borderRadius: '0 0 14px 14px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
+              }} />
+            </motion.div>
 
           </div>
         </section>
