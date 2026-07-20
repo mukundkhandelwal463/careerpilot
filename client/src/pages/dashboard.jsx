@@ -322,7 +322,7 @@ const Dashboard = () => {
           alignItems: 'start'
         }}>
 
-          {/* 1. LEFT COLUMN: Profile Card & Accordions */}
+          {/* 1. LEFT COLUMN: Profile Card & Download Complete Report */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Candidate Profile Card */}
             <div style={{
@@ -395,13 +395,13 @@ const Dashboard = () => {
                 style={{ display: 'none' }}
               />
 
-              {/* Info Area (Text removed from the image itself) */}
+              {/* Info Area */}
               <div style={{ padding: '20px 24px', background: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
                 <h3 style={{ fontSize: '1.11rem', fontWeight: 700, margin: '0 0 4px', color: '#1c2427' }}>
                   {user.full_name}
                 </h3>
                 <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '10px', fontWeight: 600 }}>
-                  {targetRole || 'N/A'}
+                  {targetRole || 'Software Engineer'}
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.8rem', color: '#64748b', overflow: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
@@ -416,151 +416,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Accordion / List Cards widget */}
-            <div style={{
-              background: '#ffffff',
-              borderRadius: '28px',
-              padding: '16px 20px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px'
-            }}>
-              {/* Card 1: Parsed Resumes */}
-              <div>
-                <button
-                  onClick={() => setOpenSection(openSection === 'resumes' ? null : 'resumes')}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    width: '100%',
-                    padding: '12px 6px',
-                    background: 'none',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '0.82rem',
-                    color: '#1c2427',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <span>Parsed Resumes ({resumes.length})</span>
-                  {openSection === 'resumes' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                </button>
-                {openSection === 'resumes' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px 6px 12px', maxHeight: '180px', overflowY: 'auto' }}>
-                    {resumes.map(r => (
-                      <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '8px 12px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
-                          {r.title}
-                        </span>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#2563eb' }}>
-                          {r.ats_score ? `${Math.round(r.ats_score)}%` : '0%'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
-
-              {/* Card 2: Target Role details */}
-              <div>
-                <button
-                  onClick={() => setOpenSection(openSection === 'target' ? null : 'target')}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    width: '100%',
-                    padding: '12px 6px',
-                    background: 'none',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '0.8rem',
-                    color: '#1c2427',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <span>Target Role & Domain</span>
-                  {openSection === 'target' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                </button>
-                {openSection === 'target' && (
-                  <div style={{ padding: '4px 6px 12px', fontSize: '0.8rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                      <span style={{ fontSize: '1.11rem' }}>🎯</span>
-                      <div>
-                        <strong style={{ display: 'block', color: '#334155' }}>{targetRole}</strong>
-                        <span>Active tracking &bull; Roadmap set</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
-
-              {/* Card 3: ATS keyword benchmarks */}
-              <div>
-                <button
-                  onClick={() => setOpenSection(openSection === 'benchmarks' ? null : 'benchmarks')}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    width: '100%',
-                    padding: '12px 6px',
-                    background: 'none',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '0.8rem',
-                    color: '#1c2427',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <span>ATS Keyword Match Goals</span>
-                  {openSection === 'benchmarks' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                </button>
-                {openSection === 'benchmarks' && (
-                  <div style={{ padding: '4px 6px 12px', fontSize: '0.8rem', color: '#64748b' }}>
-                    Target standard: <strong>Aim for &gt; 70% ATS score</strong> to pass recruiters' automatic pre-screening.
-                  </div>
-                )}
-              </div>
-
-              <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
-
-              {/* Card 4: Interview Ready milestones */}
-              <div>
-                <button
-                  onClick={() => setOpenSection(openSection === 'milestones' ? null : 'milestones')}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    width: '100%',
-                    padding: '12px 6px',
-                    background: 'none',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '0.8rem',
-                    color: '#1c2427',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <span>Interview Readiness</span>
-                  {openSection === 'milestones' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                </button>
-                {openSection === 'milestones' && (
-                  <div style={{ padding: '4px 6px 12px', fontSize: '0.8rem', color: '#64748b' }}>
-                    Mock Score: <strong>{interviewReadiness ? `${interviewReadiness}%` : 'No mock test yet'}</strong> &bull; Average rating based on technical + HR questions.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Download Complete Report Button in Left Column */}
+            {/* Download Complete Report Card */}
             <div style={{
               background: '#ffffff',
               borderRadius: '28px',
@@ -569,10 +425,12 @@ const Dashboard = () => {
               display: 'flex',
               flexDirection: 'column',
               gap: '16px',
-              textAlign: 'center',
-              marginTop: '8px'
+              textAlign: 'center'
             }}>
-              <span style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Get your full evaluation</span>
+              <div>
+                <strong style={{ fontSize: '0.95rem', color: '#1c2427', display: 'block', marginBottom: '4px' }}>Complete Evaluation Report</strong>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, display: 'block' }}>Download your comprehensive profile & mock performance summary</span>
+              </div>
               <button
                 onClick={() => window.open(`/api/results/download-complete-report?id=${user.email}`, '_blank')}
                 style={{
@@ -591,30 +449,30 @@ const Dashboard = () => {
                   boxShadow: '0 4px 12px rgba(28,36,39,0.1)'
                 }}
               >
-                <Download className="size-5" /> Download Complete Report
+                <Download className="size-5" /> Download PDF Report
               </button>
             </div>
           </div>
 
-          {/* 2. MIDDLE COLUMN: Scorecard Radials Grid + New Download & Mock Interview Box */}
+          {/* 2. MIDDLE COLUMN: Scorecards, Action Center, Best Test Result */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             
-            {/* 2x2 Scorecard Radials Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            {/* 3 Scorecard Radials Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
               {/* Card 1: Best ATS Match */}
               <div style={{
                 background: '#ffffff',
-                borderRadius: '28px',
-                padding: '24px',
+                borderRadius: '24px',
+                padding: '20px 16px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px',
+                minHeight: '190px',
                 textAlign: 'center'
               }}>
-                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Best ATS Match
                 </span>
                 {renderRadialGauge(bestAtsScore, '#10b981')}
@@ -623,62 +481,43 @@ const Dashboard = () => {
               {/* Card 2: Mock Interview */}
               <div style={{
                 background: '#ffffff',
-                borderRadius: '28px',
-                padding: '24px',
+                borderRadius: '24px',
+                padding: '20px 16px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px',
+                minHeight: '190px',
                 textAlign: 'center'
               }}>
-                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Mock Interview
                 </span>
                 {renderRadialGauge(interviewReadiness, '#f5c35c')}
               </div>
 
-              {/* Card 3: Tasks Progress */}
+              {/* Card 3: Job Fit Match */}
               <div style={{
                 background: '#ffffff',
-                borderRadius: '28px',
-                padding: '24px',
+                borderRadius: '24px',
+                padding: '20px 16px',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px',
+                minHeight: '190px',
                 textAlign: 'center'
               }}>
-                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Tasks Progress
-                </span>
-                {renderRadialGauge(todayProgressPercent, '#3b82f6')}
-              </div>
-
-              {/* Card 4: Job Fit Match */}
-              <div style={{
-                background: '#ffffff',
-                borderRadius: '28px',
-                padding: '24px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '200px',
-                textAlign: 'center'
-              }}>
-                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Job Fit Match
                 </span>
                 {renderRadialGauge(jobFitScore, '#8b5cf6')}
               </div>
             </div>
 
-            {/* NEW BOX: Download & Mock Interview Hub (Fills the blank space!) */}
+            {/* Resume Alignment & Action Center */}
             <div style={{
               background: '#ffffff',
               borderRadius: '28px',
@@ -694,7 +533,7 @@ const Dashboard = () => {
                   Resume Alignment & Action Center
                 </h3>
                 <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
-                  Download your highest-aligned resume matching the <strong>{targetRole}</strong> roadmap, or launch a dynamic mock voice interview simulation.
+                  Download your highest-aligned resume matching the <strong>{targetRole || 'Software Engineer'}</strong> roadmap, or launch a dynamic mock voice interview simulation.
                 </p>
               </div>
 
@@ -725,7 +564,6 @@ const Dashboard = () => {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
-                {/* Download best resume */}
                 <button
                   onClick={downloadBestResume}
                   style={{
@@ -747,7 +585,6 @@ const Dashboard = () => {
                   <Download className="size-4" /> Download Resume
                 </button>
 
-                {/* Take mock interview */}
                 <button
                   onClick={handleTakeInterview}
                   style={{
@@ -771,7 +608,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* NEW BOX: Best Mock Test Result */}
+            {/* Best Mock Test Result Card */}
             <div style={{
               background: '#ffffff',
               borderRadius: '32px',
@@ -826,63 +663,45 @@ const Dashboard = () => {
 
           </div>
 
-          {/* 3. RIGHT COLUMN: Detailed Career Map & Dynamic Tasks Checklist */}
+          {/* 3. RIGHT COLUMN: CS Special Course & Preparation Tasks */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             
-            {/* Detailed Career Map Card */}
+            {/* Computer Science Special Progress */}
             <div style={{
-              background: '#ffffff',
-              borderRadius: '28px',
-              padding: '24px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.03)'
+              background: '#1c2427',
+              borderRadius: '32px',
+              padding: '28px',
+              color: '#ffffff',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1c2427', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Compass className="size-4 text-slate-500" /> Career Map
-                </span>
-                <span style={{ fontSize: '0.8rem', background: '#eff6ff', color: '#3b82f6', padding: '2px 8px', borderRadius: '999px', fontWeight: 700 }}>
-                  Active Path
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>CS Special Course Progress</h3>
+                <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '999px', fontWeight: 700 }}>
+                  Active
                 </span>
               </div>
 
-              {/* Detailed roadmap level blocks */}
-              {careerRoadmap ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {careerRoadmap.levels?.slice(0, 3).map((lvl, idx) => (
-                    <div key={idx} style={{ 
-                      background: '#f8fafc', 
-                      border: '1px solid #e2e8f0', 
-                      borderRadius: '16px', 
-                      padding: '12px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '4px'
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c2427' }}>
-                          Level {lvl.level || idx + 1}
-                        </span>
-                        <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
-                          {lvl.duration}
-                        </span>
-                      </div>
-                      <strong style={{ fontSize: '0.8rem', color: '#1e293b' }}>{lvl.title}</strong>
-                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.3 }}>
-                        {lvl.focus}
-                      </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {[
+                  { title: "Data Structures & Algorithms", progress: 85, color: "#10b981" },
+                  { title: "Operating Systems", progress: 60, color: "#3b82f6" },
+                  { title: "Database Management", progress: 40, color: "#f5c35c" },
+                  { title: "Computer Networks", progress: 25, color: "#8b5cf6" }
+                ].map((course, idx) => (
+                  <div key={idx}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{course.title}</span>
+                      <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700, fontFamily: 'monospace' }}>{course.progress}%</span>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '20px 10px', border: '1px dashed #cbd5e1', borderRadius: '16px' }}>
-                  <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic' }}>
-                    No Career Map loaded. Generate your path in <Link to="/preparation" style={{ color: '#3b82f6', fontWeight: 700 }}>Preparation Hub</Link>.
-                  </p>
-                </div>
-              )}
+                    <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
+                      <div style={{ width: `${course.progress}%`, height: '100%', background: course.color, borderRadius: '999px' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Dark Preparation tasks list */}
+            {/* Preparation tasks checklist */}
             <div style={{
               background: '#1c2427',
               borderRadius: '32px',
@@ -897,7 +716,7 @@ const Dashboard = () => {
                 </strong>
               </div>
 
-              {/* Task list with circular checked badges */}
+              {/* Task list */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {todayTasks.length > 0 ? (
                   todayTasks.map((task) => (
@@ -922,27 +741,24 @@ const Dashboard = () => {
                       onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        {/* Circle custom icon */}
                         <div style={{
-                          width: '24px',
-                          height: '24px',
+                          width: '32px',
+                          height: '32px',
                           borderRadius: '50%',
-                          background: 'rgba(255,255,255,0.1)',
+                          background: task.completed ? 'rgba(245,195,92,0.15)' : 'rgba(255,255,255,0.05)',
                           display: 'grid',
                           placeItems: 'center',
-                          fontSize: '10px'
+                          color: task.completed ? '#f5c35c' : '#94a3b8',
+                          flexShrink: 0
                         }}>
-                          📋
+                          <CheckSquare className="size-4" />
                         </div>
                         <div style={{ overflow: 'hidden' }}>
-                          <strong style={{ 
-                            display: 'block', 
-                            fontSize: '0.8rem',
+                          <strong style={{
+                            display: 'block',
+                            fontSize: '0.85rem',
                             textDecoration: task.completed ? 'line-through' : 'none',
-                            color: task.completed ? '#6b7280' : '#ffffff',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            maxWidth: '150px'
+                            color: task.completed ? '#94a3b8' : '#ffffff'
                           }}>
                             {task.text}
                           </strong>
@@ -976,41 +792,6 @@ const Dashboard = () => {
                     </p>
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* NEW BOX: Computer Science Special Progress */}
-            <div style={{
-              background: '#1c2427',
-              borderRadius: '32px',
-              padding: '28px',
-              color: '#ffffff',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>CS Special Course</h3>
-                <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '999px', fontWeight: 700 }}>
-                  Active
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {[
-                  { title: "Data Structures & Algorithms", progress: 85, color: "#10b981" },
-                  { title: "Operating Systems", progress: 60, color: "#3b82f6" },
-                  { title: "Database Management", progress: 40, color: "#f5c35c" },
-                  { title: "Computer Networks", progress: 25, color: "#8b5cf6" }
-                ].map((course, idx) => (
-                  <div key={idx}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{course.title}</span>
-                      <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700, fontFamily: 'monospace' }}>{course.progress}%</span>
-                    </div>
-                    <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
-                      <div style={{ width: `${course.progress}%`, height: '100%', background: course.color, borderRadius: '999px' }} />
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
 
