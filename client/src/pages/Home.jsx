@@ -52,6 +52,26 @@ const TiltCard = ({ children, className, style = {} }) => {
   );
 };
 
+/* Feature pill tube data */
+const featurePills = [
+  { icon: BarChart3, bg: '#ecfdf5', color: '#10b981', title: 'ATS Resume Analyzer' },
+  { icon: FileCode, bg: '#eff6ff', color: '#3b82f6', title: 'LaTeX Resume Architect' },
+  { icon: Mic, bg: '#fff1f2', color: '#f43f5e', title: 'Voice AI Mock Interview' },
+  { icon: Code2, bg: '#fef3c7', color: '#d97706', title: 'CS Special Evaluation' },
+  { icon: Search, bg: '#f3e8ff', color: '#9333ea', title: 'Live Job Matching' },
+  { icon: Target, bg: '#ecfeff', color: '#0891b2', title: 'Career Roadmap & Keywords' }
+];
+
+/* Positions for the 6 floating pills around the laptop (absolute positioned) */
+const pillPositions = [
+  { top: '5%',   left: '-260px',  flyX: -600,  flyY: -100 },  // top-left
+  { top: '38%',  left: '-280px',  flyX: -700,  flyY: 0 },     // mid-left
+  { top: '72%',  left: '-240px',  flyX: -600,  flyY: 100 },   // bottom-left
+  { top: '5%',   right: '-260px', flyX: 600,   flyY: -100 },  // top-right
+  { top: '38%',  right: '-280px', flyX: 700,   flyY: 0 },     // mid-right
+  { top: '72%',  right: '-240px', flyX: 600,   flyY: 100 }    // bottom-right
+];
+
 
 const Home = () => {
   const containerRef = useRef(null);
@@ -60,37 +80,24 @@ const Home = () => {
   const [showFeatureScreen, setShowFeatureScreen] = useState(false);
   const [dockOffset, setDockOffset] = useState({ x: 0, y: 0, scale: 0.58 });
 
-  // Measure the exact offset between laptop origin and dock target
+  // Measure exact offset between laptop and dock target
   const measureDock = useCallback(() => {
     if (!laptopRef.current || !dockRef.current) return;
     const laptopRect = laptopRef.current.getBoundingClientRect();
     const dockRect = dockRef.current.getBoundingClientRect();
     const scrollY = window.scrollY;
-
-    // We want the laptop center to align with the dock center
     const laptopCenterX = laptopRect.left + laptopRect.width / 2;
     const laptopCenterY = laptopRect.top + scrollY + laptopRect.height / 2;
     const dockCenterX = dockRect.left + dockRect.width / 2;
     const dockCenterY = dockRect.top + scrollY + dockRect.height / 2;
-
-    // Target scale: dock width / laptop width
     const targetScale = Math.min(dockRect.width / laptopRect.width, 0.58);
-
-    setDockOffset({
-      x: dockCenterX - laptopCenterX,
-      y: dockCenterY - laptopCenterY,
-      scale: targetScale
-    });
+    setDockOffset({ x: dockCenterX - laptopCenterX, y: dockCenterY - laptopCenterY, scale: targetScale });
   }, []);
 
   useEffect(() => {
-    // Measure after layout settles
     const timer = setTimeout(measureDock, 300);
     window.addEventListener('resize', measureDock);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', measureDock);
-    };
+    return () => { clearTimeout(timer); window.removeEventListener('resize', measureDock); };
   }, [measureDock]);
 
   const { scrollYProgress } = useScroll({
@@ -99,24 +106,32 @@ const Home = () => {
   });
 
   const scaleY = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
-
-  // Parallax blobs
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
-  // Laptop scroll transforms — uses measured offsets for pixel-perfect docking
-  const laptopX = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.x]);
-  const laptopY = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.y]);
-  const laptopScale = useTransform(scrollYProgress, [0, 0.25], [1, dockOffset.scale]);
+  // Laptop scroll transforms — docks into spotlight
+  const laptopX = useTransform(scrollYProgress, [0, 0.22], [0, dockOffset.x]);
+  const laptopY = useTransform(scrollYProgress, [0, 0.22], [0, dockOffset.y]);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.22], [1, dockOffset.scale]);
 
-  // Swap screen content at midpoint
+  // Feature pills fly outward on scroll (0 → 0.18 range, before laptop fully docks)
+  const pillProgress = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
+
+  // Create individual pill transforms
+  const pillTransforms = pillPositions.map(pos => ({
+    x: useTransform(pillProgress, [0, 1], [0, pos.flyX]),
+    y: useTransform(pillProgress, [0, 1], [0, pos.flyY]),
+    opacity: useTransform(pillProgress, [0, 0.6, 1], [1, 1, 0]),
+    scale: useTransform(pillProgress, [0, 1], [1, 0.7])
+  }));
+
+  // Swap screen content
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     setShowFeatureScreen(latest > 0.13);
   });
 
   return (
     <div ref={containerRef} className="page-shell" style={{ position: 'relative', overflowX: 'hidden' }}>
-      {/* Scroll progress bar */}
       <motion.div style={{ scaleX: scaleY, position: 'fixed', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(to right, var(--accent), var(--teal))', transformOrigin: '0%', zIndex: 100000 }} />
 
       <Navbar />
@@ -127,60 +142,80 @@ const Home = () => {
 
       <main style={{ width: 'min(var(--max-width), calc(100% - 32px))', margin: '0 auto' }}>
         
-        {/* ════════════════════════════════════
-            HERO SECTION — Laptop at center
-            ════════════════════════════════════ */}
+        {/* ═══════════════════════════════════════════════════════
+            HERO — Laptop centered with floating pill tubes around it
+            Scrolling → pills fly outward, laptop docks into box
+            ═══════════════════════════════════════════════════════ */}
         <section style={{ padding: '140px 0 60px', textAlign: 'center' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(220px, 270px) minmax(500px, 1fr) minmax(220px, 270px)',
-            gap: '32px', alignItems: 'center', maxWidth: '1440px', margin: '0 auto', position: 'relative'
-          }}>
+          <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '1440px', margin: '0 auto' }}>
 
-            {/* LEFT BADGES */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left', zIndex: 20 }}>
-              {[
-                { icon: BarChart3, bg: '#ecfdf5', color: '#10b981', title: 'ATS Resume Analyzer', sub: '85% Match Verified' },
-                { icon: FileCode, bg: '#eff6ff', color: '#3b82f6', title: 'LaTeX Resume Architect', sub: '3 LaTeX Templates' },
-                { icon: Mic, bg: '#fff1f2', color: '#f43f5e', title: 'Voice AI Mock Interview', sub: 'Real-Time AI Speech' }
-              ].map((f, idx) => {
-                const Icon = f.icon;
-                return (
-                  <motion.div key={idx} whileHover={{ y: -5, scale: 1.03 }} initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.1 * (idx + 1) }}
-                    style={{ background: '#fff', borderRadius: '20px', padding: '16px 20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <div style={{ background: f.bg, padding: '10px', borderRadius: '12px', color: f.color, flexShrink: 0 }}><Icon className="size-5" /></div>
-                    <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>{f.title}</h3>
+            {/* ── FLOATING FEATURE PILL TUBES ── */}
+            {featurePills.map((pill, idx) => {
+              const Icon = pill.icon;
+              const pos = pillPositions[idx];
+              const transform = pillTransforms[idx];
+              return (
+                <motion.div
+                  key={idx}
+                  style={{
+                    position: 'absolute',
+                    top: pos.top,
+                    left: pos.left || 'auto',
+                    right: pos.right || 'auto',
+                    x: transform.x,
+                    y: transform.y,
+                    opacity: transform.opacity,
+                    scale: transform.scale,
+                    zIndex: 20
+                  }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, delay: 0.08 * idx, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <motion.div
+                    whileHover={{ y: -4, scale: 1.05 }}
+                    animate={{ y: [0, idx % 2 === 0 ? -6 : 6, 0] }}
+                    transition={{ duration: 3 + idx * 0.5, repeat: Infinity, ease: 'easeInOut' }}
+                    style={{
+                      background: '#ffffff',
+                      borderRadius: '999px',
+                      padding: '12px 24px',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+                      border: '1px solid #e2e8f0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      whiteSpace: 'nowrap',
+                      cursor: 'default'
+                    }}
+                  >
+                    <div style={{ background: pill.bg, padding: '8px', borderRadius: '12px', color: pill.color, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+                      <Icon className="size-5" />
+                    </div>
+                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1c2427' }}>{pill.title}</span>
                   </motion.div>
-                );
-              })}
-            </div>
+                </motion.div>
+              );
+            })}
 
-            {/* ═══ THE LAPTOP ═══ scrolls from center → docks in spotlight box */}
+            {/* ── LAPTOP MOCKUP ── scrolls down into spotlight box */}
             <motion.div
               ref={laptopRef}
               style={{
-                x: laptopX,
-                y: laptopY,
-                scale: laptopScale,
-                position: 'relative',
-                margin: '0 auto',
-                width: '100%',
-                maxWidth: '880px',
-                zIndex: 30
+                x: laptopX, y: laptopY, scale: laptopScale,
+                position: 'relative', width: '100%', maxWidth: '880px', zIndex: 30
               }}
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-
-
-              {/* LAPTOP HARDWARE */}
+              {/* LAPTOP BODY */}
               <div style={{ background: '#1c2427', borderRadius: '26px 26px 10px 10px', padding: '14px 14px 24px 14px', boxShadow: '0 30px 80px rgba(0,0,0,0.28)', border: '2px solid #334155' }}>
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#475569' }} />
                 </div>
 
-                {/* SCREEN — crossfade between Dashboard and ATS Feature */}
+                {/* SCREEN — crossfade */}
                 <div style={{ background: '#0f172a', borderRadius: '14px', overflow: 'hidden', display: 'flex', height: '500px', border: '1px solid rgba(255,255,255,0.08)', textAlign: 'left', position: 'relative' }}>
                   {/* Sidebar */}
                   <div style={{ width: '56px', background: '#090d16', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', paddingTop: '20px', borderRight: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
@@ -193,7 +228,7 @@ const Home = () => {
                     </div>
                   </div>
 
-                  {/* Content area with crossfade */}
+                  {/* Screen content with crossfade */}
                   <div style={{ flex: 1, position: 'relative' }}>
                     {/* SCREEN 1: Dashboard */}
                     <div style={{ position: 'absolute', inset: 0, opacity: showFeatureScreen ? 0 : 1, transition: 'opacity 0.5s ease', pointerEvents: showFeatureScreen ? 'none' : 'auto' }}>
@@ -268,34 +303,16 @@ const Home = () => {
               <div style={{ height: '16px', width: '108%', marginLeft: '-4%', background: 'linear-gradient(to bottom, #475569, #1e293b)', borderRadius: '0 0 18px 18px', boxShadow: '0 12px 30px rgba(0,0,0,0.35)' }} />
             </motion.div>
 
-            {/* RIGHT BADGES */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left', zIndex: 20 }}>
-              {[
-                { icon: Code2, bg: '#fef3c7', color: '#d97706', title: 'CS Special Evaluation', sub: '6 CS Core Subjects' },
-                { icon: Search, bg: '#f3e8ff', color: '#9333ea', title: 'Live Job Matching', sub: '100K+ Live Jobs' },
-                { icon: Target, bg: '#ecfeff', color: '#0891b2', title: 'Career Roadmap & Keywords', sub: 'Gemini AI Keyword Stream' }
-              ].map((f, idx) => {
-                const Icon = f.icon;
-                return (
-                  <motion.div key={idx} whileHover={{ y: -5, scale: 1.03 }} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.1 * (idx + 1) }}
-                    style={{ background: '#fff', borderRadius: '20px', padding: '16px 20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <div style={{ background: f.bg, padding: '10px', borderRadius: '12px', color: f.color, flexShrink: 0 }}><Icon className="size-5" /></div>
-                    <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>{f.title}</h3>
-                  </motion.div>
-                );
-              })}
-            </div>
           </div>
         </section>
 
 
-        {/* ═══════════════════════════════════════════════════════════
-            FEATURE SPOTLIGHT — has the DOCK TARGET where laptop lands
-            ═══════════════════════════════════════════════════════════ */}
+        {/* ═══════════════════════════════════════════════
+            FEATURE SPOTLIGHT — Laptop docks into right side
+            ═══════════════════════════════════════════════ */}
         <section style={{ padding: '40px 0 80px', position: 'relative' }}>
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            display: 'grid', gridTemplateColumns: '1fr 1fr',
             gap: '40px', alignItems: 'center',
             background: '#ffffff', borderRadius: '32px', padding: '44px 48px',
             boxShadow: '0 20px 60px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0', textAlign: 'left'
@@ -331,14 +348,8 @@ const Home = () => {
               </Link>
             </div>
 
-            {/* RIGHT — DOCK TARGET (invisible box the laptop lands in) */}
-            <div ref={dockRef} style={{
-              height: '380px',
-              borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }} />
+            {/* RIGHT — DOCK TARGET */}
+            <div ref={dockRef} style={{ height: '380px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
           </div>
         </section>
 
