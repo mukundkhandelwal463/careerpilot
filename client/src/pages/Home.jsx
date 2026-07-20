@@ -62,14 +62,14 @@ const featurePills = [
   { icon: Target, bg: '#ecfeff', color: '#0891b2', title: 'Career Roadmap & Keywords' }
 ];
 
-/* Positions for the 6 floating pills around the laptop (absolute positioned) */
+/* Positions for the 6 floating pills — touching laptop edges */
 const pillPositions = [
-  { top: '5%',   left: '-260px',  flyX: -600,  flyY: -100 },  // top-left
-  { top: '38%',  left: '-280px',  flyX: -700,  flyY: 0 },     // mid-left
-  { top: '72%',  left: '-240px',  flyX: -600,  flyY: 100 },   // bottom-left
-  { top: '5%',   right: '-260px', flyX: 600,   flyY: -100 },  // top-right
-  { top: '38%',  right: '-280px', flyX: 700,   flyY: 0 },     // mid-right
-  { top: '72%',  right: '-240px', flyX: 600,   flyY: 100 }    // bottom-right
+  { top: '8%',   left: '-180px',  flyX: -500,  flyY: -80 },   // top-left
+  { top: '40%',  left: '-195px',  flyX: -550,  flyY: 0 },     // mid-left
+  { top: '72%',  left: '-170px',  flyX: -500,  flyY: 80 },    // bottom-left
+  { top: '8%',   right: '-180px', flyX: 500,   flyY: -80 },   // top-right
+  { top: '40%',  right: '-195px', flyX: 550,   flyY: 0 },     // mid-right
+  { top: '72%',  right: '-170px', flyX: 500,   flyY: 80 }     // bottom-right
 ];
 
 
@@ -179,20 +179,20 @@ const Home = () => {
                     style={{
                       background: '#ffffff',
                       borderRadius: '999px',
-                      padding: '12px 24px',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+                      padding: '8px 16px',
+                      boxShadow: '0 6px 20px rgba(0,0,0,0.07)',
                       border: '1px solid #e2e8f0',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
+                      gap: '8px',
                       whiteSpace: 'nowrap',
                       cursor: 'default'
                     }}
                   >
-                    <div style={{ background: pill.bg, padding: '8px', borderRadius: '12px', color: pill.color, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
-                      <Icon className="size-5" />
+                    <div style={{ background: pill.bg, padding: '5px', borderRadius: '8px', color: pill.color, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+                      <Icon className="size-3.5" />
                     </div>
-                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#1c2427' }}>{pill.title}</span>
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1c2427' }}>{pill.title}</span>
                   </motion.div>
                 </motion.div>
               );
@@ -313,9 +313,9 @@ const Home = () => {
         <section style={{ padding: '40px 0 80px', position: 'relative' }}>
           <div style={{
             display: 'grid', gridTemplateColumns: '1fr 1fr',
-            gap: '40px', alignItems: 'center',
-            background: '#ffffff', borderRadius: '32px', padding: '44px 48px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0', textAlign: 'left'
+            gap: '32px', alignItems: 'center',
+            background: '#ffffff', borderRadius: '28px', padding: '32px 36px',
+            boxShadow: '0 16px 50px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', textAlign: 'left'
           }}>
             {/* LEFT TEXT */}
             <div>
@@ -349,7 +349,7 @@ const Home = () => {
             </div>
 
             {/* RIGHT — DOCK TARGET */}
-            <div ref={dockRef} style={{ height: '380px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+            <div ref={dockRef} style={{ height: '300px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
           </div>
         </section>
 
