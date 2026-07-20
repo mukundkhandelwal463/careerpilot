@@ -1660,14 +1660,14 @@ def evaluate_mock_test_code(language, code, title, description, examples):
 
         return {
             "compiled": is_compiled,
-            "passed": is_compiled,
+            "passed": False,
             "output": "Local dry-run validation successful." if is_compiled else f"Compilation Error: {err_msg}",
             "test_results": [
                 {
                     "input": str(ex),
                     "expected": "Parsed from example",
                     "actual": "Mock matched output" if is_compiled else "Compilation Failed",
-                    "passed": is_compiled
+                    "passed": False
                 } for ex in (examples or ["Default Case"])
             ]
         }
@@ -1755,7 +1755,7 @@ def grade_coding_question(language, code, title, description, constraints, examp
         else:
             return float(max_marks) * 0.4, "Compiles but fails test cases."
 
-    prompt = f"""You are a professional software engineering interviewer and compiler grader.
+    prompt = f"""You are an elite software engineering interviewer and compiler grader.
 You need to evaluate a candidate's code submission for the following coding challenge:
 Title: {title}
 Description: {description}
@@ -1767,9 +1767,12 @@ Candidate's code:
 {code}
 
 Grade the code out of {max_marks} marks.
-Be extremely objective. If the code has syntax errors or would fail compilation/execution, give 0 marks.
-If it is correct but not optimized, give 70-80% of max marks.
-If it is fully correct and optimal, give {max_marks} marks.
+CRITICAL RULES:
+1. If the code is just a boilerplate/template, empty, or does not attempt to solve the problem logic at all, you MUST give 0 marks.
+2. If the code has syntax errors or would fail compilation/execution, give 0 marks.
+3. If it compiles and attempts the logic but fails test cases, give partial marks (e.g. 10-30% of max).
+4. If it is correct but not optimized, give 70-80% of max marks.
+5. If it is fully correct and optimal, give {max_marks} marks.
 
 Return a JSON object with:
 - 'score': float (the final score given out of {max_marks})
@@ -1794,9 +1797,6 @@ Format response as strictly valid JSON (start with '{{' and end with '}}'). No m
         res = evaluate_mock_test_code(language, code, title, description, examples)
         if not res.get("compiled", False):
             return 0.0, "Compilation failed (local dry-run)."
-        elif res.get("passed", False):
-            return float(max_marks), "All sample test cases passed (local dry-run fallback)."
         else:
-            return float(max_marks) * 0.4, "Compiles but failed some sample test cases (local dry-run fallback)."
-
+            return 0.0, "Compiles successfully, but AI logic verification is unavailable. 0 marks awarded for unverified logic."
 
