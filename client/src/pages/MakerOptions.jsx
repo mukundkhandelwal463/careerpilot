@@ -20,12 +20,12 @@ const MakerOptions = () => {
         </p>
 
         <div className="maker-grid">
-          {/* Form Builder Card */}
+          {/* LaTeX Resume Architect Card */}
           <div className="maker-card maker-card--form" onClick={() => navigate('/app/builder/default')}>
-            <div className="card-icon">📝</div>
-            <h2>Form Builder</h2>
+            <div className="card-icon">⚡</div>
+            <h2>LaTeX Resume Architect</h2>
             <p>
-              Fill out a structured form with live preview. Pick templates, colors, and fonts — download a polished DOCX/PDF instantly.
+              Generate ATS-optimized LaTeX source code with 3 major templates (Jake's Tech, Executive, Minimalist) with instant Overleaf compile links.
             </p>
           </div>
 

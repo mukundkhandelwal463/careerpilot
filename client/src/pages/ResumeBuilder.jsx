@@ -1,95 +1,112 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
-import Loader from '../Components/Loader.jsx';
-import ResumePreviewCard from '../Components/ResumePreviewCard.jsx';
+import { 
+  FileCode, 
+  Copy, 
+  Download, 
+  ExternalLink, 
+  Check, 
+  Sparkles, 
+  Upload, 
+  User, 
+  Briefcase, 
+  GraduationCap, 
+  Code2
+} from 'lucide-react';
 import '../css/style.css';
 
-
-const TEMPLATE_CONFIGS = {
-  "classical.pdf": {
-    headings: ["ABOUT ME", "EDUCATION", "WORK EXPERIENCE", "SKILLS"],
-    previewType: "classical",
-    fields: ["name", "headline", "email", "phone", "location", "summary", "education", "experience", "skills"],
-    labels: { summary: "About Me" },
-  },
-  "resume for experienced.pdf": {
-    headings: ["ABOUT ME", "EDUCATION", "WORK EXPERIENCE", "SKILLS"],
-    previewType: "classical",
-    fields: ["name", "headline", "email", "phone", "location", "summary", "education", "experience", "skills"],
-    labels: { summary: "About Me" },
-  },
-  "freasher.pdf": {
-    headings: ["ABOUT ME", "EDUCATION", "WORK EXPERIENCE", "CONTACT", "SKILLS", "LANGUAGES"],
-    previewType: "freasher",
-    fields: ["name", "headline", "email", "phone", "location", "website", "summary", "education", "experience", "skills", "side_skills", "languages"],
-    labels: { summary: "About Me", side_skills: "Personal Skills" },
-  },
-  "resume for experienced2.pdf": {
-    headings: ["SUMMARY", "WORK EXPERIENCE", "EDUCATION"],
-    previewType: "experienced2",
-    fields: ["name", "headline", "email", "phone", "location", "website", "summary", "experience", "education"],
-    labels: { summary: "Summary", headline: "Role (Uppercase in template)" },
-  },
+const escapeLatex = (str) => {
+  if (!str) return '';
+  return String(str)
+    .replace(/\\/g, '\\textbackslash{}')
+    .replace(/&/g, '\\&')
+    .replace(/%/g, '\\%')
+    .replace(/\$/g, '\\$')
+    .replace(/#/g, '\\#')
+    .replace(/_/g, '\\_')
+    .replace(/\{/g, '\\{')
+    .replace(/\}/g, '\\}')
+    .replace(/~/g, '\\textasciitilde{}')
+    .replace(/\^/g, '\\textasciicircum{}');
 };
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
   const navigate = useNavigate();
 
-  // Helper to load unsaved draft from localStorage
-  const getInitialValue = (fieldKey, defaultValue = '') => {
-    const draft = localStorage.getItem(`resume_draft_${resumeId || 'new'}`);
-    if (draft) {
-      try {
-        const parsed = JSON.parse(draft);
-        if (parsed[fieldKey] !== undefined) return parsed[fieldKey];
-      } catch (e) {}
-    }
-    return defaultValue;
-  };
+  // Form State
+  const [template, setTemplate] = useState('modern_tech'); // 'modern_tech' | 'executive' | 'minimal'
+  
+  const [name, setName] = useState('Mukund Khandelwal');
+  const [headline, setHeadline] = useState('Software Engineer');
+  const [email, setEmail] = useState('mukundkhandelwal463@gmail.com');
+  const [phone, setPhone] = useState('+91 9876543210');
+  const [location, setLocation] = useState('India');
+  const [linkedin, setLinkedin] = useState('linkedin.com/in/mukund');
+  const [github, setGithub] = useState('github.com/mukundkhandelwal463');
+  const [summary, setSummary] = useState('Results-driven Software Engineer with expertise in React, Python, Django, Data Structures, and System Architecture.');
 
-  // Form Fields State
-  const [template, setTemplate] = useState(() => getInitialValue('template', 'classical.pdf'));
-  const [name, setName] = useState(() => getInitialValue('full_name', ''));
-  const [headline, setHeadline] = useState(() => getInitialValue('headline', ''));
-  const [email, setEmail] = useState(() => getInitialValue('email', ''));
-  const [phone, setPhone] = useState(() => getInitialValue('phone', ''));
-  const [location, setLocation] = useState(() => getInitialValue('location', ''));
-  const [website, setWebsite] = useState(() => getInitialValue('website', ''));
-  const [summary, setSummary] = useState(() => getInitialValue('summary', ''));
-  const [skills, setSkills] = useState(() => getInitialValue('skills', ''));
-  const [sideSkills, setSideSkills] = useState(() => getInitialValue('side_skills', ''));
-  const [languages, setLanguages] = useState(() => getInitialValue('languages', ''));
-  const [experience, setExperience] = useState(() => getInitialValue('experience', ''));
-  const [education, setEducation] = useState(() => getInitialValue('education', ''));
+  // Experience
+  const [jobTitle, setJobTitle] = useState('Software Engineer Intern');
+  const [company, setCompany] = useState('Tech Solutions Inc.');
+  const [jobDates, setJobDates] = useState('Jan 2024 -- Present');
+  const [jobLocation, setJobLocation] = useState('Remote');
+  const [jobBullets, setJobBullets] = useState('Developed high-performance web applications using React and Django.\nOptimized backend REST APIs reducing response latency by 35%.\nImplemented secure authentication and automated CI/CD workflows.');
 
-  // Split personal info location & social states
-  const [address, setAddress] = useState(() => getInitialValue('address', ''));
-  const [city, setCity] = useState(() => getInitialValue('city', ''));
-  const [stateField, setStateField] = useState(() => getInitialValue('state', ''));
-  const [zipCode, setZipCode] = useState(() => getInitialValue('zip_code', ''));
-  const [country, setCountry] = useState(() => getInitialValue('country', ''));
-  const [linkedin, setLinkedin] = useState(() => getInitialValue('linkedin', ''));
-  const [github, setGithub] = useState(() => getInitialValue('github', ''));
+  // Education
+  const [college, setCollege] = useState('Institute of Technology');
+  const [degree, setDegree] = useState('B.Tech in Computer Science & Engineering');
+  const [gradDate, setGradDate] = useState('2021 -- 2025');
+  const [eduLocation, setEduLocation] = useState('India');
 
-  // Active form section state
-  const [activeSection, setActiveSection] = useState('personal');
+  // Skills & Projects
+  const [skills, setSkills] = useState('JavaScript, React, Python, Django, C++, SQL, Git, Linux, System Design');
+  const [projectName, setProjectName] = useState('CareerPilot - AI Resume Screener');
+  const [projectTech, setProjectTech] = useState('React, Python, Django, Gemini AI, TailwindCSS');
+  const [projectDate, setProjectDate] = useState('2024');
+  const [projectDesc, setProjectDesc] = useState('Built full-stack AI career preparation platform with dynamic ATS evaluation, mock voice interviews, and LaTeX resume compilation.');
 
   // UI Status
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [status, setStatus] = useState({ text: '', type: '' });
-  const [geminiSuggestions, setGeminiSuggestions] = useState('');
-  const [downloadLinks, setDownloadLinks] = useState(null);
+  const [isCopied, setIsCopied] = useState(false);
   const [isAutofilling, setIsAutofilling] = useState(false);
+  const [statusMsg, setStatusMsg] = useState('');
+  const [activeTab, setActiveTab] = useState('personal');
 
+  // Autofill from user's latest resume on mount
+  useEffect(() => {
+    const fetchLatestResume = async () => {
+      try {
+        const res = await fetch('/api/resumes');
+        const data = await res.json();
+        if (data.success && data.resumes && data.resumes.length > 0) {
+          const latest = data.resumes[0];
+          if (latest.resume_json) {
+            const parsed = JSON.parse(latest.resume_json);
+            if (parsed.full_name || parsed.name) setName(parsed.full_name || parsed.name);
+            if (parsed.email) setEmail(parsed.email);
+            if (parsed.phone) setPhone(parsed.phone);
+            if (parsed.headline) setHeadline(parsed.headline);
+            if (parsed.summary) setSummary(parsed.summary);
+            if (parsed.skills) setSkills(parsed.skills);
+            if (parsed.experience) setJobBullets(parsed.experience);
+            if (parsed.education) setDegree(parsed.education);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching latest resume:", err);
+      }
+    };
+    fetchLatestResume();
+  }, []);
+
+  // Handle Resume Upload & Extraction
   const handleAutofillUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setIsAutofilling(true);
-    setStatus({ text: 'Extracting data from resume...', type: 'info' });
+    setStatusMsg('Extracting data from resume file...');
 
     const formData = new FormData();
     formData.append('resume', file);
@@ -102,1019 +119,677 @@ const ResumeBuilder = () => {
       const data = await res.json();
       if (data.success && data.data) {
         const pd = data.data;
-        if (pd.full_name) setName(pd.full_name);
+        if (pd.full_name || pd.name) setName(pd.full_name || pd.name);
         if (pd.headline) setHeadline(pd.headline);
         if (pd.email) setEmail(pd.email);
         if (pd.phone) setPhone(pd.phone);
         if (pd.location) setLocation(pd.location);
         if (pd.summary) setSummary(pd.summary);
         if (pd.skills) setSkills(pd.skills);
-        if (pd.experience) setExperience(pd.experience);
-        if (pd.education) setEducation(pd.education);
-        if (pd.address) setAddress(pd.address);
-        if (pd.city) setCity(pd.city);
-        if (pd.state) setStateField(pd.state);
-        if (pd.zip_code) setZipCode(pd.zip_code);
-        if (pd.country) setCountry(pd.country);
+        if (pd.experience) setJobBullets(pd.experience);
+        if (pd.education) setDegree(pd.education);
         if (pd.linkedin) setLinkedin(pd.linkedin);
         if (pd.github) setGithub(pd.github);
-        if (pd.website) setWebsite(pd.website);
-        
-        setStatus({ text: 'Resume successfully extracted!', type: 'success' });
+        setStatusMsg('Resume data extracted successfully!');
       } else {
-        setStatus({ text: data.error || 'Failed to parse resume.', type: 'error' });
+        setStatusMsg(data.error || 'Failed to extract resume data.');
       }
     } catch (err) {
       console.error(err);
-      setStatus({ text: 'Network error parsing resume.', type: 'error' });
+      setStatusMsg('Error parsing resume file.');
     } finally {
       setIsAutofilling(false);
     }
   };
 
+  // Generate LaTeX Code
+  const latexCode = useMemo(() => {
+    const escName = escapeLatex(name);
+    const escHeadline = escapeLatex(headline);
+    const escEmail = escapeLatex(email);
+    const escPhone = escapeLatex(phone);
+    const escLocation = escapeLatex(location);
+    const escLinkedin = escapeLatex(linkedin);
+    const escGithub = escapeLatex(github);
+    const escSummary = escapeLatex(summary);
 
-  useEffect(() => {
-    const fetchResume = async () => {
-      if (!resumeId || resumeId === 'default') {
-        setLoading(false);
-        return;
-      }
-      
-      // If there is already a local unsaved draft, do not overwrite it with stale DB values on refresh
-      if (localStorage.getItem(`resume_draft_${resumeId}`)) {
-        setLoading(false);
-        return;
-      }
+    const escJobTitle = escapeLatex(jobTitle);
+    const escCompany = escapeLatex(company);
+    const escJobDates = escapeLatex(jobDates);
+    const escJobLocation = escapeLatex(jobLocation);
+    const escJobBullets = jobBullets.split('\n').filter(Boolean).map(b => `  \\item ${escapeLatex(b)}`).join('\n');
 
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/resumes/${resumeId}`);
-        const data = await res.json();
-        if (data.success && data.resume) {
-          const r = data.resume;
-          let parsedData = {};
-          if (r.resume_json) {
-            try {
-              parsedData = JSON.parse(r.resume_json);
-            } catch (e) { }
-          }
-          setTemplate(parsedData.template || 'classical.pdf');
-          setName(parsedData.full_name || parsedData.name || '');
-          setHeadline(parsedData.headline || '');
-          setEmail(parsedData.email || '');
-          setPhone(parsedData.phone || '');
-          setLocation(parsedData.location || '');
-          setWebsite(parsedData.website || '');
-          setSummary(parsedData.summary || '');
-          setSkills(parsedData.skills || '');
-          setSideSkills(parsedData.side_skills || '');
-          setLanguages(parsedData.languages || '');
-          setExperience(parsedData.experience || '');
-          setEducation(parsedData.education || '');
+    const escCollege = escapeLatex(college);
+    const escDegree = escapeLatex(degree);
+    const escGradDate = escapeLatex(gradDate);
 
-          setAddress(parsedData.address || '');
-          setCity(parsedData.city || '');
-          setStateField(parsedData.state || '');
-          setZipCode(parsedData.zip_code || '');
-          setCountry(parsedData.country || '');
-          setLinkedin(parsedData.linkedin || '');
-          setGithub(parsedData.github || '');
+    const escSkills = escapeLatex(skills);
+    const escProjName = escapeLatex(projectName);
+    const escProjTech = escapeLatex(projectTech);
+    const escProjDate = escapeLatex(projectDate);
+    const escProjDesc = escapeLatex(projectDesc);
 
-          if (parsedData.location && !parsedData.city) {
-            const parts = parsedData.location.split(',').map(p => p.trim());
-            if (parts.length >= 2) {
-              setCity(parts[0]);
-              setCountry(parts[parts.length - 1]);
-            } else {
-              setCity(parsedData.location);
-            }
-          }
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchResume();
-  }, [resumeId]);
+    if (template === 'executive') {
+      return `\\documentclass[10pt,a4paper]{article}
+\\usepackage[margin=0.75in]{geometry}
+\\usepackage{titlesec}
+\\usepackage{xcolor}
+\\usepackage[hidelinks]{hyperref}
 
-  // Auto-save form fields to local storage draft on any changes
-  useEffect(() => {
-    const draftData = {
-      template,
-      full_name: name,
-      headline,
-      email,
-      phone,
-      location,
-      website,
-      summary,
-      skills,
-      side_skills: sideSkills,
-      languages,
-      experience,
-      education,
-      address,
-      city,
-      state: stateField,
-      zip_code: zipCode,
-      country,
-      linkedin,
-      github
-    };
-    localStorage.setItem(`resume_draft_${resumeId || 'new'}`, JSON.stringify(draftData));
-  }, [
-    template, name, headline, email, phone, location, website, summary,
-    skills, sideSkills, languages, experience, education,
-    address, city, stateField, zipCode, country, linkedin, github, resumeId
-  ]);
+\\definecolor{primary}{RGB}{28, 36, 39}
+\\definecolor{accent}{RGB}{16, 185, 129}
 
-  const getLabel = (fieldKey, defaultText) => {
-    const config = TEMPLATE_CONFIGS[template] || TEMPLATE_CONFIGS["classical.pdf"];
-    return (config.labels && config.labels[fieldKey]) || defaultText;
-  };
+\\titleformat{\\section}{\\color{primary}\\large\\bfseries\\uppercase}{}{0em}{}[\\titlerule]
 
-  const isFieldVisible = (fieldKey) => {
-    const config = TEMPLATE_CONFIGS[template] || TEMPLATE_CONFIGS["classical.pdf"];
-    return config.fields.includes(fieldKey);
-  };
+\\begin{document}
 
-  const splitLines = (text) => {
-    return String(text || "")
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean);
-  };
+\\begin{center}
+{\\Huge \\bfseries \\color{primary} ${escName}} \\\\[4pt]
+{\\color{accent} \\bfseries ${escHeadline}} \\\\[6pt]
+\\small ${escEmail} $\\cdot$ ${escPhone} $\\cdot$ ${escLocation} $\\cdot$ \\href{https://${escLinkedin}}{${escLinkedin}}
+\\end{center}
 
-  const splitBlocks = (text) => {
-    return String(text || "")
-      .split(/\r?\n\s*\r?\n/)
-      .map((block) => splitLines(block))
-      .filter((lines) => lines.length > 0);
-  };
+\\vspace{8pt}
 
-  const parseCommaOrLineItems = (text) => {
-    return String(text || "")
-      .split(/[,\n]/)
-      .map((item) => item.trim())
-      .filter(Boolean);
-  };
+\\section{Executive Summary}
+${escSummary}
 
-  const parseEntryBlocks = (rawText, defaultLabel) => {
-    return splitBlocks(rawText).map((lines, index) => {
-      if (lines.length === 1) {
-        return {
-          meta: `${defaultLabel} ${index + 1}`,
-          title: lines[0],
-          detailLines: [],
-        };
-      }
-      if (lines.length === 2) {
-        return {
-          meta: lines[0],
-          title: lines[1],
-          detailLines: [],
-        };
-      }
-      return {
-        meta: lines[0],
-        title: lines[1],
-        detailLines: lines.slice(2),
-      };
-    });
-  };
+\\section{Professional Experience}
+\\textbf{${escJobTitle}} \\hfill ${escJobDates} \\\\
+\\textit{${escCompany}, ${escJobLocation}}
+\\begin{itemize}
+${escJobBullets}
+\\end{itemize}
 
-  // ── Premium Live Preview ──
-  const renderUnifiedPreview = () => {
-    const expBlocks = parseEntryBlocks(experience, 'Experience');
-    const eduBlocks = parseEntryBlocks(education, 'Education');
-    const skillList = parseCommaOrLineItems(skills);
-    const sideSkillList = parseCommaOrLineItems(sideSkills);
-    const langList = parseCommaOrLineItems(languages);
-    const displayLocation = [city, stateField, country].filter(Boolean).join(', ') || location;
+\\section{Education}
+\\textbf{${escDegree}} \\hfill ${escGradDate} \\\\
+\\textit{${escCollege}, ${escLocation}}
 
-    const previewData = {
-      name, headline, phone, email, displayLocation,
-      linkedin, github, website, summary,
-      expBlocks, eduBlocks, skillList, sideSkillList, langList,
-      template,
-    };
+\\section{Key Projects}
+\\textbf{${escProjName}} (${escProjTech}) \\hfill ${escProjDate} \\\\
+${escProjDesc}
 
-    return (
-      <ResumePreviewCard
-        data={previewData}
-        onAddSkill={(kw) => setSkills(prev => prev ? prev + ', ' + kw : kw)}
-      />
-    );
-  };
+\\section{Technical Skills}
+${escSkills}
 
-  // ── Legacy aliases (all point to unified renderer) ──
-  const renderClassicalPreview = () => renderUnifiedPreview();
-  const renderFreasherPreview = () => renderUnifiedPreview();
-  const renderExperienced2Preview = () => renderUnifiedPreview();
-
-
-  // ── ATS Analysis Panel ──
-  const KEYWORD_BANK = {
-    default: ['Leadership', 'Project Management', 'Communication', 'Problem Solving', 'Teamwork', 'Time Management', 'Critical Thinking'],
-    data: ['SQL', 'Statistical Analysis', 'Machine Learning Algorithms', 'Data Modeling', 'ETL', 'Deep Learning (TensorFlow/PyTorch)', 'Experimentation/A/B Testing', 'Data Visualization', 'Python', 'R'],
-    software: ['Agile', 'Scrum', 'REST APIs', 'Microservices', 'CI/CD', 'Docker', 'Kubernetes', 'System Design', 'Code Review'],
-    web: ['React', 'TypeScript', 'Node.js', 'GraphQL', 'REST APIs', 'Responsive Design', 'Performance Optimization', 'SEO', 'Testing'],
-    finance: ['Financial Reporting', 'Auditing', 'Tax Compliance', 'Risk Assessment', 'Budgeting', 'Forecasting', 'GAAP', 'Excel'],
-    marketing: ['SEO/SEM', 'Content Strategy', 'Social Media', 'Brand Management', 'Analytics', 'Email Campaigns', 'A/B Testing'],
-    hr: ['Talent Acquisition', 'Onboarding', 'Performance Management', 'Employee Relations', 'HRIS', 'Compliance', 'Workforce Planning'],
-  };
-
-  const getATSCategory = (hl) => {
-    const h = (hl || '').toLowerCase();
-    if (h.includes('data') || h.includes('analyst') || h.includes('science') || h.includes('ml') || h.includes('ai')) return 'data';
-    if (h.includes('software') || h.includes('engineer') || h.includes('backend') || h.includes('devops')) return 'software';
-    if (h.includes('web') || h.includes('frontend') || h.includes('full stack') || h.includes('react')) return 'web';
-    if (h.includes('finance') || h.includes('account') || h.includes('audit')) return 'finance';
-    if (h.includes('market') || h.includes('brand') || h.includes('seo')) return 'marketing';
-    if (h.includes('hr') || h.includes('human resource') || h.includes('recruit')) return 'hr';
-    return 'default';
-  };
-
-  const computeATSPanel = () => {
-    const extractedSkills = parseCommaOrLineItems(skills);
-    const extractedSideSkills = parseCommaOrLineItems(sideSkills);
-    const allSkillsLower = [...extractedSkills, ...extractedSideSkills].map(s => s.toLowerCase());
-    const cat = getATSCategory(headline);
-    const pool = [...(KEYWORD_BANK[cat] || []), ...KEYWORD_BANK.default];
-    const missing = pool.filter(kw => !allSkillsLower.some(sk => sk.includes(kw.toLowerCase().split(' ')[0])));
-    // Simple ATS score: % of pool keywords found
-    const found = pool.length - missing.length;
-    const atsScore = Math.round((found / pool.length) * 100);
-    return { extractedSkills, atsScore, missing: missing.slice(0, 8), cat };
-  };
-
-  const renderATSPanel = () => {
-    const { extractedSkills, atsScore, missing, cat } = computeATSPanel();
-    const catLabel = cat === 'default' ? 'General' : cat.charAt(0).toUpperCase() + cat.slice(1);
-    const scoreColor = atsScore >= 75 ? '#16a34a' : atsScore >= 50 ? '#d97706' : '#dc2626';
-
-    return (
-      <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        {/* Extracted Info */}
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px' }}>
-          <p style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: 800, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.8px' }}>📋 Extracted from Resume</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-            <div>
-              <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Name</span>
-              <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#1e293b', fontWeight: 700 }}>{name || <em style={{ color: '#94a3b8' }}>Not entered</em>}</p>
-            </div>
-            <div>
-              <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Role</span>
-              <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#1e293b', fontWeight: 700 }}>{headline || <em style={{ color: '#94a3b8' }}>Not entered</em>}</p>
-            </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Skills Detected</span>
-              {extractedSkills.length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
-                  {extractedSkills.slice(0, 10).map((sk, i) => (
-                    <span key={i} style={{ background: '#dbeafe', color: '#1d4ed8', fontSize: '10.5px', padding: '2px 8px', borderRadius: '999px', fontWeight: 600 }}>{sk}</span>
-                  ))}
-                  {extractedSkills.length > 10 && <span style={{ fontSize: '10.5px', color: '#64748b' }}>+{extractedSkills.length - 10} more</span>}
-                </div>
-              ) : <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>No skills entered yet</p>}
-            </div>
-          </div>
-        </div>
-
-        {/* ATS Score + Missing Keywords */}
-        <div style={{ background: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: '12px', padding: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <span style={{ fontSize: '14px' }}>✦</span>
-            <h4 style={{ margin: 0, fontSize: '12.5px', fontWeight: 800, color: '#3730a3' }}>ATS Analysis Target (<span style={{ color: scoreColor }}>{atsScore}% Score</span>)</h4>
-          </div>
-          <p style={{ margin: '0 0 10px 0', fontSize: '11.5px', color: '#4338ca' }}>
-            Add these missing keywords to boost your ATS compatibility for <strong>{catLabel}</strong> roles:
-          </p>
-          {missing.length > 0 ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {missing.map((kw, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSkills(prev => prev ? prev + ', ' + kw : kw)}
-                  style={{ background: '#fff', border: '1px solid #a5b4fc', color: '#4338ca', fontSize: '11px', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.15s' }}
-                  onMouseEnter={e => { e.target.style.background = '#eef2ff'; e.target.style.borderColor = '#6366f1'; }}
-                  onMouseLeave={e => { e.target.style.background = '#fff'; e.target.style.borderColor = '#a5b4fc'; }}
-                >
-                  + {kw}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p style={{ fontSize: '11.5px', color: '#4338ca', fontStyle: 'italic' }}>🎉 No missing keywords! You are fully optimized for {catLabel} roles.</p>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // (renderFreasherPreview and renderExperienced2Preview are already declared above as aliases to renderUnifiedPreview)
-
-
-  const renderLivePreview = () => {
-    const config = TEMPLATE_CONFIGS[template] || TEMPLATE_CONFIGS["classical.pdf"];
-    if (config.previewType === "freasher") return renderFreasherPreview();
-    if (config.previewType === "experienced2") return renderExperienced2Preview();
-    return renderClassicalPreview();
-  };
-
-  const renderPersonalFields = () => (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-      
-      {/* Autofill Resume Block */}
-      <div style={{
-        gridColumn: '1 / -1',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
-        background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-        padding: '16px',
-        borderRadius: '16px',
-        border: '1px solid #bbf7d0',
-        marginBottom: '4px'
-      }}>
-        <div>
-          <strong style={{ display: 'block', fontSize: '0.95rem', color: '#166534', marginBottom: '2px' }}>✨ Magic Autofill</strong>
-          <span style={{ fontSize: '0.78rem', color: '#15803d' }}>Upload an existing resume and our AI will extract all your info instantly!</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '6px' }}>
-          <input 
-            type="file" 
-            accept=".pdf,.docx,.txt"
-            onChange={handleAutofillUpload}
-            disabled={isAutofilling}
-            style={{ fontSize: '0.8rem', color: '#166534' }}
-          />
-          {isAutofilling && <span style={{ fontSize: '0.8rem', color: '#166534', fontWeight: 'bold' }}>Extracting...</span>}
-        </div>
-      </div>
-
-      {/* Profile Picture Placeholder Mockup */}
-      <div style={{
-        gridColumn: '1 / -1',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '20px',
-        background: 'rgba(24, 35, 38, 0.02)',
-        padding: '16px',
-        borderRadius: '16px',
-        marginBottom: '8px'
-      }}>
-        <div style={{
-          width: '80px',
-          height: '80px',
-          borderRadius: '50%',
-          border: '2px dashed rgba(24, 35, 38, 0.12)',
-          display: 'grid',
-          placeItems: 'center',
-          background: '#ffffff',
-          color: 'var(--muted)',
-          fontSize: '0.8rem',
-          fontWeight: 700,
-          cursor: 'pointer'
-        }}>
-          📷 <span style={{ fontSize: '0.62rem', marginTop: '4px' }}>Add Photo</span>
-        </div>
-        <div>
-          <strong style={{ display: 'block', fontSize: '0.88rem', color: 'var(--text)' }}>Profile Picture</strong>
-          <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>JPG, PNG or GIF. Max 5MB.</span>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>Full Name <span style={{ color: '#ff6b4a' }}>*</span></label>
-        <input 
-          type="text" 
-          value={name} 
-          onChange={(e) => setName(e.target.value)} 
-          placeholder="John Doe" 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-          required 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>Email <span style={{ color: '#ff6b4a' }}>*</span></label>
-        <input 
-          type="email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          placeholder="hello@email.com" 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-          required 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>Phone <span style={{ color: '#ff6b4a' }}>*</span></label>
-        <input 
-          type="text" 
-          value={phone} 
-          onChange={(e) => setPhone(e.target.value)} 
-          placeholder="+1 234 567 8900" 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-          required 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>Address <span style={{ color: '#ff6b4a' }}>*</span></label>
-        <input 
-          type="text" 
-          value={address} 
-          onChange={(e) => setAddress(e.target.value)} 
-          placeholder="Enter your address" 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-          required 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>City <span style={{ color: '#ff6b4a' }}>*</span></label>
-        <input 
-          type="text" 
-          value={city} 
-          onChange={(e) => setCity(e.target.value)} 
-          placeholder="Enter your city" 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-          required 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>State <span style={{ color: '#ff6b4a' }}>*</span></label>
-        <input 
-          type="text" 
-          value={stateField} 
-          onChange={(e) => setStateField(e.target.value)} 
-          placeholder="Enter your state" 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-          required 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>Zip Code <span style={{ color: '#ff6b4a' }}>*</span></label>
-        <input 
-          type="text" 
-          value={zipCode} 
-          onChange={(e) => setZipCode(e.target.value)} 
-          placeholder="Enter your zip code" 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-          required 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>Country <span style={{ color: '#ff6b4a' }}>*</span></label>
-        <input 
-          type="text" 
-          value={country} 
-          onChange={(e) => setCountry(e.target.value)} 
-          placeholder="Enter your country" 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-          required 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>LinkedIn</label>
-        <input 
-          type="text" 
-          value={linkedin} 
-          onChange={(e) => setLinkedin(e.target.value)} 
-          placeholder="https://linkedin.com/in/..." 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>GitHub</label>
-        <input 
-          type="text" 
-          value={github} 
-          onChange={(e) => setGithub(e.target.value)} 
-          placeholder="https://github.com/..." 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>Website</label>
-        <input 
-          type="text" 
-          value={website} 
-          onChange={(e) => setWebsite(e.target.value)} 
-          placeholder="https://yourwebsite.com" 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>Professional Title</label>
-        <input 
-          type="text" 
-          value={headline} 
-          onChange={(e) => setHeadline(e.target.value)} 
-          placeholder="Data Science" 
-          style={{ padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', outline: 'none' }} 
-        />
-      </div>
-
-    </div>
-  );
-
-  const renderSummaryFields = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <label style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text)' }}>Professional Summary</label>
-      <span style={{ fontSize: '0.76rem', color: 'var(--muted)', marginBottom: '8px' }}>
-        Write a short profile summarizing your career achievements, background, and target roles.
-      </span>
-      <textarea 
-        value={summary} 
-        onChange={(e) => setSummary(e.target.value)} 
-        placeholder="Write short profile text" 
-        style={{ padding: '12px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', minHeight: '160px', width: '100%', resize: 'vertical', outline: 'none' }} 
-      />
-    </div>
-  );
-
-  const renderExperienceFields = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <label style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text)' }}>Work Experience</label>
-      <span style={{ fontSize: '0.76rem', color: 'var(--muted)', marginBottom: '8px' }}>
-        Add your work experience. Leave a blank line between different job blocks.
-      </span>
-      <textarea 
-        value={experience} 
-        onChange={(e) => setExperience(e.target.value)} 
-        placeholder="Format:&#13;Salford & Co. | 2033 - 2035&#13;Senior Accountant&#13;- Managed auditing&#13;- Financial reporting" 
-        style={{ padding: '12px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', minHeight: '220px', width: '100%', fontFamily: 'monospace', outline: 'none' }} 
-      />
-    </div>
-  );
-
-  const renderEducationFields = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <label style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text)' }}>Education Timeline</label>
-      <span style={{ fontSize: '0.76rem', color: 'var(--muted)', marginBottom: '8px' }}>
-        Add your academic history. Leave a blank line between different degree blocks.
-      </span>
-      <textarea 
-        value={education} 
-        onChange={(e) => setEducation(e.target.value)} 
-        placeholder="Format:&#13;Borcelle University | 2026 - 2030&#13;Senior Accountant&#13;GPA: 3.8" 
-        style={{ padding: '12px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', minHeight: '220px', width: '100%', fontFamily: 'monospace', outline: 'none' }} 
-      />
-    </div>
-  );
-
-  const renderSkillsFields = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text)' }}>Core Technical Skills</label>
-        <span style={{ fontSize: '0.76rem', color: 'var(--muted)', marginBottom: '4px' }}>
-          Separate your skills with commas.
-        </span>
-        <textarea 
-          value={skills} 
-          onChange={(e) => setSkills(e.target.value)} 
-          placeholder="python, machine learning, javascript, sql, react" 
-          style={{ padding: '12px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', minHeight: '100px', width: '100%', outline: 'none' }} 
-        />
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text)' }}>Personal & Soft Skills</label>
-        <span style={{ fontSize: '0.76rem', color: 'var(--muted)', marginBottom: '4px' }}>
-          Communication, leadership, project management, etc.
-        </span>
-        <textarea 
-          value={sideSkills} 
-          onChange={(e) => setSideSkills(e.target.value)} 
-          placeholder="communication, team leadership, problem solving" 
-          style={{ padding: '12px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', minHeight: '100px', width: '100%', outline: 'none' }} 
-        />
-      </div>
-    </div>
-  );
-
-  const renderLanguagesFields = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <label style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text)' }}>Languages</label>
-      <span style={{ fontSize: '0.76rem', color: 'var(--muted)', marginBottom: '8px' }}>
-        List the languages you speak, separated by commas.
-      </span>
-      <textarea 
-        value={languages} 
-        onChange={(e) => setLanguages(e.target.value)} 
-        placeholder="English - Fluent, Spanish - Fluent" 
-        style={{ padding: '12px', borderRadius: '10px', border: '1px solid rgba(24, 35, 38, 0.12)', fontSize: '0.86rem', minHeight: '120px', width: '100%', outline: 'none' }} 
-      />
-    </div>
-  );
-
-  const handleBuild = async (e) => {
-    e.preventDefault();
-    setStatus({ text: "Building template and generating updated files...", type: "info" });
-    setSaving(true);
-
-    const computedLocation = `${address ? address + ', ' : ''}${city ? city + ', ' : ''}${stateField ? stateField + ', ' : ''}${zipCode ? zipCode + ' ' : ''}${country || ''}`;
-    const answers = {
-      full_name: name,
-      headline,
-      email,
-      phone,
-      location: computedLocation || location,
-      address,
-      city,
-      state: stateField,
-      zip_code: zipCode,
-      country,
-      website,
-      linkedin,
-      github,
-      summary,
-      skills,
-      side_skills: sideSkills,
-      languages,
-      experience,
-      education
-    };
-
-    try {
-      // Save/create first in database if resumeId is provided
-      if (resumeId && resumeId !== 'default') {
-        await fetch(`/api/resumes`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: resumeId,
-            title: name ? `${name} - Resume` : 'Form Builder Resume',
-            resume_data: { ...answers, template }
-          })
-        });
-      }
-
-      // Hit generation endpoint
-      const res = await fetch("/api/chatbot/generate-resume", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, template_choice: template })
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Could not build resume.");
-      }
-
-      if (data.gemini_suggestions) {
-        setGeminiSuggestions(data.gemini_suggestions);
-      }
-
-      if (data.pdf_b64) {
-        const safeName = String(template || "resume").replace(/\.pdf$/i, "").replace(/\s+/g, "_");
-        const pdfDataUri = `data:application/pdf;base64,${data.pdf_b64}`;
-        
-        // Programmatically trigger immediate browser download
-        const downloadLink = document.createElement("a");
-        downloadLink.href = pdfDataUri;
-        downloadLink.download = `${safeName}_updated.pdf`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-
-        setDownloadLinks({
-          pdf: pdfDataUri
-        });
-      }
-
-      setStatus({ text: "Updated resume generated successfully.", type: "success" });
-      localStorage.removeItem(`resume_draft_${resumeId || 'new'}`);
-    } catch (err) {
-      setStatus({ text: err.message, type: "error" });
-    } finally {
-      setSaving(false);
+\\end{document}`;
     }
-  };
 
-  useEffect(() => {
-    const handleDownloadTrigger = () => {
-      handleBuild({ preventDefault: () => {} });
-    };
-    window.addEventListener("trigger_resume_download", handleDownloadTrigger);
-    return () => {
-      window.removeEventListener("trigger_resume_download", handleDownloadTrigger);
-    };
-  }, [name, headline, email, phone, address, city, stateField, zipCode, country, website, linkedin, github, summary, skills, sideSkills, languages, experience, education, template]);
+    if (template === 'minimal') {
+      return `\\documentclass[10pt,letterpaper]{article}
+\\usepackage[margin=0.5in]{geometry}
+\\usepackage[hidelinks]{hyperref}
+\\usepackage{xcolor}
 
-  if (loading) {
-    return (
-      <div className="page-shell">
-        <Navbar />
-        <main className="page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-          <Loader />
-        </main>
-      </div>
-    );
-  }
+\\pagestyle{empty}
 
-  const sections = [
-    { id: 'personal', name: 'Personal Info', icon: '👤' },
-    { id: 'summary', name: 'Summary', icon: '📝' },
-    { id: 'experience', name: 'Work Experience', icon: '💼' },
-    { id: 'education', name: 'Education', icon: '🎓' },
-    { id: 'skills', name: 'Skills', icon: '✨' },
-    { id: 'languages', name: 'Languages', icon: '🌐' }
-  ];
+\\begin{document}
 
-  const handleNext = () => {
-    const currentIndex = sections.findIndex(s => s.id === activeSection);
-    if (currentIndex < sections.length - 1) {
-      setActiveSection(sections[currentIndex + 1].id);
+\\begin{center}
+    {\\Huge \\textbf{${escName}}} \\\\[2pt]
+    \\small ${escHeadline} $|$ ${escEmail} $|$ ${escPhone} $|$ \\href{https://${escGithub}}{${escGithub}}
+\\end{center}
+
+\\hrule
+\\vspace{8pt}
+
+\\noindent \\textbf{\\large SUMMARY} \\\\
+\\small ${escSummary}
+
+\\vspace{8pt}
+\\noindent \\textbf{\\large EXPERIENCE} \\\\
+\\textbf{${escCompany}} -- \\textit{${escJobTitle}} \\hfill ${escJobDates} \\\\
+\\begin{itemize}
+${escJobBullets}
+\\end{itemize}
+
+\\vspace{8pt}
+\\noindent \\textbf{\\large PROJECTS} \\\\
+\\textbf{${escProjName}} (${escProjTech}) \\hfill ${escProjDate} \\\\
+${escProjDesc}
+
+\\vspace{8pt}
+\\noindent \\textbf{\\large EDUCATION} \\\\
+\\textbf{${escCollege}} -- ${escDegree} \\hfill ${escGradDate}
+
+\\vspace{8pt}
+\\noindent \\textbf{\\large TECHNICAL SKILLS} \\\\
+${escSkills}
+
+\\end{document}`;
     }
+
+    // Default: 'modern_tech' (Jake's Resume style)
+    return `\\documentclass[letterpaper,11pt]{article}
+\\usepackage[empty]{fullpage}
+\\usepackage{titlesec}
+\\usepackage{marvosym}
+\\usepackage[hidelinks]{hyperref}
+\\usepackage{verbatim}
+\\usepackage{enumitem}
+
+\\pagestyle{empty}
+\\urlstyle{same}
+
+\\addtolength{\\oddsidemargin}{-0.5in}
+\\addtolength{\\evensidemargin}{-0.5in}
+\\addtolength{\\textwidth}{1in}
+\\addtolength{\\topmargin}{-.5in}
+\\addtolength{\\textheight}{1.0in}
+
+\\titleformat{\\section}{\\vspace{-4pt}\\scshape\\raggedright\\large}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
+
+\\begin{document}
+
+\\begin{center}
+    \\textbf{\\Huge \\scshape ${escName}} \\\\[2pt]
+    \\small ${escPhone} $|$ \\href{mailto:${escEmail}}{${escEmail}} $|$ 
+    \\href{https://${escLinkedin}}{${escLinkedin}} $|$
+    \\href{https://${escGithub}}{${escGithub}}
+\\end{center}
+
+\\section{Summary}
+\\small{${escSummary}}
+
+\\section{Education}
+\\begin{itemize}[leftmargin=0.15in, label={}]
+  \\item \\textbf{${escCollege}} \\hfill ${escGradDate} \\\\
+  ${escDegree} \\hfill \\textit{${escLocation}}
+\\end{itemize}
+
+\\section{Experience}
+\\begin{itemize}[leftmargin=0.15in, label={}]
+  \\item \\textbf{${escJobTitle}} \\hfill ${escJobDates} \\\\
+  \\textit{${escCompany}} \\hfill \\textit{${escJobLocation}}
+  \\begin{itemize}
+${escJobBullets}
+  \\end{itemize}
+\\end{itemize}
+
+\\section{Projects}
+\\begin{itemize}[leftmargin=0.15in, label={}]
+  \\item \\textbf{${escProjName}} $|$ \\emph{${escProjTech}} \\hfill ${escProjDate} \\\\
+  ${escProjDesc}
+\\end{itemize}
+
+\\section{Technical Skills}
+\\begin{itemize}[leftmargin=0.15in, label={}]
+  \\small{\\item{\\textbf{Skills}{: ${escSkills}}}}
+\\end{itemize}
+
+\\end{document}`;
+  }, [template, name, headline, email, phone, location, linkedin, github, summary, jobTitle, company, jobDates, jobLocation, jobBullets, college, degree, gradDate, skills, projectName, projectTech, projectDate, projectDesc]);
+
+  // Copy LaTeX code handler
+  const handleCopyLatex = () => {
+    navigator.clipboard.writeText(latexCode);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handlePrev = () => {
-    const currentIndex = sections.findIndex(s => s.id === activeSection);
-    if (currentIndex > 0) {
-      setActiveSection(sections[currentIndex - 1].id);
-    }
+  // Download .tex file handler
+  const handleDownloadTex = () => {
+    const blob = new Blob([latexCode], { type: 'text/x-tex;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name.replace(/\s+/g, '_')}_Resume.tex`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
+
+  // Live Compiler URLs
+  const latexOnlineUrl = `https://latexonline.cc/compile?text=${encodeURIComponent(latexCode)}`;
 
   return (
-    <div className="page-shell">
+    <div style={{ background: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
-      <main className="page" style={{ marginTop: '24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '24px', alignItems: 'start' }}>
+
+      <main style={{ marginTop: '70px', padding: '32px 24px', flex: 1 }}>
+        <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
           
-          {/* LEFT PANEL: Form Editor */}
-          <article className="card" style={{ background: 'rgba(255, 255, 255, 0.7)', borderRadius: '20px', padding: '24px', border: '1px solid rgba(24, 35, 38, 0.04)', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
-            
-            {/* Form Editor Header toolbar */}
+          {/* Header Title Bar */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '28px',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <div>
+              <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#1c2427', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <FileCode className="size-8 text-emerald-500" /> LaTeX Resume Architect
+              </h1>
+              <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.9rem', fontWeight: 500 }}>
+                Generate clean, ATS-optimized LaTeX source code with 3 professional templates and instant online compile links.
+              </p>
+            </div>
+
+            {/* Quick Upload Banner */}
             <div style={{
+              background: '#ffffff',
+              borderRadius: '20px',
+              padding: '12px 20px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+              border: '1px solid #e2e8f0',
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              borderBottom: '1px solid rgba(24, 35, 38, 0.08)',
-              paddingBottom: '16px',
-              marginBottom: '16px'
+              gap: '12px'
             }}>
-              <div style={{
-                background: '#eff6ff',
-                color: '#2563eb',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                fontSize: '0.88rem',
+              <Sparkles className="size-5 text-amber-500" />
+              <div>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c2427', display: 'block' }}>Autofill From Resume</span>
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Extract info from PDF/DOCX</span>
+              </div>
+              <label style={{
+                background: '#1c2427',
+                color: '#ffffff',
+                padding: '8px 14px',
+                borderRadius: '12px',
+                fontSize: '0.8rem',
                 fontWeight: 700,
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '6px'
               }}>
-                <span>{sections.find(s => s.id === activeSection)?.icon}</span>
-                {sections.find(s => s.id === activeSection)?.name}
-              </div>
-
-              {/* Toolbar controls */}
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <div style={{ position: 'relative' }}>
-                  <select
-                    value={template}
-                    onChange={(e) => setTemplate(e.target.value)}
-                    style={{
-                      appearance: 'none',
-                      background: '#ffffff',
-                      border: '1px solid rgba(24, 35, 38, 0.12)',
-                      borderRadius: '8px',
-                      padding: '8px 32px 8px 12px',
-                      fontSize: '0.82rem',
-                      fontWeight: 600,
-                      color: 'var(--text)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {Object.keys(TEMPLATE_CONFIGS).map((tKey) => (
-                      <option key={tKey} value={tKey}>Template: {tKey.replace(/\.pdf$/i, '')}</option>
-                    ))}
-                  </select>
-                  <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '0.68rem', color: 'var(--muted)' }}>▼</span>
-                </div>
-
-                <button style={{
-                  background: '#ffffff',
-                  border: '1px solid rgba(24, 35, 38, 0.12)',
-                  borderRadius: '8px',
-                  padding: '8px 14px',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  color: 'var(--text)',
-                  cursor: 'pointer'
-                }}>
-                  🎨 Color
-                </button>
-
-                <button style={{
-                  background: '#ffffff',
-                  border: '1px solid rgba(24, 35, 38, 0.12)',
-                  borderRadius: '8px',
-                  padding: '8px 14px',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  color: 'var(--text)',
-                  cursor: 'pointer'
-                }}>
-                  𝖳 Size: Medium
-                </button>
-              </div>
+                <Upload className="size-4" /> Upload
+                <input type="file" onChange={handleAutofillUpload} accept=".pdf,.docx,.txt" style={{ display: 'none' }} />
+              </label>
             </div>
+          </div>
 
-            {/* Icon tabs navigation */}
+          {statusMsg && (
             <div style={{
-              display: 'flex',
-              gap: '12px',
-              borderBottom: '1px solid rgba(24, 35, 38, 0.06)',
-              paddingBottom: '14px',
+              background: '#ecfdf5',
+              border: '1px solid #10b981',
+              color: '#065f46',
+              padding: '10px 16px',
+              borderRadius: '12px',
+              fontSize: '0.85rem',
+              fontWeight: 600,
               marginBottom: '20px'
             }}>
-              {sections.map((sec) => (
-                <button
-                  key={sec.id}
-                  type="button"
-                  onClick={() => setActiveSection(sec.id)}
-                  title={sec.name}
-                  style={{
-                    background: activeSection === sec.id ? 'rgba(37, 99, 235, 0.08)' : 'none',
-                    border: activeSection === sec.id ? '1px solid #bfdbfe' : '1px solid transparent',
-                    borderRadius: '8px',
-                    width: '38px',
-                    height: '38px',
-                    display: 'grid',
-                    placeItems: 'center',
-                    fontSize: '1.15rem',
-                    cursor: 'pointer',
-                    color: activeSection === sec.id ? '#2563eb' : 'var(--muted)',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {sec.icon}
-                </button>
-              ))}
+              {statusMsg}
             </div>
+          )}
 
-            {/* Active section inputs */}
-            <div style={{ minHeight: '360px', marginBottom: '24px' }}>
-              {activeSection === 'personal' && renderPersonalFields()}
-              {activeSection === 'summary' && renderSummaryFields()}
-              {activeSection === 'experience' && renderExperienceFields()}
-              {activeSection === 'education' && renderEducationFields()}
-              {activeSection === 'skills' && renderSkillsFields()}
-              {activeSection === 'languages' && renderLanguagesFields()}
-            </div>
+          {/* MAIN 2-COLUMN GRID */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', alignItems: 'start' }}>
 
-            {/* Bottom Actions Row */}
+            {/* LEFT COLUMN: FORM INPUTS */}
             <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              borderTop: '1px solid rgba(24, 35, 38, 0.08)',
-              paddingTop: '20px'
+              background: '#ffffff',
+              borderRadius: '28px',
+              padding: '28px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+              border: '1px solid #e2e8f0'
             }}>
-              <button 
-                onClick={handlePrev}
-                disabled={activeSection === 'personal'}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: activeSection === 'personal' ? 'var(--muted)' : '#475569',
-                  fontSize: '0.86rem',
-                  fontWeight: 700,
-                  cursor: activeSection === 'personal' ? 'default' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                ← Previous
-              </button>
 
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button 
-                  onClick={handleBuild}
-                  disabled={saving}
-                  style={{
-                    background: '#ffffff',
-                    border: '1px solid rgba(24, 35, 38, 0.12)',
-                    borderRadius: '8px',
-                    padding: '10px 24px',
-                    fontSize: '0.86rem',
-                    fontWeight: 700,
-                    color: 'var(--text)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {saving ? 'Saving...' : 'Save'}
-                </button>
+              {/* Form Section Navigation Tabs */}
+              <div style={{
+                display: 'flex',
+                gap: '8px',
+                overflowX: 'auto',
+                paddingBottom: '12px',
+                borderBottom: '1px solid #f1f5f9',
+                marginBottom: '24px'
+              }}>
+                {[
+                  { id: 'personal', label: 'Personal', icon: User },
+                  { id: 'experience', label: 'Experience', icon: Briefcase },
+                  { id: 'education', label: 'Education', icon: GraduationCap },
+                  { id: 'skills', label: 'Skills & Projects', icon: Code2 },
+                ].map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      style={{
+                        background: isActive ? '#1c2427' : '#f8fafc',
+                        color: isActive ? '#ffffff' : '#64748b',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '10px 16px',
+                        fontSize: '0.85rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <Icon className="size-4" /> {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
 
-                <button 
-                  onClick={handleBuild}
-                  disabled={saving}
+              {/* TAB 1: PERSONAL DETAILS */}
+              {activeTab === 'personal' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Full Name *</label>
+                    <input type="text" value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Headline / Target Position</label>
+                    <input type="text" value={headline} onChange={e => setHeadline(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Email Address *</label>
+                      <input type="email" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Phone Number</label>
+                      <input type="text" value={phone} onChange={e => setPhone(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>LinkedIn URL</label>
+                      <input type="text" value={linkedin} onChange={e => setLinkedin(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>GitHub / Portfolio URL</label>
+                      <input type="text" value={github} onChange={e => setGithub(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Professional Summary</label>
+                    <textarea rows="4" value={summary} onChange={e => setSummary(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.88rem', outline: 'none', resize: 'vertical' }} />
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: EXPERIENCE */}
+              {activeTab === 'experience' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Job Title</label>
+                      <input type="text" value={jobTitle} onChange={e => setJobTitle(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Company Name</label>
+                      <input type="text" value={company} onChange={e => setCompany(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Dates (e.g. Jan 2024 -- Present)</label>
+                      <input type="text" value={jobDates} onChange={e => setJobDates(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Location</label>
+                      <input type="text" value={jobLocation} onChange={e => setJobLocation(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Key Responsibilities & Achievements (1 per line)</label>
+                    <textarea rows="5" value={jobBullets} onChange={e => setJobBullets(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.88rem', outline: 'none', resize: 'vertical' }} />
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: EDUCATION */}
+              {activeTab === 'education' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>College / University Name</label>
+                    <input type="text" value={college} onChange={e => setCollege(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Degree & Major</label>
+                    <input type="text" value={degree} onChange={e => setDegree(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Graduation Date / Years</label>
+                      <input type="text" value={gradDate} onChange={e => setGradDate(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Location</label>
+                      <input type="text" value={eduLocation} onChange={e => setEduLocation(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: SKILLS & PROJECTS */}
+              {activeTab === 'skills' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Technical Skills (Comma Separated)</label>
+                    <input type="text" value={skills} onChange={e => setSkills(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                  </div>
+
+                  <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: '8px 0' }} />
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Project Title</label>
+                    <input type="text" value={projectName} onChange={e => setProjectName(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Technologies Used</label>
+                      <input type="text" value={projectTech} onChange={e => setProjectTech(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Project Date</label>
+                      <input type="text" value={projectDate} onChange={e => setProjectDate(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem', outline: 'none' }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Project Description</label>
+                    <textarea rows="3" value={projectDesc} onChange={e => setProjectDesc(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.88rem', outline: 'none', resize: 'vertical' }} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT COLUMN: LATEX PREVIEW & CONTROLS */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Template Selector Card */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '24px',
+                padding: '20px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                border: '1px solid #e2e8f0'
+              }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Select Major LaTeX Template
+                </span>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                  {[
+                    { id: 'modern_tech', name: 'Jake\'s Tech', tag: 'ATS Standard' },
+                    { id: 'executive', name: 'Executive', tag: 'Corporate' },
+                    { id: 'minimal', name: 'Minimalist', tag: 'Clean Deedy' },
+                  ].map(t => {
+                    const isSelected = template === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        onClick={() => setTemplate(t.id)}
+                        style={{
+                          background: isSelected ? '#1c2427' : '#f8fafc',
+                          color: isSelected ? '#ffffff' : '#1c2427',
+                          border: isSelected ? '2px solid #10b981' : '1px solid #cbd5e1',
+                          borderRadius: '16px',
+                          padding: '12px 10px',
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <strong style={{ fontSize: '0.85rem', display: 'block' }}>{t.name}</strong>
+                        <span style={{ fontSize: '0.7rem', color: isSelected ? '#10b981' : '#64748b', fontWeight: 600 }}>{t.tag}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Action Buttons Bar */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <button
+                  onClick={handleCopyLatex}
                   style={{
-                    background: '#1c2427',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '10px 24px',
-                    fontSize: '0.86rem',
-                    fontWeight: 700,
+                    background: isCopied ? '#10b981' : '#1c2427',
                     color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '12px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                    justifyContent: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 12px rgba(28,36,39,0.1)'
                   }}
                 >
-                  📥 {saving ? 'Building...' : 'Download'}
+                  {isCopied ? <Check className="size-4" /> : <Copy className="size-4" />}
+                  {isCopied ? 'Copied!' : 'Copy LaTeX'}
                 </button>
 
-                <button 
-                  onClick={handleNext}
-                  disabled={activeSection === 'languages'}
+                <button
+                  onClick={handleDownloadTex}
                   style={{
-                    background: '#ffffff',
-                    border: '1px solid rgba(24, 35, 38, 0.12)',
-                    borderRadius: '8px',
-                    padding: '10px 24px',
-                    fontSize: '0.86rem',
+                    background: '#3b82f6',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '12px',
                     fontWeight: 700,
-                    color: activeSection === 'languages' ? 'var(--muted)' : 'var(--text)',
-                    cursor: activeSection === 'languages' ? 'default' : 'pointer'
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 12px rgba(59,130,246,0.2)'
                   }}
                 >
-                  Next →
+                  <Download className="size-4" /> Download .tex
                 </button>
-              </div>
-            </div>
 
-            {status.text && (
-              <div style={{
-                marginTop: '16px',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                fontSize: '0.84rem',
-                background: status.type === 'error' ? 'rgba(255, 107, 74, 0.08)' : 'rgba(15, 157, 88, 0.08)',
-                color: status.type === 'error' ? 'var(--accent-deep)' : '#0f9d58'
-              }}>
-                {status.text}
-              </div>
-            )}
-          </article>
-
-          {/* RIGHT PANEL: Live Resume Preview */}
-          <article className="card" style={{ background: 'rgba(255, 255, 255, 0.7)', borderRadius: '20px', padding: '24px', border: '1px solid rgba(24, 35, 38, 0.04)', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', position: 'sticky', top: '100px' }}>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <span style={{ fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', fontWeight: 800 }}>
-                📋 Live Preview
-              </span>
-              <span style={{ fontSize: '0.74rem', color: 'var(--muted)', fontStyle: 'italic' }}>
-                Autosaved just now
-              </span>
-            </div>
-
-            <div id="selectedTemplateLabel" style={{ fontSize: '0.76rem', color: 'var(--text)', background: 'rgba(24, 35, 38, 0.04)', padding: '6px 12px', borderRadius: '6px', marginBottom: '16px', display: 'inline-block' }}>
-              Template Choice: <strong>{template}</strong>
-            </div>
-
-            {geminiSuggestions && (
-              <div style={{ whiteSpace: 'pre-wrap', background: 'rgba(37,99,235,0.04)', border: '1px solid rgba(37,99,235,0.15)', borderRadius: '12px', padding: '14px', marginBottom: '16px', fontSize: '0.84rem', color: 'var(--text)' }}>
-                <strong>AI Builder Analysis Checklist:</strong><br /><br />
-                {geminiSuggestions}
-              </div>
-            )}
-
-            <div className="resume-preview resume-preview-rich" style={{ padding: 0, border: 'none', background: 'none' }}>
-              {renderLivePreview()}
-            </div>
-
-            {/* ATS Analysis Panel Removed per user request */}
-
-            {downloadLinks && (
-              <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
-                <a 
-                  className="btn btn-primary" 
-                  style={{ textDecoration: 'none', width: '100%', textAlign: 'center', background: '#0f172a' }} 
-                  download={`${template.replace(/\.pdf$/i, '')}_updated.pdf`} 
-                  href={downloadLinks.pdf}
+                <a
+                  href="https://www.overleaf.com/docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: '#f5c35c',
+                    color: '#1c2427',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '12px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    textDecoration: 'none',
+                    boxShadow: '0 4px 12px rgba(245,195,92,0.2)'
+                  }}
                 >
-                  Download Updated PDF File
+                  <ExternalLink className="size-4" /> Open Overleaf
                 </a>
               </div>
-            )}
-          </article>
+
+              {/* Online Preview Link Banner */}
+              <div style={{
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '16px',
+                padding: '12px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <span style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 600 }}>
+                  Want instant online PDF rendering?
+                </span>
+                <a
+                  href={latexOnlineUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#2563eb',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Compile PDF Online <ExternalLink className="size-3.5" />
+                </a>
+              </div>
+
+              {/* Generated LaTeX Code Display Box */}
+              <div style={{
+                background: '#1c2427',
+                borderRadius: '24px',
+                padding: '20px',
+                color: '#e2e8f0',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f5c35c', fontFamily: 'monospace' }}>
+                    generated_resume.tex
+                  </span>
+                  <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '6px', color: '#94a3b8' }}>
+                    LaTeX Source
+                  </span>
+                </div>
+
+                <pre style={{
+                  background: '#141a1c',
+                  borderRadius: '14px',
+                  padding: '16px',
+                  fontFamily: 'Consolas, Monaco, "Fira Code", monospace',
+                  fontSize: '0.8rem',
+                  lineHeight: 1.5,
+                  maxHeight: '480px',
+                  overflow: 'auto',
+                  color: '#a7f3d0',
+                  margin: 0,
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-all'
+                }}>
+                  {latexCode}
+                </pre>
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
       </main>
 
