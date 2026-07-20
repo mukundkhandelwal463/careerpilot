@@ -158,53 +158,8 @@ const Home = () => {
       <main style={{ width: 'min(var(--max-width), calc(100% - 32px))', margin: '0 auto' }}>
         
         {/* REDESIGNED HERO SECTION - CENTERED LAPTOP WITH SURROUNDING FEATURES */}
-        <section style={{ padding: '60px 0 40px', textAlign: 'center' }}>
+        <section style={{ padding: '40px 0 40px', textAlign: 'center' }}>
           
-          {/* Top Hero Text Container (Centered) */}
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            style={{ maxWidth: '900px', margin: '0 auto 40px auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-          >
-            <motion.div variants={fadeUp} className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <Sparkles className="size-4 text-orange-500" /> AI-Powered Career Operating System
-            </motion.div>
-            
-            <motion.h1 variants={fadeUp} style={{ fontSize: 'clamp(2.4rem, 5.2vw, 4rem)', fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.02em', color: '#1e293b', margin: '0 0 16px 0' }}>
-              Simplify. Prepare. <span style={{ background: 'linear-gradient(135deg, var(--accent), #ff8f57)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Get Hired Faster.</span>
-            </motion.h1>
-            
-            <motion.p variants={fadeUp} style={{ fontSize: '1.08rem', color: '#64748b', margin: '0 0 24px 0', lineHeight: 1.6, maxWidth: '720px' }}>
-              The all-in-one platform to build better resumes, get ATS insights, master interviews, learn in-demand skills and discover the right opportunities — effortlessly.
-            </motion.p>
-
-            <motion.div variants={fadeUp} style={{ display: 'flex', gap: '14px', justifyContent: 'center', marginBottom: '28px', flexWrap: 'wrap' }}>
-              <Link className="btn btn-primary" to="/upload" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 26px', background: 'linear-gradient(135deg, var(--accent), var(--accent-deep))', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '999px', fontWeight: 700, boxShadow: '0 8px 25px rgba(255,107,74,0.25)' }}>
-                Get Started Free <ArrowRight className="size-4" />
-              </Link>
-              <Link className="btn btn-secondary" to="/preparation" style={{ display: 'inline-flex', alignItems: 'center', padding: '12px 26px', color: '#475569', background: 'white', border: '1px solid rgba(24,35,38,0.12)', cursor: 'pointer', borderRadius: '999px', fontWeight: 700 }}>
-                Explore Prep Hub
-              </Link>
-            </motion.div>
-
-            {/* Quick Stats Bar */}
-            <motion.div variants={fadeUp} style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap', opacity: 0.9 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
-                <Users className="size-4 text-emerald-500" /> <strong>10K+</strong> Active Users
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
-                <FileText className="size-4 text-blue-500" /> <strong>500K+</strong> Resumes Optimized
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
-                <Award className="size-4 text-amber-500" /> <strong>95%</strong> ATS Accuracy
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
-                <Cpu className="size-4 text-rose-500" /> <strong>24/7</strong> AI Career Assistant
-              </div>
-            </motion.div>
-          </motion.div>
-
           {/* 3-COLUMN HERO GRID: SURROUNDING FEATURE CARDS AROUND CENTERED LAPTOP */}
           <div style={{
             display: 'grid',
