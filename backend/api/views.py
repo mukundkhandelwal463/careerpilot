@@ -2438,15 +2438,20 @@ def download_complete_report_api(request):
         if best_resume:
             title_clean = str(best_resume.title or 'Uploaded Resume').encode('latin-1', 'replace').decode('latin-1')
             ats_val = int(best_resume.ats_score) if best_resume.ats_score is not None else 0
+            cat_clean = str(best_resume.category or 'General').encode('latin-1', 'replace').decode('latin-1')
             
             pdf.set_font("Helvetica", "", 10)
             pdf.set_text_color(71, 85, 105)
-            pdf.cell(70, 6, f"Analyzed Resume: {title_clean[:35]}")
-            pdf.cell(40, 6, f"ATS Match: {ats_val}%")
+            pdf.cell(0, 6, f"Analyzed Resume: {title_clean}", ln=True)
+            pdf.cell(0, 6, f"Target Category: {cat_clean}", ln=True)
+
+            pdf.set_font("Helvetica", "B", 10)
+            pdf.set_text_color(16, 185, 129)
+            pdf.cell(45, 6, f"Highest ATS Score: {ats_val}%")
             
             cur_y = pdf.get_y() + 1
-            draw_progress_bar(125, cur_y, 65, 4, ats_val, (16, 185, 129))
-            pdf.ln(7)
+            draw_progress_bar(55, cur_y, 135, 4.5, ats_val, (16, 185, 129))
+            pdf.ln(8)
         else:
             pdf.set_font("Helvetica", "", 10)
             pdf.set_text_color(148, 163, 184)
@@ -2461,19 +2466,19 @@ def download_complete_report_api(request):
         best_interview = MockInterview.objects.filter(user=user).order_by('-score', '-id').first()
         if best_interview and best_interview.score is not None:
             int_score = int(best_interview.score)
-            pdf.set_font("Helvetica", "", 10)
-            pdf.set_text_color(71, 85, 105)
-            pdf.cell(60, 6, f"Latest Mock Interview Score: {int_score}%")
+            pdf.set_font("Helvetica", "B", 10)
+            pdf.set_text_color(245, 195, 92)
+            pdf.cell(50, 6, f"Interview Score: {int_score}%")
             
             cur_y = pdf.get_y() + 1
-            draw_progress_bar(80, cur_y, 65, 4, int_score, (245, 195, 92))
-            pdf.ln(7)
+            draw_progress_bar(60, cur_y, 130, 4.5, int_score, (245, 195, 92))
+            pdf.ln(8)
 
             pdf.set_font("Helvetica", "I", 9)
             pdf.set_text_color(100, 116, 139)
             feedback_text = str(best_interview.feedback or "Voice mock interview attempt completed.").encode('latin-1', 'replace').decode('latin-1')
-            pdf.multi_cell(0, 4.5, f"AI Feedback: {feedback_text[:220]}...")
-            pdf.ln(2)
+            pdf.multi_cell(0, 4.5, f"AI Feedback: {feedback_text[:250]}")
+            pdf.ln(3)
         else:
             pdf.set_font("Helvetica", "", 10)
             pdf.set_text_color(148, 163, 184)
@@ -2490,11 +2495,11 @@ def download_complete_report_api(request):
             total_pct = int((best_test.score / best_test.max_score) * 100) if best_test.max_score else 0
             pdf.set_font("Helvetica", "B", 10)
             pdf.set_text_color(16, 185, 129)
-            pdf.cell(60, 6, f"Total Score: {best_test.score} / {best_test.max_score} ({total_pct}%)")
+            pdf.cell(55, 6, f"Total Score: {best_test.score} / {best_test.max_score} ({total_pct}%)")
             
             cur_y = pdf.get_y() + 1
-            draw_progress_bar(80, cur_y, 65, 4, total_pct, (16, 185, 129))
-            pdf.ln(7)
+            draw_progress_bar(65, cur_y, 125, 4.5, total_pct, (16, 185, 129))
+            pdf.ln(8)
 
             sections = [
                 ("Technical Core MCQs", best_test.technical_score, 90.0, (16, 185, 129)),
@@ -2504,15 +2509,15 @@ def download_complete_report_api(request):
                 ("Coding (Hard)", best_test.coding_hard_score, 50.0, (236, 72, 153))
             ]
 
-            pdf.set_font("Helvetica", "", 9)
+            pdf.set_font("Helvetica", "", 9.5)
             pdf.set_text_color(71, 85, 105)
             for sec_name, score_val, max_val, color_rgb in sections:
                 sec_pct = int((score_val / max_val) * 100) if max_val else 0
-                pdf.cell(50, 5, f"{sec_name}")
-                pdf.cell(40, 5, f"{score_val} / {max_val} ({sec_pct}%)")
-                cur_y = pdf.get_y() + 0.5
-                draw_progress_bar(100, cur_y, 60, 3.5, sec_pct, color_rgb)
-                pdf.ln(5.5)
+                pdf.cell(45, 6, f"{sec_name}")
+                pdf.cell(40, 6, f"{score_val} / {max_val} ({sec_pct}%)")
+                cur_y = pdf.get_y() + 1
+                draw_progress_bar(95, cur_y, 95, 4, sec_pct, color_rgb)
+                pdf.ln(6.5)
         else:
             pdf.set_font("Helvetica", "", 10)
             pdf.set_text_color(148, 163, 184)
@@ -2544,24 +2549,13 @@ def download_complete_report_api(request):
         pdf.set_font("Helvetica", "", 9.5)
         pdf.set_text_color(51, 65, 85)
 
-        for i in range(0, len(cs_subjects), 2):
-            subj1 = cs_subjects[i]
-            subj2 = cs_subjects[i+1] if i+1 < len(cs_subjects) else None
-
-            # Left column subject
-            pct1 = int(subj1[1])
-            pdf.cell(48, 6, f"{subj1[0]}: {pct1}%")
-            cur_y1 = pdf.get_y() + 1
-            draw_progress_bar(58, cur_y1, 38, 3.5, pct1, subj1[2])
-
-            if subj2:
-                pct2 = int(subj2[1])
-                pdf.set_x(105)
-                pdf.cell(50, 6, f"{subj2[0]}: {pct2}%")
-                cur_y2 = pdf.get_y() + 1
-                draw_progress_bar(155, cur_y2, 38, 3.5, pct2, subj2[2])
-
-            pdf.ln(7)
+        for subj_name, pct_str, color_rgb in cs_subjects:
+            pct_val = int(pct_str)
+            pdf.cell(55, 6, f"{subj_name}")
+            pdf.cell(20, 6, f"{pct_val}%")
+            cur_y = pdf.get_y() + 1
+            draw_progress_bar(85, cur_y, 105, 4, pct_val, color_rgb)
+            pdf.ln(6.5)
 
         pdf_output = pdf.output(dest='S')
         if isinstance(pdf_output, str):
