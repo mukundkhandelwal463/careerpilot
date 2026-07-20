@@ -2344,7 +2344,7 @@ def download_complete_report_api(request):
             return HttpResponse("Unauthorized", status=401)
 
         from fpdf import FPDF
-        from api.models import MockTestAttempt, ResumeAnalysis
+        from api.models import MockTestAttempt, Resume
         import os
         from django.conf import settings
 
@@ -2375,11 +2375,12 @@ def download_complete_report_api(request):
         pdf.line(10, pdf.get_y(), 200, pdf.get_y())
         pdf.ln(4)
 
-        best_resume = ResumeAnalysis.objects.filter(user=user).order_by('-ats_score').first()
+        best_resume = Resume.objects.filter(user=user).order_by('-ats_score').first()
         if best_resume:
             title_clean = str(best_resume.title or 'Resume').encode('latin-1', 'replace').decode('latin-1')
+            ats_val = int(best_resume.ats_score) if best_resume.ats_score is not None else 0
             pdf.set_font("Helvetica", "", 12)
-            pdf.cell(0, 8, f"Highest ATS Match Score: {int(best_resume.ats_score)}%", ln=True)
+            pdf.cell(0, 8, f"Highest ATS Match Score: {ats_val}%", ln=True)
             pdf.cell(0, 8, f"Target Role Analyzed: {title_clean}", ln=True)
         else:
             pdf.set_font("Helvetica", "", 12)
