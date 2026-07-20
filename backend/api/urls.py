@@ -31,6 +31,7 @@ urlpatterns = [
     path('results/list', views.get_results_api, name='get_results_api'),
     path('results/download-pdf', views.download_pdf_report_api, name='download_pdf_report_api'),
     path('results/download-complete-report', views.download_complete_report_api, name='download_complete_report_api'),
+    path('results/download-complete-report.pdf', views.download_complete_report_api, name='download_complete_report_pdf'),
 
     # Downloads / Standalone
     path('download-docx', views.download_docx_api, name='download_docx_api'),

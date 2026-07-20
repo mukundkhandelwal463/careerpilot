@@ -220,7 +220,26 @@ const Dashboard = () => {
 
     fetchResumes();
     fetchTestResults();
-  }, [user, navigate]);
+  const handleDownloadPdfReport = async () => {
+    if (!user) return;
+    try {
+      const url = `/api/results/download-complete-report.pdf?id=${encodeURIComponent(user.email)}&dsa=${csProgress.dsa}&oops=${csProgress.oops}&cn=${csProgress.cn}&os=${csProgress.os}&dbms=${csProgress.dbms}&sys=${csProgress.sys}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to download PDF");
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = 'CareerPilot_Complete_Evaluation_Report.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("PDF Download error:", err);
+      window.open(`/api/results/download-complete-report.pdf?id=${encodeURIComponent(user.email)}&dsa=${csProgress.dsa}&oops=${csProgress.oops}&cn=${csProgress.cn}&os=${csProgress.os}&dbms=${csProgress.dbms}&sys=${csProgress.sys}`, '_blank');
+    }
+  };
 
   const handleDeleteResume = async (resumeId, e) => {
     e.preventDefault();
@@ -519,7 +538,7 @@ const Dashboard = () => {
                 <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, display: 'block' }}>Download your comprehensive profile & mock performance summary</span>
               </div>
               <button
-                onClick={() => window.open(`/api/results/download-complete-report?id=${user.email}&dsa=${csProgress.dsa}&oops=${csProgress.oops}&cn=${csProgress.cn}&os=${csProgress.os}&dbms=${csProgress.dbms}&sys=${csProgress.sys}`, '_blank')}
+                onClick={handleDownloadPdfReport}
                 style={{
                   background: '#1c2427',
                   color: '#ffffff',
@@ -771,9 +790,11 @@ const Dashboard = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {[
                   { title: "Data Structures & Algorithms", progress: csProgress.dsa, color: "#10b981" },
+                  { title: "Object-Oriented Programming (OOPs)", progress: csProgress.oops, color: "#ec4899" },
                   { title: "Operating Systems", progress: csProgress.os, color: "#3b82f6" },
                   { title: "Database Management", progress: csProgress.dbms, color: "#f5c35c" },
-                  { title: "Computer Networks", progress: csProgress.cn, color: "#8b5cf6" }
+                  { title: "Computer Networks", progress: csProgress.cn, color: "#8b5cf6" },
+                  { title: "System Design", progress: csProgress.sys, color: "#06b6d4" }
                 ].map((course, idx) => (
                   <div key={idx}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
