@@ -17,7 +17,8 @@ import {
   Award,
   Trophy,
   Plus,
-  Trash2
+  Trash2,
+  RefreshCw
 } from 'lucide-react';
 import '../css/style.css';
 
@@ -44,94 +45,124 @@ const ResumeBuilder = () => {
   // Form Section State
   const [activeTab, setActiveTab] = useState('personal');
 
-  // Personal Info
-  const [name, setName] = useState('Mukund Khandelwal');
-  const [location, setLocation] = useState('Dausa, Rajasthan');
-  const [phone, setPhone] = useState('+91-6376447286');
-  const [email, setEmail] = useState('mukundkhandelwal463@gmail.com');
-  const [linkedin, setLinkedin] = useState('https://www.linkedin.com/in/mukund463/');
-  const [github, setGithub] = useState('https://github.com/mukundkhandelwal463');
+  // Personal Info (Starts BLANK by default)
+  const [name, setName] = useState('');
+  const [location, setLocation] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [linkedin, setLinkedin] = useState('');
+  const [github, setGithub] = useState('');
 
-  // Education
-  const [educationList, setEducationList] = useState([
-    { school: 'Lovely Professional University', location: 'Phagwara, Punjab', degree: 'B.Tech -- Computer Science and Engineering | CGPA: 7.69', dates: 'Aug 2023 -- Present' },
-    { school: 'Genius Public School', location: 'Dausa, Rajasthan', degree: 'Intermediate | Percentage: 65%', dates: 'Apr 2022 -- Mar 2023' },
-    { school: 'Shekhawati Public School', location: 'Dausa, Rajasthan', degree: 'Matriculation | Percentage: 91%', dates: 'Apr 2020 -- Mar 2021' }
-  ]);
+  // Education (Starts BLANK by default)
+  const [educationList, setEducationList] = useState([]);
 
-  // Key Skills
-  const [skillsList, setSkillsList] = useState([
-    { category: 'Data Analysis & Validation', items: 'Anomaly Detection, Outlier Identification, Data Consistency Checks, Sanity Testing, Root Cause Analysis' },
-    { category: 'Machine Learning & AI', items: 'Scikit-learn, Random Forest, SVM, Naive Bayes, TF-IDF, Cosine Similarity, imbalanced-learn' },
-    { category: 'Statistical Analysis', items: 'Descriptive Statistics, Trend Analysis, EDA, SciPy, NumPy, Feature Engineering' },
-    { category: 'Programming & Tools', items: 'Python, Pandas, Matplotlib, Seaborn, SQL, Joblib, Streamlit, Git, GitHub' },
-    { category: 'Reporting & BI', items: 'Power BI, DAX, Power Query, MS Excel, Pivot Tables, KPI Dashboards, Data Storytelling' }
-  ]);
+  // Key / Technical Skills (Starts BLANK by default)
+  const [skillsList, setSkillsList] = useState([]);
 
-  // Projects
-  const [projectsList, setProjectsList] = useState([
-    {
-      title: 'Resume Analyzer & Job Recommendation',
-      link: 'https://github.com/mukundkhandelwal463',
-      tech: 'Flask, spaCy, Scikit-learn, MySQL, TF-IDF',
-      date: 'Jan 2026',
-      bullets: 'Developed an AI-powered data validation and classification system using Flask -- applied NLP-based pipelines (spaCy, Regex, TF-IDF, cosine similarity) to extract, parse, and validate data consistency across PDF/DOCX/TXT formats, directly mirroring equipment data validation workflows.\nTrained and evaluated ML models (SVM, Naive Bayes) for accurate data classification and anomaly identification -- achieving high-precision candidate profiling through rule-based and statistical approaches.\nImplemented ATS scoring rules to systematically validate entries against established benchmarks, detect irregular patterns, and produce structured validation reports for decision-making.'
-    },
-    {
-      title: 'Accident Prediction With Pipeline',
-      link: 'https://github.com/mukundkhandelwal463/Accident-Prediction-With-Pipeline',
-      tech: 'Python, Scikit-learn, Streamlit, imbalanced-learn',
-      date: 'Apr 2025',
-      bullets: 'Built an end-to-end ML validation pipeline using Scikit-learn -- applied preprocessing, categorical encoding, and class balancing via RandomOverSampler to handle data irregularities and ensure integrity before model training.\nLeveraged Random Forest Classifier with statistical analysis to detect and classify incorrect data entries, identify anomalies, and reason out root causes of outliers across multiple input parameters.\nDeployed a Streamlit web app enabling real-time data input validation and severity prediction, demonstrating ability to operationalize data verification rules for live use cases.'
-    },
-    {
-      title: 'Data-Driven Sales Analytics Dashboard',
-      link: 'https://github.com/mukundkhandelwal463/Advance_sales_Dashboard',
-      tech: 'Microsoft Excel, Power BI, Power Query, DAX',
-      date: 'May 2025',
-      bullets: 'Performed data cleaning, transformation, and validation across raw sales datasets using Power Query -- applied consistency checks, detected anomalies, and ensured data accuracy before KPI modeling.\nMonitored historical trends in revenue, profit, and order data using DAX measures -- identified unusual data deflections and irregularities through dynamic trend analysis across time periods.\nDesigned interactive dashboards with slicer-based filtering to enable real-time cross-validation of data across regions, categories, and customer segments for strategic reporting.'
-    }
-  ]);
+  // Projects (Starts BLANK by default)
+  const [projectsList, setProjectsList] = useState([]);
 
-  // Training / Experience
-  const [trainingList, setTrainingList] = useState([
-    {
-      title: 'Data Science & Business Intelligence Training',
-      date: 'Jun 2025',
-      link: 'https://github.com/mukundkhandelwal463',
-      projectTitle: 'Wine Quality Prediction System',
-      tech: 'Python, SQL, Power BI, Scikit-learn',
-      bullets: 'Performed comprehensive EDA and statistical analysis on wine quality data -- applied feature engineering to identify key parameters (alcohol, density, acidity) influencing quality, and built sanity checks and test cases to validate data against expected ballpark ranges.\nTrained Logistic Regression and Random Forest models achieving 81% accuracy and 0.79 F1-score -- used outlier detection and root cause analysis to refine data quality and improve model reliability.'
-    }
-  ]);
+  // Training / Experience (Starts BLANK by default)
+  const [trainingList, setTrainingList] = useState([]);
 
-  // Certifications
-  const [certificationsList, setCertificationsList] = useState([
-    { title: 'Machine Learning & Data Science', issuer: 'GeeksforGeeks / Nation SkillUp', date: 'Jan 2026' },
-    { title: 'Data Structures and Algorithms', issuer: 'Apna College', date: 'Jun 2026' },
-    { title: 'Cloud Computing', issuer: 'NPTEL', date: 'Jun 2025' },
-    { title: 'Data Visualization / Empowering Business', issuer: 'Tata Forage', date: 'Jun 2025' }
-  ]);
+  // Certifications (Starts BLANK by default)
+  const [certificationsList, setCertificationsList] = useState([]);
 
-  // Achievements
-  const [achievementsList, setAchievementsList] = useState([
-    'Built 4+ end-to-end ML and data validation pipelines independently -- covering anomaly detection, outlier analysis, and statistical validation across real-world datasets.',
-    'Netflix Movies Analysis Dashboard received 4 GitHub Stars, reflecting quality of data analysis and visualization.',
-    'Achieved 91% in Matriculation; maintaining CGPA of 7.69 in B.Tech CSE at LPU.',
-    'Solved 200+ problems on LeetCode and GeeksforGeeks, demonstrating strong analytical and problem-solving skills.'
-  ]);
+  // Achievements (Starts BLANK by default)
+  const [achievementsList, setAchievementsList] = useState([]);
 
   // Status
   const [isCopied, setIsCopied] = useState(false);
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
 
+  // Function to load sample data if user wants to see demo
+  const loadSampleData = () => {
+    setName('Mukund Khandelwal');
+    setLocation('Dausa, Rajasthan');
+    setPhone('+91-6376447286');
+    setEmail('mukundkhandelwal463@gmail.com');
+    setLinkedin('https://www.linkedin.com/in/mukund463/');
+    setGithub('https://github.com/mukundkhandelwal463');
+
+    setEducationList([
+      { school: 'Lovely Professional University', location: 'Phagwara, Punjab', degree: 'B.Tech -- Computer Science and Engineering | CGPA: 7.69', dates: 'Aug 2023 -- Present' },
+      { school: 'Genius Public School', location: 'Dausa, Rajasthan', degree: 'Intermediate | Percentage: 65%', dates: 'Apr 2022 -- Mar 2023' },
+      { school: 'Shekhawati Public School', location: 'Dausa, Rajasthan', degree: 'Matriculation | Percentage: 91%', dates: 'Apr 2020 -- Mar 2021' }
+    ]);
+
+    setSkillsList([
+      { category: 'Data Analysis & Validation', items: 'Anomaly Detection, Outlier Identification, Data Consistency Checks, Sanity Testing, Root Cause Analysis' },
+      { category: 'Machine Learning & AI', items: 'Scikit-learn, Random Forest, SVM, Naive Bayes, TF-IDF, Cosine Similarity, imbalanced-learn' },
+      { category: 'Statistical Analysis', items: 'Descriptive Statistics, Trend Analysis, EDA, SciPy, NumPy, Feature Engineering' },
+      { category: 'Programming & Tools', items: 'Python, Pandas, Matplotlib, Seaborn, SQL, Joblib, Streamlit, Git, GitHub' },
+      { category: 'Reporting & BI', items: 'Power BI, DAX, Power Query, MS Excel, Pivot Tables, KPI Dashboards, Data Storytelling' }
+    ]);
+
+    setProjectsList([
+      {
+        title: 'Resume Analyzer & Job Recommendation',
+        link: 'https://github.com/mukundkhandelwal463',
+        tech: 'Flask, spaCy, Scikit-learn, MySQL, TF-IDF',
+        date: 'Jan 2026',
+        bullets: 'Developed an AI-powered data validation and classification system using Flask -- applied NLP-based pipelines (spaCy, Regex, TF-IDF, cosine similarity) to extract, parse, and validate data consistency across PDF/DOCX/TXT formats.\nTrained and evaluated ML models (SVM, Naive Bayes) for accurate data classification and anomaly identification.\nImplemented ATS scoring rules to systematically validate entries.'
+      },
+      {
+        title: 'Accident Prediction With Pipeline',
+        link: 'https://github.com/mukundkhandelwal463/Accident-Prediction-With-Pipeline',
+        tech: 'Python, Scikit-learn, Streamlit, imbalanced-learn',
+        date: 'Apr 2025',
+        bullets: 'Built an end-to-end ML validation pipeline using Scikit-learn -- applied preprocessing, categorical encoding, and class balancing via RandomOverSampler.\nLeveraged Random Forest Classifier with statistical analysis to detect and classify incorrect data entries.'
+      }
+    ]);
+
+    setTrainingList([
+      {
+        title: 'Data Science & Business Intelligence Training',
+        date: 'Jun 2025',
+        link: 'https://github.com/mukundkhandelwal463',
+        projectTitle: 'Wine Quality Prediction System',
+        tech: 'Python, SQL, Power BI, Scikit-learn',
+        bullets: 'Performed comprehensive EDA and statistical analysis on wine quality data.\nTrained Logistic Regression and Random Forest models achieving 81% accuracy.'
+      }
+    ]);
+
+    setCertificationsList([
+      { title: 'Machine Learning & Data Science', issuer: 'GeeksforGeeks / Nation SkillUp', date: 'Jan 2026' },
+      { title: 'Data Structures and Algorithms', issuer: 'Apna College', date: 'Jun 2026' }
+    ]);
+
+    setAchievementsList([
+      'Built 4+ end-to-end ML and data validation pipelines independently.',
+      'Netflix Movies Analysis Dashboard received 4 GitHub Stars.'
+    ]);
+
+    setStatusMsg('Loaded sample resume data into form.');
+  };
+
+  // Clear all form fields
+  const clearForm = () => {
+    setName('');
+    setLocation('');
+    setPhone('');
+    setEmail('');
+    setLinkedin('');
+    setGithub('');
+    setEducationList([]);
+    setSkillsList([]);
+    setProjectsList([]);
+    setTrainingList([]);
+    setCertificationsList([]);
+    setAchievementsList([]);
+    setStatusMsg('Form cleared.');
+  };
+
   // Handle Upload Auto-parse
   const handleAutofillUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setIsAutofilling(true);
-    setStatusMsg('Extracting data from resume file...');
+    setStatusMsg('Extracting data from uploaded resume file...');
 
     const formData = new FormData();
     formData.append('resume', file);
@@ -147,23 +178,119 @@ const ResumeBuilder = () => {
         if (pd.full_name || pd.name) setName(pd.full_name || pd.name);
         if (pd.email) setEmail(pd.email);
         if (pd.phone) setPhone(pd.phone);
-        if (pd.location) setLocation(pd.location);
+        if (pd.location || pd.address || pd.city) setLocation(pd.location || pd.address || pd.city);
         if (pd.linkedin) setLinkedin(pd.linkedin);
         if (pd.github) setGithub(pd.github);
-        setStatusMsg('Resume data extracted successfully into LaTeX Architect!');
+
+        // Parse Education
+        if (pd.education) {
+          if (Array.isArray(pd.education)) {
+            setEducationList(pd.education.map(e => (typeof e === 'string' ? { school: e, location: '', degree: '', dates: '' } : e)));
+          } else if (typeof pd.education === 'string') {
+            setEducationList([{ school: pd.education, location: '', degree: '', dates: '' }]);
+          }
+        }
+
+        // Parse Skills
+        if (pd.skills) {
+          if (Array.isArray(pd.skills)) {
+            setSkillsList([{ category: 'Technical Skills', items: pd.skills.join(', ') }]);
+          } else if (typeof pd.skills === 'string') {
+            setSkillsList([{ category: 'Technical Skills', items: pd.skills }]);
+          }
+        }
+
+        // Parse Projects / Experience
+        if (pd.experience) {
+          if (typeof pd.experience === 'string') {
+            setTrainingList([{ title: 'Professional Experience', date: '', link: '', projectTitle: 'Key Responsibilities', tech: '', bullets: pd.experience }]);
+          }
+        }
+
+        setStatusMsg('Resume parsed and form populated successfully!');
       } else {
         setStatusMsg(data.error || 'Failed to extract resume data.');
       }
     } catch (err) {
       console.error(err);
-      setStatusMsg('Error parsing resume file.');
+      setStatusMsg('Error parsing uploaded resume file.');
     } finally {
       setIsAutofilling(false);
     }
   };
 
+  // Dynamic Tabs depending on template choice
+  const activeTabsList = useMemo(() => {
+    if (template === 'abey_classic') {
+      return [
+        { id: 'personal', label: 'Personal', icon: User },
+        { id: 'education', label: 'Education', icon: GraduationCap },
+        { id: 'skills', label: 'Technical Skills', icon: Code2 },
+        { id: 'projects', label: 'Projects', icon: Briefcase },
+        { id: 'training', label: 'Experience & Training', icon: Award },
+        { id: 'certifications', label: 'Certifications', icon: Trophy },
+      ];
+    }
+    if (template === 'executive') {
+      return [
+        { id: 'personal', label: 'Personal', icon: User },
+        { id: 'education', label: 'Education', icon: GraduationCap },
+        { id: 'skills', label: 'Skills & Competencies', icon: Code2 },
+        { id: 'projects', label: 'Projects', icon: Briefcase },
+        { id: 'certifications', label: 'Certifications', icon: Trophy },
+      ];
+    }
+    // Default: 'mukund_ml'
+    return [
+      { id: 'personal', label: 'Personal', icon: User },
+      { id: 'education', label: 'Education', icon: GraduationCap },
+      { id: 'skills', label: 'Key Skills', icon: Code2 },
+      { id: 'projects', label: 'Projects', icon: Briefcase },
+      { id: 'training', label: 'Training', icon: Award },
+      { id: 'certifications', label: 'Certifications & Wins', icon: Trophy },
+    ];
+  }, [template]);
+
+  // Ensure active tab remains valid when template changes
+  useEffect(() => {
+    if (!activeTabsList.find(t => t.id === activeTab)) {
+      setActiveTab('personal');
+    }
+  }, [template, activeTabsList, activeTab]);
+
   // Generate Dynamic LaTeX Code
   const latexCode = useMemo(() => {
+    const displayName = name || '[YOUR FULL NAME]';
+    const displayLocation = location || '[City, State]';
+    const displayPhone = phone || '[Phone Number]';
+    const displayEmail = email || '[Email Address]';
+    const displayLinkedin = linkedin || 'LinkedIn';
+    const displayGithub = github || 'GitHub';
+
+    const eduContent = educationList.length > 0
+      ? educationList.map(e => `    \\resumeSubheading\n      {${esc(e.school || '[School Name]')}}{${esc(e.location || '[Location]')}}\n      {${esc(e.degree || '[Degree / CGPA]')}}{${esc(e.dates || '[Dates]')}}`).join('\n')
+      : `    \\resumeSubheading\n      {[University / School Name]}{[Location]}\n      {[Degree / Major | CGPA / Marks]}{[Aug 2023 -- Present]}`;
+
+    const skillsContent = skillsList.length > 0
+      ? skillsList.map(s => `     \\textbf{\\normalsize{${esc(s.category || 'Skills')}:}}{\\normalsize{ ${esc(s.items || '[Skill Items]')}}} \\\\`).join('\n')
+      : `     \\textbf{\\normalsize{Programming \\& Tools:}}{\\normalsize{ [Python, SQL, JavaScript, Git, Linux]}} \\\\`;
+
+    const projectsContent = projectsList.length > 0
+      ? projectsList.map(p => `      \\resumeProjectHeading\n          {\\href{${esc(p.link || '#')}}{\\textbf{\\large{${esc(p.title || '[Project Title]')}}}}{${esc(p.tech ? ` $|$ \\large{${esc(p.tech)}}` : '')}}}{${esc(p.date || '[Date]')}}\n          \\resumeItemListStart\n${(p.bullets || '[Project achievement description]').split('\n').filter(Boolean).map(b => `            \\resumeItem{\\normalsize{${esc(b)}}}`).join('\n')}\n          \\resumeItemListEnd\n          \\vspace{-18pt}`).join('\n')
+      : `      \\resumeProjectHeading\n          {\\textbf{\\large{[Project Title]}} $|$ \\large{[Technologies Used]}}{[Date]}\n          \\resumeItemListStart\n            \\resumeItem{\\normalsize{[Developed key project features and optimized performance metrics.]}}\n          \\resumeItemListEnd\n          \\vspace{-18pt}`;
+
+    const trainingContent = trainingList.length > 0
+      ? trainingList.map(t => `  \\resumeSubheading\n    {${esc(t.title || '[Training Title]')}}{${esc(t.date || '[Date]')}}\n    {}{}\n  \\vspace{-25pt}\n  \\begin{itemize}[leftmargin=0.15in, label={}]\n    \\resumeProjectHeading\n        {\\href{${esc(t.link || '#')}}{\\textbf{\\large{${esc(t.projectTitle || '[Project]')}}}}{${esc(t.tech ? ` $|$ \\large{${esc(t.tech)}}` : '')}}}{}\n        \\resumeItemListStart\n${(t.bullets || '[Training description]').split('\n').filter(Boolean).map(b => `          \\resumeItem{\\normalsize{${esc(b)}}}`).join('\n')}\n        \\resumeItemListEnd\n  \\end{itemize}`).join('\n')
+      : `  \\resumeSubheading\n    {[Training Program / Experience]}{[Date]}\n    {}{}\n  \\vspace{-25pt}\n  \\begin{itemize}[leftmargin=0.15in, label={}]\n    \\resumeProjectHeading\n        {\\textbf{\\large{[Project Title]}} $|$ \\large{[Tech Stack]}}{}\n        \\resumeItemListStart\n          \\resumeItem{\\normalsize{[Completed hands-on technical modules and key assignments.]}}\n        \\resumeItemListEnd\n  \\end{itemize}`;
+
+    const certsContent = certificationsList.length > 0
+      ? certificationsList.map(c => `        \\resumeItem{\\normalsize{${esc(c.title || '[Certification]')} -- \\textbf{(${esc(c.issuer || '[Issuer]')})} \\hfill \\textbf{${esc(c.date || '[Date]')}}}}`).join('\n')
+      : `        \\resumeItem{\\normalsize{[Machine Learning \\& Data Science Certification] -- \\textbf{([Issuer])} \\hfill \\textbf{[Date]}}}`;
+
+    const achievementsContent = achievementsList.length > 0
+      ? achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')
+      : `    \\item [Built end-to-end data pipelines and solved 200+ problem solving challenges.]`;
+
     if (template === 'abey_classic') {
       return `%-------------------------
 % Resume in Latex - Abey George Classic Style
@@ -259,13 +386,13 @@ const ResumeBuilder = () => {
 
 %----------HEADING----------
 \\begin{center}
-    {\\Huge \\scshape ${esc(name)}} \\\\ \\vspace{2pt}
-    ${esc(location)} \\\\ \\vspace{2pt}
+    {\\Huge \\scshape ${esc(displayName)}} \\\\ \\vspace{2pt}
+    ${esc(displayLocation)} \\\\ \\vspace{2pt}
     \\small
-    \\href{tel:${esc(phone)}}{${esc(phone)}} ~\\$|\\$~
-    \\href{mailto:${esc(email)}}{${esc(email)}} ~\\$|\\$~
-    \\href{${esc(linkedin)}}{LinkedIn} ~\\$|\\$~
-    \\href{${esc(github)}}{GitHub}
+    \\href{tel:${esc(displayPhone)}}{${esc(displayPhone)}} ~\\$|\\$~
+    \\href{mailto:${esc(displayEmail)}}{${esc(displayEmail)}} ~\\$|\\$~
+    \\href{${esc(displayLinkedin)}}{LinkedIn} ~\\$|\\$~
+    \\href{${esc(displayGithub)}}{GitHub}
 \\end{center}
 \\vspace{3mm}
 
@@ -273,9 +400,7 @@ const ResumeBuilder = () => {
 \\section{EDUCATION}
 \\vspace{3pt}
   \\resumeSubHeadingListStart
-${educationList.map(e => `    \\resumeSubheading
-      {${esc(e.school)}}{${esc(e.location)}}
-      {${esc(e.degree)}}{${esc(e.dates)}}`).join('\n')}
+${eduContent}
   \\resumeSubHeadingListEnd
 
 %-----------TECHNICAL SKILLS-----------
@@ -283,7 +408,7 @@ ${educationList.map(e => `    \\resumeSubheading
 \\vspace{2pt}
  \\begin{itemize}[leftmargin=0.15in, label={}]
     \\small{\\item{
-${skillsList.map(s => `     \\textbf{\\normalsize{${esc(s.category)}:}}{\\normalsize{ ${esc(s.items)}}} \\\\`).join('\n')}
+${skillsContent}
     }}
  \\end{itemize}
  \\vspace{-15pt}
@@ -293,12 +418,7 @@ ${skillsList.map(s => `     \\textbf{\\normalsize{${esc(s.category)}:}}{\\normal
     \\vspace{-2pt}
     \\resumeSubHeadingListStart
 
-${projectsList.map(p => `      \\resumeProjectHeading
-          {\\href{${esc(p.link)}}{\\textbf{\\large{${esc(p.title)}}}} $|$ \\large{${esc(p.tech)}}}{${esc(p.date)}}
-          \\resumeItemListStart
-${p.bullets.split('\n').filter(Boolean).map(b => `            \\resumeItem{\\normalsize{${esc(b)}}}`).join('\n')}
-          \\resumeItemListEnd
-          \\vspace{-18pt}`).join('\n')}
+${projectsContent}
 
     \\resumeSubHeadingListEnd
 
@@ -306,16 +426,7 @@ ${p.bullets.split('\n').filter(Boolean).map(b => `            \\resumeItem{\\nor
 \\section{EXPERIENCE \\& TRAINING}
 \\vspace{-2pt}
 \\resumeSubHeadingListStart
-${trainingList.map(t => `  \\resumeSubheading
-    {${esc(t.title)}}{${esc(t.date)}}
-    {}{}
-  \\vspace{-5pt}
-
-  \\resumeProjectHeading
-      {\\href{${esc(t.link)}}{\\textbf{\\large{${esc(t.projectTitle)}}}} $|$ \\large{${esc(t.tech)}}}{${esc(t.date)}}
-      \\resumeItemListStart
-${t.bullets.split('\n').filter(Boolean).map(b => `        \\resumeItem{\\normalsize{${esc(b)}}}`).join('\n')}
-      \\resumeItemListEnd`).join('\n')}
+${trainingContent}
 
 \\resumeSubHeadingListEnd
 \\vspace{-12pt}
@@ -324,7 +435,7 @@ ${t.bullets.split('\n').filter(Boolean).map(b => `        \\resumeItem{\\normals
 \\section{CERTIFICATIONS}
 \\resumeSubHeadingListStart
     \\resumeItemListStart
-${certificationsList.map(c => `        \\resumeItem{\\normalsize{${esc(c.title)} -- \\textbf{(${esc(c.issuer)})} \\hfill \\textbf{${esc(c.date)}}}}`).join('\n')}
+${certsContent}
     \\resumeItemListEnd
 \\resumeSubHeadingListEnd
 \\vspace{-15pt}
@@ -347,25 +458,25 @@ ${certificationsList.map(c => `        \\resumeItem{\\normalsize{${esc(c.title)}
 \\begin{document}
 
 \\begin{center}
-{\\Huge \\bfseries \\color{primary} ${esc(name)}} \\\\[4pt]
-{\\color{accent} \\bfseries ${esc(location)}} \\\\[6pt]
-\\small ${esc(email)} $\\cdot$ ${esc(phone)} $\\cdot$ \\href{${esc(linkedin)}}{LinkedIn} $\\cdot$ \\href{${esc(github)}}{GitHub}
+{\\Huge \\bfseries \\color{primary} ${esc(displayName)}} \\\\[4pt]
+{\\color{accent} \\bfseries ${esc(displayLocation)}} \\\\[6pt]
+\\small ${esc(displayEmail)} $\\cdot$ ${esc(displayPhone)} $\\cdot$ \\href{${esc(displayLinkedin)}}{LinkedIn} $\\cdot$ \\href{${esc(displayGithub)}}{GitHub}
 \\end{center}
 
 \\vspace{8pt}
 
 \\section{Education}
-${educationList.map(e => `\\textbf{${esc(e.school)}} \\hfill ${esc(e.dates)} \\\\ \\textit{${esc(e.degree)}} \\hfill ${esc(e.location)} \\\\[4pt]`).join('\n')}
+${educationList.length > 0 ? educationList.map(e => `\\textbf{${esc(e.school)}} \\hfill ${esc(e.dates)} \\\\ \\textit{${esc(e.degree)}} \\hfill ${esc(e.location)} \\\\[4pt]`).join('\n') : '\\textbf{[University]} \\hfill [Dates] \\\\ \\textit{[Degree]} \\hfill [Location]'}
 
 \\section{Key Skills \\& Competencies}
-${skillsList.map(s => `\\textbf{${esc(s.category)}}: ${esc(s.items)} \\\\[2pt]`).join('\n')}
+${skillsList.length > 0 ? skillsList.map(s => `\\textbf{${esc(s.category)}}: ${esc(s.items)} \\\\[2pt]`).join('\n') : '\\textbf{[Skills]}: [Python, SQL, Machine Learning, Problem Solving]'}
 
 \\section{Projects}
-${projectsList.map(p => `\\textbf{${esc(p.title)}} (${esc(p.tech)}) \\hfill ${esc(p.date)} \\\\
-${p.bullets.split('\n').filter(Boolean).map(b => `$\\bullet$ ${esc(b)}`).join(' \\\\ ')} \\\\[6pt]`).join('\n')}
+${projectsList.length > 0 ? projectsList.map(p => `\\textbf{${esc(p.title)}} (${esc(p.tech)}) \\hfill ${esc(p.date)} \\\\
+${(p.bullets || '').split('\n').filter(Boolean).map(b => `$\\bullet$ ${esc(b)}`).join(' \\\\ ')} \\\\[6pt]`).join('\n') : '\\textbf{[Project Title]} ([Tech Stack]) \\hfill [Date] \\\\ $\\bullet$ [Project description]'}
 
 \\section{Certifications}
-${certificationsList.map(c => `$\\bullet$ \\textbf{${esc(c.title)}} -- ${esc(c.issuer)} (${esc(c.date)})`).join(' \\\\ ')}
+${certificationsList.length > 0 ? certificationsList.map(c => `$\\bullet$ \\textbf{${esc(c.title)}} -- ${esc(c.issuer)} (${esc(c.date)})`).join(' \\\\ ') : '$\\bullet$ \\textbf{[Certification]} -- [Issuer] ([Date])'}
 
 \\end{document}`;
     }
@@ -455,13 +566,13 @@ ${certificationsList.map(c => `$\\bullet$ \\textbf{${esc(c.title)}} -- ${esc(c.i
 
 %----------HEADING----------
 \\begin{center}
-    {\\Huge \\scshape ${esc(name)}} \\\\ \\vspace{2pt}
-    ${esc(location)} \\\\ \\vspace{2pt}
+    {\\Huge \\scshape ${esc(displayName)}} \\\\ \\vspace{2pt}
+    ${esc(displayLocation)} \\\\ \\vspace{2pt}
     \\small
-    \\href{tel:${esc(phone)}}{${esc(phone)}} ~\\$|\\$~
-    \\href{mailto:${esc(email)}}{${esc(email)}} ~\\$|\\$~
-    \\href{${esc(linkedin)}}{LinkedIn} ~\\$|\\$~
-    \\href{${esc(github)}}{GitHub}
+    \\href{tel:${esc(displayPhone)}}{${esc(displayPhone)}} ~\\$|\\$~
+    \\href{mailto:${esc(displayEmail)}}{${esc(displayEmail)}} ~\\$|\\$~
+    \\href{${esc(displayLinkedin)}}{LinkedIn} ~\\$|\\$~
+    \\href{${esc(displayGithub)}}{GitHub}
 \\end{center}
 \\vspace{-4mm}
 
@@ -469,9 +580,7 @@ ${certificationsList.map(c => `$\\bullet$ \\textbf{${esc(c.title)}} -- ${esc(c.i
 \\section{EDUCATION}
 \\vspace{3pt}
   \\resumeSubHeadingListStart
-${educationList.map(e => `    \\resumeSubheading
-      {${esc(e.school)}}{${esc(e.location)}}
-      {${esc(e.degree)}}{${esc(e.dates)}}`).join('\n')}
+${eduContent}
   \\resumeSubHeadingListEnd
 
 %-----------KEY SKILLS-----------
@@ -479,7 +588,7 @@ ${educationList.map(e => `    \\resumeSubheading
 \\vspace{2pt}
  \\begin{itemize}[leftmargin=0.15in, label={}]
     \\small{\\item{
-${skillsList.map(s => `     \\textbf{\\normalsize{${esc(s.category)}:}}{\\normalsize{ ${esc(s.items)}}} \\\\`).join('\n')}
+${skillsContent}
     }}
  \\end{itemize}
  \\vspace{-15pt}
@@ -489,12 +598,7 @@ ${skillsList.map(s => `     \\textbf{\\normalsize{${esc(s.category)}:}}{\\normal
     \\vspace{-2pt}
     \\resumeSubHeadingListStart
 
-${projectsList.map(p => `      \\resumeProjectHeading
-          {\\href{${esc(p.link)}}{\\textbf{\\large{${esc(p.title)}}}} $|$ \\large{${esc(p.tech)}}}{${esc(p.date)}}
-          \\resumeItemListStart
-${p.bullets.split('\n').filter(Boolean).map(b => `            \\resumeItem{\\normalsize{${esc(b)}}}`).join('\n')}
-          \\resumeItemListEnd
-          \\vspace{-18pt}`).join('\n')}
+${projectsContent}
 
     \\resumeSubHeadingListEnd
 
@@ -502,17 +606,7 @@ ${p.bullets.split('\n').filter(Boolean).map(b => `            \\resumeItem{\\nor
 \\section{TRAINING}
 \\vspace{-2pt}
 \\resumeSubHeadingListStart
-${trainingList.map(t => `  \\resumeSubheading
-    {${esc(t.title)}}{${esc(t.date)}}
-    {}{}
-  \\vspace{-25pt}
-  \\begin{itemize}[leftmargin=0.15in, label={}]
-    \\resumeProjectHeading
-        {\\href{${esc(t.link)}}{\\textbf{\\large{${esc(t.projectTitle)}}}} $|$ \\large{${esc(t.tech)}}}{}
-        \\resumeItemListStart
-${t.bullets.split('\n').filter(Boolean).map(b => `          \\resumeItem{\\normalsize{${esc(b)}}}`).join('\n')}
-        \\resumeItemListEnd
-  \\end{itemize}`).join('\n')}
+${trainingContent}
 \\resumeSubHeadingListEnd
 \\vspace{-12pt}
 
@@ -520,7 +614,7 @@ ${t.bullets.split('\n').filter(Boolean).map(b => `          \\resumeItem{\\norma
 \\section{CERTIFICATIONS}
 \\resumeSubHeadingListStart
     \\resumeItemListStart
-${certificationsList.map(c => `        \\resumeItem{\\normalsize{${esc(c.title)} -- \\textbf{(${esc(c.issuer)})} \\hfill \\textbf{${esc(c.date)}}}}`).join('\n')}
+${certsContent}
     \\resumeItemListEnd
 \\resumeSubHeadingListEnd
 \\vspace{-15pt}
@@ -529,7 +623,7 @@ ${certificationsList.map(c => `        \\resumeItem{\\normalsize{${esc(c.title)}
 \\section{ACHIEVEMENTS}
 \\begin{itemize}[leftmargin=0.15in, label={$\\bullet$}, itemsep=1pt]
     \\small{
-${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
+${achievementsContent}
     }
 \\end{itemize}
 
@@ -549,7 +643,7 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${name.replace(/\s+/g, '_')}_Resume.tex`;
+    a.download = `${(name || 'Resume').replace(/\s+/g, '_')}_Resume.tex`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -579,41 +673,83 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                 <FileCode className="size-6 text-emerald-500" /> LaTeX Resume Architect
               </h1>
               <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '0.82rem', fontWeight: 500 }}>
-                Build & Customize your authentic LaTeX resume code with 3 specialized templates & live compile links.
+                Form is blank by default -- Upload your resume to autofill, or switch templates dynamically.
               </p>
             </div>
 
-            {/* Quick Upload Banner */}
-            <div style={{
-              background: '#ffffff',
-              borderRadius: '14px',
-              padding: '6px 14px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-              border: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}>
-              <Sparkles className="size-4 text-amber-500" />
-              <div>
-                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1c2427', display: 'block' }}>Magic Resume Autofill</span>
-                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Parse PDF / DOCX to Form</span>
-              </div>
-              <label style={{
-                background: '#1c2427',
-                color: '#ffffff',
-                padding: '6px 12px',
-                borderRadius: '10px',
-                fontSize: '0.78rem',
-                fontWeight: 700,
-                cursor: 'pointer',
+            {/* Quick Upload Banner & Load Sample Data */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button
+                onClick={loadSampleData}
+                style={{
+                  background: '#f1f5f9',
+                  color: '#475569',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '12px',
+                  padding: '6px 12px',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <RefreshCw className="size-3.5" /> Demo Sample Data
+              </button>
+
+              { (name || educationList.length > 0) && (
+                <button
+                  onClick={clearForm}
+                  style={{
+                    background: '#fef2f2',
+                    color: '#ef4444',
+                    border: '1px solid #fca5a5',
+                    borderRadius: '12px',
+                    padding: '6px 12px',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Trash2 className="size-3.5" /> Clear Form
+                </button>
+              )}
+
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '14px',
+                padding: '6px 14px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+                border: '1px solid #e2e8f0',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px'
+                gap: '10px'
               }}>
-                <Upload className="size-3.5" /> Upload
-                <input type="file" onChange={handleAutofillUpload} accept=".pdf,.docx,.txt" style={{ display: 'none' }} />
-              </label>
+                <Sparkles className="size-4 text-amber-500" />
+                <div>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1c2427', display: 'block' }}>Magic Resume Autofill</span>
+                  <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Parse PDF / DOCX to Form</span>
+                </div>
+                <label style={{
+                  background: '#1c2427',
+                  color: '#ffffff',
+                  padding: '6px 12px',
+                  borderRadius: '10px',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <Upload className="size-3.5" /> Upload Resume
+                  <input type="file" onChange={handleAutofillUpload} accept=".pdf,.docx,.txt" style={{ display: 'none' }} />
+                </label>
+              </div>
             </div>
           </div>
 
@@ -688,7 +824,7 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                 border: '1px solid #e2e8f0'
               }}>
 
-                {/* Form Navigation Tabs */}
+                {/* Form Navigation Tabs (Dynamic according to selected template) */}
                 <div style={{
                   display: 'flex',
                   gap: '6px',
@@ -697,14 +833,7 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                   borderBottom: '1px solid #f1f5f9',
                   marginBottom: '14px'
                 }}>
-                  {[
-                    { id: 'personal', label: 'Personal', icon: User },
-                    { id: 'education', label: 'Education', icon: GraduationCap },
-                    { id: 'skills', label: 'Skills', icon: Code2 },
-                    { id: 'projects', label: 'Projects', icon: Briefcase },
-                    { id: 'training', label: 'Training', icon: Award },
-                    { id: 'certifications', label: 'Certs & Wins', icon: Trophy },
-                  ].map(tab => {
+                  {activeTabsList.map(tab => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
                     return (
@@ -738,33 +867,33 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div>
                       <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Full Name</label>
-                      <input type="text" value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                      <input type="text" placeholder="e.g. John Doe" value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                     </div>
 
                     <div>
                       <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Location / City, State</label>
-                      <input type="text" value={location} onChange={e => setLocation(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                      <input type="text" placeholder="e.g. New York, NY" value={location} onChange={e => setLocation(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
                         <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Phone Number</label>
-                        <input type="text" value={phone} onChange={e => setPhone(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                        <input type="text" placeholder="+1-555-0199" value={phone} onChange={e => setPhone(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                       </div>
                       <div>
                         <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Email Address</label>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                        <input type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                       </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
                         <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>LinkedIn URL</label>
-                        <input type="text" value={linkedin} onChange={e => setLinkedin(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                        <input type="text" placeholder="linkedin.com/in/username" value={linkedin} onChange={e => setLinkedin(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                       </div>
                       <div>
                         <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>GitHub URL</label>
-                        <input type="text" value={github} onChange={e => setGithub(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                        <input type="text" placeholder="github.com/username" value={github} onChange={e => setGithub(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                       </div>
                     </div>
                   </div>
@@ -777,11 +906,9 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                       <div key={idx} style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                           <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c2427' }}>Education #{idx + 1}</span>
-                          {educationList.length > 1 && (
-                            <button onClick={() => setEducationList(educationList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                              <Trash2 className="size-3.5" />
-                            </button>
-                          )}
+                          <button onClick={() => setEducationList(educationList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                            <Trash2 className="size-3.5" />
+                          </button>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
                           <input type="text" placeholder="School / University" value={edu.school} onChange={e => { const list = [...educationList]; list[idx].school = e.target.value; setEducationList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
@@ -805,14 +932,12 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                     {skillsList.map((skill, idx) => (
                       <div key={idx} style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                          <input type="text" placeholder="Skill Category Name" value={skill.category} onChange={e => { const list = [...skillsList]; list[idx].category = e.target.value; setSkillsList(list); }} style={{ fontWeight: 700, color: '#1c2427', background: 'transparent', border: 'none', fontSize: '0.85rem', width: '80%' }} />
-                          {skillsList.length > 1 && (
-                            <button onClick={() => setSkillsList(skillsList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                              <Trash2 className="size-3.5" />
-                            </button>
-                          )}
+                          <input type="text" placeholder="Skill Category Name (e.g. Machine Learning)" value={skill.category} onChange={e => { const list = [...skillsList]; list[idx].category = e.target.value; setSkillsList(list); }} style={{ fontWeight: 700, color: '#1c2427', background: 'transparent', border: 'none', fontSize: '0.85rem', width: '80%' }} />
+                          <button onClick={() => setSkillsList(skillsList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                            <Trash2 className="size-3.5" />
+                          </button>
                         </div>
-                        <textarea rows="2" placeholder="Items (comma separated)" value={skill.items} onChange={e => { const list = [...skillsList]; list[idx].items = e.target.value; setSkillsList(list); }} style={{ width: '100%', padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                        <textarea rows="2" placeholder="Items (comma separated: Python, TensorFlow, PyTorch)" value={skill.items} onChange={e => { const list = [...skillsList]; list[idx].items = e.target.value; setSkillsList(list); }} style={{ width: '100%', padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
                       </div>
                     ))}
                     <button onClick={() => setSkillsList([...skillsList, { category: '', items: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: '1px stroke #cbd5e1', borderRadius: '10px', padding: '8px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
@@ -828,11 +953,9 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                       <div key={idx} style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                           <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c2427' }}>Project #{idx + 1}</span>
-                          {projectsList.length > 1 && (
-                            <button onClick={() => setProjectsList(projectsList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                              <Trash2 className="size-3.5" />
-                            </button>
-                          )}
+                          <button onClick={() => setProjectsList(projectsList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                            <Trash2 className="size-3.5" />
+                          </button>
                         </div>
                         <input type="text" placeholder="Project Title" value={proj.title} onChange={e => { const list = [...projectsList]; list[idx].title = e.target.value; setProjectsList(list); }} style={{ width: '100%', padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem', marginBottom: '6px' }} />
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', marginBottom: '6px' }}>
@@ -849,22 +972,31 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                   </div>
                 )}
 
-                {/* TAB 5: TRAINING */}
+                {/* TAB 5: TRAINING / EXPERIENCE */}
                 {activeTab === 'training' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {trainingList.map((tr, idx) => (
                       <div key={idx} style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c2427' }}>Training / Experience #{idx + 1}</span>
+                          <button onClick={() => setTrainingList(trainingList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '6px' }}>
-                          <input type="text" placeholder="Training Program Title" value={tr.title} onChange={e => { const list = [...trainingList]; list[idx].title = e.target.value; setTrainingList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                          <input type="text" placeholder="Training / Position Title" value={tr.title} onChange={e => { const list = [...trainingList]; list[idx].title = e.target.value; setTrainingList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
                           <input type="text" placeholder="Date (e.g. Jun 2025)" value={tr.date} onChange={e => { const list = [...trainingList]; list[idx].date = e.target.value; setTrainingList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '6px' }}>
-                          <input type="text" placeholder="Project Title in Training" value={tr.projectTitle} onChange={e => { const list = [...trainingList]; list[idx].projectTitle = e.target.value; setTrainingList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                          <input type="text" placeholder="Project / Subtitle" value={tr.projectTitle} onChange={e => { const list = [...trainingList]; list[idx].projectTitle = e.target.value; setTrainingList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
                           <input type="text" placeholder="Tech Stack" value={tr.tech} onChange={e => { const list = [...trainingList]; list[idx].tech = e.target.value; setTrainingList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
                         </div>
                         <textarea rows="3" placeholder="Description Bullets (1 per line)" value={tr.bullets} onChange={e => { const list = [...trainingList]; list[idx].bullets = e.target.value; setTrainingList(list); }} style={{ width: '100%', padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
                       </div>
                     ))}
+                    <button onClick={() => setTrainingList([...trainingList, { title: '', date: '', link: '', projectTitle: '', tech: '', bullets: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: '1px stroke #cbd5e1', borderRadius: '10px', padding: '8px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                      <Plus className="size-3.5" /> Add Training / Experience
+                    </button>
                   </div>
                 )}
 
@@ -878,11 +1010,9 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                           <input type="text" placeholder="Certification Name" value={cert.title} onChange={e => { const list = [...certificationsList]; list[idx].title = e.target.value; setCertificationsList(list); }} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
                           <input type="text" placeholder="Issuer / Organization" value={cert.issuer} onChange={e => { const list = [...certificationsList]; list[idx].issuer = e.target.value; setCertificationsList(list); }} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
                           <input type="text" placeholder="Date" value={cert.date} onChange={e => { const list = [...certificationsList]; list[idx].date = e.target.value; setCertificationsList(list); }} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
-                          {certificationsList.length > 1 && (
-                            <button onClick={() => setCertificationsList(certificationsList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                              <Trash2 className="size-3.5" />
-                            </button>
-                          )}
+                          <button onClick={() => setCertificationsList(certificationsList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                            <Trash2 className="size-3.5" />
+                          </button>
                         </div>
                       ))}
                       <button onClick={() => setCertificationsList([...certificationsList, { title: '', issuer: '', date: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: 'none', borderRadius: '8px', padding: '6px 10px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -890,10 +1020,12 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                       </button>
                     </div>
 
-                    <div>
-                      <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1c2427', marginBottom: '8px' }}>Key Achievements (1 per line)</h3>
-                      <textarea rows="3" value={achievementsList.join('\n')} onChange={e => setAchievementsList(e.target.value.split('\n').filter(Boolean))} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }} />
-                    </div>
+                    {template === 'mukund_ml' && (
+                      <div>
+                        <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1c2427', marginBottom: '8px' }}>Key Achievements (1 per line)</h3>
+                        <textarea rows="3" placeholder="Bullet points of key accomplishments" value={achievementsList.join('\n')} onChange={e => setAchievementsList(e.target.value.split('\n').filter(Boolean))} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }} />
+                      </div>
+                    )}
                   </div>
                 )}
 
