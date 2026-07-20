@@ -769,7 +769,6 @@ const Dashboard = () => {
                   <Mic className="size-4" /> Start Mock Interview
                 </button>
               </div>
-              </div>
             </div>
 
             {/* NEW BOX: Best Mock Test Result */}
