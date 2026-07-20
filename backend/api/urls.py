@@ -12,6 +12,7 @@ urlpatterns = [
     path('analyze-resume', views.analyze_resume, name='analyze_resume'),
     path('parse-resume-to-json', views.parse_resume_to_json, name='parse_resume_to_json'),
     path('suggest-stream-keywords', views.suggest_stream_keywords_api, name='suggest_stream_keywords_api'),
+    path('suggest-stream-keywords/', views.suggest_stream_keywords_api, name='suggest_stream_keywords_api_slash'),
     path('recommend-jobs', views.recommend_jobs, name='recommend_jobs'),
     path('search-jobs', views.search_jobs_jsearch, name='search_jobs_jsearch'),
     path('rank-candidates', views.rank_candidates, name='rank_candidates'),

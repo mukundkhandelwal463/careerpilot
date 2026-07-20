@@ -91,6 +91,33 @@ const ResumeBuilder = () => {
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
 
+  const getClientFallbackKeywords = (streamText) => {
+    const s = (streamText || '').toLowerCase();
+    if (s.includes('ai') || s.includes('ml') || s.includes('machine') || s.includes('learning')) {
+      return ['Scikit-learn', 'PyTorch', 'TensorFlow', 'Random Forest', 'TF-IDF', 'NLP Pipelines', 'Feature Engineering', 'EDA', 'Model Deployment', 'Cosine Similarity', 'Neural Networks', 'Pandas & NumPy'];
+    }
+    if (s.includes('cyber') || s.includes('security') || s.includes('sec')) {
+      return ['Wireshark', 'Metasploit', 'Penetration Testing', 'Nmap', 'SIEM', 'SOC Analysis', 'ISO 27001', 'Cryptography', 'Network Security', 'Ethical Hacking', 'Zero Trust', 'Firewalls'];
+    }
+    if (s.includes('devops') || s.includes('cloud') || s.includes('aws')) {
+      return ['Docker', 'Kubernetes', 'Terraform', 'CI/CD Pipelines', 'AWS', 'Ansible', 'Jenkins', 'Prometheus', 'Grafana', 'Linux Administration', 'Bash Scripting', 'Helm'];
+    }
+    if (s.includes('ios') || s.includes('swift') || s.includes('apple')) {
+      return ['Swift', 'SwiftUI', 'UIKit', 'Xcode', 'Combine Framework', 'CoreData', 'CocoaPods', 'RESTful APIs', 'Git', 'TestFlight', 'App Store Deployment', 'MVVM'];
+    }
+    if (s.includes('android') || s.includes('kotlin') || s.includes('mobile')) {
+      return ['Kotlin', 'Android SDK', 'Jetpack Compose', 'Coroutines', 'Room Database', 'Retrofit', 'Dagger Hilt', 'Gradle', 'MVVM Architecture', 'Unit Testing'];
+    }
+    if (s.includes('web') || s.includes('full') || s.includes('stack') || s.includes('react')) {
+      return ['React.js', 'Node.js', 'Express.js', 'MongoDB', 'RESTful APIs', 'Redux Toolkit', 'TypeScript', 'Tailwind CSS', 'GraphQL', 'Next.js', 'JWT Auth', 'Webpack'];
+    }
+    if (s.includes('data eng') || s.includes('sql') || s.includes('spark')) {
+      return ['Apache Spark', 'PySpark', 'Hadoop', 'Kafka', 'Airflow', 'ETL Pipelines', 'Snowflake', 'Databricks', 'Data Warehousing', 'SQL Optimization', 'Parquet', 'BigQuery'];
+    }
+    const words = streamText.split(/[\s,/\-_]+/).filter(w => w.length > 2).map(w => w.charAt(0).toUpperCase() + w.slice(1));
+    return Array.from(new Set([...words, 'System Design', 'Agile Methodology', 'Git / GitHub', 'Problem Solving', 'REST APIs', 'Unit Testing', 'CI/CD', 'Performance Optimization']));
+  };
+
   // Fetch Gemini Keywords for User-Entered Stream
   const handleFetchGeminiKeywords = async () => {
     if (!customStream.trim()) return;
@@ -103,20 +130,26 @@ const ResumeBuilder = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stream: customStream.trim() }),
       });
-      const data = await res.json();
-      if (data.success && Array.isArray(data.keywords) && data.keywords.length > 0) {
-        setDynamicKeywords(data.keywords);
-        setStatusMsg(`Gemini AI generated ${data.keywords.length} ATS keywords for "${customStream}"!`);
-        setTimeout(() => setStatusMsg(''), 3000);
-      } else {
-        setStatusMsg('Failed to generate keywords. Using default suggestions.');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.keywords) && data.keywords.length > 0) {
+          setDynamicKeywords(data.keywords);
+          setStatusMsg(`Gemini AI generated ${data.keywords.length} ATS keywords for "${customStream}"!`);
+          setTimeout(() => setStatusMsg(''), 3000);
+          setIsFetchingKeywords(false);
+          return;
+        }
       }
     } catch (err) {
-      console.error(err);
-      setStatusMsg('Error fetching Gemini AI keywords.');
-    } finally {
-      setIsFetchingKeywords(false);
+      console.warn('API fetch error, using fallback:', err);
     }
+
+    // Fallback keyword generation
+    const fallbacks = getClientFallbackKeywords(customStream);
+    setDynamicKeywords(fallbacks);
+    setStatusMsg(`Generated ${fallbacks.length} ATS keywords for "${customStream}"!`);
+    setTimeout(() => setStatusMsg(''), 3000);
+    setIsFetchingKeywords(false);
   };
 
   // Calculate Real-Time ATS Score
