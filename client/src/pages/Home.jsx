@@ -130,7 +130,7 @@ const Home = () => {
         {/* ════════════════════════════════════
             HERO SECTION — Laptop at center
             ════════════════════════════════════ */}
-        <section style={{ padding: '120px 0 60px', textAlign: 'center' }}>
+        <section style={{ padding: '140px 0 60px', textAlign: 'center' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'minmax(220px, 270px) minmax(500px, 1fr) minmax(220px, 270px)',
@@ -149,10 +149,7 @@ const Home = () => {
                   <motion.div key={idx} whileHover={{ y: -5, scale: 1.03 }} initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.1 * (idx + 1) }}
                     style={{ background: '#fff', borderRadius: '20px', padding: '16px 20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
                     <div style={{ background: f.bg, padding: '10px', borderRadius: '12px', color: f.color, flexShrink: 0 }}><Icon className="size-5" /></div>
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>{f.title}</h3>
-                      <span style={{ fontSize: '0.72rem', color: f.color, fontWeight: 700 }}>{f.sub}</span>
-                    </div>
+                    <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>{f.title}</h3>
                   </motion.div>
                 );
               })}
@@ -175,18 +172,7 @@ const Home = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              {/* Floating pills */}
-              <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ position: 'absolute', top: '-20px', right: '20px', background: '#fff', border: '1px solid #e2e8f0', padding: '8px 16px', borderRadius: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 35 }}>
-                <div style={{ background: '#ecfdf5', color: '#10b981', padding: '4px', borderRadius: '6px' }}><Sparkles className="size-3.5" /></div>
-                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1c2427' }}>Your AI Career Companion</span>
-              </motion.div>
 
-              <motion.div animate={{ y: [0, 6, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ position: 'absolute', bottom: '24px', left: '-16px', background: '#fff', border: '1px solid #e2e8f0', padding: '8px 16px', borderRadius: '24px', boxShadow: '0 10px 25px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 35 }}>
-                <div style={{ background: '#fef2f2', color: '#ef4444', padding: '4px', borderRadius: '6px' }}><Award className="size-3.5" /></div>
-                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1c2427' }}>16 Applications Active</span>
-              </motion.div>
 
               {/* LAPTOP HARDWARE */}
               <div style={{ background: '#1c2427', borderRadius: '26px 26px 10px 10px', padding: '14px 14px 24px 14px', boxShadow: '0 30px 80px rgba(0,0,0,0.28)', border: '2px solid #334155' }}>
@@ -195,7 +181,7 @@ const Home = () => {
                 </div>
 
                 {/* SCREEN — crossfade between Dashboard and ATS Feature */}
-                <div style={{ background: '#0f172a', borderRadius: '14px', overflow: 'hidden', display: 'flex', height: '420px', border: '1px solid rgba(255,255,255,0.08)', textAlign: 'left', position: 'relative' }}>
+                <div style={{ background: '#0f172a', borderRadius: '14px', overflow: 'hidden', display: 'flex', height: '500px', border: '1px solid rgba(255,255,255,0.08)', textAlign: 'left', position: 'relative' }}>
                   {/* Sidebar */}
                   <div style={{ width: '56px', background: '#090d16', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', paddingTop: '20px', borderRight: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
                     <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--accent), #ff8f57)', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: '0.75rem', color: 'white' }}>C</div>
@@ -294,10 +280,7 @@ const Home = () => {
                   <motion.div key={idx} whileHover={{ y: -5, scale: 1.03 }} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.1 * (idx + 1) }}
                     style={{ background: '#fff', borderRadius: '20px', padding: '16px 20px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '14px' }}>
                     <div style={{ background: f.bg, padding: '10px', borderRadius: '12px', color: f.color, flexShrink: 0 }}><Icon className="size-5" /></div>
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>{f.title}</h3>
-                      <span style={{ fontSize: '0.72rem', color: f.color, fontWeight: 700 }}>{f.sub}</span>
-                    </div>
+                    <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>{f.title}</h3>
                   </motion.div>
                 );
               })}
