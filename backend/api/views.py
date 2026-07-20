@@ -2416,25 +2416,30 @@ def download_complete_report_api(request):
         pdf.line(10, pdf.get_y(), 200, pdf.get_y())
         pdf.ln(4)
         
+        dsa_pct = request.GET.get('dsa', '0')
+        os_pct = request.GET.get('os', '0')
+        dbms_pct = request.GET.get('dbms', '0')
+        cn_pct = request.GET.get('cn', '0')
+
         pdf.set_font("Helvetica", "", 12)
         pdf.cell(100, 8, "Data Structures & Algorithms:")
         pdf.set_text_color(16, 185, 129)
-        pdf.cell(90, 8, "85% Completed", ln=True)
+        pdf.cell(90, 8, f"{dsa_pct}% Completed", ln=True)
         
         pdf.set_text_color(30, 41, 59)
         pdf.cell(100, 8, "Operating Systems:")
         pdf.set_text_color(59, 130, 246)
-        pdf.cell(90, 8, "60% Completed", ln=True)
+        pdf.cell(90, 8, f"{os_pct}% Completed", ln=True)
         
         pdf.set_text_color(30, 41, 59)
         pdf.cell(100, 8, "Database Management:")
         pdf.set_text_color(245, 195, 92)
-        pdf.cell(90, 8, "40% Completed", ln=True)
+        pdf.cell(90, 8, f"{dbms_pct}% Completed", ln=True)
         
         pdf.set_text_color(30, 41, 59)
         pdf.cell(100, 8, "Computer Networks:")
         pdf.set_text_color(139, 92, 246)
-        pdf.cell(90, 8, "25% Completed", ln=True)
+        pdf.cell(90, 8, f"{cn_pct}% Completed", ln=True)
 
         response = HttpResponse(pdf.output(dest='S').encode('latin1'), content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="complete_user_report.pdf"'

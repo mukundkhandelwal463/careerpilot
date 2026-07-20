@@ -49,6 +49,7 @@ const Dashboard = () => {
   // Track the number of times user has initiated mock interview for their best resume
   const [interviewCount, setInterviewCount] = useState(0);
   const [bestTestResult, setBestTestResult] = useState(null);
+  const [csProgress, setCsProgress] = useState({ dsa: 0, os: 0, dbms: 0, cn: 0 });
 
   const todayStr = getLocalDateString(new Date());
   const todayTasks = scheduledTasks[todayStr] || [];
@@ -103,6 +104,69 @@ const Dashboard = () => {
     
     const savedCount = localStorage.getItem(`best_resume_interview_count_${email}`);
     setInterviewCount(savedCount ? parseInt(savedCount, 10) : 0);
+
+    // Dynamic CS Special Course Progress calculation
+    try {
+      // 1. DSA Sheet Progress
+      let dsaDone = 0;
+      const dsaRaw = localStorage.getItem(`dsa_sheet_progress_${email}`);
+      if (dsaRaw) {
+        const parsed = JSON.parse(dsaRaw);
+        dsaDone = Object.values(parsed).filter(Boolean).length;
+      }
+      const dsaPct = Math.min(100, Math.round((dsaDone / 260) * 100));
+
+      // 2. OS Progress
+      let osDone = 0;
+      const osRaw = localStorage.getItem(`os_tracker_progress_${email}`);
+      if (osRaw) {
+        const parsed = JSON.parse(osRaw);
+        osDone += Object.values(parsed).filter(Boolean).length;
+      }
+      const osTheoryRaw = localStorage.getItem('completed_os_concepts');
+      if (osTheoryRaw) {
+        const parsed = JSON.parse(osTheoryRaw);
+        if (Array.isArray(parsed)) osDone += parsed.length;
+      }
+      const osPct = Math.min(100, Math.round((osDone / 25) * 100));
+
+      // 3. DBMS Progress
+      let dbmsDone = 0;
+      const dbmsRaw = localStorage.getItem(`dbms_tracker_progress_${email}`);
+      if (dbmsRaw) {
+        const parsed = JSON.parse(dbmsRaw);
+        dbmsDone += Object.values(parsed).filter(Boolean).length;
+      }
+      const dbmsTheoryRaw = localStorage.getItem('completed_dbms_concepts');
+      if (dbmsTheoryRaw) {
+        const parsed = JSON.parse(dbmsTheoryRaw);
+        if (Array.isArray(parsed)) dbmsDone += parsed.length;
+      }
+      const dbmsPct = Math.min(100, Math.round((dbmsDone / 25) * 100));
+
+      // 4. CN Progress
+      let cnDone = 0;
+      const cnRaw = localStorage.getItem(`cn_tracker_progress_${email}`);
+      if (cnRaw) {
+        const parsed = JSON.parse(cnRaw);
+        cnDone += Object.values(parsed).filter(Boolean).length;
+      }
+      const cnTheoryRaw = localStorage.getItem('completed_cn_concepts');
+      if (cnTheoryRaw) {
+        const parsed = JSON.parse(cnTheoryRaw);
+        if (Array.isArray(parsed)) cnDone += parsed.length;
+      }
+      const cnPct = Math.min(100, Math.round((cnDone / 25) * 100));
+
+      setCsProgress({
+        dsa: dsaPct,
+        os: osPct,
+        dbms: dbmsPct,
+        cn: cnPct
+      });
+    } catch (err) {
+      console.error("Error calculating CS course progress:", err);
+    }
 
     const fetchResumes = async () => {
       try {
@@ -432,7 +496,7 @@ const Dashboard = () => {
                 <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, display: 'block' }}>Download your comprehensive profile & mock performance summary</span>
               </div>
               <button
-                onClick={() => window.open(`/api/results/download-complete-report?id=${user.email}`, '_blank')}
+                onClick={() => window.open(`/api/results/download-complete-report?id=${user.email}&dsa=${csProgress.dsa}&os=${csProgress.os}&dbms=${csProgress.dbms}&cn=${csProgress.cn}`, '_blank')}
                 style={{
                   background: '#1c2427',
                   color: '#ffffff',
@@ -683,10 +747,10 @@ const Dashboard = () => {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {[
-                  { title: "Data Structures & Algorithms", progress: 85, color: "#10b981" },
-                  { title: "Operating Systems", progress: 60, color: "#3b82f6" },
-                  { title: "Database Management", progress: 40, color: "#f5c35c" },
-                  { title: "Computer Networks", progress: 25, color: "#8b5cf6" }
+                  { title: "Data Structures & Algorithms", progress: csProgress.dsa, color: "#10b981" },
+                  { title: "Operating Systems", progress: csProgress.os, color: "#3b82f6" },
+                  { title: "Database Management", progress: csProgress.dbms, color: "#f5c35c" },
+                  { title: "Computer Networks", progress: csProgress.cn, color: "#8b5cf6" }
                 ].map((course, idx) => (
                   <div key={idx}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
