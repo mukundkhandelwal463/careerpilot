@@ -2344,7 +2344,7 @@ def download_complete_report_api(request):
             return HttpResponse("Unauthorized", status=401)
 
         from fpdf import FPDF
-        from api.models import MockTestAttempt, Resume
+        from api.models import MockTestAttempt, Resume, MockInterview, CareerMap
         import os
         from django.conf import settings
 
@@ -2352,105 +2352,155 @@ def download_complete_report_api(request):
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
 
+        # 1. HEADER & BRANDING: CAREER PILOT
         pdf.set_fill_color(28, 36, 39)
-        pdf.rect(0, 0, 210, 45, 'F')
+        pdf.rect(0, 0, 210, 48, 'F')
         
         logo_path = os.path.join(settings.BASE_DIR, "..", "client", "public", "logo.png")
         if os.path.exists(logo_path):
-            pdf.image(logo_path, x=10, y=10, w=25)
+            pdf.image(logo_path, x=10, y=8, w=22)
 
-        full_name_clean = str(getattr(user, 'full_name', '') or user.email).encode('latin-1', 'replace').decode('latin-1')
-        email_clean = str(user.email).encode('latin-1', 'replace').decode('latin-1')
+        pdf.set_text_color(245, 195, 92)
+        pdf.set_font("Helvetica", "B", 22)
+        pdf.cell(0, 10, "CAREER PILOT", ln=True, align='C')
 
         pdf.set_text_color(255, 255, 255)
-        pdf.set_font("Helvetica", "B", 20)
-        pdf.cell(0, 15, "Complete Profile & Progress Report", ln=True, align='C')
-        pdf.set_font("Helvetica", "", 11)
-        pdf.cell(0, 10, f"Candidate: {full_name_clean} ({email_clean})", ln=True, align='C')
-        pdf.ln(15)
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 8, "Complete Profile & Career Evaluation Report", ln=True, align='C')
+        pdf.set_font("Helvetica", "I", 10)
+        pdf.cell(0, 6, "Automated Comprehensive Assessment Summary", ln=True, align='C')
+        pdf.ln(12)
 
-        pdf.set_text_color(30, 41, 59)
-        pdf.set_font("Helvetica", "B", 16)
-        pdf.cell(0, 10, "1. ATS & Resume Alignment", ln=True)
+        # 2. USER DETAILS
+        full_name_clean = str(getattr(user, 'full_name', '') or user.email).encode('latin-1', 'replace').decode('latin-1')
+        email_clean = str(user.email).encode('latin-1', 'replace').decode('latin-1')
+        mobile_clean = str(getattr(user, 'mobile', '') or 'N/A').encode('latin-1', 'replace').decode('latin-1')
+
+        pdf.set_text_color(28, 36, 39)
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 8, "1. Candidate Details", ln=True)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(4)
+
+        pdf.set_font("Helvetica", "", 11)
+        pdf.cell(95, 7, f"Full Name: {full_name_clean}")
+        pdf.cell(95, 7, f"Email: {email_clean}", ln=True)
+        pdf.cell(95, 7, f"Phone / Mobile: {mobile_clean}", ln=True)
+        pdf.ln(8)
+
+        # 3. CAREER ROADMAP & TARGET ROLE
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 8, "2. Target Role & Career Roadmap", ln=True)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(4)
+
+        cmap = CareerMap.objects.filter(user=user).first()
+        target_role_str = cmap.target_role if (cmap and cmap.target_role) else "Software Engineer"
+        target_role_clean = str(target_role_str).encode('latin-1', 'replace').decode('latin-1')
+
+        pdf.set_font("Helvetica", "", 11)
+        pdf.cell(0, 7, f"Target Position / Domain: {target_role_clean}", ln=True)
+        pdf.cell(0, 7, "Career Roadmap Status: Active Structured Path Set", ln=True)
+        pdf.ln(8)
+
+        # 4. BEST ATS SCORE & RESUME ALIGNMENT
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 8, "3. Best ATS Score & Resume Match", ln=True)
         pdf.line(10, pdf.get_y(), 200, pdf.get_y())
         pdf.ln(4)
 
         best_resume = Resume.objects.filter(user=user).order_by('-ats_score').first()
         if best_resume:
-            title_clean = str(best_resume.title or 'Resume').encode('latin-1', 'replace').decode('latin-1')
+            title_clean = str(best_resume.title or 'Uploaded Resume').encode('latin-1', 'replace').decode('latin-1')
             ats_val = int(best_resume.ats_score) if best_resume.ats_score is not None else 0
-            pdf.set_font("Helvetica", "", 12)
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.set_text_color(16, 185, 129)
             pdf.cell(0, 8, f"Highest ATS Match Score: {ats_val}%", ln=True)
-            pdf.cell(0, 8, f"Target Role Analyzed: {title_clean}", ln=True)
+            pdf.set_text_color(28, 36, 39)
+            pdf.set_font("Helvetica", "", 11)
+            pdf.cell(0, 7, f"Analyzed Resume Title: {title_clean}", ln=True)
         else:
-            pdf.set_font("Helvetica", "", 12)
-            pdf.cell(0, 8, "No resumes analyzed yet.", ln=True)
+            pdf.set_font("Helvetica", "", 11)
+            pdf.cell(0, 7, "No resumes analyzed yet.", ln=True)
         
-        pdf.ln(10)
+        pdf.ln(8)
 
-        pdf.set_font("Helvetica", "B", 16)
-        pdf.cell(0, 10, "2. Best Mock Test Performance", ln=True)
+        # 5. PREVIOUS MOCK INTERVIEW RESULT
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 8, "4. Mock Voice Interview Result", ln=True)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(4)
+
+        best_interview = MockInterview.objects.filter(user=user).order_by('-score', '-id').first()
+        if best_interview and best_interview.score is not None:
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.set_text_color(245, 195, 92)
+            pdf.cell(0, 8, f"Latest Mock Interview Score: {int(best_interview.score)}%", ln=True)
+            pdf.set_text_color(28, 36, 39)
+            pdf.set_font("Helvetica", "", 10)
+            feedback_text = str(best_interview.feedback or "Voice mock interview attempt completed.").encode('latin-1', 'replace').decode('latin-1')
+            pdf.multi_cell(0, 5, f"Feedback / Summary: {feedback_text[:250]}...")
+        else:
+            pdf.set_font("Helvetica", "", 11)
+            pdf.cell(0, 7, "No mock interviews recorded yet.", ln=True)
+
+        pdf.ln(8)
+
+        # 6. FULL TIME TEST RESULTS
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 8, "5. Full-Time Mock Assessment Results", ln=True)
         pdf.line(10, pdf.get_y(), 200, pdf.get_y())
         pdf.ln(4)
 
         best_test = MockTestAttempt.objects.filter(user=user).order_by('-score').first()
         if best_test:
-            pdf.set_font("Helvetica", "B", 24)
+            pdf.set_font("Helvetica", "B", 16)
             pdf.set_text_color(16, 185, 129)
-            pdf.cell(0, 12, f"Score: {best_test.score} / {best_test.max_score}", ln=True, align='C')
-            pdf.ln(5)
+            pdf.cell(0, 10, f"Total Score: {best_test.score} / {best_test.max_score}", ln=True)
+            pdf.ln(2)
             
-            pdf.set_text_color(30, 41, 59)
-            pdf.set_font("Helvetica", "B", 12)
-            pdf.cell(100, 8, "Section", border=1)
-            pdf.cell(90, 8, "Marks Obtained", border=1, ln=True)
+            pdf.set_text_color(28, 36, 39)
+            pdf.set_font("Helvetica", "B", 11)
+            pdf.cell(100, 7, "Section", border=1)
+            pdf.cell(90, 7, "Marks Obtained", border=1, ln=True)
             
-            pdf.set_font("Helvetica", "", 11)
-            pdf.cell(100, 8, "Technical Core MCQs", border=1)
-            pdf.cell(90, 8, f"{best_test.technical_score} / 90.0", border=1, ln=True)
-            pdf.cell(100, 8, "Verbal Reasoning", border=1)
-            pdf.cell(90, 8, f"{best_test.verbal_score} / 15.0", border=1, ln=True)
-            pdf.cell(100, 8, "Aptitude", border=1)
-            pdf.cell(90, 8, f"{best_test.aptitude_score} / 15.0", border=1, ln=True)
-            pdf.cell(100, 8, "Coding (Easy)", border=1)
-            pdf.cell(90, 8, f"{best_test.coding_easy_score} / 30.0", border=1, ln=True)
-            pdf.cell(100, 8, "Coding (Hard)", border=1)
-            pdf.cell(90, 8, f"{best_test.coding_hard_score} / 50.0", border=1, ln=True)
+            pdf.set_font("Helvetica", "", 10)
+            pdf.cell(100, 7, "Technical Core MCQs", border=1)
+            pdf.cell(90, 7, f"{best_test.technical_score} / 90.0", border=1, ln=True)
+            pdf.cell(100, 7, "Verbal Reasoning", border=1)
+            pdf.cell(90, 7, f"{best_test.verbal_score} / 15.0", border=1, ln=True)
+            pdf.cell(100, 7, "Aptitude", border=1)
+            pdf.cell(90, 7, f"{best_test.aptitude_score} / 15.0", border=1, ln=True)
+            pdf.cell(100, 7, "Coding (Easy)", border=1)
+            pdf.cell(90, 7, f"{best_test.coding_easy_score} / 30.0", border=1, ln=True)
+            pdf.cell(100, 7, "Coding (Hard)", border=1)
+            pdf.cell(90, 7, f"{best_test.coding_hard_score} / 50.0", border=1, ln=True)
         else:
-            pdf.set_font("Helvetica", "", 12)
-            pdf.cell(0, 8, "No mock tests completed yet.", ln=True)
+            pdf.set_font("Helvetica", "", 11)
+            pdf.cell(0, 7, "No full-time mock tests completed yet.", ln=True)
 
-        pdf.ln(10)
+        pdf.ln(8)
 
-        pdf.set_font("Helvetica", "B", 16)
-        pdf.cell(0, 10, "3. Computer Science Special Progress", ln=True)
+        # 7. ALL CS SPECIAL COURSE PROGRESS (DSA, OOPs, CN, OS, DBMS, System Design)
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 8, "6. CS Special Course Subject Progress", ln=True)
         pdf.line(10, pdf.get_y(), 200, pdf.get_y())
         pdf.ln(4)
         
         dsa_pct = request.GET.get('dsa', '0')
+        oops_pct = request.GET.get('oops', '0')
+        cn_pct = request.GET.get('cn', '0')
         os_pct = request.GET.get('os', '0')
         dbms_pct = request.GET.get('dbms', '0')
-        cn_pct = request.GET.get('cn', '0')
+        sys_pct = request.GET.get('sys', '0')
 
-        pdf.set_font("Helvetica", "", 12)
-        pdf.cell(100, 8, "Data Structures & Algorithms:")
-        pdf.set_text_color(16, 185, 129)
-        pdf.cell(90, 8, f"{dsa_pct}% Completed", ln=True)
-        
-        pdf.set_text_color(30, 41, 59)
-        pdf.cell(100, 8, "Operating Systems:")
-        pdf.set_text_color(59, 130, 246)
-        pdf.cell(90, 8, f"{os_pct}% Completed", ln=True)
-        
-        pdf.set_text_color(30, 41, 59)
-        pdf.cell(100, 8, "Database Management:")
-        pdf.set_text_color(245, 195, 92)
-        pdf.cell(90, 8, f"{dbms_pct}% Completed", ln=True)
-        
-        pdf.set_text_color(30, 41, 59)
-        pdf.cell(100, 8, "Computer Networks:")
-        pdf.set_text_color(139, 92, 246)
-        pdf.cell(90, 8, f"{cn_pct}% Completed", ln=True)
+        pdf.set_font("Helvetica", "", 11)
+        pdf.cell(95, 7, f"Data Structures & Algorithms: {dsa_pct}%")
+        pdf.cell(95, 7, f"Object-Oriented Programming (OOPs): {oops_pct}%", ln=True)
+        pdf.cell(95, 7, f"Computer Networks (CN): {cn_pct}%")
+        pdf.cell(95, 7, f"Operating Systems (OS): {os_pct}%", ln=True)
+        pdf.cell(95, 7, f"Database Management (DBMS): {dbms_pct}%")
+        pdf.cell(95, 7, f"System Design: {sys_pct}%", ln=True)
 
         pdf_output = pdf.output(dest='S')
         if isinstance(pdf_output, str):
@@ -2459,7 +2509,7 @@ def download_complete_report_api(request):
             pdf_bytes = bytes(pdf_output)
 
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="complete_user_report.pdf"'
+        response['Content-Disposition'] = 'attachment; filename="CareerPilot_Complete_Evaluation_Report.pdf"'
         return response
 
     except Exception as e:

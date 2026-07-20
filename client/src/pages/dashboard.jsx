@@ -151,18 +151,41 @@ const Dashboard = () => {
         const parsed = JSON.parse(cnRaw);
         cnDone += Object.values(parsed).filter(Boolean).length;
       }
-      const cnTheoryRaw = localStorage.getItem('completed_cn_concepts');
-      if (cnTheoryRaw) {
-        const parsed = JSON.parse(cnTheoryRaw);
-        if (Array.isArray(parsed)) cnDone += parsed.length;
+      // 5. OOPs Progress
+      let oopsDone = 0;
+      const oopsRaw = localStorage.getItem(`oops_tracker_progress_${email}`);
+      if (oopsRaw) {
+        const parsed = JSON.parse(oopsRaw);
+        oopsDone += Object.values(parsed).filter(Boolean).length;
       }
-      const cnPct = Math.min(100, Math.round((cnDone / 25) * 100));
+      const oopsTheoryRaw = localStorage.getItem('completed_oops_concepts');
+      if (oopsTheoryRaw) {
+        const parsed = JSON.parse(oopsTheoryRaw);
+        if (Array.isArray(parsed)) oopsDone += parsed.length;
+      }
+      const oopsPct = Math.min(100, Math.round((oopsDone / 25) * 100));
+
+      // 6. System Design Progress
+      let sysDone = 0;
+      const sysRaw = localStorage.getItem(`sys_tracker_progress_${email}`);
+      if (sysRaw) {
+        const parsed = JSON.parse(sysRaw);
+        sysDone += Object.values(parsed).filter(Boolean).length;
+      }
+      const sysTheoryRaw = localStorage.getItem('completed_sys_concepts');
+      if (sysTheoryRaw) {
+        const parsed = JSON.parse(sysTheoryRaw);
+        if (Array.isArray(parsed)) sysDone += parsed.length;
+      }
+      const sysPct = Math.min(100, Math.round((sysDone / 25) * 100));
 
       setCsProgress({
         dsa: dsaPct,
+        oops: oopsPct,
+        cn: cnPct,
         os: osPct,
         dbms: dbmsPct,
-        cn: cnPct
+        sys: sysPct
       });
     } catch (err) {
       console.error("Error calculating CS course progress:", err);
@@ -496,7 +519,7 @@ const Dashboard = () => {
                 <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, display: 'block' }}>Download your comprehensive profile & mock performance summary</span>
               </div>
               <button
-                onClick={() => window.open(`/api/results/download-complete-report?id=${user.email}&dsa=${csProgress.dsa}&os=${csProgress.os}&dbms=${csProgress.dbms}&cn=${csProgress.cn}`, '_blank')}
+                onClick={() => window.open(`/api/results/download-complete-report?id=${user.email}&dsa=${csProgress.dsa}&oops=${csProgress.oops}&cn=${csProgress.cn}&os=${csProgress.os}&dbms=${csProgress.dbms}&sys=${csProgress.sys}`, '_blank')}
                 style={{
                   background: '#1c2427',
                   color: '#ffffff',
