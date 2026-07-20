@@ -3,15 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  TrendingUp, 
-  Briefcase, 
-  Award, 
-  Camera, 
-  Compass, 
-  CheckSquare, 
+import {
+  ChevronDown,
+  ChevronUp,
+  TrendingUp,
+  Briefcase,
+  Award,
+  Camera,
+  Compass,
+  CheckSquare,
   User as UserIcon,
   Activity,
   FileText,
@@ -57,7 +57,7 @@ const Dashboard = () => {
   const toggleTodayTask = (taskId) => {
     const updated = { ...scheduledTasks };
     if (updated[todayStr] && user) {
-      updated[todayStr] = updated[todayStr].map(t => 
+      updated[todayStr] = updated[todayStr].map(t =>
         t.id === taskId ? { ...t, completed: !t.completed } : t
       );
       setScheduledTasks(updated);
@@ -66,7 +66,7 @@ const Dashboard = () => {
   };
 
   const todayCompletedCount = todayTasks.filter(t => t.completed).length;
-  const todayProgressPercent = todayTasks.length > 0 
+  const todayProgressPercent = todayTasks.length > 0
     ? Math.round((todayCompletedCount / todayTasks.length) * 100)
     : 0;
 
@@ -93,15 +93,15 @@ const Dashboard = () => {
 
     const email = user.email;
     setProfileImg(localStorage.getItem(`candidate_profile_img_${email}`) || "/candidate_profile.png");
-    
+
     const savedTasks = localStorage.getItem(`scheduled_tasks_${email}`);
     setScheduledTasks(savedTasks ? JSON.parse(savedTasks) : {});
-    
+
     const savedRoadmap = localStorage.getItem(`active_career_roadmap_${email}`);
     setCareerRoadmap(savedRoadmap ? JSON.parse(savedRoadmap) : null);
-    
+
     setTargetRole(localStorage.getItem(`active_target_role_${email}`) || '');
-    
+
     const savedCount = localStorage.getItem(`best_resume_interview_count_${email}`);
     setInterviewCount(savedCount ? parseInt(savedCount, 10) : 0);
 
@@ -288,7 +288,7 @@ const Dashboard = () => {
   const targetPositionsCount = resumes.length > 0 ? 203 : 0;
 
   // Find the highest scoring resume item
-  const bestResumeItem = resumes.length > 0 
+  const bestResumeItem = resumes.length > 0
     ? resumes.reduce((prev, current) => (prev.ats_score > current.ats_score ? prev : current), resumes[0])
     : null;
 
@@ -302,10 +302,10 @@ const Dashboard = () => {
     try {
       const parsed = JSON.parse(bestResumeItem.resume_json || '{}');
       if (parsed.original_file_b64) {
-        const mime = parsed.original_file_name?.endsWith('.pdf') 
-          ? 'application/pdf' 
+        const mime = parsed.original_file_name?.endsWith('.pdf')
+          ? 'application/pdf'
           : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-        
+
         const linkSource = `data:${mime};base64,${parsed.original_file_b64}`;
         const downloadLink = document.createElement("a");
         downloadLink.href = linkSource;
@@ -385,7 +385,7 @@ const Dashboard = () => {
       <Navbar />
 
       <main className="page" style={{ marginTop: '48px' }}>
-        
+
         {/* TOP ROW HEADER: TITLE + COMPACT STATS */}
         <div style={{
           display: 'flex',
@@ -448,12 +448,12 @@ const Dashboard = () => {
               position: 'relative'
             }}>
               {/* Photo area with hover trigger */}
-              <div 
+              <div
                 onClick={() => fileInputRef.current.click()}
-                style={{ 
-                  position: 'relative', 
+                style={{
+                  position: 'relative',
                   height: profileImg && profileImg !== "/candidate_profile.png" ? '240px' : '150px',
-                  cursor: 'pointer', 
+                  cursor: 'pointer',
                   overflow: 'hidden',
                   display: 'flex',
                   alignItems: 'center',
@@ -464,9 +464,9 @@ const Dashboard = () => {
                 className="group"
               >
                 {profileImg && profileImg !== "/candidate_profile.png" ? (
-                  <img 
-                    src={profileImg} 
-                    alt="Profile photo" 
+                  <img
+                    src={profileImg}
+                    alt="Profile photo"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'filter 0.3s' }}
                   />
                 ) : (
@@ -494,7 +494,7 @@ const Dashboard = () => {
                   opacity: 0,
                   transition: 'opacity 0.3s'
                 }}
-                className="hover-overlay"
+                  className="hover-overlay"
                 >
                   <Camera className="size-6" />
                   <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Change Photo</span>
@@ -502,11 +502,11 @@ const Dashboard = () => {
               </div>
 
               {/* Hidden file input */}
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleProfileImageChange} 
-                accept="image/*" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleProfileImageChange}
+                accept="image/*"
                 style={{ display: 'none' }}
               />
 
@@ -544,7 +544,7 @@ const Dashboard = () => {
             }}>
               <div>
                 <strong style={{ fontSize: '0.95rem', color: '#1c2427', display: 'block', marginBottom: '4px' }}>Complete Evaluation Report</strong>
-                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, display: 'block' }}>Complete Evaluation Report</span>
+
               </div>
               <button
                 onClick={handleDownloadPdfReport}
@@ -564,14 +564,14 @@ const Dashboard = () => {
                   boxShadow: '0 4px 12px rgba(28,36,39,0.1)'
                 }}
               >
-                <Download className="size-5" /> Download PDF Report
+                <Download className="size-5" /> Download PDF
               </button>
             </div>
           </div>
 
           {/* 2. MIDDLE COLUMN: Scorecards, Action Center, Best Test Result */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            
+
             {/* 3 Scorecard Radials Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
               {/* Card 1: Best ATS Match */}
@@ -731,7 +731,7 @@ const Dashboard = () => {
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1c2427', margin: 0 }}>Best Mock Test Result</h2>
                 <Award className="size-6 text-emerald-500" />
               </div>
-              
+
               {bestTestResult ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div style={{ textAlign: 'center', marginBottom: '8px' }}>
@@ -740,7 +740,7 @@ const Dashboard = () => {
                     </span>
                     <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Total Score Performance</p>
                   </div>
-                  
+
                   <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     {[
                       { name: "Technical MCQs", score: bestTestResult.technical_score, max: 90, color: "#10b981" },
@@ -777,7 +777,7 @@ const Dashboard = () => {
 
           {/* 3. RIGHT COLUMN: CS Special Course & Preparation Tasks */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            
+
             {/* Computer Science Special Progress */}
             <div style={{
               background: '#1c2427',
@@ -787,7 +787,7 @@ const Dashboard = () => {
               boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>CS Special Complete Evaluation Report</h3>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>CSE Special</h3>
                 <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '999px', fontWeight: 700 }}>
                   Active
                 </span>
@@ -795,11 +795,11 @@ const Dashboard = () => {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {[
-                  { title: "dsa", progress: csProgress.dsa || 0, color: "#10b981" },
-                  { title: "oops", progress: csProgress.oops || 0, color: "#ec4899" },
-                  { title: "Operating Systems (OS)", progress: csProgress.os || 0, color: "#3b82f6" },
-                  { title: "Database Management (DBMS)", progress: csProgress.dbms || 0, color: "#f5c35c" },
-                  { title: "Computer Networks (CN)", progress: csProgress.cn || 0, color: "#8b5cf6" },
+                  { title: "DSA", progress: csProgress.dsa || 0, color: "#10b981" },
+                  { title: "OOPs", progress: csProgress.oops || 0, color: "#ec4899" },
+                  { title: "Operating System", progress: csProgress.os || 0, color: "#3b82f6" },
+                  { title: "Database Management", progress: csProgress.dbms || 0, color: "#f5c35c" },
+                  { title: "Computer Networks", progress: csProgress.cn || 0, color: "#8b5cf6" },
                   { title: "System Design", progress: csProgress.sys || 0, color: "#06b6d4" }
                 ].map((course, idx) => (
                   <div key={idx}>

@@ -2347,165 +2347,221 @@ def download_complete_report_api(request):
         from api.models import MockTestAttempt, Resume, MockInterview, CareerMap
         import os
         from django.conf import settings
+        from datetime import datetime
 
-        pdf = FPDF()
+        class ReportPDF(FPDF):
+            def footer(self):
+                self.set_y(-12)
+                self.set_font("Helvetica", "I", 8)
+                self.set_text_color(148, 163, 184)
+                self.cell(0, 10, f"CareerPilot Comprehensive Report  |  Page {self.page_no()}", align='C')
+
+        pdf = ReportPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
 
-        # 1. HEADER & BRANDING: CAREER PILOT
+        # 1. HEADER & BRANDING BARS
         pdf.set_fill_color(28, 36, 39)
-        pdf.rect(0, 0, 210, 48, 'F')
+        pdf.rect(0, 0, 210, 42, 'F')
         
         logo_path = os.path.join(settings.BASE_DIR, "..", "client", "public", "logo.png")
         if os.path.exists(logo_path):
-            pdf.image(logo_path, x=10, y=8, w=22)
+            pdf.image(logo_path, x=12, y=6, w=22)
 
         pdf.set_text_color(245, 195, 92)
-        pdf.set_font("Helvetica", "B", 22)
-        pdf.cell(0, 10, "CAREER PILOT", ln=True, align='C')
+        pdf.set_font("Helvetica", "B", 20)
+        pdf.set_xy(40, 8)
+        pdf.cell(0, 8, "CAREER PILOT", ln=True)
 
         pdf.set_text_color(255, 255, 255)
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 8, "Complete Profile & Career Evaluation Report", ln=True, align='C')
-        pdf.set_font("Helvetica", "I", 10)
-        pdf.cell(0, 6, "Automated Comprehensive Assessment Summary", ln=True, align='C')
-        pdf.ln(12)
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.set_xy(40, 18)
+        pdf.cell(0, 6, "Comprehensive Profile & Career Evaluation Report", ln=True)
+        pdf.set_font("Helvetica", "I", 9)
+        pdf.set_text_color(203, 213, 225)
+        pdf.set_xy(40, 25)
+        pdf.cell(0, 5, f"Generated: {datetime.now().strftime('%B %d, %Y')}", ln=True)
 
-        # 2. USER DETAILS
+        pdf.set_y(48)
+
+        # Helper to draw Section Header
+        def draw_section_header(title):
+            pdf.set_fill_color(248, 250, 252)
+            pdf.rect(10, pdf.get_y(), 190, 8, 'F')
+            pdf.set_font("Helvetica", "B", 11)
+            pdf.set_text_color(28, 36, 39)
+            pdf.cell(0, 8, f"  {title}", ln=True)
+            pdf.set_draw_color(226, 232, 240)
+            pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+            pdf.ln(3)
+
+        # Helper to draw Progress Bar Graph
+        def draw_progress_bar(x, y, w, h, pct, color_rgb=(16, 185, 129)):
+            pdf.set_fill_color(226, 232, 240)
+            pdf.rect(x, y, w, h, 'F')
+            fill_w = max(0, min(w, (float(pct) / 100.0) * w))
+            if fill_w > 0:
+                pdf.set_fill_color(*color_rgb)
+                pdf.rect(x, y, fill_w, h, 'F')
+
+        # 1. CANDIDATE DETAILS
         full_name_clean = str(getattr(user, 'full_name', '') or user.email).encode('latin-1', 'replace').decode('latin-1')
         email_clean = str(user.email).encode('latin-1', 'replace').decode('latin-1')
         mobile_clean = str(getattr(user, 'mobile', '') or 'N/A').encode('latin-1', 'replace').decode('latin-1')
 
-        pdf.set_text_color(28, 36, 39)
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 8, "1. Candidate Details", ln=True)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(4)
+        draw_section_header("1. Candidate Profile Details")
 
-        pdf.set_font("Helvetica", "", 11)
-        pdf.cell(95, 7, f"Full Name: {full_name_clean}")
-        pdf.cell(95, 7, f"Email: {email_clean}", ln=True)
-        pdf.cell(95, 7, f"Phone / Mobile: {mobile_clean}", ln=True)
-        pdf.ln(8)
+        pdf.set_font("Helvetica", "", 10)
+        pdf.set_text_color(71, 85, 105)
+        pdf.cell(95, 6, f"Full Name: {full_name_clean}")
+        pdf.cell(95, 6, f"Email: {email_clean}", ln=True)
+        pdf.cell(95, 6, f"Phone / Mobile: {mobile_clean}", ln=True)
+        pdf.ln(5)
 
-        # 3. CAREER ROADMAP & TARGET ROLE
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 8, "2. Target Role & Career Roadmap", ln=True)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(4)
+        # 2. TARGET ROLE & CAREER ROADMAP
+        draw_section_header("2. Target Role & Career Roadmap")
 
         cmap = CareerMap.objects.filter(user=user).first()
         target_role_str = cmap.target_role if (cmap and cmap.target_role) else "Software Engineer"
         target_role_clean = str(target_role_str).encode('latin-1', 'replace').decode('latin-1')
 
-        pdf.set_font("Helvetica", "", 11)
-        pdf.cell(0, 7, f"Target Position / Domain: {target_role_clean}", ln=True)
-        pdf.cell(0, 7, "Career Roadmap Status: Active Structured Path Set", ln=True)
-        pdf.ln(8)
+        pdf.set_font("Helvetica", "", 10)
+        pdf.set_text_color(71, 85, 105)
+        pdf.cell(95, 6, f"Target Position / Domain: {target_role_clean}")
+        pdf.cell(95, 6, "Career Roadmap Status: Active Structured Path Set", ln=True)
+        pdf.ln(5)
 
-        # 4. BEST ATS SCORE & RESUME ALIGNMENT
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 8, "3. Best ATS Score & Resume Match", ln=True)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(4)
+        # 3. BEST ATS SCORE & RESUME MATCH
+        draw_section_header("3. Best ATS Score & Resume Match")
 
         best_resume = Resume.objects.filter(user=user).order_by('-ats_score').first()
         if best_resume:
             title_clean = str(best_resume.title or 'Uploaded Resume').encode('latin-1', 'replace').decode('latin-1')
             ats_val = int(best_resume.ats_score) if best_resume.ats_score is not None else 0
-            pdf.set_font("Helvetica", "B", 12)
-            pdf.set_text_color(16, 185, 129)
-            pdf.cell(0, 8, f"Highest ATS Match Score: {ats_val}%", ln=True)
-            pdf.set_text_color(28, 36, 39)
-            pdf.set_font("Helvetica", "", 11)
-            pdf.cell(0, 7, f"Analyzed Resume Title: {title_clean}", ln=True)
+            
+            pdf.set_font("Helvetica", "", 10)
+            pdf.set_text_color(71, 85, 105)
+            pdf.cell(70, 6, f"Analyzed Resume: {title_clean[:35]}")
+            pdf.cell(40, 6, f"ATS Match: {ats_val}%")
+            
+            cur_y = pdf.get_y() + 1
+            draw_progress_bar(125, cur_y, 65, 4, ats_val, (16, 185, 129))
+            pdf.ln(7)
         else:
-            pdf.set_font("Helvetica", "", 11)
-            pdf.cell(0, 7, "No resumes analyzed yet.", ln=True)
-        
-        pdf.ln(8)
+            pdf.set_font("Helvetica", "", 10)
+            pdf.set_text_color(148, 163, 184)
+            pdf.cell(0, 6, "No resumes analyzed yet.", ln=True)
+            pdf.ln(2)
 
-        # 5. PREVIOUS MOCK INTERVIEW RESULT
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 8, "4. Mock Voice Interview Result", ln=True)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(4)
+        pdf.ln(3)
+
+        # 4. MOCK VOICE INTERVIEW PERFORMANCE
+        draw_section_header("4. Mock Voice Interview Performance")
 
         best_interview = MockInterview.objects.filter(user=user).order_by('-score', '-id').first()
         if best_interview and best_interview.score is not None:
-            pdf.set_font("Helvetica", "B", 12)
-            pdf.set_text_color(245, 195, 92)
-            pdf.cell(0, 8, f"Latest Mock Interview Score: {int(best_interview.score)}%", ln=True)
-            pdf.set_text_color(28, 36, 39)
+            int_score = int(best_interview.score)
             pdf.set_font("Helvetica", "", 10)
+            pdf.set_text_color(71, 85, 105)
+            pdf.cell(60, 6, f"Latest Mock Interview Score: {int_score}%")
+            
+            cur_y = pdf.get_y() + 1
+            draw_progress_bar(80, cur_y, 65, 4, int_score, (245, 195, 92))
+            pdf.ln(7)
+
+            pdf.set_font("Helvetica", "I", 9)
+            pdf.set_text_color(100, 116, 139)
             feedback_text = str(best_interview.feedback or "Voice mock interview attempt completed.").encode('latin-1', 'replace').decode('latin-1')
-            pdf.multi_cell(0, 5, f"Feedback / Summary: {feedback_text[:250]}...")
+            pdf.multi_cell(0, 4.5, f"AI Feedback: {feedback_text[:220]}...")
+            pdf.ln(2)
         else:
-            pdf.set_font("Helvetica", "", 11)
-            pdf.cell(0, 7, "No mock interviews recorded yet.", ln=True)
+            pdf.set_font("Helvetica", "", 10)
+            pdf.set_text_color(148, 163, 184)
+            pdf.cell(0, 6, "No mock interviews recorded yet.", ln=True)
+            pdf.ln(2)
 
-        pdf.ln(8)
+        pdf.ln(3)
 
-        # 6. FULL TIME TEST RESULTS
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 8, "5. Full-Time Mock Assessment Results", ln=True)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(4)
+        # 5. FULL-TIME MOCK ASSESSMENT RESULTS
+        draw_section_header("5. Full-Time Mock Assessment Results")
 
         best_test = MockTestAttempt.objects.filter(user=user).order_by('-score').first()
         if best_test:
-            pdf.set_font("Helvetica", "B", 16)
+            total_pct = int((best_test.score / best_test.max_score) * 100) if best_test.max_score else 0
+            pdf.set_font("Helvetica", "B", 10)
             pdf.set_text_color(16, 185, 129)
-            pdf.cell(0, 10, f"Total Score: {best_test.score} / {best_test.max_score}", ln=True)
-            pdf.ln(2)
+            pdf.cell(60, 6, f"Total Score: {best_test.score} / {best_test.max_score} ({total_pct}%)")
             
-            pdf.set_text_color(28, 36, 39)
-            pdf.set_font("Helvetica", "B", 11)
-            pdf.cell(100, 7, "Section", border=1)
-            pdf.cell(90, 7, "Marks Obtained", border=1, ln=True)
-            
-            pdf.set_font("Helvetica", "", 10)
-            pdf.cell(100, 7, "Technical Core MCQs", border=1)
-            pdf.cell(90, 7, f"{best_test.technical_score} / 90.0", border=1, ln=True)
-            pdf.cell(100, 7, "Verbal Reasoning", border=1)
-            pdf.cell(90, 7, f"{best_test.verbal_score} / 15.0", border=1, ln=True)
-            pdf.cell(100, 7, "Aptitude", border=1)
-            pdf.cell(90, 7, f"{best_test.aptitude_score} / 15.0", border=1, ln=True)
-            pdf.cell(100, 7, "Coding (Easy)", border=1)
-            pdf.cell(90, 7, f"{best_test.coding_easy_score} / 30.0", border=1, ln=True)
-            pdf.cell(100, 7, "Coding (Hard)", border=1)
-            pdf.cell(90, 7, f"{best_test.coding_hard_score} / 50.0", border=1, ln=True)
+            cur_y = pdf.get_y() + 1
+            draw_progress_bar(80, cur_y, 65, 4, total_pct, (16, 185, 129))
+            pdf.ln(7)
+
+            sections = [
+                ("Technical Core MCQs", best_test.technical_score, 90.0, (16, 185, 129)),
+                ("Verbal Reasoning", best_test.verbal_score, 15.0, (59, 130, 246)),
+                ("Aptitude", best_test.aptitude_score, 15.0, (245, 195, 92)),
+                ("Coding (Easy)", best_test.coding_easy_score, 30.0, (139, 92, 246)),
+                ("Coding (Hard)", best_test.coding_hard_score, 50.0, (236, 72, 153))
+            ]
+
+            pdf.set_font("Helvetica", "", 9)
+            pdf.set_text_color(71, 85, 105)
+            for sec_name, score_val, max_val, color_rgb in sections:
+                sec_pct = int((score_val / max_val) * 100) if max_val else 0
+                pdf.cell(50, 5, f"{sec_name}")
+                pdf.cell(40, 5, f"{score_val} / {max_val} ({sec_pct}%)")
+                cur_y = pdf.get_y() + 0.5
+                draw_progress_bar(100, cur_y, 60, 3.5, sec_pct, color_rgb)
+                pdf.ln(5.5)
         else:
-            pdf.set_font("Helvetica", "", 11)
-            pdf.cell(0, 7, "No full-time mock tests completed yet.", ln=True)
+            pdf.set_font("Helvetica", "", 10)
+            pdf.set_text_color(148, 163, 184)
+            pdf.cell(0, 6, "No full-time mock tests completed yet.", ln=True)
+            pdf.ln(2)
 
-        pdf.ln(8)
+        pdf.ln(3)
 
-        # 7. ALL CS SPECIAL COURSE PROGRESS (DSA, OOPs, CN, OS, DBMS, System Design)
-        pdf.set_font("Helvetica", "B", 14)
-        pdf.cell(0, 8, "6. CS Special Course Subject Progress", ln=True)
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(4)
-        
+        # 6. CSE SPECIAL COMPLETE EVALUATION REPORT
+        draw_section_header("6. CSE Special Complete Evaluation Report")
+
         def clean_pct(val):
             if not val or val in ['undefined', 'NaN', 'null', 'None']:
                 return '0'
-            return val
+            try:
+                return str(int(float(val)))
+            except:
+                return '0'
 
-        dsa_pct = clean_pct(request.GET.get('dsa'))
-        oops_pct = clean_pct(request.GET.get('oops'))
-        cn_pct = clean_pct(request.GET.get('cn'))
-        os_pct = clean_pct(request.GET.get('os'))
-        dbms_pct = clean_pct(request.GET.get('dbms'))
-        sys_pct = clean_pct(request.GET.get('sys'))
+        cs_subjects = [
+            ("DSA", clean_pct(request.GET.get('dsa')), (16, 185, 129)),
+            ("OOPs", clean_pct(request.GET.get('oops')), (236, 72, 153)),
+            ("Operating System", clean_pct(request.GET.get('os')), (59, 130, 246)),
+            ("Database Management", clean_pct(request.GET.get('dbms')), (245, 195, 92)),
+            ("Computer Networks", clean_pct(request.GET.get('cn')), (139, 92, 246)),
+            ("System Design", clean_pct(request.GET.get('sys')), (6, 182, 212))
+        ]
 
-        pdf.set_font("Helvetica", "", 11)
-        pdf.cell(95, 7, f"dsa: {dsa_pct}%")
-        pdf.cell(95, 7, f"oops: {oops_pct}%", ln=True)
-        pdf.cell(95, 7, f"Computer Networks (CN): {cn_pct}%")
-        pdf.cell(95, 7, f"Operating Systems (OS): {os_pct}%", ln=True)
-        pdf.cell(95, 7, f"Database Management (DBMS): {dbms_pct}%")
-        pdf.cell(95, 7, f"System Design: {sys_pct}%", ln=True)
+        pdf.set_font("Helvetica", "", 9.5)
+        pdf.set_text_color(51, 65, 85)
+
+        for i in range(0, len(cs_subjects), 2):
+            subj1 = cs_subjects[i]
+            subj2 = cs_subjects[i+1] if i+1 < len(cs_subjects) else None
+
+            # Left column subject
+            pct1 = int(subj1[1])
+            pdf.cell(48, 6, f"{subj1[0]}: {pct1}%")
+            cur_y1 = pdf.get_y() + 1
+            draw_progress_bar(58, cur_y1, 38, 3.5, pct1, subj1[2])
+
+            if subj2:
+                pct2 = int(subj2[1])
+                pdf.set_x(105)
+                pdf.cell(50, 6, f"{subj2[0]}: {pct2}%")
+                cur_y2 = pdf.get_y() + 1
+                draw_progress_bar(155, cur_y2, 38, 3.5, pct2, subj2[2])
+
+            pdf.ln(7)
 
         pdf_output = pdf.output(dest='S')
         if isinstance(pdf_output, str):
