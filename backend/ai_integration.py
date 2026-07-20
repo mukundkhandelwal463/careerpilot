@@ -57,6 +57,29 @@ def _generate_with_timeout(model, prompt, timeout_sec=10, retries=1):
             raise last_error
 
 
+FALLBACK_API_KEY = "AQ.Ab8RN6LBGor_JPADgSRyO2EnCvx74IYDEmABEGaDbstwnAPhQw"
+
+def _generate_with_deepseek_fallback(prompt, timeout_sec=10):
+    import urllib.request
+    import json
+    url = "https://api.deepseek.com/chat/completions"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {FALLBACK_API_KEY}"
+    }
+    data = {
+        "model": "deepseek-chat",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.3
+    }
+    req = urllib.request.Request(url, headers=headers, data=json.dumps(data).encode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=timeout_sec) as response:
+            result = json.loads(response.read().decode("utf-8"))
+            return result["choices"][0]["message"]["content"]
+    except Exception as e:
+        raise RuntimeError(f"DeepSeek fallback failed: {e}")
+
 def _generate_with_model_fallback(prompt, timeout_sec=10):
     global _RESOLVED_GEMINI_MODELS
 
@@ -81,19 +104,34 @@ def _generate_with_model_fallback(prompt, timeout_sec=10):
             _RESOLVED_GEMINI_MODELS = list(GEMINI_MODEL_CANDIDATES)
 
     last_error = None
-    for model_name in _RESOLVED_GEMINI_MODELS:
-        try:
-            model = genai.GenerativeModel(model_name)
-            return _generate_with_timeout(model, prompt, timeout_sec=timeout_sec, retries=1)
-        except Exception as exc:
-            last_error = exc
-            err = str(exc).upper()
-            if "API_KEY_INVALID" in err:
-                raise
+    keys_to_try = [SYSTEM_API_KEY, FALLBACK_API_KEY]
+    
+    for current_key in keys_to_try:
+        if not current_key or current_key == "your_gemini_api_key_here":
             continue
+            
+        genai.configure(api_key=current_key)
+        
+        for model_name in _RESOLVED_GEMINI_MODELS:
+            try:
+                model = genai.GenerativeModel(model_name)
+                return _generate_with_timeout(model, prompt, timeout_sec=timeout_sec, retries=1)
+            except Exception as exc:
+                last_error = exc
+                err = str(exc).upper()
+                if "API_KEY_INVALID" in err or "429" in err or "QUOTA" in err:
+                    break  # Break inner loop to try next API key
+                continue  # Try next Gemini model
+
+    # If all Gemini models and keys fail, attempt DeepSeek API fallback
+    try:
+        return _generate_with_deepseek_fallback(prompt, timeout_sec=timeout_sec)
+    except Exception as e:
+        last_error = e
+
     if last_error:
         raise last_error
-    raise RuntimeError("No Gemini model candidates available.")
+    raise RuntimeError("No Gemini model candidates available and DeepSeek fallback failed.")
 
 
 def get_gemini_ats_feedback(resume_text, job_description, score):
