@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
+import { Search, MapPin, Briefcase, Calendar, Upload } from 'lucide-react';
 import '../css/style.css';
 
 const EMPLOYMENT_TYPES = [
@@ -263,15 +264,33 @@ const Jobs = () => {
             }}>
               <form onSubmit={handleSearch}>
                 {/* Search Bar */}
-                <div style={{ position: 'relative', marginBottom: '14px' }}>
+                <div style={{ position: 'relative', marginBottom: '14px', display: 'flex', alignItems: 'center' }}>
+                  <Search 
+                    style={{ 
+                      position: 'absolute', 
+                      left: '14px', 
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: '#94a3b8', 
+                      width: '18px', 
+                      height: '18px', 
+                      pointerEvents: 'none' 
+                    }} 
+                  />
                   <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search jobs..."
-                    style={{ ...inputStyle, paddingLeft: '42px', height: '48px' }}
+                    style={{ 
+                      ...inputStyle, 
+                      paddingLeft: '42px', 
+                      height: '48px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      lineHeight: 'normal'
+                    }}
                   />
-                  <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '1.1rem', opacity: 0.4 }}>🔍</span>
                 </div>
                 
                 <button
