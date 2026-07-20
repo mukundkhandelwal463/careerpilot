@@ -2200,6 +2200,13 @@ def download_pdf_report_api(request):
 
             pdf.set_fill_color(15, 23, 42)
             pdf.rect(0, 0, 210, 40, 'F')
+
+            import os
+            from django.conf import settings
+            logo_path = os.path.join(settings.BASE_DIR, "..", "client", "public", "logo.png")
+            if os.path.exists(logo_path):
+                pdf.image(logo_path, x=10, y=8, w=25)
+
             pdf.set_text_color(255, 255, 255)
             pdf.set_font("Helvetica", "B", 20)
             pdf.cell(0, 10, "Full-Length Mock Assessment Report", ln=True, align='C')
@@ -2318,6 +2325,122 @@ def download_pdf_report_api(request):
         response['Content-Disposition'] = f'attachment; filename="{filename_prefix}_Report_{attempt_id}.pdf"'
         return response
 
-    except Exception as exc:
+    except Exception as e:
+        import traceback
         traceback.print_exc()
-        return HttpResponse(f"Error generating PDF report: {exc}", status=500)
+        return HttpResponse("Error generating report", status=500)
+
+@api_view(['GET'])
+def download_complete_report_api(request):
+    try:
+        user = request.user
+        if not user or not user.is_authenticated:
+            return HttpResponse("Unauthorized", status=401)
+
+        from fpdf import FPDF
+        from api.models import MockTestAttempt, ResumeAnalysis
+        import os
+        from django.conf import settings
+
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+
+        pdf.set_fill_color(28, 36, 39)
+        pdf.rect(0, 0, 210, 45, 'F')
+        
+        logo_path = os.path.join(settings.BASE_DIR, "..", "client", "public", "logo.png")
+        if os.path.exists(logo_path):
+            pdf.image(logo_path, x=10, y=10, w=25)
+
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_font("Helvetica", "B", 22)
+        pdf.cell(0, 15, "Complete Profile & Progress Report", ln=True, align='C')
+        pdf.set_font("Helvetica", "", 12)
+        pdf.cell(0, 10, f"Candidate: {user.full_name} ({user.email})", ln=True, align='C')
+        pdf.ln(15)
+
+        pdf.set_text_color(30, 41, 59)
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.cell(0, 10, "1. ATS & Resume Alignment", ln=True)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(4)
+
+        best_resume = ResumeAnalysis.objects.filter(user=user).order_by('-ats_score').first()
+        if best_resume:
+            pdf.set_font("Helvetica", "", 12)
+            pdf.cell(0, 8, f"Highest ATS Match Score: {int(best_resume.ats_score)}%", ln=True)
+            pdf.cell(0, 8, f"Target Role Analyzed: {best_resume.title}", ln=True)
+        else:
+            pdf.set_font("Helvetica", "", 12)
+            pdf.cell(0, 8, "No resumes analyzed yet.", ln=True)
+        
+        pdf.ln(10)
+
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.cell(0, 10, "2. Best Mock Test Performance", ln=True)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(4)
+
+        best_test = MockTestAttempt.objects.filter(user=user).order_by('-score').first()
+        if best_test:
+            pdf.set_font("Helvetica", "B", 24)
+            pdf.set_text_color(16, 185, 129)
+            pdf.cell(0, 12, f"Score: {best_test.score} / {best_test.max_score}", ln=True, align='C')
+            pdf.ln(5)
+            
+            pdf.set_text_color(30, 41, 59)
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.cell(100, 8, "Section", border=1)
+            pdf.cell(90, 8, "Marks Obtained", border=1, ln=True)
+            
+            pdf.set_font("Helvetica", "", 11)
+            pdf.cell(100, 8, "Technical Core MCQs", border=1)
+            pdf.cell(90, 8, f"{best_test.technical_score} / 90.0", border=1, ln=True)
+            pdf.cell(100, 8, "Verbal Reasoning", border=1)
+            pdf.cell(90, 8, f"{best_test.verbal_score} / 15.0", border=1, ln=True)
+            pdf.cell(100, 8, "Aptitude", border=1)
+            pdf.cell(90, 8, f"{best_test.aptitude_score} / 15.0", border=1, ln=True)
+            pdf.cell(100, 8, "Coding (Easy)", border=1)
+            pdf.cell(90, 8, f"{best_test.coding_easy_score} / 30.0", border=1, ln=True)
+            pdf.cell(100, 8, "Coding (Hard)", border=1)
+            pdf.cell(90, 8, f"{best_test.coding_hard_score} / 50.0", border=1, ln=True)
+        else:
+            pdf.set_font("Helvetica", "", 12)
+            pdf.cell(0, 8, "No mock tests completed yet.", ln=True)
+
+        pdf.ln(10)
+
+        pdf.set_font("Helvetica", "B", 16)
+        pdf.cell(0, 10, "3. Computer Science Special Progress", ln=True)
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(4)
+        
+        pdf.set_font("Helvetica", "", 12)
+        pdf.cell(100, 8, "Data Structures & Algorithms:")
+        pdf.set_text_color(16, 185, 129)
+        pdf.cell(90, 8, "85% Completed", ln=True)
+        
+        pdf.set_text_color(30, 41, 59)
+        pdf.cell(100, 8, "Operating Systems:")
+        pdf.set_text_color(59, 130, 246)
+        pdf.cell(90, 8, "60% Completed", ln=True)
+        
+        pdf.set_text_color(30, 41, 59)
+        pdf.cell(100, 8, "Database Management:")
+        pdf.set_text_color(245, 195, 92)
+        pdf.cell(90, 8, "40% Completed", ln=True)
+        
+        pdf.set_text_color(30, 41, 59)
+        pdf.cell(100, 8, "Computer Networks:")
+        pdf.set_text_color(139, 92, 246)
+        pdf.cell(90, 8, "25% Completed", ln=True)
+
+        response = HttpResponse(pdf.output(dest='S').encode('latin1'), content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="complete_user_report.pdf"'
+        return response
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return HttpResponse("Error generating complete report", status=500)

@@ -30,6 +30,7 @@ urlpatterns = [
     path('mock-test/submit', views.submit_mock_test_api, name='submit_mock_test_api'),
     path('results/list', views.get_results_api, name='get_results_api'),
     path('results/download-pdf', views.download_pdf_report_api, name='download_pdf_report_api'),
+    path('results/download-complete-report', views.download_complete_report_api, name='download_complete_report_api'),
 
     # Downloads / Standalone
     path('download-docx', views.download_docx_api, name='download_docx_api'),
