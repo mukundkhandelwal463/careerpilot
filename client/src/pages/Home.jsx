@@ -40,7 +40,7 @@ const TiltCard = ({ children, className, style = {} }) => {
     const height = rect.height;
     const mouseXVal = (event.clientX - rect.left - width / 2) / (width / 2);
     const mouseYVal = (event.clientY - rect.top - height / 2) / (height / 2);
-    x.current = mouseXVal * 6; // degrees max tilt
+    x.current = mouseXVal * 6;
     y.current = -mouseYVal * 6;
     event.currentTarget.style.transform = `rotateY(${x.current}deg) rotateX(${y.current}deg)`;
   };
@@ -79,7 +79,6 @@ const Home = () => {
     restDelta: 0.001
   });
 
-  // Parallax background animations
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
@@ -108,10 +107,10 @@ const Home = () => {
           position: 'absolute', 
           top: '10%', 
           right: '10%', 
-          width: '380px', 
-          height: '380px', 
+          width: '400px', 
+          height: '400px', 
           borderRadius: '50%', 
-          background: 'radial-gradient(circle, rgba(255, 107, 74, 0.12) 0%, rgba(255,255,255,0) 70%)', 
+          background: 'radial-gradient(circle, rgba(255, 107, 74, 0.14) 0%, rgba(255,255,255,0) 70%)', 
           filter: 'blur(50px)',
           y: floatY1,
           pointerEvents: 'none',
@@ -136,34 +135,44 @@ const Home = () => {
 
       <main style={{ width: 'min(var(--max-width), calc(100% - 32px))', margin: '0 auto' }}>
         
-        {/* REDESIGNED HERO SECTION - CENTERED BIGGER LAPTOP WITH CLEAN FEATURE TITLES */}
-        <section style={{ padding: '30px 0 50px', textAlign: 'center' }}>
+        {/* HERO SECTION: DEAD-CENTER LAPTOP WITH FLOATING SURROUNDING FEATURE BADGES */}
+        <section style={{ padding: '40px 0 60px', textAlign: 'center', position: 'relative' }}>
           
-          {/* 3-COLUMN HERO GRID */}
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(240px, 280px) minmax(580px, 1fr) minmax(240px, 280px)',
-            gap: '24px',
-            alignItems: 'center',
-            maxWidth: '1440px',
+            position: 'relative',
+            maxWidth: '1240px',
             margin: '0 auto',
-            position: 'relative'
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '560px'
           }}>
 
-            {/* ── LEFT SURROUNDING FEATURE BADGES (NAMES ONLY) ── */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
+            {/* ── LEFT SURROUNDING FEATURE BADGES (FLOATING) ── */}
+            <div style={{
+              position: 'absolute',
+              left: '0',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              zIndex: 20,
+              width: '260px',
+              textAlign: 'left'
+            }}>
               
-              {/* Feature 1: ATS Resume Screener */}
+              {/* Feature 1: ATS Resume Analyzer */}
               <motion.div
-                whileHover={{ y: -5, scale: 1.02 }}
-                initial={{ opacity: 0, x: -40 }}
+                whileHover={{ y: -6, scale: 1.03 }}
+                initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
                 style={{
                   background: '#ffffff',
-                  borderRadius: '18px',
+                  borderRadius: '20px',
                   padding: '14px 18px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
@@ -181,15 +190,15 @@ const Home = () => {
 
               {/* Feature 2: LaTeX Resume Architect */}
               <motion.div
-                whileHover={{ y: -5, scale: 1.02 }}
-                initial={{ opacity: 0, x: -40 }}
+                whileHover={{ y: -6, scale: 1.03 }}
+                initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
                 style={{
                   background: '#ffffff',
-                  borderRadius: '18px',
+                  borderRadius: '20px',
                   padding: '14px 18px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
@@ -207,15 +216,15 @@ const Home = () => {
 
               {/* Feature 3: Voice AI Mock Interview */}
               <motion.div
-                whileHover={{ y: -5, scale: 1.02 }}
-                initial={{ opacity: 0, x: -40 }}
+                whileHover={{ y: -6, scale: 1.03 }}
+                initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
                 style={{
                   background: '#ffffff',
-                  borderRadius: '18px',
+                  borderRadius: '20px',
                   padding: '14px 18px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
@@ -233,12 +242,12 @@ const Home = () => {
 
             </div>
 
-            {/* ── CENTER BIGGER LAPTOP MOCKUP DISPLAY ── */}
+            {/* ── DEAD-CENTERED LAPTOP MOCKUP DISPLAY ── */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.92 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              style={{ position: 'relative', margin: '0 auto', width: '100%', maxWidth: '820px' }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              style={{ position: 'relative', margin: '0 auto', width: '100%', maxWidth: '840px', zIndex: 10 }}
             >
               {/* Floating Top Pill Badge */}
               <motion.div 
@@ -246,23 +255,23 @@ const Home = () => {
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 style={{
                   position: 'absolute',
-                  top: '-22px',
-                  right: '20px',
+                  top: '-24px',
+                  right: '30px',
                   background: '#ffffff',
                   border: '1px solid #e2e8f0',
-                  padding: '9px 18px',
+                  padding: '10px 20px',
                   borderRadius: '24px',
                   boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  zIndex: 10
+                  zIndex: 25
                 }}
               >
                 <div style={{ background: '#ecfdf5', color: '#10b981', padding: '5px', borderRadius: '8px' }}>
                   <Sparkles className="size-4" />
                 </div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1c2427' }}>Your AI Career Companion</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1c2427' }}>Your AI Career Companion</span>
               </motion.div>
 
               {/* Floating Bottom Pill Badge */}
@@ -271,31 +280,31 @@ const Home = () => {
                 transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
                 style={{
                   position: 'absolute',
-                  bottom: '28px',
-                  left: '-18px',
+                  bottom: '26px',
+                  left: '-24px',
                   background: '#ffffff',
                   border: '1px solid #e2e8f0',
-                  padding: '9px 18px',
+                  padding: '10px 20px',
                   borderRadius: '24px',
                   boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  zIndex: 10
+                  zIndex: 25
                 }}
               >
                 <div style={{ background: '#fef2f2', color: '#ef4444', padding: '5px', borderRadius: '8px' }}>
                   <Award className="size-4" />
                 </div>
-                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1c2427' }}>16 Applications Active</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1c2427' }}>16 Applications Active</span>
               </motion.div>
 
-              {/* LAPTOP HARDWARE BODY (BIGGER & CRISPER) */}
+              {/* LAPTOP HARDWARE BODY */}
               <div style={{
                 background: '#1c2427',
                 borderRadius: '28px 28px 10px 10px',
                 padding: '16px 16px 28px 16px',
-                boxShadow: '0 30px 75px rgba(0,0,0,0.3)',
+                boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
                 border: '2px solid #334155'
               }}>
                 
@@ -304,19 +313,19 @@ const Home = () => {
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#475569' }} />
                 </div>
 
-                {/* LAPTOP SCREEN INTERFACE (EXPANDED TO 440px HEIGHT) */}
+                {/* LAPTOP SCREEN INTERFACE */}
                 <div style={{
                   background: '#0f172a',
                   borderRadius: '16px',
                   overflow: 'hidden',
                   display: 'flex',
-                  height: '440px',
+                  height: '450px',
                   border: '1px solid rgba(255,255,255,0.08)',
                   textAlign: 'left'
                 }}>
                   {/* Laptop Sidebar */}
-                  <div style={{ width: '58px', background: '#090d16', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '22px', paddingTop: '22px', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--accent), #ff8f57)', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: '0.75rem', color: 'white' }}>C</div>
+                  <div style={{ width: '60px', background: '#090d16', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '22px', paddingTop: '22px', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--accent), #ff8f57)', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: '0.8rem', color: 'white' }}>C</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', color: '#475569' }}>
                       <FileText className="size-5" style={{ color: 'var(--accent)' }} />
                       <Briefcase className="size-5" />
@@ -326,30 +335,30 @@ const Home = () => {
                   </div>
                   
                   {/* Laptop Dashboard Canvas */}
-                  <div style={{ flex: 1, padding: '22px 26px', background: '#0b1329', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div style={{ flex: 1, padding: '24px 28px', background: '#0b1329', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'white' }}>Welcome back, Anam! 👋</span>
-                      <span style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.08)', color: '#a7f3d0', padding: '4px 10px', borderRadius: '12px', fontWeight: 700 }}>AI Live</span>
+                      <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white' }}>Welcome back, Anam! 👋</span>
+                      <span style={{ fontSize: '0.72rem', background: 'rgba(255,255,255,0.08)', color: '#a7f3d0', padding: '4px 12px', borderRadius: '12px', fontWeight: 700 }}>AI Live</span>
                     </div>
                     
                     {/* ATS Score Gauge Indicator */}
-                    <div style={{ display: 'flex', gap: '22px', alignItems: 'center', margin: '16px 0' }}>
+                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', margin: '18px 0' }}>
                       <div style={{
-                        width: '104px', height: '104px', borderRadius: '50%',
+                        width: '108px', height: '108px', borderRadius: '50%',
                         background: 'conic-gradient(#10b981 306deg, #1e293b 0deg)',
                         display: 'grid', placeItems: 'center', position: 'relative',
                         boxShadow: '0 0 25px rgba(16,185,129,0.25)'
                       }}>
-                        <div style={{ width: '86px', height: '86px', borderRadius: '50%', background: '#0b1329', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: '1.35rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>85%</span>
-                          <span style={{ fontSize: '0.52rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ATS MATCH</span>
+                        <div style={{ width: '88px', height: '88px', borderRadius: '50%', background: '#0b1329', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>85%</span>
+                          <span style={{ fontSize: '0.55rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ATS MATCH</span>
                         </div>
                       </div>
                       
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <strong style={{ fontSize: '1.05rem', color: 'white' }}>Overall Career Score: 85%</strong>
-                        <span style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 700 }}>ATS Ready & Market Aligned ✔</span>
-                        <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Target Role: Data Science & ML Specialist</span>
+                        <strong style={{ fontSize: '1.1rem', color: 'white' }}>Overall Career Score: 85%</strong>
+                        <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 700 }}>ATS Ready & Market Aligned ✔</span>
+                        <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Target Role: Data Science & ML Specialist</span>
                       </div>
                     </div>
 
@@ -362,8 +371,8 @@ const Home = () => {
                         { label: 'Active Applications', val: '16', color: '#ec4899' }
                       ].map((item, idx) => (
                         <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>{item.label}</span>
-                          <strong style={{ fontSize: '0.9rem', color: item.color }}>{item.val}</strong>
+                          <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>{item.label}</span>
+                          <strong style={{ fontSize: '0.92rem', color: item.color }}>{item.val}</strong>
                         </div>
                       ))}
                     </div>
@@ -379,24 +388,35 @@ const Home = () => {
                 marginLeft: '-4%',
                 background: 'linear-gradient(to bottom, #475569, #1e293b)',
                 borderRadius: '0 0 20px 20px',
-                boxShadow: '0 12px 30px rgba(0,0,0,0.35)'
+                boxShadow: '0 12px 35px rgba(0,0,0,0.35)'
               }} />
             </motion.div>
 
-            {/* ── RIGHT SURROUNDING FEATURE BADGES (NAMES ONLY) ── */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
+            {/* ── RIGHT SURROUNDING FEATURE BADGES (FLOATING) ── */}
+            <div style={{
+              position: 'absolute',
+              right: '0',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              zIndex: 20,
+              width: '260px',
+              textAlign: 'left'
+            }}>
               
               {/* Feature 4: CS Special Evaluation */}
               <motion.div
-                whileHover={{ y: -5, scale: 1.02 }}
-                initial={{ opacity: 0, x: 40 }}
+                whileHover={{ y: -6, scale: 1.03 }}
+                initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
                 style={{
                   background: '#ffffff',
-                  borderRadius: '18px',
+                  borderRadius: '20px',
                   padding: '14px 18px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
@@ -414,15 +434,15 @@ const Home = () => {
 
               {/* Feature 5: Live Job Matcher */}
               <motion.div
-                whileHover={{ y: -5, scale: 1.02 }}
-                initial={{ opacity: 0, x: 40 }}
+                whileHover={{ y: -6, scale: 1.03 }}
+                initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
                 style={{
                   background: '#ffffff',
-                  borderRadius: '18px',
+                  borderRadius: '20px',
                   padding: '14px 18px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
@@ -440,15 +460,15 @@ const Home = () => {
 
               {/* Feature 6: Career Roadmap & AI Keywords */}
               <motion.div
-                whileHover={{ y: -5, scale: 1.02 }}
-                initial={{ opacity: 0, x: 40 }}
+                whileHover={{ y: -6, scale: 1.03 }}
+                initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
                 style={{
                   background: '#ffffff',
-                  borderRadius: '18px',
+                  borderRadius: '20px',
                   padding: '14px 18px',
-                  boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
+                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
