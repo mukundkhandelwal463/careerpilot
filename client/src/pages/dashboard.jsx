@@ -220,6 +220,8 @@ const Dashboard = () => {
 
     fetchResumes();
     fetchTestResults();
+  }, [user, navigate]);
+
   const handleDownloadPdfReport = async () => {
     if (!user) return;
     try {
