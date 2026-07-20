@@ -416,6 +416,150 @@ const Dashboard = () => {
               </div>
             </div>
 
+            {/* Accordion / List Cards widget */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '28px',
+              padding: '16px 20px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}>
+              {/* Card 1: Parsed Resumes */}
+              <div>
+                <button
+                  onClick={() => setOpenSection(openSection === 'resumes' ? null : 'resumes')}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '12px 6px',
+                    background: 'none',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    color: '#1c2427',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>Parsed Resumes ({resumes.length})</span>
+                  {openSection === 'resumes' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+                {openSection === 'resumes' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px 6px 12px', maxHeight: '180px', overflowY: 'auto' }}>
+                    {resumes.map(r => (
+                      <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '8px 12px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
+                          {r.title}
+                        </span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#2563eb' }}>
+                          {r.ats_score ? `${Math.round(r.ats_score)}%` : '0%'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
+
+              {/* Card 2: Target Role details */}
+              <div>
+                <button
+                  onClick={() => setOpenSection(openSection === 'target' ? null : 'target')}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '12px 6px',
+                    background: 'none',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    color: '#1c2427',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>Target Role & Domain</span>
+                  {openSection === 'target' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+                {openSection === 'target' && (
+                  <div style={{ padding: '4px 6px 12px', fontSize: '0.8rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '1.11rem' }}>🎯</span>
+                      <div>
+                        <strong style={{ display: 'block', color: '#334155' }}>{targetRole}</strong>
+                        <span>Active tracking &bull; Roadmap set</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
+
+              {/* Card 3: ATS keyword benchmarks */}
+              <div>
+                <button
+                  onClick={() => setOpenSection(openSection === 'benchmarks' ? null : 'benchmarks')}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '12px 6px',
+                    background: 'none',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    color: '#1c2427',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>ATS Keyword Match Goals</span>
+                  {openSection === 'benchmarks' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+                {openSection === 'benchmarks' && (
+                  <div style={{ padding: '4px 6px 12px', fontSize: '0.8rem', color: '#64748b' }}>
+                    Target standard: <strong>Aim for &gt; 70% ATS score</strong> to pass recruiters' automatic pre-screening.
+                  </div>
+                )}
+              </div>
+
+              <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
+
+              {/* Card 4: Interview Ready milestones */}
+              <div>
+                <button
+                  onClick={() => setOpenSection(openSection === 'milestones' ? null : 'milestones')}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '12px 6px',
+                    background: 'none',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    color: '#1c2427',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>Interview Readiness</span>
+                  {openSection === 'milestones' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+                {openSection === 'milestones' && (
+                  <div style={{ padding: '4px 6px 12px', fontSize: '0.8rem', color: '#64748b' }}>
+                    Mock Score: <strong>{interviewReadiness ? `${interviewReadiness}%` : 'No mock test yet'}</strong> &bull; Average rating based on technical + HR questions.
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Download Complete Report Button in Left Column */}
             <div style={{
               background: '#ffffff',
@@ -452,8 +596,183 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* 2. MIDDLE COLUMN: Best Full Time Test Result */}
+          {/* 2. MIDDLE COLUMN: Scorecard Radials Grid + New Download & Mock Interview Box */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            {/* 2x2 Scorecard Radials Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              {/* Card 1: Best ATS Match */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '28px',
+                padding: '24px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '200px',
+                textAlign: 'center'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Best ATS Match
+                </span>
+                {renderRadialGauge(bestAtsScore, '#10b981')}
+              </div>
+
+              {/* Card 2: Mock Interview */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '28px',
+                padding: '24px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '200px',
+                textAlign: 'center'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Mock Interview
+                </span>
+                {renderRadialGauge(interviewReadiness, '#f5c35c')}
+              </div>
+
+              {/* Card 3: Tasks Progress */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '28px',
+                padding: '24px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '200px',
+                textAlign: 'center'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Tasks Progress
+                </span>
+                {renderRadialGauge(todayProgressPercent, '#3b82f6')}
+              </div>
+
+              {/* Card 4: Job Fit Match */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '28px',
+                padding: '24px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '200px',
+                textAlign: 'center'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Job Fit Match
+                </span>
+                {renderRadialGauge(jobFitScore, '#8b5cf6')}
+              </div>
+            </div>
+
+            {/* NEW BOX: Download & Mock Interview Hub (Fills the blank space!) */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '28px',
+              padding: '28px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+              border: '1px solid rgba(28,36,39,0.04)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}>
+              <div>
+                <h3 style={{ fontSize: '1.02rem', fontWeight: 700, color: '#1c2427', margin: '0 0 4px' }}>
+                  Resume Alignment & Action Center
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                  Download your highest-aligned resume matching the <strong>{targetRole}</strong> roadmap, or launch a dynamic mock voice interview simulation.
+                </p>
+              </div>
+
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '16px',
+                padding: '16px',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+                gap: '12px',
+                textAlign: 'center'
+              }}>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block' }}>Best ATS Match</span>
+                  <strong style={{ fontSize: '0.94rem', color: '#10b981', display: 'block', marginTop: '2px' }}>{bestAtsScore}%</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block' }}>Best Mock Score</span>
+                  <strong style={{ fontSize: '0.94rem', color: '#f5c35c', display: 'block', marginTop: '2px' }}>
+                    {interviewReadiness ? `${interviewReadiness}%` : 'N/A'}
+                  </strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block' }}>Interviews Taken</span>
+                  <strong style={{ fontSize: '0.94rem', color: '#1c2427', display: 'block', marginTop: '2px' }}>{interviewCount} Attempts</strong>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
+                {/* Download best resume */}
+                <button
+                  onClick={downloadBestResume}
+                  style={{
+                    background: '#1c2427',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '12px 16px',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(28,36,39,0.1)'
+                  }}
+                >
+                  <Download className="size-4" /> Download Resume
+                </button>
+
+                {/* Take mock interview */}
+                <button
+                  onClick={handleTakeInterview}
+                  style={{
+                    background: '#f5c35c',
+                    color: '#1c2427',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '12px 16px',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(245,195,92,0.15)'
+                  }}
+                >
+                  <Mic className="size-4" /> Start Mock Interview
+                </button>
+              </div>
+              </div>
+            </div>
+
+            {/* NEW BOX: Best Mock Test Result */}
             <div style={{
               background: '#ffffff',
               borderRadius: '32px',
@@ -505,10 +824,164 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
+
           </div>
 
-          {/* 3. RIGHT COLUMN: Computer Science Special Progress */}
+          {/* 3. RIGHT COLUMN: Detailed Career Map & Dynamic Tasks Checklist */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            {/* Detailed Career Map Card */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '28px',
+              padding: '24px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.03)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1c2427', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Compass className="size-4 text-slate-500" /> Career Map
+                </span>
+                <span style={{ fontSize: '0.8rem', background: '#eff6ff', color: '#3b82f6', padding: '2px 8px', borderRadius: '999px', fontWeight: 700 }}>
+                  Active Path
+                </span>
+              </div>
+
+              {/* Detailed roadmap level blocks */}
+              {careerRoadmap ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {careerRoadmap.levels?.slice(0, 3).map((lvl, idx) => (
+                    <div key={idx} style={{ 
+                      background: '#f8fafc', 
+                      border: '1px solid #e2e8f0', 
+                      borderRadius: '16px', 
+                      padding: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c2427' }}>
+                          Level {lvl.level || idx + 1}
+                        </span>
+                        <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
+                          {lvl.duration}
+                        </span>
+                      </div>
+                      <strong style={{ fontSize: '0.8rem', color: '#1e293b' }}>{lvl.title}</strong>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.3 }}>
+                        {lvl.focus}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '20px 10px', border: '1px dashed #cbd5e1', borderRadius: '16px' }}>
+                  <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                    No Career Map loaded. Generate your path in <Link to="/preparation" style={{ color: '#3b82f6', fontWeight: 700 }}>Preparation Hub</Link>.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Dark Preparation tasks list */}
+            <div style={{
+              background: '#1c2427',
+              borderRadius: '32px',
+              padding: '24px',
+              color: '#ffffff',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
+                <span style={{ fontSize: '0.87rem', fontWeight: 700 }}>Preparation Tasks</span>
+                <strong style={{ fontSize: '1.11rem', fontFamily: 'monospace', color: '#f5c35c' }}>
+                  {todayCompletedCount}/{todayTasks.length}
+                </strong>
+              </div>
+
+              {/* Task list with circular checked badges */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {todayTasks.length > 0 ? (
+                  todayTasks.map((task) => (
+                    <button
+                      key={task.id}
+                      onClick={() => toggleTodayTask(task.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                        borderRadius: '16px',
+                        padding: '12px 16px',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        color: '#ffffff',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {/* Circle custom icon */}
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: 'rgba(255,255,255,0.1)',
+                          display: 'grid',
+                          placeItems: 'center',
+                          fontSize: '10px'
+                        }}>
+                          📋
+                        </div>
+                        <div style={{ overflow: 'hidden' }}>
+                          <strong style={{ 
+                            display: 'block', 
+                            fontSize: '0.8rem',
+                            textDecoration: task.completed ? 'line-through' : 'none',
+                            color: task.completed ? '#6b7280' : '#ffffff',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: '150px'
+                          }}>
+                            {task.text}
+                          </strong>
+                          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Today &bull; Target</span>
+                        </div>
+                      </div>
+
+                      {/* Right circular check badge */}
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        border: '2px solid #6b7280',
+                        borderColor: task.completed ? '#f5c35c' : '#6b7280',
+                        background: task.completed ? '#f5c35c' : 'transparent',
+                        display: 'grid',
+                        placeItems: 'center',
+                        fontSize: '9px',
+                        color: '#1c2427',
+                        fontWeight: 'bold',
+                        flexShrink: 0
+                      }}>
+                        {task.completed && '✓'}
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '20px 10px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '16px' }}>
+                    <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                      No tasks scheduled for today. Add goals in <Link to="/preparation" style={{ color: '#f5c35c', fontWeight: 700 }}>Task Tracker</Link>.
+                    </p>
+                  </div>
+                )}
+              </div>
+              </div>
+            </div>
+
+            {/* NEW BOX: Computer Science Special Progress */}
             <div style={{
               background: '#1c2427',
               borderRadius: '32px',
@@ -542,6 +1015,7 @@ const Dashboard = () => {
                 ))}
               </div>
             </div>
+
           </div>
 
         </div>
