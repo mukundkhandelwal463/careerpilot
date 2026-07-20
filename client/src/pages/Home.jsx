@@ -130,7 +130,7 @@ const Home = () => {
         {/* ════════════════════════════════════
             HERO SECTION — Laptop at center
             ════════════════════════════════════ */}
-        <section style={{ padding: '80px 0 60px', textAlign: 'center' }}>
+        <section style={{ padding: '120px 0 60px', textAlign: 'center' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'minmax(220px, 270px) minmax(500px, 1fr) minmax(220px, 270px)',
@@ -168,7 +168,7 @@ const Home = () => {
                 position: 'relative',
                 margin: '0 auto',
                 width: '100%',
-                maxWidth: '780px',
+                maxWidth: '880px',
                 zIndex: 30
               }}
               initial={{ opacity: 0, scale: 0.92 }}
