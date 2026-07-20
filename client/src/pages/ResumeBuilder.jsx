@@ -638,7 +638,7 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
             {/* LEFT COLUMN: CONTROLS & FORM TABS */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
-              {/* Template Selector Card */}
+              {/* Template Selector Card (Top of Left Column) */}
               <div style={{
                 background: '#ffffff',
                 borderRadius: '24px',
@@ -679,108 +679,7 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                 </div>
               </div>
 
-              {/* Action Bar (Copy LaTeX, Download .tex, Open Overleaf) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                <button
-                  onClick={handleCopyLatex}
-                  style={{
-                    background: isCopied ? '#10b981' : '#1c2427',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '16px',
-                    padding: '12px',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    boxShadow: '0 4px 12px rgba(28,36,39,0.1)'
-                  }}
-                >
-                  {isCopied ? <Check className="size-4" /> : <Copy className="size-4" />}
-                  {isCopied ? 'Copied!' : 'Copy LaTeX'}
-                </button>
-
-                <button
-                  onClick={handleDownloadTex}
-                  style={{
-                    background: '#3b82f6',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '16px',
-                    padding: '12px',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    boxShadow: '0 4px 12px rgba(59,130,246,0.2)'
-                  }}
-                >
-                  <Download className="size-4" /> Download .tex
-                </button>
-
-                <a
-                  href="https://www.overleaf.com/docs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    background: '#f5c35c',
-                    color: '#1c2427',
-                    border: 'none',
-                    borderRadius: '16px',
-                    padding: '12px',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    textDecoration: 'none',
-                    boxShadow: '0 4px 12px rgba(245,195,92,0.2)'
-                  }}
-                >
-                  <ExternalLink className="size-4" /> Open Overleaf
-                </a>
-              </div>
-
-              {/* Online Preview Link Banner */}
-              <div style={{
-                background: '#eff6ff',
-                border: '1px solid #bfdbfe',
-                borderRadius: '16px',
-                padding: '12px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <span style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 600 }}>
-                  Render & Preview Live PDF Online:
-                </span>
-                <a
-                  href={latexOnlineUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: '#2563eb',
-                    fontWeight: 700,
-                    fontSize: '0.82rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    textDecoration: 'underline'
-                  }}
-                >
-                  Compile PDF Online <ExternalLink className="size-3.5" />
-                </a>
-              </div>
-
-              {/* Form Input Card */}
+              {/* Form Input Card (Middle of Left Column) */}
               <div style={{
                 background: '#ffffff',
                 borderRadius: '28px',
@@ -998,6 +897,107 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                   </div>
                 )}
 
+              </div>
+
+              {/* Action Bar (Down Side - Copy LaTeX, Download .tex, Open Overleaf) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                <button
+                  onClick={handleCopyLatex}
+                  style={{
+                    background: isCopied ? '#10b981' : '#1c2427',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '14px 12px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 12px rgba(28,36,39,0.1)'
+                  }}
+                >
+                  {isCopied ? <Check className="size-4" /> : <Copy className="size-4" />}
+                  {isCopied ? 'Copied!' : 'Copy LaTeX'}
+                </button>
+
+                <button
+                  onClick={handleDownloadTex}
+                  style={{
+                    background: '#3b82f6',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '14px 12px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    boxShadow: '0 4px 12px rgba(59,130,246,0.2)'
+                  }}
+                >
+                  <Download className="size-4" /> Download .tex
+                </button>
+
+                <a
+                  href="https://www.overleaf.com/docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: '#f5c35c',
+                    color: '#1c2427',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '14px 12px',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    textDecoration: 'none',
+                    boxShadow: '0 4px 12px rgba(245,195,92,0.2)'
+                  }}
+                >
+                  <ExternalLink className="size-4" /> Open Overleaf
+                </a>
+              </div>
+
+              {/* Online Preview Link Banner (Down Side) */}
+              <div style={{
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '16px',
+                padding: '12px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <span style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 600 }}>
+                  Render & Preview Live PDF Online:
+                </span>
+                <a
+                  href={latexOnlineUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#2563eb',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Compile PDF Online <ExternalLink className="size-3.5" />
+                </a>
               </div>
 
             </div>
