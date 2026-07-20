@@ -978,7 +978,6 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
-              </div>
             </div>
 
             {/* NEW BOX: Computer Science Special Progress */}
