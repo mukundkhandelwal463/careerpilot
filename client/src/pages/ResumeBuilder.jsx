@@ -651,9 +651,9 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                 </span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                   {[
-                    { id: 'mukund_ml', name: 'Mukund Data ML', tag: 'Specialist LaTeX' },
-                    { id: 'abey_classic', name: 'Abey Classic', tag: 'Data Tech Classic' },
-                    { id: 'executive', name: 'Executive', tag: 'Corporate Modern' },
+                    { id: 'mukund_ml', name: 'Data & ML Specialist', tag: 'ATS Standard' },
+                    { id: 'abey_classic', name: 'Classic Tech', tag: 'Software Engineer' },
+                    { id: 'executive', name: 'Executive Modern', tag: 'Corporate Lead' },
                   ].map(t => {
                     const isSelected = template === t.id;
                     return (
@@ -1013,7 +1013,7 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f5c35c', fontFamily: 'monospace' }}>
-                    {template === 'abey_classic' ? 'abey_classic_resume.tex' : 'mukund_ml_data_resume.tex'}
+                    {template === 'abey_classic' ? 'classic_tech_resume.tex' : template === 'executive' ? 'executive_resume.tex' : 'data_ml_specialist_resume.tex'}
                   </span>
                   <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '6px', color: '#94a3b8' }}>
                     LaTeX Source Code
