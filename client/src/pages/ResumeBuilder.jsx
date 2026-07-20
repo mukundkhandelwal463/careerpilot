@@ -562,7 +562,7 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
     <div style={{ background: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
 
-      <main style={{ marginTop: '70px', padding: '32px 24px', flex: 1 }}>
+      <main style={{ marginTop: '55px', padding: '16px 20px', flex: 1 }}>
         <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
           
           {/* Title Header */}
@@ -570,15 +570,15 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '28px',
+            marginBottom: '12px',
             flexWrap: 'wrap',
-            gap: '16px'
+            gap: '12px'
           }}>
             <div>
-              <h1 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#1c2427', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <FileCode className="size-8 text-emerald-500" /> LaTeX Resume Architect
+              <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1c2427', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileCode className="size-6 text-emerald-500" /> LaTeX Resume Architect
               </h1>
-              <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.9rem', fontWeight: 500 }}>
+              <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '0.82rem', fontWeight: 500 }}>
                 Build & Customize your authentic LaTeX resume code with 3 specialized templates & live compile links.
               </p>
             </div>
@@ -586,32 +586,32 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
             {/* Quick Upload Banner */}
             <div style={{
               background: '#ffffff',
-              borderRadius: '20px',
-              padding: '12px 20px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+              borderRadius: '14px',
+              padding: '6px 14px',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
               border: '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
-              gap: '12px'
+              gap: '10px'
             }}>
-              <Sparkles className="size-5 text-amber-500" />
+              <Sparkles className="size-4 text-amber-500" />
               <div>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c2427', display: 'block' }}>Magic Resume Autofill</span>
-                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Parse PDF / DOCX to Form</span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1c2427', display: 'block' }}>Magic Resume Autofill</span>
+                <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Parse PDF / DOCX to Form</span>
               </div>
               <label style={{
                 background: '#1c2427',
                 color: '#ffffff',
-                padding: '8px 14px',
-                borderRadius: '12px',
-                fontSize: '0.8rem',
+                padding: '6px 12px',
+                borderRadius: '10px',
+                fontSize: '0.78rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px'
+                gap: '4px'
               }}>
-                <Upload className="size-4" /> Upload
+                <Upload className="size-3.5" /> Upload
                 <input type="file" onChange={handleAutofillUpload} accept=".pdf,.docx,.txt" style={{ display: 'none' }} />
               </label>
             </div>
@@ -622,34 +622,34 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
               background: '#ecfdf5',
               border: '1px solid #10b981',
               color: '#065f46',
-              padding: '10px 16px',
-              borderRadius: '12px',
-              fontSize: '0.85rem',
+              padding: '8px 14px',
+              borderRadius: '10px',
+              fontSize: '0.82rem',
               fontWeight: 600,
-              marginBottom: '20px'
+              marginBottom: '12px'
             }}>
               {statusMsg}
             </div>
           )}
 
           {/* MAIN 2-COLUMN GRID */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'start' }}>
 
             {/* LEFT COLUMN: CONTROLS & FORM TABS */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               
               {/* Template Selector Card (Top of Left Column) */}
               <div style={{
                 background: '#ffffff',
-                borderRadius: '24px',
-                padding: '20px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                borderRadius: '18px',
+                padding: '12px 16px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
                 border: '1px solid #e2e8f0'
               }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Select LaTeX Resume Template
                 </span>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                   {[
                     { id: 'mukund_ml', name: 'Data & ML Specialist', tag: 'ATS Standard' },
                     { id: 'abey_classic', name: 'Classic Tech', tag: 'Software Engineer' },
@@ -664,15 +664,15 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                           background: isSelected ? '#1c2427' : '#f8fafc',
                           color: isSelected ? '#ffffff' : '#1c2427',
                           border: isSelected ? '2px solid #10b981' : '1px solid #cbd5e1',
-                          borderRadius: '16px',
-                          padding: '12px 8px',
+                          borderRadius: '12px',
+                          padding: '8px 6px',
                           textAlign: 'center',
                           cursor: 'pointer',
                           transition: 'all 0.2s'
                         }}
                       >
-                        <strong style={{ fontSize: '0.82rem', display: 'block' }}>{t.name}</strong>
-                        <span style={{ fontSize: '0.68rem', color: isSelected ? '#10b981' : '#64748b', fontWeight: 600 }}>{t.tag}</span>
+                        <strong style={{ fontSize: '0.8rem', display: 'block' }}>{t.name}</strong>
+                        <span style={{ fontSize: '0.65rem', color: isSelected ? '#10b981' : '#64748b', fontWeight: 600 }}>{t.tag}</span>
                       </button>
                     );
                   })}
@@ -682,20 +682,20 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
               {/* Form Input Card (Middle of Left Column) */}
               <div style={{
                 background: '#ffffff',
-                borderRadius: '28px',
-                padding: '28px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                borderRadius: '20px',
+                padding: '16px 20px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
                 border: '1px solid #e2e8f0'
               }}>
 
                 {/* Form Navigation Tabs */}
                 <div style={{
                   display: 'flex',
-                  gap: '8px',
+                  gap: '6px',
                   overflowX: 'auto',
-                  paddingBottom: '12px',
+                  paddingBottom: '8px',
                   borderBottom: '1px solid #f1f5f9',
-                  marginBottom: '24px'
+                  marginBottom: '14px'
                 }}>
                   {[
                     { id: 'personal', label: 'Personal', icon: User },
@@ -715,19 +715,19 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                           background: isActive ? '#1c2427' : '#f8fafc',
                           color: isActive ? '#ffffff' : '#64748b',
                           border: 'none',
-                          borderRadius: '12px',
-                          padding: '10px 14px',
-                          fontSize: '0.82rem',
+                          borderRadius: '10px',
+                          padding: '8px 12px',
+                          fontSize: '0.8rem',
                           fontWeight: 700,
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '6px',
+                          gap: '5px',
                           whiteSpace: 'nowrap',
                           transition: 'all 0.2s'
                         }}
                       >
-                        <Icon className="size-4" /> {tab.label}
+                        <Icon className="size-3.5" /> {tab.label}
                       </button>
                     );
                   })}
@@ -735,36 +735,36 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
 
                 {/* TAB 1: PERSONAL DETAILS */}
                 {activeTab === 'personal' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Full Name</label>
-                      <input type="text" value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} />
+                      <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Full Name</label>
+                      <input type="text" value={name} onChange={e => setName(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                     </div>
 
                     <div>
-                      <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Location / City, State</label>
-                      <input type="text" value={location} onChange={e => setLocation(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} />
+                      <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Location / City, State</label>
+                      <input type="text" value={location} onChange={e => setLocation(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Phone Number</label>
-                        <input type="text" value={phone} onChange={e => setPhone(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} />
+                        <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Phone Number</label>
+                        <input type="text" value={phone} onChange={e => setPhone(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                       </div>
                       <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>Email Address</label>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} />
+                        <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>Email Address</label>
+                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                       <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>LinkedIn URL</label>
-                        <input type="text" value={linkedin} onChange={e => setLinkedin(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} />
+                        <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>LinkedIn URL</label>
+                        <input type="text" value={linkedin} onChange={e => setLinkedin(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                       </div>
                       <div>
-                        <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '6px' }}>GitHub URL</label>
-                        <input type="text" value={github} onChange={e => setGithub(e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} />
+                        <label style={{ fontSize: '0.78rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '4px' }}>GitHub URL</label>
+                        <input type="text" value={github} onChange={e => setGithub(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
                       </div>
                     </div>
                   </div>
@@ -772,97 +772,97 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
 
                 {/* TAB 2: EDUCATION */}
                 {activeTab === 'education' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {educationList.map((edu, idx) => (
-                      <div key={idx} style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1c2427' }}>Education #{idx + 1}</span>
+                      <div key={idx} style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c2427' }}>Education #{idx + 1}</span>
                           {educationList.length > 1 && (
                             <button onClick={() => setEducationList(educationList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                              <Trash2 className="size-4" />
+                              <Trash2 className="size-3.5" />
                             </button>
                           )}
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-                          <input type="text" placeholder="School / University" value={edu.school} onChange={e => { const list = [...educationList]; list[idx].school = e.target.value; setEducationList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
-                          <input type="text" placeholder="Location" value={edu.location} onChange={e => { const list = [...educationList]; list[idx].location = e.target.value; setEducationList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                          <input type="text" placeholder="School / University" value={edu.school} onChange={e => { const list = [...educationList]; list[idx].school = e.target.value; setEducationList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                          <input type="text" placeholder="Location" value={edu.location} onChange={e => { const list = [...educationList]; list[idx].location = e.target.value; setEducationList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                          <input type="text" placeholder="Degree / Marks" value={edu.degree} onChange={e => { const list = [...educationList]; list[idx].degree = e.target.value; setEducationList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
-                          <input type="text" placeholder="Dates (e.g. Aug 2023 -- Present)" value={edu.dates} onChange={e => { const list = [...educationList]; list[idx].dates = e.target.value; setEducationList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          <input type="text" placeholder="Degree / Marks" value={edu.degree} onChange={e => { const list = [...educationList]; list[idx].degree = e.target.value; setEducationList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                          <input type="text" placeholder="Dates (e.g. Aug 2023 -- Present)" value={edu.dates} onChange={e => { const list = [...educationList]; list[idx].dates = e.target.value; setEducationList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
                         </div>
                       </div>
                     ))}
-                    <button onClick={() => setEducationList([...educationList, { school: '', location: '', degree: '', dates: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: '1px stroke #cbd5e1', borderRadius: '12px', padding: '10px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                      <Plus className="size-4" /> Add Education Row
+                    <button onClick={() => setEducationList([...educationList, { school: '', location: '', degree: '', dates: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: '1px stroke #cbd5e1', borderRadius: '10px', padding: '8px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                      <Plus className="size-3.5" /> Add Education Row
                     </button>
                   </div>
                 )}
 
                 {/* TAB 3: SKILLS */}
                 {activeTab === 'skills' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {skillsList.map((skill, idx) => (
-                      <div key={idx} style={{ background: '#f8fafc', padding: '14px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <input type="text" placeholder="Skill Category Name" value={skill.category} onChange={e => { const list = [...skillsList]; list[idx].category = e.target.value; setSkillsList(list); }} style={{ fontWeight: 700, color: '#1c2427', background: 'transparent', border: 'none', fontSize: '0.9rem', width: '80%' }} />
+                      <div key={idx} style={{ background: '#f8fafc', padding: '10px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <input type="text" placeholder="Skill Category Name" value={skill.category} onChange={e => { const list = [...skillsList]; list[idx].category = e.target.value; setSkillsList(list); }} style={{ fontWeight: 700, color: '#1c2427', background: 'transparent', border: 'none', fontSize: '0.85rem', width: '80%' }} />
                           {skillsList.length > 1 && (
                             <button onClick={() => setSkillsList(skillsList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                              <Trash2 className="size-4" />
+                              <Trash2 className="size-3.5" />
                             </button>
                           )}
                         </div>
-                        <textarea rows="2" placeholder="Items (comma separated)" value={skill.items} onChange={e => { const list = [...skillsList]; list[idx].items = e.target.value; setSkillsList(list); }} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                        <textarea rows="2" placeholder="Items (comma separated)" value={skill.items} onChange={e => { const list = [...skillsList]; list[idx].items = e.target.value; setSkillsList(list); }} style={{ width: '100%', padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
                       </div>
                     ))}
-                    <button onClick={() => setSkillsList([...skillsList, { category: '', items: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: '1px stroke #cbd5e1', borderRadius: '12px', padding: '10px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                      <Plus className="size-4" /> Add Skill Category
+                    <button onClick={() => setSkillsList([...skillsList, { category: '', items: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: '1px stroke #cbd5e1', borderRadius: '10px', padding: '8px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                      <Plus className="size-3.5" /> Add Skill Category
                     </button>
                   </div>
                 )}
 
                 {/* TAB 4: PROJECTS */}
                 {activeTab === 'projects' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {projectsList.map((proj, idx) => (
-                      <div key={idx} style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1c2427' }}>Project #{idx + 1}</span>
+                      <div key={idx} style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c2427' }}>Project #{idx + 1}</span>
                           {projectsList.length > 1 && (
                             <button onClick={() => setProjectsList(projectsList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                              <Trash2 className="size-4" />
+                              <Trash2 className="size-3.5" />
                             </button>
                           )}
                         </div>
-                        <input type="text" placeholder="Project Title" value={proj.title} onChange={e => { const list = [...projectsList]; list[idx].title = e.target.value; setProjectsList(list); }} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem', marginBottom: '8px' }} />
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '8px' }}>
-                          <input type="text" placeholder="GitHub Link" value={proj.link} onChange={e => { const list = [...projectsList]; list[idx].link = e.target.value; setProjectsList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
-                          <input type="text" placeholder="Tech Stack" value={proj.tech} onChange={e => { const list = [...projectsList]; list[idx].tech = e.target.value; setProjectsList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
-                          <input type="text" placeholder="Date" value={proj.date} onChange={e => { const list = [...projectsList]; list[idx].date = e.target.value; setProjectsList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                        <input type="text" placeholder="Project Title" value={proj.title} onChange={e => { const list = [...projectsList]; list[idx].title = e.target.value; setProjectsList(list); }} style={{ width: '100%', padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem', marginBottom: '6px' }} />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px', marginBottom: '6px' }}>
+                          <input type="text" placeholder="GitHub Link" value={proj.link} onChange={e => { const list = [...projectsList]; list[idx].link = e.target.value; setProjectsList(list); }} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
+                          <input type="text" placeholder="Tech Stack" value={proj.tech} onChange={e => { const list = [...projectsList]; list[idx].tech = e.target.value; setProjectsList(list); }} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
+                          <input type="text" placeholder="Date" value={proj.date} onChange={e => { const list = [...projectsList]; list[idx].date = e.target.value; setProjectsList(list); }} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
                         </div>
-                        <textarea rows="4" placeholder="Bullet points (1 per line)" value={proj.bullets} onChange={e => { const list = [...projectsList]; list[idx].bullets = e.target.value; setProjectsList(list); }} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                        <textarea rows="3" placeholder="Bullet points (1 per line)" value={proj.bullets} onChange={e => { const list = [...projectsList]; list[idx].bullets = e.target.value; setProjectsList(list); }} style={{ width: '100%', padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
                       </div>
                     ))}
-                    <button onClick={() => setProjectsList([...projectsList, { title: '', link: '', tech: '', date: '', bullets: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: '1px stroke #cbd5e1', borderRadius: '12px', padding: '10px', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                      <Plus className="size-4" /> Add Project
+                    <button onClick={() => setProjectsList([...projectsList, { title: '', link: '', tech: '', date: '', bullets: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: '1px stroke #cbd5e1', borderRadius: '10px', padding: '8px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                      <Plus className="size-3.5" /> Add Project
                     </button>
                   </div>
                 )}
 
                 {/* TAB 5: TRAINING */}
                 {activeTab === 'training' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {trainingList.map((tr, idx) => (
-                      <div key={idx} style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '8px' }}>
-                          <input type="text" placeholder="Training Program Title" value={tr.title} onChange={e => { const list = [...trainingList]; list[idx].title = e.target.value; setTrainingList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
-                          <input type="text" placeholder="Date (e.g. Jun 2025)" value={tr.date} onChange={e => { const list = [...trainingList]; list[idx].date = e.target.value; setTrainingList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                      <div key={idx} style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '6px' }}>
+                          <input type="text" placeholder="Training Program Title" value={tr.title} onChange={e => { const list = [...trainingList]; list[idx].title = e.target.value; setTrainingList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                          <input type="text" placeholder="Date (e.g. Jun 2025)" value={tr.date} onChange={e => { const list = [...trainingList]; list[idx].date = e.target.value; setTrainingList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '8px' }}>
-                          <input type="text" placeholder="Project Title in Training" value={tr.projectTitle} onChange={e => { const list = [...trainingList]; list[idx].projectTitle = e.target.value; setTrainingList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
-                          <input type="text" placeholder="Tech Stack" value={tr.tech} onChange={e => { const list = [...trainingList]; list[idx].tech = e.target.value; setTrainingList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '6px' }}>
+                          <input type="text" placeholder="Project Title in Training" value={tr.projectTitle} onChange={e => { const list = [...trainingList]; list[idx].projectTitle = e.target.value; setTrainingList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                          <input type="text" placeholder="Tech Stack" value={tr.tech} onChange={e => { const list = [...trainingList]; list[idx].tech = e.target.value; setTrainingList(list); }} style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
                         </div>
-                        <textarea rows="3" placeholder="Description Bullets (1 per line)" value={tr.bullets} onChange={e => { const list = [...trainingList]; list[idx].bullets = e.target.value; setTrainingList(list); }} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                        <textarea rows="3" placeholder="Description Bullets (1 per line)" value={tr.bullets} onChange={e => { const list = [...trainingList]; list[idx].bullets = e.target.value; setTrainingList(list); }} style={{ width: '100%', padding: '6px 10px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
                       </div>
                     ))}
                   </div>
@@ -870,29 +870,29 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
 
                 {/* TAB 6: CERTIFICATIONS & ACHIEVEMENTS */}
                 {activeTab === 'certifications' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     <div>
-                      <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1c2427', marginBottom: '10px' }}>Certifications</h3>
+                      <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1c2427', marginBottom: '8px' }}>Certifications</h3>
                       {certificationsList.map((cert, idx) => (
-                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr auto', gap: '8px', marginBottom: '8px' }}>
-                          <input type="text" placeholder="Certification Name" value={cert.title} onChange={e => { const list = [...certificationsList]; list[idx].title = e.target.value; setCertificationsList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
-                          <input type="text" placeholder="Issuer / Organization" value={cert.issuer} onChange={e => { const list = [...certificationsList]; list[idx].issuer = e.target.value; setCertificationsList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
-                          <input type="text" placeholder="Date" value={cert.date} onChange={e => { const list = [...certificationsList]; list[idx].date = e.target.value; setCertificationsList(list); }} style={{ padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.82rem' }} />
+                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr auto', gap: '6px', marginBottom: '6px' }}>
+                          <input type="text" placeholder="Certification Name" value={cert.title} onChange={e => { const list = [...certificationsList]; list[idx].title = e.target.value; setCertificationsList(list); }} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
+                          <input type="text" placeholder="Issuer / Organization" value={cert.issuer} onChange={e => { const list = [...certificationsList]; list[idx].issuer = e.target.value; setCertificationsList(list); }} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
+                          <input type="text" placeholder="Date" value={cert.date} onChange={e => { const list = [...certificationsList]; list[idx].date = e.target.value; setCertificationsList(list); }} style={{ padding: '6px 8px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.78rem' }} />
                           {certificationsList.length > 1 && (
                             <button onClick={() => setCertificationsList(certificationsList.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
-                              <Trash2 className="size-4" />
+                              <Trash2 className="size-3.5" />
                             </button>
                           )}
                         </div>
                       ))}
-                      <button onClick={() => setCertificationsList([...certificationsList, { title: '', issuer: '', date: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: 'none', borderRadius: '10px', padding: '8px 14px', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Plus className="size-3.5" /> Add Certification
+                      <button onClick={() => setCertificationsList([...certificationsList, { title: '', issuer: '', date: '' }])} style={{ background: '#f1f5f9', color: '#1c2427', border: 'none', borderRadius: '8px', padding: '6px 10px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Plus className="size-3" /> Add Certification
                       </button>
                     </div>
 
                     <div>
-                      <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1c2427', marginBottom: '10px' }}>Key Achievements (1 per line)</h3>
-                      <textarea rows="4" value={achievementsList.join('\n')} onChange={e => setAchievementsList(e.target.value.split('\n').filter(Boolean))} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid #cbd5e1', fontSize: '0.85rem' }} />
+                      <h3 style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1c2427', marginBottom: '8px' }}>Key Achievements (1 per line)</h3>
+                      <textarea rows="3" value={achievementsList.join('\n')} onChange={e => setAchievementsList(e.target.value.split('\n').filter(Boolean))} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.8rem' }} />
                     </div>
                   </div>
                 )}
@@ -900,26 +900,26 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
               </div>
 
               {/* Action Bar (Down Side - Copy LaTeX, Download .tex, Open Overleaf) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                 <button
                   onClick={handleCopyLatex}
                   style={{
                     background: isCopied ? '#10b981' : '#1c2427',
                     color: '#ffffff',
                     border: 'none',
-                    borderRadius: '16px',
-                    padding: '14px 12px',
+                    borderRadius: '12px',
+                    padding: '10px 8px',
                     fontWeight: 700,
-                    fontSize: '0.85rem',
+                    fontSize: '0.8rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px',
-                    boxShadow: '0 4px 12px rgba(28,36,39,0.1)'
+                    gap: '4px',
+                    boxShadow: '0 2px 8px rgba(28,36,39,0.08)'
                   }}
                 >
-                  {isCopied ? <Check className="size-4" /> : <Copy className="size-4" />}
+                  {isCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                   {isCopied ? 'Copied!' : 'Copy LaTeX'}
                 </button>
 
@@ -929,19 +929,19 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                     background: '#3b82f6',
                     color: '#ffffff',
                     border: 'none',
-                    borderRadius: '16px',
-                    padding: '14px 12px',
+                    borderRadius: '12px',
+                    padding: '10px 8px',
                     fontWeight: 700,
-                    fontSize: '0.85rem',
+                    fontSize: '0.8rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px',
-                    boxShadow: '0 4px 12px rgba(59,130,246,0.2)'
+                    gap: '4px',
+                    boxShadow: '0 2px 8px rgba(59,130,246,0.15)'
                   }}
                 >
-                  <Download className="size-4" /> Download .tex
+                  <Download className="size-3.5" /> Download .tex
                 </button>
 
                 <a
@@ -952,20 +952,20 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                     background: '#f5c35c',
                     color: '#1c2427',
                     border: 'none',
-                    borderRadius: '16px',
-                    padding: '14px 12px',
+                    borderRadius: '12px',
+                    padding: '10px 8px',
                     fontWeight: 700,
-                    fontSize: '0.85rem',
+                    fontSize: '0.8rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px',
+                    gap: '4px',
                     textDecoration: 'none',
-                    boxShadow: '0 4px 12px rgba(245,195,92,0.2)'
+                    boxShadow: '0 2px 8px rgba(245,195,92,0.15)'
                   }}
                 >
-                  <ExternalLink className="size-4" /> Open Overleaf
+                  <ExternalLink className="size-3.5" /> Open Overleaf
                 </a>
               </div>
 
@@ -973,13 +973,13 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
               <div style={{
                 background: '#eff6ff',
                 border: '1px solid #bfdbfe',
-                borderRadius: '16px',
-                padding: '12px 16px',
+                borderRadius: '12px',
+                padding: '8px 14px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
               }}>
-                <span style={{ fontSize: '0.82rem', color: '#1e40af', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.78rem', color: '#1e40af', fontWeight: 600 }}>
                   Render & Preview Live PDF Online:
                 </span>
                 <a
@@ -989,45 +989,45 @@ ${achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')}
                   style={{
                     color: '#2563eb',
                     fontWeight: 700,
-                    fontSize: '0.82rem',
+                    fontSize: '0.78rem',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
                     textDecoration: 'underline'
                   }}
                 >
-                  Compile PDF Online <ExternalLink className="size-3.5" />
+                  Compile PDF Online <ExternalLink className="size-3" />
                 </a>
               </div>
 
             </div>
 
             {/* RIGHT COLUMN: GENERATED LATEX CODE CONTAINER */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{
                 background: '#1c2427',
-                borderRadius: '24px',
-                padding: '20px',
+                borderRadius: '20px',
+                padding: '16px',
                 color: '#e2e8f0',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+                boxShadow: '0 4px 20px rgba(0,0,0,0.06)'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f5c35c', fontFamily: 'monospace' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f5c35c', fontFamily: 'monospace' }}>
                     {template === 'abey_classic' ? 'classic_tech_resume.tex' : template === 'executive' ? 'executive_resume.tex' : 'data_ml_specialist_resume.tex'}
                   </span>
-                  <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '6px', color: '#94a3b8' }}>
+                  <span style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '6px', color: '#94a3b8' }}>
                     LaTeX Source Code
                   </span>
                 </div>
 
                 <pre style={{
                   background: '#141a1c',
-                  borderRadius: '14px',
-                  padding: '16px',
+                  borderRadius: '12px',
+                  padding: '12px',
                   fontFamily: 'Consolas, Monaco, "Fira Code", monospace',
-                  fontSize: '0.78rem',
-                  lineHeight: 1.5,
-                  maxHeight: '760px',
+                  fontSize: '0.76rem',
+                  lineHeight: 1.45,
+                  maxHeight: '680px',
                   overflow: 'auto',
                   color: '#a7f3d0',
                   margin: 0,
