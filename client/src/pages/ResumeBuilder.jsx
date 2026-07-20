@@ -17,8 +17,7 @@ import {
   Award,
   Trophy,
   Plus,
-  Trash2,
-  RefreshCw
+  Trash2
 } from 'lucide-react';
 import '../css/style.css';
 
@@ -76,70 +75,6 @@ const ResumeBuilder = () => {
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
 
-  // Function to load sample data if user wants to see demo
-  const loadSampleData = () => {
-    setName('Mukund Khandelwal');
-    setLocation('Dausa, Rajasthan');
-    setPhone('+91-6376447286');
-    setEmail('mukundkhandelwal463@gmail.com');
-    setLinkedin('https://www.linkedin.com/in/mukund463/');
-    setGithub('https://github.com/mukundkhandelwal463');
-
-    setEducationList([
-      { school: 'Lovely Professional University', location: 'Phagwara, Punjab', degree: 'B.Tech -- Computer Science and Engineering | CGPA: 7.69', dates: 'Aug 2023 -- Present' },
-      { school: 'Genius Public School', location: 'Dausa, Rajasthan', degree: 'Intermediate | Percentage: 65%', dates: 'Apr 2022 -- Mar 2023' },
-      { school: 'Shekhawati Public School', location: 'Dausa, Rajasthan', degree: 'Matriculation | Percentage: 91%', dates: 'Apr 2020 -- Mar 2021' }
-    ]);
-
-    setSkillsList([
-      { category: 'Data Analysis & Validation', items: 'Anomaly Detection, Outlier Identification, Data Consistency Checks, Sanity Testing, Root Cause Analysis' },
-      { category: 'Machine Learning & AI', items: 'Scikit-learn, Random Forest, SVM, Naive Bayes, TF-IDF, Cosine Similarity, imbalanced-learn' },
-      { category: 'Statistical Analysis', items: 'Descriptive Statistics, Trend Analysis, EDA, SciPy, NumPy, Feature Engineering' },
-      { category: 'Programming & Tools', items: 'Python, Pandas, Matplotlib, Seaborn, SQL, Joblib, Streamlit, Git, GitHub' },
-      { category: 'Reporting & BI', items: 'Power BI, DAX, Power Query, MS Excel, Pivot Tables, KPI Dashboards, Data Storytelling' }
-    ]);
-
-    setProjectsList([
-      {
-        title: 'Resume Analyzer & Job Recommendation',
-        link: 'https://github.com/mukundkhandelwal463',
-        tech: 'Flask, spaCy, Scikit-learn, MySQL, TF-IDF',
-        date: 'Jan 2026',
-        bullets: 'Developed an AI-powered data validation and classification system using Flask -- applied NLP-based pipelines (spaCy, Regex, TF-IDF, cosine similarity) to extract, parse, and validate data consistency across PDF/DOCX/TXT formats.\nTrained and evaluated ML models (SVM, Naive Bayes) for accurate data classification and anomaly identification.\nImplemented ATS scoring rules to systematically validate entries.'
-      },
-      {
-        title: 'Accident Prediction With Pipeline',
-        link: 'https://github.com/mukundkhandelwal463/Accident-Prediction-With-Pipeline',
-        tech: 'Python, Scikit-learn, Streamlit, imbalanced-learn',
-        date: 'Apr 2025',
-        bullets: 'Built an end-to-end ML validation pipeline using Scikit-learn -- applied preprocessing, categorical encoding, and class balancing via RandomOverSampler.\nLeveraged Random Forest Classifier with statistical analysis to detect and classify incorrect data entries.'
-      }
-    ]);
-
-    setTrainingList([
-      {
-        title: 'Data Science & Business Intelligence Training',
-        date: 'Jun 2025',
-        link: 'https://github.com/mukundkhandelwal463',
-        projectTitle: 'Wine Quality Prediction System',
-        tech: 'Python, SQL, Power BI, Scikit-learn',
-        bullets: 'Performed comprehensive EDA and statistical analysis on wine quality data.\nTrained Logistic Regression and Random Forest models achieving 81% accuracy.'
-      }
-    ]);
-
-    setCertificationsList([
-      { title: 'Machine Learning & Data Science', issuer: 'GeeksforGeeks / Nation SkillUp', date: 'Jan 2026' },
-      { title: 'Data Structures and Algorithms', issuer: 'Apna College', date: 'Jun 2026' }
-    ]);
-
-    setAchievementsList([
-      'Built 4+ end-to-end ML and data validation pipelines independently.',
-      'Netflix Movies Analysis Dashboard received 4 GitHub Stars.'
-    ]);
-
-    setStatusMsg('Loaded sample resume data into form.');
-  };
-
   // Clear all form fields
   const clearForm = () => {
     setName('');
@@ -154,7 +89,8 @@ const ResumeBuilder = () => {
     setTrainingList([]);
     setCertificationsList([]);
     setAchievementsList([]);
-    setStatusMsg('Form cleared.');
+    setStatusMsg('Form reset to blank.');
+    setTimeout(() => setStatusMsg(''), 3000);
   };
 
   // Handle Upload Auto-parse
@@ -208,6 +144,7 @@ const ResumeBuilder = () => {
         }
 
         setStatusMsg('Resume parsed and form populated successfully!');
+        setTimeout(() => setStatusMsg(''), 4000);
       } else {
         setStatusMsg(data.error || 'Failed to extract resume data.');
       }
@@ -659,14 +596,14 @@ ${achievementsContent}
       <main style={{ marginTop: '55px', padding: '16px 20px', flex: 1 }}>
         <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
           
-          {/* Title Header */}
+          {/* Top Header Row - Perfectly Aligned */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '12px',
-            flexWrap: 'wrap',
-            gap: '12px'
+            marginBottom: '16px',
+            flexWrap: 'nowrap',
+            gap: '16px'
           }}>
             <div>
               <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1c2427', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -677,27 +614,8 @@ ${achievementsContent}
               </p>
             </div>
 
-            {/* Quick Upload Banner & Load Sample Data */}
+            {/* Header Right Action Controls */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <button
-                onClick={loadSampleData}
-                style={{
-                  background: '#f1f5f9',
-                  color: '#475569',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '12px',
-                  padding: '6px 12px',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <RefreshCw className="size-3.5" /> Demo Sample Data
-              </button>
-
               { (name || educationList.length > 0) && (
                 <button
                   onClick={clearForm}
@@ -706,19 +624,21 @@ ${achievementsContent}
                     color: '#ef4444',
                     border: '1px solid #fca5a5',
                     borderRadius: '12px',
-                    padding: '6px 12px',
+                    padding: '8px 14px',
                     fontSize: '0.78rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    gap: '4px',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   <Trash2 className="size-3.5" /> Clear Form
                 </button>
               )}
 
+              {/* Quick Resume Upload Banner */}
               <div style={{
                 background: '#ffffff',
                 borderRadius: '14px',
@@ -727,24 +647,25 @@ ${achievementsContent}
                 border: '1px solid #e2e8f0',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px'
+                gap: '12px'
               }}>
                 <Sparkles className="size-4 text-amber-500" />
-                <div>
+                <div style={{ lineHeight: 1.2 }}>
                   <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1c2427', display: 'block' }}>Magic Resume Autofill</span>
                   <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Parse PDF / DOCX to Form</span>
                 </div>
                 <label style={{
                   background: '#1c2427',
                   color: '#ffffff',
-                  padding: '6px 12px',
+                  padding: '7px 14px',
                   borderRadius: '10px',
                   fontSize: '0.78rem',
                   fontWeight: 700,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '4px',
+                  whiteSpace: 'nowrap'
                 }}>
                   <Upload className="size-3.5" /> Upload Resume
                   <input type="file" onChange={handleAutofillUpload} accept=".pdf,.docx,.txt" style={{ display: 'none' }} />
@@ -753,6 +674,7 @@ ${achievementsContent}
             </div>
           </div>
 
+          {/* Status Message Notification */}
           {statusMsg && (
             <div style={{
               background: '#ecfdf5',
@@ -768,11 +690,11 @@ ${achievementsContent}
             </div>
           )}
 
-          {/* MAIN 2-COLUMN GRID */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'start' }}>
+          {/* MAIN 2-COLUMN GRID (Top Aligned Flush) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'stretch' }}>
 
             {/* LEFT COLUMN: CONTROLS & FORM TABS */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
               
               {/* Template Selector Card (Top of Left Column) */}
               <div style={{
@@ -821,7 +743,8 @@ ${achievementsContent}
                 borderRadius: '20px',
                 padding: '16px 20px',
                 boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
-                border: '1px solid #e2e8f0'
+                border: '1px solid #e2e8f0',
+                flex: 1
               }}>
 
                 {/* Form Navigation Tabs (Dynamic according to selected template) */}
@@ -1134,14 +1057,17 @@ ${achievementsContent}
 
             </div>
 
-            {/* RIGHT COLUMN: GENERATED LATEX CODE CONTAINER */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* RIGHT COLUMN: GENERATED LATEX CODE CONTAINER (Aligned Flush to Left Column) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
               <div style={{
                 background: '#1c2427',
                 borderRadius: '20px',
                 padding: '16px',
                 color: '#e2e8f0',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.06)'
+                boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f5c35c', fontFamily: 'monospace' }}>
@@ -1159,7 +1085,9 @@ ${achievementsContent}
                   fontFamily: 'Consolas, Monaco, "Fira Code", monospace',
                   fontSize: '0.76rem',
                   lineHeight: 1.45,
-                  maxHeight: '680px',
+                  flex: 1,
+                  minHeight: '620px',
+                  maxHeight: '760px',
                   overflow: 'auto',
                   color: '#a7f3d0',
                   margin: 0,
