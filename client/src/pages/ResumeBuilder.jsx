@@ -17,7 +17,11 @@ import {
   Award,
   Trophy,
   Plus,
-  Trash2
+  Trash2,
+  Target,
+  BarChart3,
+  Lightbulb,
+  CheckCircle2
 } from 'lucide-react';
 import '../css/style.css';
 
@@ -34,12 +38,54 @@ const esc = (str) => {
     .replace(/\}/g, '\\}');
 };
 
+const STREAM_ROADMAPS = {
+  data_science: {
+    name: 'Data Science & Machine Learning',
+    icon: '🤖',
+    keywords: [
+      'Scikit-learn', 'Random Forest', 'PyTorch', 'TF-IDF', 'NLP Pipelines', 
+      'Feature Engineering', 'EDA', 'Outlier Detection', 'Model Deployment', 
+      'Imbalanced-learn', 'Cosine Similarity', 'SciPy'
+    ]
+  },
+  web_dev: {
+    name: 'Full Stack Web Development',
+    icon: '🌐',
+    keywords: [
+      'React.js', 'Node.js', 'Express', 'MongoDB', 'RESTful APIs', 
+      'Redux Toolkit', 'TypeScript', 'Tailwind CSS', 'GraphQL', 
+      'Next.js', 'JWT Auth', 'Webpack'
+    ]
+  },
+  backend: {
+    name: 'Backend & Cloud Engineering',
+    icon: '⚡',
+    keywords: [
+      'Python', 'Django / Flask', 'FastAPI', 'PostgreSQL', 'Docker', 
+      'Kubernetes', 'Redis Caching', 'CI/CD Pipelines', 'AWS S3', 
+      'Microservices', 'gRPC', 'SQL Optimization'
+    ]
+  },
+  data_analytics: {
+    name: 'Data Analyst & Business Intelligence',
+    icon: '📊',
+    keywords: [
+      'Power BI', 'DAX Measures', 'SQL Queries', 'Power Query', 
+      'Pandas & NumPy', 'MS Excel Pivots', 'KPI Dashboards', 
+      'Data Storytelling', 'Tableau', 'Root Cause Analysis'
+    ]
+  }
+};
+
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
   const navigate = useNavigate();
 
   // Template Choice: 'mukund_ml' | 'abey_classic' | 'executive'
   const [template, setTemplate] = useState('mukund_ml');
+
+  // Career Roadmap / Stream Target
+  const [targetStream, setTargetStream] = useState('data_science');
 
   // Form Section State
   const [activeTab, setActiveTab] = useState('personal');
@@ -74,6 +120,33 @@ const ResumeBuilder = () => {
   const [isCopied, setIsCopied] = useState(false);
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
+
+  // Calculate Real-Time ATS Score
+  const atsScore = useMemo(() => {
+    let score = 0;
+    if (name.trim()) score += 15;
+    if (email.trim() && phone.trim()) score += 15;
+    if (educationList.length > 0 && educationList[0].school) score += 20;
+    if (skillsList.length > 0 && skillsList[0].items) score += 20;
+    if (projectsList.length > 0 && projectsList[0].title) score += 20;
+    if (certificationsList.length > 0 || achievementsList.length > 0) score += 10;
+    return score;
+  }, [name, email, phone, educationList, skillsList, projectsList, certificationsList, achievementsList]);
+
+  // Add suggested keyword to skills list
+  const handleAddKeywordToSkills = (keyword) => {
+    if (skillsList.length === 0) {
+      setSkillsList([{ category: 'Core Competencies', items: keyword }]);
+    } else {
+      const updated = [...skillsList];
+      if (!updated[0].items.includes(keyword)) {
+        updated[0].items = updated[0].items ? `${updated[0].items}, ${keyword}` : keyword;
+        setSkillsList(updated);
+      }
+    }
+    setStatusMsg(`Added "${keyword}" to Skills section!`);
+    setTimeout(() => setStatusMsg(''), 2500);
+  };
 
   // Clear all form fields
   const clearForm = () => {
@@ -693,7 +766,7 @@ ${achievementsContent}
           {/* MAIN 2-COLUMN GRID (Top Aligned Flush) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'stretch' }}>
 
-            {/* LEFT COLUMN: CONTROLS & FORM TABS */}
+            {/* LEFT COLUMN: CONTROLS, CAREER ROADMAP & FORM TABS */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
               
               {/* Template Selector Card (Top of Left Column) */}
@@ -734,6 +807,98 @@ ${achievementsContent}
                       </button>
                     );
                   })}
+                </div>
+              </div>
+
+              {/* CAREER ROADMAP & REAL-TIME ATS KEYWORD RECOMMENDATION CARD */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '18px',
+                padding: '14px 16px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
+                border: '1px solid #e2e8f0'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Target className="size-4 text-emerald-600" />
+                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1c2427', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Target Career Roadmap Stream
+                    </span>
+                  </div>
+
+                  {/* ATS Score Indicator Pill */}
+                  <div style={{
+                    background: atsScore >= 70 ? '#ecfdf5' : '#fffbeb',
+                    border: `1px solid ${atsScore >= 70 ? '#6ee7b7' : '#fde68a'}`,
+                    padding: '4px 10px',
+                    borderRadius: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}>
+                    <BarChart3 className={`size-3.5 ${atsScore >= 70 ? 'text-emerald-600' : 'text-amber-600'}`} />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: atsScore >= 70 ? '#047857' : '#b45309' }}>
+                      ATS Match: {atsScore}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Career Roadmap Selector Dropdown */}
+                <div style={{ marginBottom: '12px' }}>
+                  <select
+                    value={targetStream}
+                    onChange={(e) => setTargetStream(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '10px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      color: '#1c2427',
+                      background: '#f8fafc',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="data_science">🤖 Data Science & Machine Learning Roadmap</option>
+                    <option value="web_dev">🌐 Full Stack Web Development Roadmap</option>
+                    <option value="backend">⚡ Backend & Cloud Engineering Roadmap</option>
+                    <option value="data_analytics">📊 Data Analyst & Business Intelligence Roadmap</option>
+                  </select>
+                </div>
+
+                {/* Suggested High-Impact Keywords */}
+                <div>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+                    <Lightbulb className="size-3 text-amber-500" /> Recommended ATS Keywords (Click to add to Skills):
+                  </span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {STREAM_ROADMAPS[targetStream].keywords.map((kw, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleAddKeywordToSkills(kw)}
+                        title={`Click to add "${kw}" to Skills`}
+                        style={{
+                          background: '#f1f5f9',
+                          color: '#334155',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: '16px',
+                          padding: '4px 10px',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          transition: 'all 0.15s'
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.background = '#10b981'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.borderColor = '#10b981'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#334155'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                      >
+                        <Plus className="size-3" /> {kw}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
