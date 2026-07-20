@@ -1,6 +1,6 @@
-flask
-flask-cors
-flask-sqlalchemy
+django
+django-cors-headers
+djangorestframework
 pymysql
 google-auth
 numpy

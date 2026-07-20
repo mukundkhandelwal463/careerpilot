@@ -5,6 +5,10 @@
   font-family: "Manrope", sans-serif;
 }
 
+html {
+  font-size: 135%;
+}
+
 h1, h2, h3, .font-heading {
   font-family: "Sora", sans-serif;
 }

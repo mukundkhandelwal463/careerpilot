@@ -1,7 +1,20 @@
 import React from 'react';
 import { Sparkles, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 
 const Hero = () => {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    const handleCtaClick = () => {
+        if (user) {
+            navigate('/dashboard');
+        } else {
+            navigate('/login');
+        }
+    };
+
     return (
         <section className="relative pt-20 pb-32 overflow-hidden">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
@@ -26,11 +39,17 @@ const Hero = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-                    <button className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-blue-200 dark:shadow-blue-900/30 transition-all hover:translate-y-[-2px] active:translate-y-[0px] flex items-center justify-center gap-2">
+                    <button 
+                        onClick={handleCtaClick}
+                        className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-blue-200 dark:shadow-blue-900/30 transition-all hover:translate-y-[-2px] active:translate-y-[0px] flex items-center justify-center gap-2 cursor-pointer"
+                    >
                         Get Started Free
                         <ArrowRight size={20} />
                     </button>
-                    <button className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white rounded-2xl font-bold text-lg border border-slate-200 dark:border-slate-700 transition-all">
+                    <button 
+                        onClick={handleCtaClick}
+                        className="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white rounded-2xl font-bold text-lg border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+                    >
                         View Templates
                     </button>
                 </div>

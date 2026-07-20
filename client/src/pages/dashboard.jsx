@@ -1,268 +1,889 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PlusIcon, UploadCloudIcon, TrashIcon, PencilIcon, XIcon, FileText, Settings, LogOut, Edit3, Eye, Download, Share2, Calendar, User, Briefcase, GraduationCap, Sparkles } from 'lucide-react';
-import { DummyResumeData } from '../assets/assets.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import Navbar from '../Components/navbar.jsx';
+import Footer from '../Components/footer.jsx';
+import { 
+  ChevronDown, 
+  ChevronUp, 
+  TrendingUp, 
+  Briefcase, 
+  Award, 
+  Camera, 
+  Compass, 
+  CheckSquare, 
+  User as UserIcon,
+  Activity,
+  FileText,
+  Download,
+  Mic,
+  Calendar
+} from 'lucide-react';
+import '../css/style.css';
 
 const Dashboard = () => {
-  const [allResumes, setAllResumes] = useState([]);
-  const [showCreateResume, setshowCreateResume] = useState(false);
-  const [showUploadResume, setshowUploadResume] = useState(false);
-  const [title, setTitle] = useState('');
-  const [resume, setResume] = useState(null);
-  const [editResumeId, setEditResumeId] = useState('');
+  const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const colors = [
-    'from-blue-400 to-blue-600',
-    'from-purple-400 to-purple-600',
-    'from-green-400 to-green-600',
-    'from-orange-400 to-orange-600',
-    'from-pink-400 to-pink-600',
-    'from-indigo-400 to-indigo-600',
-  ];
+  const fileInputRef = useRef(null);
 
-  const loadAllResumes = async () => {
-    // DummyResumeData is an object, but we need an array to map over it.
-    // For now, we'll wrap it in an array.
-    setAllResumes([DummyResumeData]);
-  }
+  const [resumes, setResumes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteLoadingId, setDeleteLoadingId] = useState(null);
 
-  const createResume = async (event) => {
-    event.preventDefault();
-    // Logic to create a new resume
-    setshowCreateResume(false);
-    navigate('/app/builder/res123');
-  }
+  // Accordion toggle states for left options list
+  const [openSection, setOpenSection] = useState('resumes'); // 'resumes', 'target', 'benchmarks', 'milestones'
 
-  const uploadResume = async (event) => {
-    event.preventDefault();
-    // Logic to upload a resume
-    setshowUploadResume(false);
-    navigate('/app/builder/res123');
-  }
-  const editTitle = async (event) => {
-    event.preventDefault();
-    // Logic to edit the title of a resume
-  }
+  // Profile picture state
+  const [profileImg, setProfileImg] = useState("/candidate_profile.png");
 
-  const deleteResume = async (resumeId) => {
-    // Logic to delete a resume
-    const confirm = window.confirm('Are you sure you want to delete this resume?');
-    if (confirm) {
-      setAllResumes(prev => prev.filter(resume => resume._id !== resumeId));
+  // Load state from localStorage
+  const getLocalDateString = (date) => {
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffset).toISOString().slice(0, 10);
+  };
+
+  const [scheduledTasks, setScheduledTasks] = useState({});
+  const [careerRoadmap, setCareerRoadmap] = useState(null);
+  const [targetRole, setTargetRole] = useState('');
+
+  // Track the number of times user has initiated mock interview for their best resume
+  const [interviewCount, setInterviewCount] = useState(0);
+
+  const todayStr = getLocalDateString(new Date());
+  const todayTasks = scheduledTasks[todayStr] || [];
+
+  const toggleTodayTask = (taskId) => {
+    const updated = { ...scheduledTasks };
+    if (updated[todayStr] && user) {
+      updated[todayStr] = updated[todayStr].map(t => 
+        t.id === taskId ? { ...t, completed: !t.completed } : t
+      );
+      setScheduledTasks(updated);
+      localStorage.setItem(`scheduled_tasks_${user.email}`, JSON.stringify(updated));
     }
-  }
+  };
 
+  const todayCompletedCount = todayTasks.filter(t => t.completed).length;
+  const todayProgressPercent = todayTasks.length > 0 
+    ? Math.round((todayCompletedCount / todayTasks.length) * 100)
+    : 0;
 
+  // Handle file upload for profile picture
+  const handleProfileImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file && user) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        localStorage.setItem(`candidate_profile_img_${user.email}`, reader.result);
+        setProfileImg(reader.result);
+        // Force header update by triggering storage event
+        window.dispatchEvent(new Event('storage'));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
-    loadAllResumes();
-  }, []);
+    if (!user) {
+      navigate('/login');
+      return;
+    }
 
+    const email = user.email;
+    setProfileImg(localStorage.getItem(`candidate_profile_img_${email}`) || "/candidate_profile.png");
+    
+    const savedTasks = localStorage.getItem(`scheduled_tasks_${email}`);
+    setScheduledTasks(savedTasks ? JSON.parse(savedTasks) : {});
+    
+    const savedRoadmap = localStorage.getItem(`active_career_roadmap_${email}`);
+    setCareerRoadmap(savedRoadmap ? JSON.parse(savedRoadmap) : null);
+    
+    setTargetRole(localStorage.getItem(`active_target_role_${email}`) || '');
+    
+    const savedCount = localStorage.getItem(`best_resume_interview_count_${email}`);
+    setInterviewCount(savedCount ? parseInt(savedCount, 10) : 0);
+
+    const fetchResumes = async () => {
+      try {
+        const res = await fetch('/api/resumes');
+        const data = await res.json();
+        if (data.success) {
+          setResumes(data.resumes || []);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResumes();
+  }, [user, navigate]);
+
+  const handleDeleteResume = async (resumeId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this resume scan result?")) return;
+
+    setDeleteLoadingId(resumeId);
+    try {
+      const res = await fetch(`/api/resumes/${resumeId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setResumes(prev => prev.filter(r => r.id !== resumeId));
+      } else {
+        alert(data.error || "Failed to delete resume.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred while deleting.");
+    } finally {
+      setDeleteLoadingId(null);
+    }
+  };
+
+  if (!user) return null;
+
+  // Dynamic calculations
+  const validScores = resumes.map(r => r.ats_score).filter(s => s !== null && s !== undefined);
+  const avgAtsScore = validScores.length ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length) : 0;
+  const bestAtsScore = validScores.length ? Math.round(Math.max(...validScores)) : 0; // Fallback to 0% for new user
+  const interviewReadiness = user.interview_score ? Math.round(user.interview_score) : 0; // Not Taken represents 0
+  const jobFitScore = bestAtsScore ? Math.round(bestAtsScore * 0.95) : 0; // Mapped fallback to 0%
+  const targetPositionsCount = resumes.length > 0 ? 203 : 0;
+
+  // Find the highest scoring resume item
+  const bestResumeItem = resumes.length > 0 
+    ? resumes.reduce((prev, current) => (prev.ats_score > current.ats_score ? prev : current), resumes[0])
+    : null;
+
+  // Function to download the highest ATS scoring resume file
+  const downloadBestResume = () => {
+    if (!bestResumeItem) {
+      alert("No scanned resumes available. Please scan a resume first.");
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(bestResumeItem.resume_json || '{}');
+      if (parsed.original_file_b64) {
+        const mime = parsed.original_file_name?.endsWith('.pdf') 
+          ? 'application/pdf' 
+          : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        
+        const linkSource = `data:${mime};base64,${parsed.original_file_b64}`;
+        const downloadLink = document.createElement("a");
+        downloadLink.href = linkSource;
+        downloadLink.download = parsed.original_file_name || 'best_ats_resume.docx';
+        downloadLink.click();
+        return;
+      }
+    } catch (e) {
+      console.error("Failed to parse resume json details:", e);
+    }
+
+    // Fallback: Download as text blob
+    const element = document.createElement("a");
+    const file = new Blob([bestResumeItem.resume_text || ''], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = `${bestResumeItem.title}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  // Function to trigger mock interview and track count
+  const handleTakeInterview = () => {
+    const newCount = interviewCount + 1;
+    setInterviewCount(newCount);
+    if (user) {
+      localStorage.setItem(`best_resume_interview_count_${user.email}`, String(newCount));
+    }
+    navigate('/preparation');
+  };
+
+  // Helper for Circular progress gauge calculation
+  const renderRadialGauge = (percentage, strokeColor) => {
+    const radius = 38;
+    const circ = 2 * Math.PI * radius; // ~238.76
+    const isNotTaken = percentage === 0 && strokeColor === '#f5c35c';
+    const strokeDashoffset = isNotTaken ? circ : circ - (circ * Math.min(percentage, 100)) / 100;
+
+    return (
+      <div style={{ position: 'relative', width: '96px', height: '96px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <svg style={{ transform: 'rotate(-90deg)', width: '96px', height: '96px' }}>
+          {/* Track circle */}
+          <circle
+            cx="48"
+            cy="48"
+            r={radius}
+            fill="transparent"
+            stroke="#f1f5f9"
+            strokeWidth="7"
+          />
+          {/* Progress circle */}
+          <circle
+            cx="48"
+            cy="48"
+            r={radius}
+            fill="transparent"
+            stroke={strokeColor}
+            strokeWidth="7"
+            strokeDasharray={circ}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+          />
+        </svg>
+        <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <strong style={{ fontSize: '0.94rem', color: '#1c2427', fontFamily: 'Sora, monospace', fontWeight: 800 }}>
+            {isNotTaken ? 'N/A' : `${percentage}%`}
+          </strong>
+          {isNotTaken && <span style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Not Taken</span>}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-        <div className="mb-10">
-          <h1 className='text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2'>Resume Dashboard</h1>
-          <p className='text-slate-600 dark:text-slate-400 text-lg'>Manage and create stunning professional resumes</p>
-          <div className="mt-4 flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
-            <span className="flex items-center gap-1"><FileText className="size-4" /> {allResumes.length} Resume{allResumes.length !== 1 && 's'}</span>
-            <span className="flex items-center gap-1"><Calendar className="size-4" /> Last updated today</span>
-            <span className="flex items-center gap-1"><User className="size-4" /> Welcome back!</span>
+    <div className="page-shell" style={{ background: '#FAF9F4', minHeight: '100vh', paddingBottom: '40px' }}>
+      <Navbar />
+
+      <main className="page" style={{ marginTop: '48px' }}>
+        
+        {/* TOP ROW HEADER: TITLE + COMPACT STATS */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '20px',
+          marginBottom: '32px',
+          borderBottom: '1px solid rgba(28,36,39,0.05)',
+          paddingBottom: '20px'
+        }}>
+          {/* Welcome Text */}
+          <div>
+            <h1 style={{ fontSize: '2.05rem', fontWeight: 500, fontFamily: 'Sora, sans-serif', color: '#1c2427', margin: 0 }}>
+              Welcome in, {user.full_name ? user.full_name.split(' ')[0] : 'Candidate'}
+            </h1>
+            <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '0.82rem' }}>
+              Your career readiness scorecard dashboard.
+            </p>
+          </div>
+
+          {/* Stats details (matches image right) */}
+          <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <TrendingUp className="size-5 text-slate-500" />
+              <div>
+                <strong style={{ fontSize: '1.23rem', fontFamily: 'Sora', display: 'block', lineHeight: 1 }}>{avgAtsScore}%</strong>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Avg ATS Match</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Briefcase className="size-5 text-slate-500" />
+              <div>
+                <strong style={{ fontSize: '1.23rem', fontFamily: 'Sora', display: 'block', lineHeight: 1 }}>{resumes.length}</strong>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>Scanned Resumes</span>
+              </div>
+            </div>
+
+            {/* Target Positions block removed per user request */}
           </div>
         </div>
 
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12'>
-          <button onClick={() => setshowCreateResume(true)} className='group relative overflow-hidden bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 h-48 border border-slate-200 dark:border-slate-700 flex items-center justify-center p-8 text-left'>
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 group-hover:scale-110 transition-transform duration-500"></div>
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="p-4 bg-gradient-to-br from-blue-500 to-purple-500 text-white rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                <PlusIcon className='size-10' />
+        {/* MAIN THREE-COLUMN GRID CONTAINER */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '270px 1fr 310px',
+          gap: '24px',
+          alignItems: 'start'
+        }}>
+
+          {/* 1. LEFT COLUMN: Profile Card & Accordions */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Candidate Profile Card */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '32px',
+              overflow: 'hidden',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+              position: 'relative'
+            }}>
+              {/* Photo area with hover trigger */}
+              <div 
+                onClick={() => fileInputRef.current.click()}
+                style={{ 
+                  position: 'relative', 
+                  height: profileImg && profileImg !== "/candidate_profile.png" ? '240px' : '150px',
+                  cursor: 'pointer', 
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: profileImg && profileImg !== "/candidate_profile.png" ? 'transparent' : '#f8fafc',
+                  transition: 'height 0.3s'
+                }}
+                className="group"
+              >
+                {profileImg && profileImg !== "/candidate_profile.png" ? (
+                  <img 
+                    src={profileImg} 
+                    alt="Profile photo" 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'filter 0.3s' }}
+                  />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ width: '70px', height: '70px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
+                      <UserIcon className="size-8 text-slate-400" />
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>No Photo</span>
+                  </div>
+                )}
+                {/* Photo hover overlay */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(0,0,0,0.4)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                  gap: '8px',
+                  opacity: 0,
+                  transition: 'opacity 0.3s'
+                }}
+                className="hover-overlay"
+                >
+                  <Camera className="size-6" />
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Change Photo</span>
+                </div>
               </div>
-              <h3 className='text-xl font-bold text-slate-800 dark:text-white mb-2'>Create New Resume</h3>
-              <p className='text-slate-600 dark:text-slate-400 text-center'>Start from scratch with our professional templates</p>
-            </div>
-          </button>
-          
-          <button onClick={() => setshowUploadResume(true)} className='group relative overflow-hidden bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 h-48 border border-slate-200 dark:border-slate-700 flex items-center justify-center p-8 text-left'>
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-teal-500/10 group-hover:scale-110 transition-transform duration-500"></div>
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="p-4 bg-gradient-to-br from-green-500 to-teal-500 text-white rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                <UploadCloudIcon className='size-10' />
-              </div>
-              <h3 className='text-xl font-bold text-slate-800 dark:text-white mb-2'>Upload Existing</h3>
-              <p className='text-slate-600 dark:text-slate-400 text-center'>Import a resume to enhance with our tools</p>
-            </div>
-          </button>
-        </div>
-        
-        <div className='mb-6'>
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <FileText className="size-6 text-blue-600" />
-              Your Resumes
-            </h2>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-full text-sm font-medium">
-              {allResumes.length} total
-            </span>
-          </div>
-        </div>
-        
-        {allResumes.length === 0 ? (
-          <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
-            <FileText className="size-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-300 mb-2">No resumes yet</h3>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">Get started by creating your first professional resume</p>
-            <button 
-              onClick={() => setshowCreateResume(true)}
-              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
-            >
-              Create Resume
-            </button>
-          </div>
-        ) : (
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {allResumes.map((resume, index) => {
-              const baseColor = colors[index % colors.length];
-              return (
-                <div key={resume._id} className='group relative bg-white dark:bg-slate-800 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-200 dark:border-slate-700'>
-                  <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${baseColor}`}></div>
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className='text-lg font-bold text-gray-800 dark:text-white transition-all group-hover:text-blue-600'>{resume.title}</h3>
-                        <p className='text-xs text-gray-500 dark:text-slate-400 mt-1 flex items-center gap-1'>
-                          <Calendar className="size-3" />
-                          Last updated: {resume.updatedAt ? new Date(resume.updatedAt).toLocaleDateString() : 'Today'}
-                        </p>
-                      </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Link to={`/view/${resume._id}`} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 hover:text-blue-600 transition-colors" title="View Resume">
-                          <Eye className="size-4" />
-                        </Link>
-                        <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 hover:text-green-600 transition-colors" title="Export">
-                          <Download className="size-4" />
-                        </button>
-                        <button onClick={(e) => { e.stopPropagation(); setEditResumeId(resume._id); setTitle(resume.title) }} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 hover:text-yellow-600 transition-colors" title="Edit Title">
-                          <Edit3 className="size-4" />
-                        </button>
-                        <button onClick={(e) => { e.stopPropagation(); deleteResume(resume._id) }} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 hover:text-red-600 transition-colors" title="Delete">
-                          <TrashIcon className="size-4" />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="mb-4">
-                      <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400 mb-3">
-                        <span className="flex items-center gap-1"><Briefcase className="size-4" /> {resume.experience?.length || 0} jobs</span>
-                        <span className="flex items-center gap-1"><GraduationCap className="size-4" /> {resume.education?.length || 0} schools</span>
-                        <span className="flex items-center gap-1"><Sparkles className="size-4" /> {resume.skills?.length || 0} skills</span>
-                      </div>
-                      
-                      <Link to={`/app/builder/${resume._id}`} className="block w-full py-3 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium text-center hover:from-blue-50 hover:to-blue-100 dark:hover:from-blue-900/50 dark:hover:to-blue-800/50 hover:text-blue-600 transition-all">
-                        Continue Editing
-                      </Link>
-                    </div>
-                    
-                    <div className="pt-3 border-t border-slate-100 dark:border-slate-700">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-slate-500 dark:text-slate-400">Template:</span>
-                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 capitalize">{resume.template}</span>
-                      </div>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-xs text-slate-500 dark:text-slate-400">Visibility:</span>
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${resume.public ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'}`}>
-                          {resume.public ? 'Public' : 'Private'}
-                        </span>
-                      </div>
-                    </div>
+
+              {/* Hidden file input */}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleProfileImageChange} 
+                accept="image/*" 
+                style={{ display: 'none' }}
+              />
+
+              {/* Info Area (Text removed from the image itself) */}
+              <div style={{ padding: '20px 24px', background: '#ffffff', borderTop: '1px solid #f1f5f9' }}>
+                <h3 style={{ fontSize: '1.11rem', fontWeight: 700, margin: '0 0 4px', color: '#1c2427' }}>
+                  {user.full_name}
+                </h3>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '10px', fontWeight: 600 }}>
+                  {targetRole || 'N/A'}
+                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.8rem', color: '#64748b', overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                    <svg style={{ flexShrink: 0 }} xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.phone || 'N/A'}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                    <svg style={{ flexShrink: 0 }} xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email || 'user@example.com'}</span>
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        )}
-        
-        {showCreateResume && (
-          <form onSubmit={createResume} onClick={() => setshowCreateResume(false)}
-            className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-50
-            flex items-center justify-center p-4'>
-            <div onClick={e => e.stopPropagation()} className='relative bg-white dark:bg-slate-800
-            border dark:border-slate-700 shadow-2xl rounded-2xl w-full max-w-md p-8'>
-              <h2 className='text-2xl font-bold mb-6 text-slate-800 dark:text-white flex items-center gap-2'>
-                <PlusIcon className="size-6 text-blue-600" />
-                Create a New Resume
-              </h2>
-              <input value={title} type="text" onChange={(e) => setTitle(e.target.value)} placeholder='e.g., "Software Engineer Resume"' className='w-full px-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent' required />
-              <button type="submit" className='w-full py-3.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all'>Create Resume</button>
-              <XIcon className='absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer transition-colors' onClick={() => { setshowCreateResume(false); setTitle('') }} />
+              </div>
             </div>
-          </form>
-        )}
-        
-        {showUploadResume && (
-          <form onSubmit={uploadResume} onClick={() => setshowUploadResume(false)}
-            className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-50
-            flex items-center justify-center p-4'>
-            <div onClick={e => e.stopPropagation()} className='relative bg-white dark:bg-slate-800
-            border dark:border-slate-700 shadow-2xl rounded-2xl w-full max-w-md p-8'>
-              <h2 className='text-2xl font-bold mb-6 text-slate-800 dark:text-white flex items-center gap-2'>
-                <UploadCloudIcon className='size-6 text-green-600' />
-                Upload an Existing Resume
-              </h2>
-              <input value={title} type="text" onChange={(e) => setTitle(e.target.value)} placeholder='e.g., "My Imported Resume"' className='w-full px-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl mb-6 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent' required />
-              <div className="mb-6">
-                <label htmlFor='resume-input' className="cursor-pointer">
-                  <div className='flex flex-col items-center justify-center w-full h-40 text-slate-500 dark:text-slate-400 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors'>
-                    {
-                      resume ? (
-                        <p className='font-medium text-green-600'>
-                          {resume.name}
-                        </p>
-                      ) : (
-                        <>
-                          <UploadCloudIcon className='size-10 mb-3 stroke-1' />
-                          <p className="font-semibold mb-1">Click to upload a file</p>
-                          <p className="text-xs text-slate-400">PDF, DOCX up to 10MB</p>
-                        </>
-                      )
-                    }
+
+            {/* Accordion / List Cards widget */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '28px',
+              padding: '16px 20px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}>
+              {/* Card 1: Parsed Resumes */}
+              <div>
+                <button
+                  onClick={() => setOpenSection(openSection === 'resumes' ? null : 'resumes')}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '12px 6px',
+                    background: 'none',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    color: '#1c2427',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>Parsed Resumes ({resumes.length})</span>
+                  {openSection === 'resumes' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+                {openSection === 'resumes' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px 6px 12px', maxHeight: '180px', overflowY: 'auto' }}>
+                    {resumes.map(r => (
+                      <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '8px 12px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
+                          {r.title}
+                        </span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#2563eb' }}>
+                          {r.ats_score ? `${Math.round(r.ats_score)}%` : '0%'}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                </label>
-
-                <input type='file' id='resume-input' className='hidden' accept='.pdf,.doc,.docx' onChange={(e) => setResume(e.target.files[0])} />
+                )}
               </div>
-              <button type="submit" className='w-full py-3.5 bg-gradient-to-r from-green-500 to-teal-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all'>Upload Resume</button>
-              <XIcon className='absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer transition-colors' onClick={() => { setshowUploadResume(false); setTitle('') }} />
-            </div>
-          </form>
-        )
-        }
 
-        {editResumeId && (
-          <form onSubmit={editTitle} onClick={() => setEditResumeId('')}
-            className='fixed inset-0 bg-black/70 backdrop-blur bg-opacity-50 z-50
-            flex items-center justify-center p-4'>
-            <div onClick={e => e.stopPropagation()} className='relative bg-white dark:bg-slate-800
-            border dark:border-slate-700 shadow-2xl rounded-2xl w-full max-w-md p-8'>
-              <h2 className='text-2xl font-bold mb-6 text-slate-800 dark:text-white flex items-center gap-2'>
-                <Edit3 className='size-6 text-yellow-600' />
-                Edit Resume Title
-              </h2>
-              <input value={title} type="text" onChange={(e) => setTitle(e.target.value)} placeholder='e.g., "Software Engineer Resume"' className='w-full px-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl mb-6 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent' required />
-              <div className="flex gap-3">
-                <button type="submit" className='flex-1 py-3.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all'>Update Title</button>
-                <button type="button" onClick={() => setEditResumeId('')} className='flex-1 py-3.5 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 font-semibold rounded-xl shadow hover:shadow-md transition-all'>Cancel</button>
+              <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
+
+              {/* Card 2: Target Role details */}
+              <div>
+                <button
+                  onClick={() => setOpenSection(openSection === 'target' ? null : 'target')}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '12px 6px',
+                    background: 'none',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    color: '#1c2427',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>Target Role & Domain</span>
+                  {openSection === 'target' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+                {openSection === 'target' && (
+                  <div style={{ padding: '4px 6px 12px', fontSize: '0.8rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '1.11rem' }}>🎯</span>
+                      <div>
+                        <strong style={{ display: 'block', color: '#334155' }}>{targetRole}</strong>
+                        <span>Active tracking &bull; Roadmap set</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <XIcon className='absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer transition-colors' onClick={() => { setEditResumeId(''); setTitle('') }} />
-            </div>
-          </form>
-        )}
 
-      </div>
+              <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
+
+              {/* Card 3: ATS keyword benchmarks */}
+              <div>
+                <button
+                  onClick={() => setOpenSection(openSection === 'benchmarks' ? null : 'benchmarks')}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '12px 6px',
+                    background: 'none',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    color: '#1c2427',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>ATS Keyword Match Goals</span>
+                  {openSection === 'benchmarks' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+                {openSection === 'benchmarks' && (
+                  <div style={{ padding: '4px 6px 12px', fontSize: '0.8rem', color: '#64748b' }}>
+                    Target standard: <strong>Aim for &gt; 70% ATS score</strong> to pass recruiters' automatic pre-screening.
+                  </div>
+                )}
+              </div>
+
+              <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: 0 }} />
+
+              {/* Card 4: Interview Ready milestones */}
+              <div>
+                <button
+                  onClick={() => setOpenSection(openSection === 'milestones' ? null : 'milestones')}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '12px 6px',
+                    background: 'none',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    color: '#1c2427',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <span>Interview Readiness</span>
+                  {openSection === 'milestones' ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+                {openSection === 'milestones' && (
+                  <div style={{ padding: '4px 6px 12px', fontSize: '0.8rem', color: '#64748b' }}>
+                    Mock Score: <strong>{interviewReadiness ? `${interviewReadiness}%` : 'No mock test yet'}</strong> &bull; Average rating based on technical + HR questions.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 2. MIDDLE COLUMN: Scorecard Radials Grid + New Download & Mock Interview Box */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            {/* 2x2 Scorecard Radials Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              {/* Card 1: Best ATS Match */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '28px',
+                padding: '24px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '200px',
+                textAlign: 'center'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Best ATS Match
+                </span>
+                {renderRadialGauge(bestAtsScore, '#10b981')}
+              </div>
+
+              {/* Card 2: Mock Interview */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '28px',
+                padding: '24px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '200px',
+                textAlign: 'center'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Mock Interview
+                </span>
+                {renderRadialGauge(interviewReadiness, '#f5c35c')}
+              </div>
+
+              {/* Card 3: Tasks Progress */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '28px',
+                padding: '24px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '200px',
+                textAlign: 'center'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Tasks Progress
+                </span>
+                {renderRadialGauge(todayProgressPercent, '#3b82f6')}
+              </div>
+
+              {/* Card 4: Job Fit Match */}
+              <div style={{
+                background: '#ffffff',
+                borderRadius: '28px',
+                padding: '24px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '200px',
+                textAlign: 'center'
+              }}>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Job Fit Match
+                </span>
+                {renderRadialGauge(jobFitScore, '#8b5cf6')}
+              </div>
+            </div>
+
+            {/* NEW BOX: Download & Mock Interview Hub (Fills the blank space!) */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '28px',
+              padding: '28px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.03)',
+              border: '1px solid rgba(28,36,39,0.04)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}>
+              <div>
+                <h3 style={{ fontSize: '1.02rem', fontWeight: 700, color: '#1c2427', margin: '0 0 4px' }}>
+                  Resume Alignment & Action Center
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                  Download your highest-aligned resume matching the <strong>{targetRole}</strong> roadmap, or launch a dynamic mock voice interview simulation.
+                </p>
+              </div>
+
+              <div style={{
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '16px',
+                padding: '16px',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+                gap: '12px',
+                textAlign: 'center'
+              }}>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block' }}>Best ATS Match</span>
+                  <strong style={{ fontSize: '0.94rem', color: '#10b981', display: 'block', marginTop: '2px' }}>{bestAtsScore}%</strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block' }}>Best Mock Score</span>
+                  <strong style={{ fontSize: '0.94rem', color: '#f5c35c', display: 'block', marginTop: '2px' }}>
+                    {interviewReadiness ? `${interviewReadiness}%` : 'N/A'}
+                  </strong>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block' }}>Interviews Taken</span>
+                  <strong style={{ fontSize: '0.94rem', color: '#1c2427', display: 'block', marginTop: '2px' }}>{interviewCount} Attempts</strong>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
+                {/* Download best resume */}
+                <button
+                  onClick={downloadBestResume}
+                  style={{
+                    background: '#1c2427',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '12px 16px',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(28,36,39,0.1)'
+                  }}
+                >
+                  <Download className="size-4" /> Download Resume
+                </button>
+
+                {/* Take mock interview */}
+                <button
+                  onClick={handleTakeInterview}
+                  style={{
+                    background: '#f5c35c',
+                    color: '#1c2427',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '12px 16px',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 4px 12px rgba(245,195,92,0.15)'
+                  }}
+                >
+                  <Mic className="size-4" /> Start Mock Interview
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* 3. RIGHT COLUMN: Detailed Career Map & Dynamic Tasks Checklist */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            {/* Detailed Career Map Card */}
+            <div style={{
+              background: '#ffffff',
+              borderRadius: '28px',
+              padding: '24px',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.03)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1c2427', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Compass className="size-4 text-slate-500" /> Career Map
+                </span>
+                <span style={{ fontSize: '0.8rem', background: '#eff6ff', color: '#3b82f6', padding: '2px 8px', borderRadius: '999px', fontWeight: 700 }}>
+                  Active Path
+                </span>
+              </div>
+
+              {/* Detailed roadmap level blocks */}
+              {careerRoadmap ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {careerRoadmap.levels?.slice(0, 3).map((lvl, idx) => (
+                    <div key={idx} style={{ 
+                      background: '#f8fafc', 
+                      border: '1px solid #e2e8f0', 
+                      borderRadius: '16px', 
+                      padding: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1c2427' }}>
+                          Level {lvl.level || idx + 1}
+                        </span>
+                        <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
+                          {lvl.duration}
+                        </span>
+                      </div>
+                      <strong style={{ fontSize: '0.8rem', color: '#1e293b' }}>{lvl.title}</strong>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.3 }}>
+                        {lvl.focus}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '20px 10px', border: '1px dashed #cbd5e1', borderRadius: '16px' }}>
+                  <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                    No Career Map loaded. Generate your path in <Link to="/preparation" style={{ color: '#3b82f6', fontWeight: 700 }}>Preparation Hub</Link>.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Dark Preparation tasks list */}
+            <div style={{
+              background: '#1c2427',
+              borderRadius: '32px',
+              padding: '24px',
+              color: '#ffffff',
+              boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
+                <span style={{ fontSize: '0.87rem', fontWeight: 700 }}>Preparation Tasks</span>
+                <strong style={{ fontSize: '1.11rem', fontFamily: 'monospace', color: '#f5c35c' }}>
+                  {todayCompletedCount}/{todayTasks.length}
+                </strong>
+              </div>
+
+              {/* Task list with circular checked badges */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {todayTasks.length > 0 ? (
+                  todayTasks.map((task) => (
+                    <button
+                      key={task.id}
+                      onClick={() => toggleTodayTask(task.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                        borderRadius: '16px',
+                        padding: '12px 16px',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        color: '#ffffff',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {/* Circle custom icon */}
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: 'rgba(255,255,255,0.1)',
+                          display: 'grid',
+                          placeItems: 'center',
+                          fontSize: '10px'
+                        }}>
+                          📋
+                        </div>
+                        <div style={{ overflow: 'hidden' }}>
+                          <strong style={{ 
+                            display: 'block', 
+                            fontSize: '0.8rem',
+                            textDecoration: task.completed ? 'line-through' : 'none',
+                            color: task.completed ? '#6b7280' : '#ffffff',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: '150px'
+                          }}>
+                            {task.text}
+                          </strong>
+                          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Today &bull; Target</span>
+                        </div>
+                      </div>
+
+                      {/* Right circular check badge */}
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        border: '2px solid #6b7280',
+                        borderColor: task.completed ? '#f5c35c' : '#6b7280',
+                        background: task.completed ? '#f5c35c' : 'transparent',
+                        display: 'grid',
+                        placeItems: 'center',
+                        fontSize: '9px',
+                        color: '#1c2427',
+                        fontWeight: 'bold',
+                        flexShrink: 0
+                      }}>
+                        {task.completed && '✓'}
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '20px 10px', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '16px' }}>
+                    <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.8rem', fontStyle: 'italic' }}>
+                      No tasks scheduled for today. Add goals in <Link to="/preparation" style={{ color: '#f5c35c', fontWeight: 700 }}>Task Tracker</Link>.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </main>
+
+      <Footer />
     </div>
-  )
-}
+  );
+};
 
 export default Dashboard;

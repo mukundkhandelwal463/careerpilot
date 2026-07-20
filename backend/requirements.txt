@@ -1,6 +1,6 @@
-flask
-flask-cors
-flask-sqlalchemy
+django
+django-cors-headers
+djangorestframework
 pymysql
 google-auth
 numpy
@@ -13,3 +13,5 @@ google-generativeai
 python-dotenv
 fpdf2
 gunicorn
+psycopg2-binary
+dj-database-url

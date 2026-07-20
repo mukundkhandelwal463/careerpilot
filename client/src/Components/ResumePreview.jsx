@@ -3,6 +3,7 @@ import ClassicTemplate from './templates/ClassicTemplate.jsx'
 import ModernTemplate from './templates/ModernTemplate.jsx'
 import MinimalTemplate from './templates/MinimalTemplate.jsx'
 import MinimalImageTemplate from './templates/MinimalImageTemplate.jsx'
+import ProfessionalTemplate from './templates/ProfessionalTemplate.jsx'
 
 
 
@@ -15,7 +16,8 @@ const ResumePreview = ({ data, template, accentColor, classes = '' }) => {
                 return <MinimalTemplate data={data} accentColor={accentColor} />;
             case 'minimal-image':
                 return <MinimalImageTemplate data={data} accentColor={accentColor} />;
-
+            case 'professional':
+                return <ProfessionalTemplate data={data} />;
             default:
                 return <ClassicTemplate data={data} accentColor={accentColor} />;
         }

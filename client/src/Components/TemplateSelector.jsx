@@ -4,6 +4,7 @@ import { Layout, Check } from 'lucide-react'
 const TemplateSelector = ({selectedTemplate, onChange}) => {
     const [isOpen, setIsOpen] = useState(false);
     const templates = [
+    { id: 'professional', name: 'Professional', preview: 'A sharp, print-ready design with bold headers, dividers, and a 3-column skills layout.' },
     { id: 'classic', name: 'Classic', preview: 'A clean, traditional layout suitable for all professions.' },
     { id: 'modern', name: 'Modern', preview: 'A sleek, contemporary design with a minimalist aesthetic.' },
     { id: 'minimal-image', name: 'Minimal with Image', preview: 'A simple layout that includes a profile image for a personal touch.' },

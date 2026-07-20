@@ -326,8 +326,11 @@ class ResumeModelService:
             skill_score = keyword_score  # neutral if JD has no recognizable skills
 
         # 3. TF-IDF cosine similarity (30% weight) - semantic similarity
-        vectors = self.vectorizer.fit_transform([cleaned_resume, cleaned_jd])
-        cosine_score = cosine_similarity(vectors[0:1], vectors[1:2])[0][0] * 100
+        try:
+            vectors = self.vectorizer.fit_transform([cleaned_resume, cleaned_jd])
+            cosine_score = cosine_similarity(vectors[0:1], vectors[1:2])[0][0] * 100
+        except Exception:
+            cosine_score = 0.0
 
         # Weighted combination
         final_score = (keyword_score * 0.60) + (cosine_score * 0.30) + (skill_score * 0.10)
@@ -361,8 +364,11 @@ class ResumeModelService:
             else:
                 skill_score = keyword_score
 
-            vectors = self.vectorizer.fit_transform([cleaned_resume, cleaned_ref])
-            cosine_score = cosine_similarity(vectors[0:1], vectors[1:2])[0][0] * 100
+            try:
+                vectors = self.vectorizer.fit_transform([cleaned_resume, cleaned_ref])
+                cosine_score = cosine_similarity(vectors[0:1], vectors[1:2])[0][0] * 100
+            except Exception:
+                cosine_score = 0.0
             final_score = (keyword_score * 0.50) + (cosine_score * 0.30) + (skill_score * 0.20)
             return round(min(max(float(final_score), 0.0), 100.0), 2)
 

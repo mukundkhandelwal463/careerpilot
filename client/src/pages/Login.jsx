@@ -1,59 +1,405 @@
-import React from 'react';
-import { Mail, Lock, ArrowRight, FileText } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import Navbar from '../Components/navbar.jsx';
+import Footer from '../Components/footer.jsx';
+import '../css/style.css';
 
 const Login = () => {
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 px-4">
-            <div className="max-w-md w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-10 border border-slate-200 dark:border-slate-700">
-                    <div className="mb-10 text-center">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-200 dark:shadow-blue-900/30">
-                            <FileText className="text-white" size={32} />
-                        </div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Welcome Back</h1>
-                        <p className="text-slate-500 dark:text-slate-400 mt-2">Sign in to your account to continue</p>
-                    </div>
+  // Mode: 'login' | 'register' | 'otp'
+  const [mode, setMode] = useState('login');
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [mobile, setMobile] = useState('');
+  
+  // 6 digits OTP code state
+  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
+  const otpRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
 
-                    <form className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Email Address</label>
-                            <div className="relative group">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={20} />
-                                <input
-                                    type="email"
-                                    placeholder="name@company.com"
-                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all w-full"
-                                />
-                            </div>
-                        </div>
+  const [status, setStatus] = useState({ text: '', type: '' });
+  const [loading, setLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">Password</label>
-                            <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={20} />
-                                <input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all w-full"
-                                />
-                            </div>
-                        </div>
+  const { login: setAuthUser, user } = useAuth();
+  const navigate = useNavigate();
 
-                        <button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-blue-100 dark:shadow-blue-900/20">
-                            Sign In
-                            <ArrowRight size={20} />
-                        </button>
-                    </form>
+  useEffect(() => {
+    // If already logged in, redirect
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
-                    <p className="mt-8 text-center text-slate-500 dark:text-slate-400 text-sm">
-                        Don't have an account? <a href="#" className="text-blue-600 font-bold hover:underline">Create one</a>
-                    </p>
+  const handleGoogleCredentialResponse = async (response) => {
+    showStatus('', '');
+    setLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_token: response.credential })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAuthUser(data.user);
+        navigate('/dashboard');
+      } else {
+        showStatus(data.error || 'Google sign-in failed.', 'error');
+      }
+    } catch (err) {
+      showStatus('Connection failed.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let attempts = 0;
+    const initGoogle = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/google-client-id`);
+        const data = await res.json();
+        if (data.success && data.google_client_id) {
+          const interval = setInterval(() => {
+            attempts++;
+            if (window.google) {
+              clearInterval(interval);
+              window.google.accounts.id.initialize({
+                client_id: data.google_client_id,
+                callback: handleGoogleCredentialResponse
+              });
+              
+              if (mode !== 'otp') {
+                const container = document.getElementById("googleBtnContainer");
+                if (container) {
+                  window.google.accounts.id.renderButton(container, {
+                    theme: "outline",
+                    size: "large",
+                    width: 368
+                  });
+                }
+              }
+            } else if (attempts > 30) {
+              clearInterval(interval);
+            }
+          }, 200);
+        }
+      } catch (err) {
+        console.error("Google SSO initialization failed:", err);
+      }
+    };
+    initGoogle();
+  }, [mode]);
+
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const showStatus = (msg, type) => {
+    setStatus({ text: msg, type: type });
+  };
+
+  const switchTab = (tab) => {
+    setMode(tab);
+    setStatus({ text: '', type: '' });
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    showStatus('', '');
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAuthUser(data.user);
+        navigate('/dashboard');
+      } else if (data.unverified) {
+        setMode('otp');
+        showStatus(data.error || 'Account unverified. Verify email.', 'error');
+      } else {
+        showStatus(data.error || 'Login failed.', 'error');
+      }
+    } catch (err) {
+      showStatus('Connection failed. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    showStatus('', '');
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: fullName,
+          email: email,
+          mobile: mobile,
+          password: password
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMode('otp');
+        const helperText = data.dev_otp ? ` (Dev Code: ${data.dev_otp})` : '';
+        showStatus("Verification code sent to " + email + helperText, 'success');
+      } else {
+        showStatus(data.error || 'Registration failed.', 'error');
+      }
+    } catch (err) {
+      showStatus('Connection failed. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    showStatus('', '');
+    const code = otpCode.join('');
+    if (code.length < 6) {
+      showStatus('Please enter all 6 digits.', 'error');
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAuthUser(data.user);
+        navigate('/dashboard');
+      } else {
+        showStatus(data.error || 'Verification failed.', 'error');
+      }
+    } catch (err) {
+      showStatus('Connection failed. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (resendCooldown > 0) return;
+    showStatus('', '');
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const helperText = data.dev_otp ? ` (Dev Code: ${data.dev_otp})` : '';
+        showStatus("New OTP sent to " + email + helperText, 'success');
+        setResendCooldown(30);
+      } else {
+        showStatus(data.error || 'Failed to resend OTP.', 'error');
+      }
+    } catch (err) {
+      showStatus('Connection failed.', 'error');
+    }
+  };
+
+  const handleOtpChange = (val, index) => {
+    const cleaned = val.replace(/[^0-9]/g, '');
+    const nextOtp = [...otpCode];
+    nextOtp[index] = cleaned;
+    setOtpCode(nextOtp);
+
+    // Auto-focus next field
+    if (cleaned && index < 5) {
+      otpRefs[index + 1].current.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
+      otpRefs[index - 1].current.focus();
+    }
+  };
+
+  return (
+    <div className="page-shell">
+      <Navbar />
+      <main className="page">
+        <div className="auth-container">
+          <div className="auth-card" id="authCard">
+            <h1>
+              {mode === 'login' ? 'Welcome Back' : mode === 'register' ? 'Create Account' : 'Verification'}
+            </h1>
+            <p className="subtitle">
+              {mode === 'login' 
+                ? 'Sign in to save your resumes & analysis' 
+                : mode === 'register' 
+                ? 'Join the future of resume building' 
+                : `Check ${email} for 6-digit code`}
+            </p>
+
+            {/* Google Sign-In & Divider */}
+            {mode !== 'otp' && (
+              <>
+                <div id="googleBtnContainer" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}></div>
+                <div className="divider">or</div>
+              </>
+            )}
+
+            {/* Tabs */}
+            {mode !== 'otp' && (
+              <div className="auth-tabs">
+                <button className={mode === 'login' ? 'active' : ''} onClick={() => switchTab('login')}>Sign In</button>
+                <button className={mode === 'register' ? 'active' : ''} onClick={() => switchTab('register')}>Create Account</button>
+              </div>
+            )}
+
+            {/* Login Form */}
+            {mode === 'login' && (
+              <form id="loginForm" className="auth-form active" onSubmit={handleLogin}>
+                <label htmlFor="loginEmail">Email</label>
+                <input 
+                  type="email" 
+                  id="loginEmail" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com" 
+                  required 
+                />
+                <label htmlFor="loginPassword">Password</label>
+                <input 
+                  type="password" 
+                  id="loginPassword" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Your password" 
+                  required 
+                />
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={loading}>
+                  {loading ? 'Signing In...' : 'Sign In'}
+                </button>
+              </form>
+            )}
+
+            {/* Register Form */}
+            {mode === 'register' && (
+              <form id="registerForm" className="auth-form active" onSubmit={handleRegister}>
+                <label htmlFor="regName">Full Name</label>
+                <input 
+                  type="text" 
+                  id="regName" 
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Your full name" 
+                  required 
+                />
+                <label htmlFor="regEmail">Email</label>
+                <input 
+                  type="email" 
+                  id="regEmail" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com" 
+                  required 
+                />
+                <label htmlFor="regMobile">Mobile (optional)</label>
+                <input 
+                  type="text" 
+                  id="regMobile" 
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
+                  placeholder="+91 9999999999" 
+                />
+                <label htmlFor="regPassword">Password</label>
+                <input 
+                  type="password" 
+                  id="regPassword" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Min 6 characters" 
+                  required 
+                />
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} disabled={loading}>
+                  {loading ? 'Creating...' : 'Create Account'}
+                </button>
+              </form>
+            )}
+
+            {/* OTP Form */}
+            {mode === 'otp' && (
+              <form id="otpForm" className="auth-form active" onSubmit={handleVerifyOTP}>
+                <div className="otp-box">
+                  <p style={{ fontWeight: 700, marginBottom: '10px' }}>Verify Your Email</p>
+                  <div className="otp-inputs" id="otpInputs">
+                    {otpCode.map((val, idx) => (
+                      <input 
+                        key={idx}
+                        ref={otpRefs[idx]}
+                        type="text" 
+                        maxLength={1} 
+                        value={val}
+                        onChange={(e) => handleOtpChange(e.target.value, idx)}
+                        onKeyDown={(e) => handleOtpKeyDown(e, idx)}
+                      />
+                    ))}
+                  </div>
+                  <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+                    {loading ? 'Verifying...' : 'Verify & Sign In'}
+                  </button>
+                  <p className="resend-text">
+                    Didn't get it?{' '}
+                    <span 
+                      className={`resend-link ${resendCooldown > 0 ? 'disabled' : ''}`} 
+                      id="resendBtn" 
+                      onClick={handleResendOTP}
+                    >
+                      {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+                    </span>
+                  </p>
+                  <button 
+                    type="button" 
+                    onClick={() => setMode('login')} 
+                    className="btn btn-secondary" 
+                    style={{ width: '105px', marginTop: '20px', fontSize: '0.82rem', padding: '6px' }}
+                  >
+                    Back
+                  </button>
                 </div>
-            </div>
+              </form>
+            )}
+
+            {status.text && (
+              <div id="authStatus" className={`auth-status ${status.type}`}>
+                {status.text}
+              </div>
+            )}
+          </div>
         </div>
-    );
+      </main>
+      <Footer />
+    </div>
+  );
 };
 
 export default Login;
-
-
