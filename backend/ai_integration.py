@@ -1800,3 +1800,48 @@ Format response as strictly valid JSON (start with '{{' and end with '}}'). No m
         else:
             return 0.0, "Compiles successfully, but AI logic verification is unavailable. 0 marks awarded for unverified logic."
 
+
+def get_gemini_keywords_for_stream(stream_name):
+    if not is_valid_key() or not stream_name:
+        return _fallback_stream_keywords(stream_name)
+    
+    prompt = f"""
+You are an expert ATS (Applicant Tracking System) Specialist and Career Coach.
+Generate a JSON list of 12 to 15 high-impact, ATS-optimized technical keywords, tools, skills, and industry terms for a candidate aiming for the target career stream/role: "{stream_name}".
+
+Output format MUST BE STRICT VALID JSON ARRAY of strings only, e.g.:
+["Keyword 1", "Keyword 2", "Keyword 3", "Keyword 4"]
+Do not include markdown backticks or any explanation outside the JSON array.
+"""
+    try:
+        raw_text = _generate_with_model_fallback(prompt, timeout_sec=10)
+        cleaned = re.sub(r'```json\s*', '', raw_text)
+        cleaned = re.sub(r'```\s*', '', cleaned).strip()
+        data = json.loads(cleaned)
+        if isinstance(data, list) and len(data) > 0:
+            return [str(x) for x in data]
+    except Exception as e:
+        print(f"Gemini stream keyword error: {e}")
+    
+    return _fallback_stream_keywords(stream_name)
+
+
+def _fallback_stream_keywords(stream_name):
+    s = (stream_name or "").lower()
+    if "cyber" in s or "security" in s:
+        return ["Wireshark", "Metasploit", "Penetration Testing", "Nmap", "SIEM", "SOC Analysis", "ISO 27001", "Cryptography", "Network Security", "Ethical Hacking", "Zero Trust", "Firewalls"]
+    if "devops" in s or "cloud" in s:
+        return ["Docker", "Kubernetes", "Terraform", "CI/CD Pipelines", "AWS", "Ansible", "Jenkins", "Prometheus", "Grafana", "Linux Administration", "Bash Scripting", "Helm"]
+    if "ios" in s or "swift" in s:
+        return ["Swift", "SwiftUI", "UIKit", "Xcode", "Combine Framework", "CoreData", "CocoaPods", "RESTful APIs", "Git", "TestFlight", "App Store Deployment", "MVVM"]
+    if "android" in s or "kotlin" in s:
+        return ["Kotlin", "Android SDK", "Jetpack Compose", "Coroutines", "Room Database", "Retrofit", "Dagger Hilt", "Gradle", "MVVM Architecture", "Unit Testing"]
+    if "data eng" in s or "spark" in s:
+        return ["Apache Spark", "PySpark", "Hadoop", "Kafka", "Airflow", "ETL Pipelines", "Snowflake", "Databricks", "Data Warehousing", "SQL Optimization", "Parquet", "BigQuery"]
+    if "data sci" in s or "machine" in s or "ml" in s:
+        return ["Scikit-learn", "Random Forest", "PyTorch", "TF-IDF", "NLP Pipelines", "Feature Engineering", "EDA", "Outlier Detection", "Model Deployment", "Cosine Similarity", "Pandas", "SciPy"]
+    
+    words = [w.capitalize() for w in re.findall(r'\w+', stream_name) if len(w) > 2]
+    return words + ["System Design", "Agile Methodology", "Git / GitHub", "Problem Solving", "REST APIs", "Unit Testing", "CI/CD", "Performance Optimization"]
+
+

@@ -21,7 +21,8 @@ import {
   Target,
   BarChart3,
   Lightbulb,
-  CheckCircle2
+  Search,
+  Loader2
 } from 'lucide-react';
 import '../css/style.css';
 
@@ -38,44 +39,11 @@ const esc = (str) => {
     .replace(/\}/g, '\\}');
 };
 
-const STREAM_ROADMAPS = {
-  data_science: {
-    name: 'Data Science & Machine Learning',
-    icon: '🤖',
-    keywords: [
-      'Scikit-learn', 'Random Forest', 'PyTorch', 'TF-IDF', 'NLP Pipelines', 
-      'Feature Engineering', 'EDA', 'Outlier Detection', 'Model Deployment', 
-      'Imbalanced-learn', 'Cosine Similarity', 'SciPy'
-    ]
-  },
-  web_dev: {
-    name: 'Full Stack Web Development',
-    icon: '🌐',
-    keywords: [
-      'React.js', 'Node.js', 'Express', 'MongoDB', 'RESTful APIs', 
-      'Redux Toolkit', 'TypeScript', 'Tailwind CSS', 'GraphQL', 
-      'Next.js', 'JWT Auth', 'Webpack'
-    ]
-  },
-  backend: {
-    name: 'Backend & Cloud Engineering',
-    icon: '⚡',
-    keywords: [
-      'Python', 'Django / Flask', 'FastAPI', 'PostgreSQL', 'Docker', 
-      'Kubernetes', 'Redis Caching', 'CI/CD Pipelines', 'AWS S3', 
-      'Microservices', 'gRPC', 'SQL Optimization'
-    ]
-  },
-  data_analytics: {
-    name: 'Data Analyst & Business Intelligence',
-    icon: '📊',
-    keywords: [
-      'Power BI', 'DAX Measures', 'SQL Queries', 'Power Query', 
-      'Pandas & NumPy', 'MS Excel Pivots', 'KPI Dashboards', 
-      'Data Storytelling', 'Tableau', 'Root Cause Analysis'
-    ]
-  }
-};
+const DEFAULT_STREAM_KEYWORDS = [
+  'Scikit-learn', 'Random Forest', 'PyTorch', 'TF-IDF', 'NLP Pipelines', 
+  'Feature Engineering', 'EDA', 'Outlier Detection', 'Model Deployment', 
+  'Cosine Similarity', 'Pandas', 'SciPy'
+];
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
@@ -84,8 +52,10 @@ const ResumeBuilder = () => {
   // Template Choice: 'mukund_ml' | 'abey_classic' | 'executive'
   const [template, setTemplate] = useState('mukund_ml');
 
-  // Career Roadmap / Stream Target
-  const [targetStream, setTargetStream] = useState('data_science');
+  // Custom Career Stream Target (User can write any role/stream!)
+  const [customStream, setCustomStream] = useState('Data Science & Machine Learning');
+  const [dynamicKeywords, setDynamicKeywords] = useState(DEFAULT_STREAM_KEYWORDS);
+  const [isFetchingKeywords, setIsFetchingKeywords] = useState(false);
 
   // Form Section State
   const [activeTab, setActiveTab] = useState('personal');
@@ -120,6 +90,34 @@ const ResumeBuilder = () => {
   const [isCopied, setIsCopied] = useState(false);
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
+
+  // Fetch Gemini Keywords for User-Entered Stream
+  const handleFetchGeminiKeywords = async () => {
+    if (!customStream.trim()) return;
+    setIsFetchingKeywords(true);
+    setStatusMsg(`Gemini AI is generating ATS keywords for "${customStream}"...`);
+
+    try {
+      const res = await fetch('/api/suggest-stream-keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stream: customStream.trim() }),
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.keywords) && data.keywords.length > 0) {
+        setDynamicKeywords(data.keywords);
+        setStatusMsg(`Gemini AI generated ${data.keywords.length} ATS keywords for "${customStream}"!`);
+        setTimeout(() => setStatusMsg(''), 3000);
+      } else {
+        setStatusMsg('Failed to generate keywords. Using default suggestions.');
+      }
+    } catch (err) {
+      console.error(err);
+      setStatusMsg('Error fetching Gemini AI keywords.');
+    } finally {
+      setIsFetchingKeywords(false);
+    }
+  };
 
   // Calculate Real-Time ATS Score
   const atsScore = useMemo(() => {
@@ -810,7 +808,7 @@ ${achievementsContent}
                 </div>
               </div>
 
-              {/* CAREER ROADMAP & REAL-TIME ATS KEYWORD RECOMMENDATION CARD */}
+              {/* DYNAMIC GEMINI CAREER STREAM & ATS KEYWORD GENERATOR CARD */}
               <div style={{
                 background: '#ffffff',
                 borderRadius: '18px',
@@ -822,7 +820,7 @@ ${achievementsContent}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <Target className="size-4 text-emerald-600" />
                     <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1c2427', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Target Career Roadmap Stream
+                      Target Career Stream / Role
                     </span>
                   </div>
 
@@ -843,37 +841,55 @@ ${achievementsContent}
                   </div>
                 </div>
 
-                {/* Career Roadmap Selector Dropdown */}
-                <div style={{ marginBottom: '12px' }}>
-                  <select
-                    value={targetStream}
-                    onChange={(e) => setTargetStream(e.target.value)}
+                {/* Stream Input Box with Gemini Keyword AI Trigger */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                  <input
+                    type="text"
+                    placeholder="Type target stream / role (e.g. Cybersecurity, iOS Dev, GenAI)..."
+                    value={customStream}
+                    onChange={(e) => setCustomStream(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleFetchGeminiKeywords(); }}
                     style={{
-                      width: '100%',
+                      flex: 1,
                       padding: '8px 12px',
                       borderRadius: '10px',
                       border: '1px solid #cbd5e1',
                       fontSize: '0.82rem',
-                      fontWeight: 700,
+                      fontWeight: 600,
                       color: '#1c2427',
-                      background: '#f8fafc',
-                      cursor: 'pointer'
+                      background: '#f8fafc'
+                    }}
+                  />
+                  <button
+                    onClick={handleFetchGeminiKeywords}
+                    disabled={isFetchingKeywords || !customStream.trim()}
+                    style={{
+                      background: isFetchingKeywords ? '#64748b' : '#1c2427',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '8px 14px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      cursor: isFetchingKeywords ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      whiteSpace: 'nowrap'
                     }}
                   >
-                    <option value="data_science">🤖 Data Science & Machine Learning Roadmap</option>
-                    <option value="web_dev">🌐 Full Stack Web Development Roadmap</option>
-                    <option value="backend">⚡ Backend & Cloud Engineering Roadmap</option>
-                    <option value="data_analytics">📊 Data Analyst & Business Intelligence Roadmap</option>
-                  </select>
+                    {isFetchingKeywords ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5 text-amber-400" />}
+                    {isFetchingKeywords ? 'Asking Gemini...' : 'Gemini AI Keywords'}
+                  </button>
                 </div>
 
-                {/* Suggested High-Impact Keywords */}
+                {/* Gemini Suggested Keywords Pills */}
                 <div>
                   <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
-                    <Lightbulb className="size-3 text-amber-500" /> Recommended ATS Keywords (Click to add to Skills):
+                    <Lightbulb className="size-3 text-amber-500" /> Gemini ATS Keywords for "{customStream}" (Click to add to Skills):
                   </span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                    {STREAM_ROADMAPS[targetStream].keywords.map((kw, i) => (
+                    {dynamicKeywords.map((kw, i) => (
                       <button
                         key={i}
                         onClick={() => handleAddKeywordToSkills(kw)}

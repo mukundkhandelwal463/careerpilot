@@ -2571,3 +2571,25 @@ def download_complete_report_api(request):
         import traceback
         traceback.print_exc()
         return HttpResponse(f"Error generating complete report: {str(e)}", status=500)
+
+
+@csrf_exempt
+def suggest_stream_keywords_api(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=405)
+    try:
+        body = json.loads(request.body.decode('utf-8'))
+        stream = body.get('stream', '').strip()
+        if not stream:
+            return JsonResponse({'error': 'Stream parameter is required'}, status=400)
+        
+        from ai_integration import get_gemini_keywords_for_stream
+        keywords = get_gemini_keywords_for_stream(stream)
+        return JsonResponse({
+            'success': True,
+            'stream': stream,
+            'keywords': keywords
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
