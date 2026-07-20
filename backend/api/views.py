@@ -2335,6 +2335,12 @@ def download_complete_report_api(request):
     try:
         user = request.user
         if not user or not user.is_authenticated:
+            user_id = request.GET.get('id')
+            if user_id:
+                from api.models import User
+                user = User.objects.filter(email=user_id).first()
+
+        if not user:
             return HttpResponse("Unauthorized", status=401)
 
         from fpdf import FPDF
@@ -2353,11 +2359,14 @@ def download_complete_report_api(request):
         if os.path.exists(logo_path):
             pdf.image(logo_path, x=10, y=10, w=25)
 
+        full_name_clean = str(getattr(user, 'full_name', '') or user.email).encode('latin-1', 'replace').decode('latin-1')
+        email_clean = str(user.email).encode('latin-1', 'replace').decode('latin-1')
+
         pdf.set_text_color(255, 255, 255)
-        pdf.set_font("Helvetica", "B", 22)
+        pdf.set_font("Helvetica", "B", 20)
         pdf.cell(0, 15, "Complete Profile & Progress Report", ln=True, align='C')
-        pdf.set_font("Helvetica", "", 12)
-        pdf.cell(0, 10, f"Candidate: {user.full_name} ({user.email})", ln=True, align='C')
+        pdf.set_font("Helvetica", "", 11)
+        pdf.cell(0, 10, f"Candidate: {full_name_clean} ({email_clean})", ln=True, align='C')
         pdf.ln(15)
 
         pdf.set_text_color(30, 41, 59)
@@ -2368,9 +2377,10 @@ def download_complete_report_api(request):
 
         best_resume = ResumeAnalysis.objects.filter(user=user).order_by('-ats_score').first()
         if best_resume:
+            title_clean = str(best_resume.title or 'Resume').encode('latin-1', 'replace').decode('latin-1')
             pdf.set_font("Helvetica", "", 12)
             pdf.cell(0, 8, f"Highest ATS Match Score: {int(best_resume.ats_score)}%", ln=True)
-            pdf.cell(0, 8, f"Target Role Analyzed: {best_resume.title}", ln=True)
+            pdf.cell(0, 8, f"Target Role Analyzed: {title_clean}", ln=True)
         else:
             pdf.set_font("Helvetica", "", 12)
             pdf.cell(0, 8, "No resumes analyzed yet.", ln=True)
@@ -2441,11 +2451,17 @@ def download_complete_report_api(request):
         pdf.set_text_color(139, 92, 246)
         pdf.cell(90, 8, f"{cn_pct}% Completed", ln=True)
 
-        response = HttpResponse(pdf.output(dest='S').encode('latin1'), content_type='application/pdf')
+        pdf_output = pdf.output(dest='S')
+        if isinstance(pdf_output, str):
+            pdf_bytes = pdf_output.encode('latin1')
+        else:
+            pdf_bytes = bytes(pdf_output)
+
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="complete_user_report.pdf"'
         return response
 
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return HttpResponse("Error generating complete report", status=500)
+        return HttpResponse(f"Error generating complete report: {str(e)}", status=500)
