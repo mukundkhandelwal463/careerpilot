@@ -49,7 +49,7 @@ const Dashboard = () => {
   // Track the number of times user has initiated mock interview for their best resume
   const [interviewCount, setInterviewCount] = useState(0);
   const [bestTestResult, setBestTestResult] = useState(null);
-  const [csProgress, setCsProgress] = useState({ dsa: 0, os: 0, dbms: 0, cn: 0 });
+  const [csProgress, setCsProgress] = useState({ dsa: 0, oops: 0, os: 0, dbms: 0, cn: 0, sys: 0 });
 
   const todayStr = getLocalDateString(new Date());
   const todayTasks = scheduledTasks[todayStr] || [];
@@ -114,7 +114,7 @@ const Dashboard = () => {
         const parsed = JSON.parse(dsaRaw);
         dsaDone = Object.values(parsed).filter(Boolean).length;
       }
-      const dsaPct = Math.min(100, Math.round((dsaDone / 260) * 100));
+      const dsaPct = Math.min(100, Math.round((dsaDone / 260) * 100)) || 0;
 
       // 2. OS Progress
       let osDone = 0;
@@ -128,7 +128,7 @@ const Dashboard = () => {
         const parsed = JSON.parse(osTheoryRaw);
         if (Array.isArray(parsed)) osDone += parsed.length;
       }
-      const osPct = Math.min(100, Math.round((osDone / 25) * 100));
+      const osPct = Math.min(100, Math.round((osDone / 25) * 100)) || 0;
 
       // 3. DBMS Progress
       let dbmsDone = 0;
@@ -142,7 +142,7 @@ const Dashboard = () => {
         const parsed = JSON.parse(dbmsTheoryRaw);
         if (Array.isArray(parsed)) dbmsDone += parsed.length;
       }
-      const dbmsPct = Math.min(100, Math.round((dbmsDone / 25) * 100));
+      const dbmsPct = Math.min(100, Math.round((dbmsDone / 25) * 100)) || 0;
 
       // 4. CN Progress
       let cnDone = 0;
@@ -151,6 +151,13 @@ const Dashboard = () => {
         const parsed = JSON.parse(cnRaw);
         cnDone += Object.values(parsed).filter(Boolean).length;
       }
+      const cnTheoryRaw = localStorage.getItem('completed_cn_concepts');
+      if (cnTheoryRaw) {
+        const parsed = JSON.parse(cnTheoryRaw);
+        if (Array.isArray(parsed)) cnDone += parsed.length;
+      }
+      const cnPct = Math.min(100, Math.round((cnDone / 25) * 100)) || 0;
+
       // 5. OOPs Progress
       let oopsDone = 0;
       const oopsRaw = localStorage.getItem(`oops_tracker_progress_${email}`);
@@ -163,7 +170,7 @@ const Dashboard = () => {
         const parsed = JSON.parse(oopsTheoryRaw);
         if (Array.isArray(parsed)) oopsDone += parsed.length;
       }
-      const oopsPct = Math.min(100, Math.round((oopsDone / 25) * 100));
+      const oopsPct = Math.min(100, Math.round((oopsDone / 25) * 100)) || 0;
 
       // 6. System Design Progress
       let sysDone = 0;
@@ -177,7 +184,7 @@ const Dashboard = () => {
         const parsed = JSON.parse(sysTheoryRaw);
         if (Array.isArray(parsed)) sysDone += parsed.length;
       }
-      const sysPct = Math.min(100, Math.round((sysDone / 25) * 100));
+      const sysPct = Math.min(100, Math.round((sysDone / 25) * 100)) || 0;
 
       setCsProgress({
         dsa: dsaPct,
@@ -537,7 +544,7 @@ const Dashboard = () => {
             }}>
               <div>
                 <strong style={{ fontSize: '0.95rem', color: '#1c2427', display: 'block', marginBottom: '4px' }}>Complete Evaluation Report</strong>
-                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, display: 'block' }}>Download your comprehensive profile & mock performance summary</span>
+                <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, display: 'block' }}>Complete Evaluation Report</span>
               </div>
               <button
                 onClick={handleDownloadPdfReport}
@@ -637,12 +644,9 @@ const Dashboard = () => {
               gap: '16px'
             }}>
               <div>
-                <h3 style={{ fontSize: '1.02rem', fontWeight: 700, color: '#1c2427', margin: '0 0 4px' }}>
+                <h3 style={{ fontSize: '1.02rem', fontWeight: 700, color: '#1c2427', margin: 0 }}>
                   Resume Alignment & Action Center
                 </h3>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
-                  Download your highest-aligned resume matching the <strong>{targetRole || 'Software Engineer'}</strong> roadmap, or launch a dynamic mock voice interview simulation.
-                </p>
               </div>
 
               <div style={{
@@ -734,30 +738,30 @@ const Dashboard = () => {
                     <span style={{ fontSize: '2.5rem', fontWeight: 800, color: '#10b981', fontFamily: 'Sora, monospace' }}>
                       {bestTestResult.score} <span style={{ fontSize: '1.2rem', color: '#94a3b8' }}>/ {bestTestResult.max_score}</span>
                     </span>
-                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Total Score</p>
+                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b', fontWeight: 600 }}>Total Score Performance</p>
                   </div>
                   
-                  <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>Technical MCQs</span>
-                      <strong style={{ fontSize: '0.9rem', color: '#1c2427' }}>{bestTestResult.technical_score} / 90.0</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>Verbal Reasoning</span>
-                      <strong style={{ fontSize: '0.9rem', color: '#1c2427' }}>{bestTestResult.verbal_score} / 15.0</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>Aptitude</span>
-                      <strong style={{ fontSize: '0.9rem', color: '#1c2427' }}>{bestTestResult.aptitude_score} / 15.0</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>Coding (Easy)</span>
-                      <strong style={{ fontSize: '0.9rem', color: '#1c2427' }}>{bestTestResult.coding_easy_score} / 30.0</strong>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>Coding (Hard)</span>
-                      <strong style={{ fontSize: '0.9rem', color: '#1c2427' }}>{bestTestResult.coding_hard_score} / 50.0</strong>
-                    </div>
+                  <div style={{ background: '#f8fafc', borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {[
+                      { name: "Technical MCQs", score: bestTestResult.technical_score, max: 90, color: "#10b981" },
+                      { name: "Verbal Reasoning", score: bestTestResult.verbal_score, max: 15, color: "#3b82f6" },
+                      { name: "Aptitude", score: bestTestResult.aptitude_score, max: 15, color: "#f5c35c" },
+                      { name: "Coding (Easy)", score: bestTestResult.coding_easy_score, max: 30, color: "#8b5cf6" },
+                      { name: "Coding (Hard)", score: bestTestResult.coding_hard_score, max: 50, color: "#ec4899" }
+                    ].map((sec, idx) => {
+                      const pct = Math.min(100, Math.round((sec.score / sec.max) * 100)) || 0;
+                      return (
+                        <div key={idx}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                            <span style={{ fontSize: '0.82rem', color: '#475569', fontWeight: 600 }}>{sec.name}</span>
+                            <strong style={{ fontSize: '0.85rem', color: '#1c2427' }}>{sec.score} / {sec.max} ({pct}%)</strong>
+                          </div>
+                          <div style={{ width: '100%', height: '7px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                            <div style={{ width: `${pct}%`, height: '100%', background: sec.color, borderRadius: '999px', transition: 'width 0.5s ease' }} />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
@@ -783,7 +787,7 @@ const Dashboard = () => {
               boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>CS Special Course Progress</h3>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>CS Special Complete Evaluation Report</h3>
                 <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', padding: '4px 10px', borderRadius: '999px', fontWeight: 700 }}>
                   Active
                 </span>
@@ -791,12 +795,12 @@ const Dashboard = () => {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {[
-                  { title: "Data Structures & Algorithms", progress: csProgress.dsa, color: "#10b981" },
-                  { title: "Object-Oriented Programming (OOPs)", progress: csProgress.oops, color: "#ec4899" },
-                  { title: "Operating Systems", progress: csProgress.os, color: "#3b82f6" },
-                  { title: "Database Management", progress: csProgress.dbms, color: "#f5c35c" },
-                  { title: "Computer Networks", progress: csProgress.cn, color: "#8b5cf6" },
-                  { title: "System Design", progress: csProgress.sys, color: "#06b6d4" }
+                  { title: "dsa", progress: csProgress.dsa || 0, color: "#10b981" },
+                  { title: "oops", progress: csProgress.oops || 0, color: "#ec4899" },
+                  { title: "Operating Systems (OS)", progress: csProgress.os || 0, color: "#3b82f6" },
+                  { title: "Database Management (DBMS)", progress: csProgress.dbms || 0, color: "#f5c35c" },
+                  { title: "Computer Networks (CN)", progress: csProgress.cn || 0, color: "#8b5cf6" },
+                  { title: "System Design", progress: csProgress.sys || 0, color: "#06b6d4" }
                 ].map((course, idx) => (
                   <div key={idx}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -804,7 +808,7 @@ const Dashboard = () => {
                       <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 700, fontFamily: 'monospace' }}>{course.progress}%</span>
                     </div>
                     <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
-                      <div style={{ width: `${course.progress}%`, height: '100%', background: course.color, borderRadius: '999px' }} />
+                      <div style={{ width: `${course.progress}%`, height: '100%', background: course.color, borderRadius: '999px', transition: 'width 0.5s ease' }} />
                     </div>
                   </div>
                 ))}

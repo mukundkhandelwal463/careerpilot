@@ -2487,16 +2487,21 @@ def download_complete_report_api(request):
         pdf.line(10, pdf.get_y(), 200, pdf.get_y())
         pdf.ln(4)
         
-        dsa_pct = request.GET.get('dsa', '0')
-        oops_pct = request.GET.get('oops', '0')
-        cn_pct = request.GET.get('cn', '0')
-        os_pct = request.GET.get('os', '0')
-        dbms_pct = request.GET.get('dbms', '0')
-        sys_pct = request.GET.get('sys', '0')
+        def clean_pct(val):
+            if not val or val in ['undefined', 'NaN', 'null', 'None']:
+                return '0'
+            return val
+
+        dsa_pct = clean_pct(request.GET.get('dsa'))
+        oops_pct = clean_pct(request.GET.get('oops'))
+        cn_pct = clean_pct(request.GET.get('cn'))
+        os_pct = clean_pct(request.GET.get('os'))
+        dbms_pct = clean_pct(request.GET.get('dbms'))
+        sys_pct = clean_pct(request.GET.get('sys'))
 
         pdf.set_font("Helvetica", "", 11)
-        pdf.cell(95, 7, f"Data Structures & Algorithms: {dsa_pct}%")
-        pdf.cell(95, 7, f"Object-Oriented Programming (OOPs): {oops_pct}%", ln=True)
+        pdf.cell(95, 7, f"dsa: {dsa_pct}%")
+        pdf.cell(95, 7, f"oops: {oops_pct}%", ln=True)
         pdf.cell(95, 7, f"Computer Networks (CN): {cn_pct}%")
         pdf.cell(95, 7, f"Operating Systems (OS): {os_pct}%", ln=True)
         pdf.cell(95, 7, f"Database Management (DBMS): {dbms_pct}%")
