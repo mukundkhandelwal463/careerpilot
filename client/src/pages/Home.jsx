@@ -83,10 +83,10 @@ const Home = () => {
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
-  // Smooth Scroll Effect: Laptop shrinks and glides down-right smoothly on scroll!
-  const laptopX = useTransform(scrollYProgress, [0, 0.3], [0, 160]);
-  const laptopY = useTransform(scrollYProgress, [0, 0.3], [0, 110]);
-  const laptopScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.78]);
+  // Smooth Scroll Docking Effect: Laptop glides down into Feature Spotlight right side on scroll!
+  const laptopY = useTransform(scrollYProgress, [0, 0.22], [0, 480]);
+  const laptopX = useTransform(scrollYProgress, [0, 0.22], [0, 210]);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.22], [1, 0.65]);
 
   return (
     <div ref={containerRef} className="page-shell" style={{ position: 'relative', overflowX: 'hidden' }}>
@@ -141,7 +141,7 @@ const Home = () => {
 
       <main style={{ width: 'min(var(--max-width), calc(100% - 32px))', margin: '0 auto' }}>
         
-        {/* HERO SECTION: DEAD-CENTER LAPTOP WITH SMOOTH DOWN-RIGHT SCROLL TRANSFORM */}
+        {/* HERO SECTION WITH CENTERED LAPTOP */}
         <section style={{ padding: '40px 0 60px', textAlign: 'center' }}>
           
           <div style={{
@@ -154,7 +154,7 @@ const Home = () => {
             position: 'relative'
           }}>
 
-            {/* ── LEFT SURROUNDING FEATURE BADGES (CLEANLY ALIGNED NO OVERLAP) ── */}
+            {/* ── LEFT SURROUNDING FEATURE BADGES ── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left', zIndex: 20 }}>
               
               {/* Feature 1: ATS Resume Screener */}
@@ -237,7 +237,7 @@ const Home = () => {
 
             </div>
 
-            {/* ── DEAD-CENTERED LAPTOP MOCKUP (GLIDES DOWN-RIGHT & SHRINKS ON SCROLL) ── */}
+            {/* ── DEAD-CENTERED LAPTOP MOCKUP (GLIDES DOWN INTO SPOTLIGHT RIGHT SLOT ON SCROLL) ── */}
             <motion.div 
               style={{
                 x: laptopX,
@@ -247,7 +247,7 @@ const Home = () => {
                 margin: '0 auto',
                 width: '100%',
                 maxWidth: '780px',
-                zIndex: 10
+                zIndex: 30
               }}
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -269,7 +269,7 @@ const Home = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  zIndex: 25
+                  zIndex: 35
                 }}
               >
                 <div style={{ background: '#ecfdf5', color: '#10b981', padding: '4px', borderRadius: '6px' }}>
@@ -294,7 +294,7 @@ const Home = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  zIndex: 25
+                  zIndex: 35
                 }}
               >
                 <div style={{ background: '#fef2f2', color: '#ef4444', padding: '4px', borderRadius: '6px' }}>
@@ -396,7 +396,7 @@ const Home = () => {
               }} />
             </motion.div>
 
-            {/* ── RIGHT SURROUNDING FEATURE BADGES (CLEANLY ALIGNED NO OVERLAP) ── */}
+            {/* ── RIGHT SURROUNDING FEATURE BADGES ── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left', zIndex: 20 }}>
               
               {/* Feature 4: CS Special Evaluation */}
@@ -483,7 +483,7 @@ const Home = () => {
 
         </section>
 
-        {/* INTERACTIVE FEATURE SPOTLIGHT SECTION (EXPLAINS ATS RESUME SCREENER FEATURE) */}
+        {/* INTERACTIVE FEATURE SPOTLIGHT SECTION (TARGET CONTAINER DOCK FOR LAPTOP ON SCROLL) */}
         <section style={{ padding: '60px 0 80px', position: 'relative' }}>
           <div style={{
             display: 'grid',
@@ -547,40 +547,20 @@ const Home = () => {
               </Link>
             </div>
 
-            {/* Feature Mini Interactive Preview Box */}
+            {/* Target Drop Zone Container where Laptop Docks on Scroll */}
             <div style={{
-              background: '#0f172a',
+              height: '360px',
               borderRadius: '24px',
-              padding: '24px',
-              color: '#ffffff',
-              boxShadow: '0 15px 40px rgba(0,0,0,0.2)',
-              border: '1px solid rgba(255,255,255,0.1)'
+              border: '2px dashed rgba(16,185,129,0.25)',
+              background: 'rgba(15,23,42,0.02)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#10b981' }}>🎯 ATS Match Analysis</span>
-                <span style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.1)', color: '#94a3b8', padding: '3px 8px', borderRadius: '8px' }}>Real-Time AI</span>
-              </div>
-
-              <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '16px', marginBottom: '16px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.82rem', color: '#cbd5e1' }}>Overall Score</span>
-                  <strong style={{ fontSize: '0.85rem', color: '#10b981' }}>85% (Optimal)</strong>
-                </div>
-                <div style={{ width: '100%', height: '8px', background: '#1e293b', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ width: '85%', height: '100%', background: 'linear-gradient(90deg, #10b981, #34d399)' }} />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recommended AI Keywords:</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                  {['PyTorch', 'Scikit-learn', 'Random Forest', 'TF-IDF', 'NLP Pipelines', 'Feature Engineering'].map((kw, i) => (
-                    <span key={i} style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)', padding: '3px 10px', borderRadius: '12px', fontSize: '0.72rem', fontWeight: 600 }}>
-                      + {kw}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600, fontStyle: 'italic' }}>
+                ✨ Live Laptop AI Workspace Docks Here
+              </span>
             </div>
 
           </div>
