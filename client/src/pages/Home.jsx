@@ -79,8 +79,13 @@ const Home = () => {
     restDelta: 0.001
   });
 
+  // Parallax background animations
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
+
+  // Smooth Scroll Effect: Laptop moves to the right smoothly when scrolling down!
+  const laptopX = useTransform(scrollYProgress, [0, 0.25], [0, 50]);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.25], [1, 0.96]);
 
   return (
     <div ref={containerRef} className="page-shell" style={{ position: 'relative', overflowX: 'hidden' }}>
@@ -135,198 +140,195 @@ const Home = () => {
 
       <main style={{ width: 'min(var(--max-width), calc(100% - 32px))', margin: '0 auto' }}>
         
-        {/* HERO SECTION: DEAD-CENTER LAPTOP WITH FLOATING SURROUNDING FEATURE BADGES */}
-        <section style={{ padding: '40px 0 60px', textAlign: 'center', position: 'relative' }}>
+        {/* HERO SECTION: DEAD-CENTER LAPTOP WITH SMOOTH SCROLL RIGHT EFFECT */}
+        <section style={{ padding: '40px 0 60px', textAlign: 'center' }}>
           
           <div style={{
-            position: 'relative',
-            maxWidth: '1240px',
-            margin: '0 auto',
-            display: 'flex',
-            justifyContent: 'center',
+            display: 'grid',
+            gridTemplateColumns: 'minmax(220px, 270px) minmax(500px, 1fr) minmax(220px, 270px)',
+            gap: '32px',
             alignItems: 'center',
-            minHeight: '560px'
+            maxWidth: '1440px',
+            margin: '0 auto',
+            position: 'relative'
           }}>
 
-            {/* ── LEFT SURROUNDING FEATURE BADGES (FLOATING) ── */}
-            <div style={{
-              position: 'absolute',
-              left: '0',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
-              zIndex: 20,
-              width: '260px',
-              textAlign: 'left'
-            }}>
+            {/* ── LEFT SURROUNDING FEATURE BADGES (CLEANLY ALIGNED NO OVERLAP) ── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left', zIndex: 20 }}>
               
-              {/* Feature 1: ATS Resume Analyzer */}
+              {/* Feature 1: ATS Resume Screener */}
               <motion.div
-                whileHover={{ y: -6, scale: 1.03 }}
-                initial={{ opacity: 0, x: -50 }}
+                whileHover={{ y: -5, scale: 1.03 }}
+                initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
                 style={{
                   background: '#ffffff',
                   borderRadius: '20px',
-                  padding: '14px 18px',
-                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
+                  padding: '16px 20px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px'
+                  gap: '14px'
                 }}
               >
                 <div style={{ background: '#ecfdf5', padding: '10px', borderRadius: '12px', color: '#10b981', flexShrink: 0 }}>
                   <BarChart3 className="size-5" />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#1c2427' }}>ATS Resume Analyzer</h3>
+                  <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>ATS Resume Analyzer</h3>
                   <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>85% Match Verified</span>
                 </div>
               </motion.div>
 
               {/* Feature 2: LaTeX Resume Architect */}
               <motion.div
-                whileHover={{ y: -6, scale: 1.03 }}
-                initial={{ opacity: 0, x: -50 }}
+                whileHover={{ y: -5, scale: 1.03 }}
+                initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
                 style={{
                   background: '#ffffff',
                   borderRadius: '20px',
-                  padding: '14px 18px',
-                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
+                  padding: '16px 20px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px'
+                  gap: '14px'
                 }}
               >
                 <div style={{ background: '#eff6ff', padding: '10px', borderRadius: '12px', color: '#3b82f6', flexShrink: 0 }}>
                   <FileCode className="size-5" />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#1c2427' }}>LaTeX Resume Architect</h3>
+                  <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>LaTeX Resume Architect</h3>
                   <span style={{ fontSize: '0.72rem', color: '#3b82f6', fontWeight: 700 }}>3 LaTeX Templates</span>
                 </div>
               </motion.div>
 
               {/* Feature 3: Voice AI Mock Interview */}
               <motion.div
-                whileHover={{ y: -6, scale: 1.03 }}
-                initial={{ opacity: 0, x: -50 }}
+                whileHover={{ y: -5, scale: 1.03 }}
+                initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
                 style={{
                   background: '#ffffff',
                   borderRadius: '20px',
-                  padding: '14px 18px',
-                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
+                  padding: '16px 20px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px'
+                  gap: '14px'
                 }}
               >
                 <div style={{ background: '#fff1f2', padding: '10px', borderRadius: '12px', color: '#f43f5e', flexShrink: 0 }}>
                   <Mic className="size-5" />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#1c2427' }}>Voice AI Mock Interview</h3>
+                  <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>Voice AI Mock Interview</h3>
                   <span style={{ fontSize: '0.72rem', color: '#f43f5e', fontWeight: 700 }}>Real-Time AI Speech</span>
                 </div>
               </motion.div>
 
             </div>
 
-            {/* ── DEAD-CENTERED LAPTOP MOCKUP DISPLAY ── */}
+            {/* ── DEAD-CENTERED LAPTOP MOCKUP (WITH SMOOTH SCROLL RIGHT EFFECT) ── */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
+              style={{
+                x: laptopX,
+                scale: laptopScale,
+                position: 'relative',
+                margin: '0 auto',
+                width: '100%',
+                maxWidth: '780px',
+                zIndex: 10
+              }}
+              initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              style={{ position: 'relative', margin: '0 auto', width: '100%', maxWidth: '840px', zIndex: 10 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
               {/* Floating Top Pill Badge */}
               <motion.div 
-                animate={{ y: [0, -8, 0] }}
+                animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 style={{
                   position: 'absolute',
-                  top: '-24px',
-                  right: '30px',
+                  top: '-20px',
+                  right: '20px',
                   background: '#ffffff',
                   border: '1px solid #e2e8f0',
-                  padding: '10px 20px',
+                  padding: '8px 16px',
                   borderRadius: '24px',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   zIndex: 25
                 }}
               >
-                <div style={{ background: '#ecfdf5', color: '#10b981', padding: '5px', borderRadius: '8px' }}>
-                  <Sparkles className="size-4" />
+                <div style={{ background: '#ecfdf5', color: '#10b981', padding: '4px', borderRadius: '6px' }}>
+                  <Sparkles className="size-3.5" />
                 </div>
-                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1c2427' }}>Your AI Career Companion</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1c2427' }}>Your AI Career Companion</span>
               </motion.div>
 
               {/* Floating Bottom Pill Badge */}
               <motion.div 
-                animate={{ y: [0, 8, 0] }}
+                animate={{ y: [0, 6, 0] }}
                 transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
                 style={{
                   position: 'absolute',
-                  bottom: '26px',
-                  left: '-24px',
+                  bottom: '24px',
+                  left: '-16px',
                   background: '#ffffff',
                   border: '1px solid #e2e8f0',
-                  padding: '10px 20px',
+                  padding: '8px 16px',
                   borderRadius: '24px',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   zIndex: 25
                 }}
               >
-                <div style={{ background: '#fef2f2', color: '#ef4444', padding: '5px', borderRadius: '8px' }}>
-                  <Award className="size-4" />
+                <div style={{ background: '#fef2f2', color: '#ef4444', padding: '4px', borderRadius: '6px' }}>
+                  <Award className="size-3.5" />
                 </div>
-                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1c2427' }}>16 Applications Active</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1c2427' }}>16 Applications Active</span>
               </motion.div>
 
               {/* LAPTOP HARDWARE BODY */}
               <div style={{
                 background: '#1c2427',
-                borderRadius: '28px 28px 10px 10px',
-                padding: '16px 16px 28px 16px',
-                boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
+                borderRadius: '26px 26px 10px 10px',
+                padding: '14px 14px 24px 14px',
+                boxShadow: '0 30px 80px rgba(0,0,0,0.28)',
                 border: '2px solid #334155'
               }}>
                 
                 {/* Laptop Camera dot */}
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#475569' }} />
                 </div>
 
                 {/* LAPTOP SCREEN INTERFACE */}
                 <div style={{
                   background: '#0f172a',
-                  borderRadius: '16px',
+                  borderRadius: '14px',
                   overflow: 'hidden',
                   display: 'flex',
-                  height: '450px',
+                  height: '420px',
                   border: '1px solid rgba(255,255,255,0.08)',
                   textAlign: 'left'
                 }}>
                   {/* Laptop Sidebar */}
-                  <div style={{ width: '60px', background: '#090d16', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '22px', paddingTop: '22px', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--accent), #ff8f57)', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: '0.8rem', color: 'white' }}>C</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', color: '#475569' }}>
+                  <div style={{ width: '56px', background: '#090d16', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', paddingTop: '20px', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--accent), #ff8f57)', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: '0.75rem', color: 'white' }}>C</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', color: '#475569' }}>
                       <FileText className="size-5" style={{ color: 'var(--accent)' }} />
                       <Briefcase className="size-5" />
                       <Sparkles className="size-5" />
@@ -335,44 +337,44 @@ const Home = () => {
                   </div>
                   
                   {/* Laptop Dashboard Canvas */}
-                  <div style={{ flex: 1, padding: '24px 28px', background: '#0b1329', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div style={{ flex: 1, padding: '20px 24px', background: '#0b1329', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white' }}>Welcome back, Anam! 👋</span>
-                      <span style={{ fontSize: '0.72rem', background: 'rgba(255,255,255,0.08)', color: '#a7f3d0', padding: '4px 12px', borderRadius: '12px', fontWeight: 700 }}>AI Live</span>
+                      <span style={{ fontSize: '1rem', fontWeight: 800, color: 'white' }}>Welcome back! 👋</span>
+                      <span style={{ fontSize: '0.68rem', background: 'rgba(255,255,255,0.08)', color: '#a7f3d0', padding: '4px 10px', borderRadius: '12px', fontWeight: 700 }}>AI Live</span>
                     </div>
                     
                     {/* ATS Score Gauge Indicator */}
-                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', margin: '18px 0' }}>
+                    <div style={{ display: 'flex', gap: '20px', alignItems: 'center', margin: '14px 0' }}>
                       <div style={{
-                        width: '108px', height: '108px', borderRadius: '50%',
+                        width: '98px', height: '98px', borderRadius: '50%',
                         background: 'conic-gradient(#10b981 306deg, #1e293b 0deg)',
                         display: 'grid', placeItems: 'center', position: 'relative',
                         boxShadow: '0 0 25px rgba(16,185,129,0.25)'
                       }}>
-                        <div style={{ width: '88px', height: '88px', borderRadius: '50%', background: '#0b1329', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>85%</span>
-                          <span style={{ fontSize: '0.55rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ATS MATCH</span>
+                        <div style={{ width: '82px', height: '82px', borderRadius: '50%', background: '#0b1329', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>85%</span>
+                          <span style={{ fontSize: '0.5rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ATS MATCH</span>
                         </div>
                       </div>
                       
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <strong style={{ fontSize: '1.1rem', color: 'white' }}>Overall Career Score: 85%</strong>
-                        <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 700 }}>ATS Ready & Market Aligned ✔</span>
-                        <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Target Role: Data Science & ML Specialist</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <strong style={{ fontSize: '1rem', color: 'white' }}>Overall Career Score: 85%</strong>
+                        <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>ATS Ready & Market Aligned ✔</span>
+                        <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Target Role: Data Science & ML Specialist</span>
                       </div>
                     </div>
 
                     {/* Progress Metrics Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                       {[
                         { label: 'Resume Score', val: '92%', color: '#10b981' },
                         { label: 'Interview Score', val: '78%', color: '#3b82f6' },
                         { label: 'CS Special Progress', val: '88%', color: '#f59e0b' },
                         { label: 'Active Applications', val: '16', color: '#ec4899' }
                       ].map((item, idx) => (
-                        <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>{item.label}</span>
-                          <strong style={{ fontSize: '0.92rem', color: item.color }}>{item.val}</strong>
+                        <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 600 }}>{item.label}</span>
+                          <strong style={{ fontSize: '0.85rem', color: item.color }}>{item.val}</strong>
                         </div>
                       ))}
                     </div>
@@ -383,103 +385,92 @@ const Home = () => {
 
               {/* Laptop Stand Base */}
               <div style={{
-                height: '18px',
+                height: '16px',
                 width: '108%',
                 marginLeft: '-4%',
                 background: 'linear-gradient(to bottom, #475569, #1e293b)',
-                borderRadius: '0 0 20px 20px',
-                boxShadow: '0 12px 35px rgba(0,0,0,0.35)'
+                borderRadius: '0 0 18px 18px',
+                boxShadow: '0 12px 30px rgba(0,0,0,0.35)'
               }} />
             </motion.div>
 
-            {/* ── RIGHT SURROUNDING FEATURE BADGES (FLOATING) ── */}
-            <div style={{
-              position: 'absolute',
-              right: '0',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
-              zIndex: 20,
-              width: '260px',
-              textAlign: 'left'
-            }}>
+            {/* ── RIGHT SURROUNDING FEATURE BADGES (CLEANLY ALIGNED NO OVERLAP) ── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left', zIndex: 20 }}>
               
               {/* Feature 4: CS Special Evaluation */}
               <motion.div
-                whileHover={{ y: -6, scale: 1.03 }}
-                initial={{ opacity: 0, x: 50 }}
+                whileHover={{ y: -5, scale: 1.03 }}
+                initial={{ opacity: 0, x: 40 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
                 style={{
                   background: '#ffffff',
                   borderRadius: '20px',
-                  padding: '14px 18px',
-                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
+                  padding: '16px 20px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px'
+                  gap: '14px'
                 }}
               >
                 <div style={{ background: '#fef3c7', padding: '10px', borderRadius: '12px', color: '#d97706', flexShrink: 0 }}>
                   <Code2 className="size-5" />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#1c2427' }}>CS Special Evaluation</h3>
+                  <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>CS Special Evaluation</h3>
                   <span style={{ fontSize: '0.72rem', color: '#d97706', fontWeight: 700 }}>6 CS Core Subjects</span>
                 </div>
               </motion.div>
 
               {/* Feature 5: Live Job Matcher */}
               <motion.div
-                whileHover={{ y: -6, scale: 1.03 }}
-                initial={{ opacity: 0, x: 50 }}
+                whileHover={{ y: -5, scale: 1.03 }}
+                initial={{ opacity: 0, x: 40 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
                 style={{
                   background: '#ffffff',
                   borderRadius: '20px',
-                  padding: '14px 18px',
-                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
+                  padding: '16px 20px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px'
+                  gap: '14px'
                 }}
               >
                 <div style={{ background: '#f3e8ff', padding: '10px', borderRadius: '12px', color: '#9333ea', flexShrink: 0 }}>
                   <Search className="size-5" />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#1c2427' }}>Live Job Matching</h3>
+                  <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>Live Job Matching</h3>
                   <span style={{ fontSize: '0.72rem', color: '#9333ea', fontWeight: 700 }}>100K+ Live Jobs</span>
                 </div>
               </motion.div>
 
               {/* Feature 6: Career Roadmap & AI Keywords */}
               <motion.div
-                whileHover={{ y: -6, scale: 1.03 }}
-                initial={{ opacity: 0, x: 50 }}
+                whileHover={{ y: -5, scale: 1.03 }}
+                initial={{ opacity: 0, x: 40 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
                 style={{
                   background: '#ffffff',
                   borderRadius: '20px',
-                  padding: '14px 18px',
-                  boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
+                  padding: '16px 20px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                   border: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px'
+                  gap: '14px'
                 }}
               >
                 <div style={{ background: '#ecfeff', padding: '10px', borderRadius: '12px', color: '#0891b2', flexShrink: 0 }}>
                   <Target className="size-5" />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#1c2427' }}>Career Roadmap & Keywords</h3>
+                  <h3 style={{ margin: 0, fontSize: '0.94rem', fontWeight: 800, color: '#1c2427' }}>Career Roadmap & Keywords</h3>
                   <span style={{ fontSize: '0.72rem', color: '#0891b2', fontWeight: 700 }}>Gemini AI Keyword Stream</span>
                 </div>
               </motion.div>
