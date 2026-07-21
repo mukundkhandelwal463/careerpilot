@@ -345,13 +345,6 @@ main {
     padding: 42px 0;
 }
 
-.feature-spotlight-grid {
-    --feature-spotlight-columns: minmax(360px, 0.95fr) minmax(420px, 1.05fr);
-    --feature-spotlight-gap: 44px;
-    --feature-spotlight-padding: 32px 36px;
-    --feature-spotlight-visual-height: 430px;
-}
-
 .intro-grid,
 .workflow-grid,
 .feature-grid,
@@ -497,12 +490,6 @@ main {
     .stack-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
-    .feature-spotlight-grid {
-        --feature-spotlight-columns: 1fr;
-        --feature-spotlight-gap: 24px;
-        --feature-spotlight-visual-height: 340px;
-    }
 }
 
 @media (max-width: 860px) {
@@ -582,11 +569,6 @@ main {
     .hero-card-main,
     .hero-card-accent {
         padding: 20px;
-    }
-
-    .feature-spotlight-grid {
-        --feature-spotlight-padding: 22px 18px;
-        --feature-spotlight-visual-height: 260px;
     }
 }
 
