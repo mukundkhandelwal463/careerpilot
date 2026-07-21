@@ -3,19 +3,19 @@ import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
-import {
-  Sparkles,
-  ArrowRight,
-  CheckCircle2,
-  Cpu,
-  Terminal,
-  Compass,
-  Briefcase,
-  Zap,
-  Award,
-  FileText,
-  HelpCircle,
-  Layers,
+import { 
+  Sparkles, 
+  ArrowRight, 
+  CheckCircle2, 
+  Cpu, 
+  Terminal, 
+  Compass, 
+  Briefcase, 
+  Zap, 
+  Award, 
+  FileText, 
+  HelpCircle, 
+  Layers, 
   Star,
   Users,
   Mic,
@@ -56,25 +56,25 @@ const TiltCard = ({ children, className, style = {} }) => {
 const featurePills = [
   { icon: BarChart3, bg: '#ecfdf5', color: '#10b981', title: 'ATS Resume Analyzer', link: '/upload' },
   { icon: Layers, bg: '#fdf4ff', color: '#c026d3', title: 'AI Resume Maker', link: '/app/builder/default' },
-  { icon: FileCode, bg: '#eff6ff', color: '#3b82f6', title: 'Complete Evaluation Reports', link: '/dashboard' },
+  { icon: FileCode, bg: '#eff6ff', color: '#3b82f6', title: 'LaTeX Resume Architect', link: '/app/builder/default' },
   { icon: Mic, bg: '#fff1f2', color: '#f43f5e', title: 'Voice AI Mock Interview', link: '/preparation' },
   { icon: Code2, bg: '#fef3c7', color: '#d97706', title: 'CS Special Evaluation', link: '/preparation' },
   { icon: Search, bg: '#f3e8ff', color: '#9333ea', title: 'Live Job Matching', link: '/jobs' },
-  { icon: Target, bg: '#ecfeff', color: '#0891b2', title: 'Career Roadmap & Keywords', link: '/preparation' }
+  { icon: Target, bg: '#ecfeff', color: '#0891b2', title: 'Career Roadmap & Keywords', link: '/app/builder/default' }
 ];
 
 /* Positions for the 7 floating pills — generous vertical distance & front layer overlap */
 const pillPositions = [
   // Left side (4 pills, cleanly spaced vertically)
-  { top: '2%', left: '-25px', flyX: -520, flyY: -100 },  // ATS Resume Analyzer
-  { top: '26%', left: '-40px', flyX: -560, flyY: -30 },   // AI Resume Maker
-  { top: '52%', left: '-45px', flyX: -560, flyY: 30 },    // LaTeX Resume Architect
-  { top: '78%', left: '-20px', flyX: -520, flyY: 100 },   // Voice AI Mock Interview
+  { top: '2%',   left: '-25px',  flyX: -520,  flyY: -100 },  // ATS Resume Analyzer
+  { top: '26%',  left: '-40px',  flyX: -560,  flyY: -30 },   // AI Resume Maker
+  { top: '52%',  left: '-45px',  flyX: -560,  flyY: 30 },    // LaTeX Resume Architect
+  { top: '78%',  left: '-20px',  flyX: -520,  flyY: 100 },   // Voice AI Mock Interview
 
   // Right side (3 pills, cleanly spaced vertically)
-  { top: '10%', right: '-25px', flyX: 520, flyY: -80 },   // CS Special Evaluation
-  { top: '44%', right: '-40px', flyX: 560, flyY: 0 },     // Live Job Matching
-  { top: '78%', right: '-20px', flyX: 520, flyY: 80 }     // Career Roadmap & Keywords
+  { top: '10%',  right: '-25px', flyX: 520,   flyY: -80 },   // CS Special Evaluation
+  { top: '44%',  right: '-40px', flyX: 560,   flyY: 0 },     // Live Job Matching
+  { top: '78%',  right: '-20px', flyX: 520,   flyY: 80 }     // Career Roadmap & Keywords
 ];
 
 
@@ -94,9 +94,8 @@ const Home = () => {
     const laptopCenterX = laptopRect.left + laptopRect.width / 2;
     const laptopCenterY = laptopRect.top + scrollY + laptopRect.height / 2;
     const dockCenterX = dockRect.left + dockRect.width / 2;
-    // Push target position further down side:
-    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2 + 75;
-    const targetScale = Math.min(dockRect.width / laptopRect.width, 0.54);
+    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2;
+    const targetScale = Math.min(dockRect.width / laptopRect.width, 0.55);
     setDockOffset({ x: dockCenterX - laptopCenterX, y: dockCenterY - laptopCenterY, scale: targetScale });
   }, []);
 
@@ -115,13 +114,13 @@ const Home = () => {
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
-  // Laptop scroll transforms — fast glide and dock lower down side
-  const laptopX = useTransform(scrollYProgress, [0, 0.15], [0, dockOffset.x]);
-  const laptopY = useTransform(scrollYProgress, [0, 0.15], [0, dockOffset.y]);
-  const laptopScale = useTransform(scrollYProgress, [0, 0.15], [1, dockOffset.scale]);
+  // Laptop scroll transforms — glides smoothly and docks into right side of spotlight box as you scroll to it
+  const laptopX = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.x]);
+  const laptopY = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.y]);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.25], [1, dockOffset.scale]);
 
-  // Feature pills fly outward fast on scroll
-  const pillProgress = useTransform(scrollYProgress, [0, 0.10], [0, 1]);
+  // Feature pills fly outward on scroll
+  const pillProgress = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
 
   // Create individual pill transforms
   const pillTransforms = pillPositions.map(pos => ({
@@ -133,7 +132,7 @@ const Home = () => {
 
   // Swap screen content
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    setShowFeatureScreen(latest > 0.08);
+    setShowFeatureScreen(latest > 0.13);
   });
 
   return (
@@ -147,7 +146,7 @@ const Home = () => {
       <motion.div style={{ position: 'absolute', top: '40%', left: '-5%', width: '450px', height: '450px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,214,199,0.15) 0%, rgba(255,255,255,0) 70%)', filter: 'blur(60px)', y: floatY2, pointerEvents: 'none', zIndex: -1 }} />
 
       <main style={{ width: 'min(var(--max-width), calc(100% - 32px))', margin: '0 auto' }}>
-
+        
         {/* ═══════════════════════════════════════════════════════
             HERO — Laptop centered with floating pill tubes around it
             Scrolling → pills fly outward, laptop docks into box
@@ -242,7 +241,7 @@ const Home = () => {
                     {/* SCREEN 1: Dashboard (Full Comprehensive Platform Preview) */}
                     <div style={{ position: 'absolute', inset: 0, opacity: showFeatureScreen ? 0 : 1, transition: 'opacity 0.5s ease', pointerEvents: showFeatureScreen ? 'none' : 'auto' }}>
                       <div style={{ padding: '16px 20px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '10px' }}>
-
+                        
                         {/* Top Header Row */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px' }}>
                           <div>
@@ -420,7 +419,7 @@ const Home = () => {
               </Link>
             </div>
 
-            {/* RIGHT — DOCK TARGET */}
+            {/* RIGHT — DOCK TARGET (centers laptop vertically in right half of spotlight box) */}
             <div ref={dockRef} style={{ width: '100%', height: '360px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
           </div>
         </section>
