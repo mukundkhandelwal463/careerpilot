@@ -94,9 +94,8 @@ const Home = () => {
     const laptopCenterX = laptopRect.left + laptopRect.width / 2;
     const laptopCenterY = laptopRect.top + scrollY + laptopRect.height / 2;
     const dockCenterX = dockRect.left + dockRect.width / 2;
-    // Vertical center alignment inside the right half of the spotlight box:
-    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2 + 45;
-    const targetScale = Math.min(dockRect.width / laptopRect.width, 0.54);
+    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2;
+    const targetScale = Math.min(dockRect.width / laptopRect.width, 0.55);
     setDockOffset({ x: dockCenterX - laptopCenterX, y: dockCenterY - laptopCenterY, scale: targetScale });
   }, []);
 
@@ -115,13 +114,13 @@ const Home = () => {
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
-  // Laptop scroll transforms — docks into spotlight faster on scroll
-  const laptopX = useTransform(scrollYProgress, [0, 0.12], [0, dockOffset.x]);
-  const laptopY = useTransform(scrollYProgress, [0, 0.12], [0, dockOffset.y]);
-  const laptopScale = useTransform(scrollYProgress, [0, 0.12], [1, dockOffset.scale]);
+  // Laptop scroll transforms — glides smoothly and docks into right side of spotlight box
+  const laptopX = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.x]);
+  const laptopY = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.y]);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.25], [1, dockOffset.scale]);
 
-  // Feature pills fly outward faster on scroll
-  const pillProgress = useTransform(scrollYProgress, [0, 0.09], [0, 1]);
+  // Feature pills fly outward on scroll
+  const pillProgress = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
 
   // Create individual pill transforms
   const pillTransforms = pillPositions.map(pos => ({
@@ -133,7 +132,7 @@ const Home = () => {
 
   // Swap screen content
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    setShowFeatureScreen(latest > 0.06);
+    setShowFeatureScreen(latest > 0.13);
   });
 
   return (
@@ -420,8 +419,8 @@ const Home = () => {
               </Link>
             </div>
 
-            {/* RIGHT — DOCK TARGET (centers laptop vertically in right half of spotlight box) */}
-            <div ref={dockRef} style={{ height: '100%', minHeight: '440px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+            {/* RIGHT — DOCK TARGET */}
+            <div ref={dockRef} style={{ width: '100%', height: '360px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
           </div>
         </section>
 
