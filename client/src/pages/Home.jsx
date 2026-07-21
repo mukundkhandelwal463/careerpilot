@@ -62,14 +62,14 @@ const featurePills = [
   { icon: Target, bg: '#ecfeff', color: '#0891b2', title: 'Career Roadmap & Keywords' }
 ];
 
-/* Positions for the 6 floating pills — directly touching/overlapping laptop screen frame */
+/* Positions for the 6 floating pills — at the front layer overlapping laptop screen bezel */
 const pillPositions = [
-  { top: '14%',  left: '5px',    flyX: -500,  flyY: -80 },   // top-left
-  { top: '44%',  left: '-10px',  flyX: -550,  flyY: 0 },     // mid-left
-  { top: '74%',  left: '10px',   flyX: -500,  flyY: 80 },    // bottom-left
-  { top: '14%',  right: '5px',   flyX: 500,   flyY: -80 },   // top-right
-  { top: '44%',  right: '-10px', flyX: 550,   flyY: 0 },     // mid-right
-  { top: '74%',  right: '10px',  flyX: 500,   flyY: 80 }     // bottom-right
+  { top: '12%',  left: '-15px',  flyX: -500,  flyY: -80 },   // top-left
+  { top: '42%',  left: '-30px',  flyX: -550,  flyY: 0 },     // mid-left
+  { top: '72%',  left: '-10px',  flyX: -500,  flyY: 80 },    // bottom-left
+  { top: '12%',  right: '-15px', flyX: 500,   flyY: -80 },   // top-right
+  { top: '42%',  right: '-30px', flyX: 550,   flyY: 0 },     // mid-right
+  { top: '72%',  right: '-10px', flyX: 500,   flyY: 80 }     // bottom-right
 ];
 
 
@@ -166,7 +166,7 @@ const Home = () => {
                     y: transform.y,
                     opacity: transform.opacity,
                     scale: transform.scale,
-                    zIndex: 20
+                    zIndex: 50
                   }}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -179,20 +179,20 @@ const Home = () => {
                     style={{
                       background: '#ffffff',
                       borderRadius: '999px',
-                      padding: '8px 16px',
-                      boxShadow: '0 6px 20px rgba(0,0,0,0.07)',
-                      border: '1px solid #e2e8f0',
+                      padding: '10px 20px',
+                      boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
+                      border: '1px solid #cbd5e1',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
+                      gap: '10px',
                       whiteSpace: 'nowrap',
                       cursor: 'default'
                     }}
                   >
-                    <div style={{ background: pill.bg, padding: '5px', borderRadius: '8px', color: pill.color, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
-                      <Icon className="size-3.5" />
+                    <div style={{ background: pill.bg, padding: '7px', borderRadius: '10px', color: pill.color, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+                      <Icon className="size-4" />
                     </div>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1c2427' }}>{pill.title}</span>
+                    <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#1c2427' }}>{pill.title}</span>
                   </motion.div>
                 </motion.div>
               );
@@ -230,34 +230,97 @@ const Home = () => {
 
                   {/* Screen content with crossfade */}
                   <div style={{ flex: 1, position: 'relative' }}>
-                    {/* SCREEN 1: Dashboard */}
+                    {/* SCREEN 1: Dashboard (Full Comprehensive Platform Preview) */}
                     <div style={{ position: 'absolute', inset: 0, opacity: showFeatureScreen ? 0 : 1, transition: 'opacity 0.5s ease', pointerEvents: showFeatureScreen ? 'none' : 'auto' }}>
-                      <div style={{ padding: '20px 24px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: '1rem', fontWeight: 800, color: 'white' }}>Welcome back! 👋</span>
-                          <span style={{ fontSize: '0.68rem', background: 'rgba(255,255,255,0.08)', color: '#a7f3d0', padding: '4px 10px', borderRadius: '12px', fontWeight: 700 }}>AI Live</span>
-                        </div>
-                        <div style={{ display: 'flex', gap: '20px', alignItems: 'center', margin: '14px 0' }}>
-                          <div style={{ width: '98px', height: '98px', borderRadius: '50%', background: 'conic-gradient(#10b981 306deg, #1e293b 0deg)', display: 'grid', placeItems: 'center', boxShadow: '0 0 25px rgba(16,185,129,0.25)' }}>
-                            <div style={{ width: '82px', height: '82px', borderRadius: '50%', background: '#0b1329', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                              <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>85%</span>
-                              <span style={{ fontSize: '0.5rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ATS MATCH</span>
-                            </div>
+                      <div style={{ padding: '16px 20px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '10px' }}>
+                        
+                        {/* Top Header Row */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px' }}>
+                          <div>
+                            <span style={{ fontSize: '0.98rem', fontWeight: 800, color: 'white', display: 'block' }}>Welcome back, Candidate! 👋</span>
+                            <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>Career Readiness & Evaluation Scorecard</span>
                           </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <strong style={{ fontSize: '1rem', color: 'white' }}>Overall Career Score: 85%</strong>
-                            <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 700 }}>ATS Ready & Market Aligned ✔</span>
-                            <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Target Role: Data Science & ML Specialist</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '0.65rem', background: 'rgba(16,185,129,0.15)', color: '#34d399', padding: '3px 10px', borderRadius: '12px', fontWeight: 700, border: '1px solid rgba(16,185,129,0.3)' }}>🟢 Live Dashboard</span>
                           </div>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                          {[{ label: 'Resume Score', val: '92%', color: '#10b981' }, { label: 'Interview Score', val: '78%', color: '#3b82f6' }, { label: 'CS Special Progress', val: '88%', color: '#f59e0b' }, { label: 'Active Applications', val: '16', color: '#ec4899' }].map((item, idx) => (
-                            <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px', padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 600 }}>{item.label}</span>
-                              <strong style={{ fontSize: '0.85rem', color: item.color }}>{item.val}</strong>
+
+                        {/* Stat Metric Pills Row */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                          {[
+                            { label: 'Avg ATS Score', val: '85%', color: '#10b981' },
+                            { label: 'Scanned Resumes', val: '3', color: '#3b82f6' },
+                            { label: 'Interview Score', val: '78%', color: '#f59e0b' },
+                            { label: 'Job Fit Score', val: '88%', color: '#ec4899' }
+                          ].map((m, idx) => (
+                            <div key={idx} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '8px 10px', textAlign: 'center' }}>
+                              <span style={{ fontSize: '0.62rem', color: '#94a3b8', display: 'block', fontWeight: 600 }}>{m.label}</span>
+                              <strong style={{ fontSize: '0.9rem', color: m.color, fontWeight: 800 }}>{m.val}</strong>
                             </div>
                           ))}
                         </div>
+
+                        {/* Center Row: Conic Gauge + Target Role + CS Core Progress */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                          {/* Radial Gauge & Target */}
+                          <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                            <div style={{
+                              width: '78px', height: '78px', borderRadius: '50%',
+                              background: 'conic-gradient(#10b981 306deg, #1e293b 0deg)',
+                              display: 'grid', placeItems: 'center',
+                              boxShadow: '0 0 20px rgba(16,185,129,0.2)'
+                            }}>
+                              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#0b1329', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'white', lineHeight: 1 }}>85%</span>
+                                <span style={{ fontSize: '0.45rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>ATS MATCH</span>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                              <strong style={{ fontSize: '0.85rem', color: 'white' }}>Overall Score: 85%</strong>
+                              <span style={{ fontSize: '0.68rem', color: '#10b981', fontWeight: 700 }}>ATS Ready & Market Aligned ✔</span>
+                              <span style={{ fontSize: '0.64rem', color: '#94a3b8' }}>Role: Data Science & ML Specialist</span>
+                            </div>
+                          </div>
+
+                          {/* CS Subjects Mini Progress Bars */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', justifyContent: 'center' }}>
+                            <span style={{ fontSize: '0.64rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>CS Core Subjects Progress:</span>
+                            {[
+                              { name: 'DSA & Algo', pct: '92%', color: '#10b981' },
+                              { name: 'OS & DBMS', pct: '88%', color: '#f59e0b' },
+                              { name: 'CN & OOPs', pct: '85%', color: '#3b82f6' },
+                              { name: 'System Design', pct: '80%', color: '#9333ea' }
+                            ].map((sub, i) => (
+                              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '0.6rem', color: '#cbd5e1', width: '75px' }}>{sub.name}</span>
+                                <div style={{ flex: 1, height: '5px', background: '#1e293b', borderRadius: '3px', overflow: 'hidden' }}>
+                                  <div style={{ width: sub.pct, height: '100%', background: sub.color, borderRadius: '3px' }} />
+                                </div>
+                                <span style={{ fontSize: '0.6rem', color: sub.color, fontWeight: 700, width: '26px' }}>{sub.pct}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Bottom Dashboard Activity Cards */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '8px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <span style={{ fontSize: '0.68rem', color: 'white', fontWeight: 700, display: 'block' }}>PDF Evaluation Report</span>
+                              <span style={{ fontSize: '0.6rem', color: '#34d399' }}>Complete Breakdown Ready</span>
+                            </div>
+                            <span style={{ fontSize: '0.6rem', background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>Export</span>
+                          </div>
+
+                          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '8px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <span style={{ fontSize: '0.68rem', color: 'white', fontWeight: 700, display: 'block' }}>Active Job Matches</span>
+                              <span style={{ fontSize: '0.6rem', color: '#9333ea' }}>16 Live Opportunities</span>
+                            </div>
+                            <span style={{ fontSize: '0.6rem', background: '#9333ea', color: 'white', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>View</span>
+                          </div>
+                        </div>
+
                       </div>
                     </div>
 
