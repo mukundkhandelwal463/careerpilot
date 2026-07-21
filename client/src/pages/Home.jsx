@@ -116,30 +116,23 @@ const Home = () => {
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
-  // Raw scroll transforms
-  const rawLaptopX = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.x]);
-  const rawLaptopY = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.y]);
-  const rawLaptopScale = useTransform(scrollYProgress, [0, 0.25], [1, dockOffset.scale]);
-  const rawPillProgress = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
+  // GPU-accelerated 60FPS scroll transforms
+  const laptopX = useTransform(scrollYProgress, [0, 0.22], [0, dockOffset.x]);
+  const laptopY = useTransform(scrollYProgress, [0, 0.22], [0, dockOffset.y]);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.22], [1, dockOffset.scale]);
+  const pillProgress = useTransform(scrollYProgress, [0, 0.16], [0, 1]);
 
-  // Spring physics for buttery-smooth liquid scroll inertia
-  const springConfig = { stiffness: 75, damping: 24, restDelta: 0.001 };
-  const laptopX = useSpring(rawLaptopX, springConfig);
-  const laptopY = useSpring(rawLaptopY, springConfig);
-  const laptopScale = useSpring(rawLaptopScale, springConfig);
-  const pillProgress = useSpring(rawPillProgress, springConfig);
-
-  // Create individual pill transforms
+  // Direct GPU-driven pill transforms
   const pillTransforms = pillPositions.map(pos => ({
     x: useTransform(pillProgress, [0, 1], [0, pos.flyX]),
     y: useTransform(pillProgress, [0, 1], [0, pos.flyY]),
-    opacity: useTransform(pillProgress, [0, 0.6, 1], [1, 1, 0]),
-    scale: useTransform(pillProgress, [0, 1], [1, 0.7])
+    opacity: useTransform(pillProgress, [0, 0.5, 1], [1, 1, 0]),
+    scale: useTransform(pillProgress, [0, 1], [1, 0.75])
   }));
 
-  // Swap screen content with smooth timing
+  // Swap screen content with clean threshold
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    setShowFeatureScreen(latest > 0.13);
+    setShowFeatureScreen(latest > 0.11);
   });
 
   return (
@@ -178,7 +171,8 @@ const Home = () => {
                     y: transform.y,
                     opacity: transform.opacity,
                     scale: transform.scale,
-                    zIndex: 50
+                    zIndex: 50,
+                    willChange: 'transform, opacity'
                   }}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -218,7 +212,8 @@ const Home = () => {
               ref={laptopRef}
               style={{
                 x: laptopX, y: laptopY, scale: laptopScale,
-                position: 'relative', width: '100%', maxWidth: '880px', zIndex: 30
+                position: 'relative', width: '100%', maxWidth: '880px', zIndex: 30,
+                willChange: 'transform', transformStyle: 'preserve-3d'
               }}
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
