@@ -116,13 +116,18 @@ const Home = () => {
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
-  // Laptop scroll transforms — glides smoothly and docks into right side of spotlight box as you scroll to it
-  const laptopX = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.x]);
-  const laptopY = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.y]);
-  const laptopScale = useTransform(scrollYProgress, [0, 0.25], [1, dockOffset.scale]);
+  // Raw scroll transforms
+  const rawLaptopX = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.x]);
+  const rawLaptopY = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.y]);
+  const rawLaptopScale = useTransform(scrollYProgress, [0, 0.25], [1, dockOffset.scale]);
+  const rawPillProgress = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
 
-  // Feature pills fly outward on scroll
-  const pillProgress = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
+  // Spring physics for buttery-smooth liquid scroll inertia
+  const springConfig = { stiffness: 75, damping: 24, restDelta: 0.001 };
+  const laptopX = useSpring(rawLaptopX, springConfig);
+  const laptopY = useSpring(rawLaptopY, springConfig);
+  const laptopScale = useSpring(rawLaptopScale, springConfig);
+  const pillProgress = useSpring(rawPillProgress, springConfig);
 
   // Create individual pill transforms
   const pillTransforms = pillPositions.map(pos => ({
@@ -132,7 +137,7 @@ const Home = () => {
     scale: useTransform(pillProgress, [0, 1], [1, 0.7])
   }));
 
-  // Swap screen content
+  // Swap screen content with smooth timing
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     setShowFeatureScreen(latest > 0.13);
   });
