@@ -57,7 +57,7 @@ def _generate_with_timeout(model, prompt, timeout_sec=10, retries=1):
             raise last_error
 
 
-FALLBACK_API_KEY = "AQ.Ab8RN6LBGor_JPADgSRyO2EnCvx74IYDEmABEGaDbstwnAPhQw"
+FALLBACK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 def _generate_with_deepseek_fallback(prompt, timeout_sec=10):
     import urllib.request
