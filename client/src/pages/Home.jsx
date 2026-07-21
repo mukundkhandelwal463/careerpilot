@@ -94,10 +94,10 @@ const Home = () => {
     const scrollY = window.scrollY;
     const laptopCenterX = laptopRect.left + laptopRect.width / 2;
     const laptopCenterY = laptopRect.top + scrollY + laptopRect.height / 2;
-    // Push dock target further right (+45px) and lower down (+125px) inside spotlight box:
-    const dockCenterX = dockRect.left + dockRect.width / 2 + 45;
-    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2 + 125;
-    const targetScale = Math.min(dockRect.width / laptopRect.width, 0.55);
+    // Align the hero laptop into the left visual bay of the spotlight box.
+    const dockCenterX = dockRect.left + dockRect.width / 2;
+    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2;
+    const targetScale = Math.min(dockRect.width / laptopRect.width, 0.62);
     setDockOffset({ x: dockCenterX - laptopCenterX, y: dockCenterY - laptopCenterY, scale: targetScale });
   }, []);
 
@@ -212,7 +212,7 @@ const Home = () => {
               ref={laptopRef}
               style={{
                 x: laptopX, y: laptopY, scale: laptopScale,
-                position: 'relative', width: '100%', maxWidth: '880px', zIndex: 30,
+                position: 'relative', width: '180%', maxWidth: '900px', zIndex: 30, height: '100%',
                 willChange: 'transform', transformStyle: 'preserve-3d'
               }}
               initial={{ opacity: 0, scale: 0.92 }}
@@ -220,8 +220,8 @@ const Home = () => {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
               {/* LAPTOP BODY */}
-              <div style={{ background: '#1c2427', borderRadius: '26px 26px 10px 10px', padding: '14px 14px 24px 14px', boxShadow: '0 30px 80px rgba(0,0,0,0.28)', border: '2px solid #334155' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
+              <div style={{ background: '#1c2427', borderRadius: '24px 24px 10px 10px', padding: '12px 12px 20px 12px', boxShadow: '0 30px 80px rgba(0,0,0,0.28)', border: '2px solid #334155' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#475569' }} />
                 </div>
 
@@ -381,48 +381,60 @@ const Home = () => {
 
 
         {/* ═══════════════════════════════════════════════
-            FEATURE SPOTLIGHT — Laptop docks into right side
+            FEATURE SPOTLIGHT — Laptop docks into left side
             ═══════════════════════════════════════════════ */}
         <section style={{ padding: '100px 0 100px', position: 'relative' }}>
-          <div style={{
-            display: 'grid', gridTemplateColumns: '1fr 1fr',
-            gap: '32px', alignItems: 'center',
-            background: '#ffffff', borderRadius: '28px', padding: '32px 36px',
+          <div className="feature-spotlight-grid" style={{
+            display: 'grid', gridTemplateColumns: 'var(--feature-spotlight-columns, minmax(360px, 0.95fr) minmax(420px, 1.05fr))',
+            gap: 'var(--feature-spotlight-gap, 44px)', alignItems: 'center',
+            background: '#ffffff', borderRadius: '28px', padding: 'var(--feature-spotlight-padding, 32px 36px)',
             boxShadow: '0 16px 50px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0', textAlign: 'left'
           }}>
-            {/* LEFT TEXT */}
+            {/* LEFT — DOCK TARGET (laptop glides into this bay) */}
+            <div
+              ref={dockRef}
+              style={{
+                width: '100%',
+                minHeight: 'var(--feature-spotlight-visual-height, 430px)',
+                borderRadius: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            />
+
+            {/* RIGHT TEXT */}
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#ecfdf5', color: '#047857', padding: '6px 14px', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 700, marginBottom: '16px' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#ecfdf5', color: '#047857', padding: '5px 14px', borderRadius: '20px', fontSize: '0.82rem', fontWeight: 700, marginBottom: '12px' }}>
                 <Sparkles className="size-4" /> Feature Spotlight
               </div>
-              <h2 style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', fontWeight: 800, color: '#1c2427', margin: '0 0 16px 0', lineHeight: 1.15 }}>
+              <h2 style={{ fontSize: 'clamp(1.6rem, 2.8vw, 2.15rem)', fontWeight: 800, color: '#1c2427', margin: '0 0 12px 0', lineHeight: 1.18 }}>
                 ATS Resume Screener & Real-Time Keyword Engine
               </h2>
-              <p style={{ fontSize: '1rem', color: '#64748b', lineHeight: 1.65, margin: '0 0 24px 0' }}>
-                CareerPilot parses candidate resumes against job descriptions, identifying missing skills, quantifying ATS match scores, and suggesting high-impact keywords dynamically generated by Gemini AI.
+              <p style={{ fontSize: '0.92rem', color: '#64748b', lineHeight: 1.58, margin: '0 0 18px 0' }}>
+                CareerPilot parses candidate resumes against target job descriptions, identifying missing skills, quantifying ATS match scores, and suggesting high-impact keywords dynamically generated by Gemini AI.
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '28px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '22px' }}>
                 {[
                   { bg: '#ecfdf5', color: '#10b981', title: 'Instant Keyword Extraction & Match Score', desc: 'Extracts hard skills, soft skills, and missing keywords in seconds.' },
-                  { bg: '#eff6ff', color: '#3b82f6', title: 'Dynamic LaTeX Source Generation', desc: 'Export clean LaTeX across 3 professional templates.' },
-                  { bg: '#fff1f2', color: '#f43f5e', title: 'Voice AI Mock Interview Prep', desc: 'Simulate real interviews with speech recognition & AI feedback.' }
+                  { bg: '#eff6ff', color: '#3b82f6', title: 'Dynamic LaTeX Source Generation', desc: 'Export clean LaTeX across 3 professional tech templates.' },
+                  { bg: '#fff1f2', color: '#f43f5e', title: 'Voice AI Mock Interview Prep', desc: 'Simulate real technical interviews with speech recognition & AI feedback.' },
+                  { bg: '#fef3c7', color: '#d97706', title: 'Automated PDF Breakdown & Analytics', desc: 'Download comprehensive evaluation reports with subject breakdowns.' },
+                  { bg: '#f3e8ff', color: '#9333ea', title: 'CS Core Subjects Evaluation', desc: 'Master DSA, Operating Systems, DBMS, OOPs & System Design.' }
                 ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                    <div style={{ background: item.bg, color: item.color, padding: '6px', borderRadius: '8px', marginTop: '2px', flexShrink: 0 }}><CheckCircle className="size-4" /></div>
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                    <div style={{ background: item.bg, color: item.color, padding: '5px', borderRadius: '7px', marginTop: '1px', flexShrink: 0 }}><CheckCircle className="size-4" /></div>
                     <div>
-                      <strong style={{ fontSize: '0.92rem', color: '#1c2427', display: 'block' }}>{item.title}</strong>
+                      <strong style={{ fontSize: '0.88rem', color: '#1c2427', display: 'block' }}>{item.title}</strong>
                       <span style={{ fontSize: '0.82rem', color: '#64748b' }}>{item.desc}</span>
                     </div>
                   </div>
                 ))}
               </div>
-              <Link to="/upload" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#1c2427', color: '#fff', padding: '12px 28px', borderRadius: '14px', fontWeight: 700, textDecoration: 'none', fontSize: '0.9rem' }}>
+              <Link to="/upload" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#1c2427', color: '#fff', padding: '11px 24px', borderRadius: '12px', fontWeight: 700, textDecoration: 'none', fontSize: '0.88rem' }}>
                 Try ATS Screener Now <ArrowRight className="size-4" />
               </Link>
             </div>
-
-            {/* RIGHT — DOCK TARGET (centers laptop vertically in right half of spotlight box) */}
-            <div ref={dockRef} style={{ width: '100%', height: '360px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
           </div>
         </section>
 
