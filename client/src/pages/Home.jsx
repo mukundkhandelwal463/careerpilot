@@ -3,19 +3,19 @@ import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
-import { 
-  Sparkles, 
-  ArrowRight, 
-  CheckCircle2, 
-  Cpu, 
-  Terminal, 
-  Compass, 
-  Briefcase, 
-  Zap, 
-  Award, 
-  FileText, 
-  HelpCircle, 
-  Layers, 
+import {
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
+  Cpu,
+  Terminal,
+  Compass,
+  Briefcase,
+  Zap,
+  Award,
+  FileText,
+  HelpCircle,
+  Layers,
   Star,
   Users,
   Mic,
@@ -66,15 +66,15 @@ const featurePills = [
 /* Positions for the 7 floating pills — generous vertical distance & front layer overlap */
 const pillPositions = [
   // Left side (4 pills, cleanly spaced vertically)
-  { top: '2%',   left: '-25px',  flyX: -520,  flyY: -100 },  // ATS Resume Analyzer
-  { top: '26%',  left: '-40px',  flyX: -560,  flyY: -30 },   // AI Resume Maker
-  { top: '52%',  left: '-45px',  flyX: -560,  flyY: 30 },    // LaTeX Resume Architect
-  { top: '78%',  left: '-20px',  flyX: -520,  flyY: 100 },   // Voice AI Mock Interview
+  { top: '2%', left: '-25px', flyX: -520, flyY: -100 },  // ATS Resume Analyzer
+  { top: '26%', left: '-40px', flyX: -560, flyY: -30 },   // AI Resume Maker
+  { top: '52%', left: '-45px', flyX: -560, flyY: 30 },    // LaTeX Resume Architect
+  { top: '78%', left: '-20px', flyX: -520, flyY: 100 },   // Voice AI Mock Interview
 
   // Right side (3 pills, cleanly spaced vertically)
-  { top: '10%',  right: '-25px', flyX: 520,   flyY: -80 },   // CS Special Evaluation
-  { top: '44%',  right: '-40px', flyX: 560,   flyY: 0 },     // Live Job Matching
-  { top: '78%',  right: '-20px', flyX: 520,   flyY: 80 }     // Career Roadmap & Keywords
+  { top: '10%', right: '-25px', flyX: 520, flyY: -80 },   // CS Special Evaluation
+  { top: '44%', right: '-40px', flyX: 560, flyY: 0 },     // Live Job Matching
+  { top: '78%', right: '-20px', flyX: 520, flyY: 80 }     // Career Roadmap & Keywords
 ];
 
 
@@ -86,6 +86,7 @@ const Home = () => {
   const [dockOffset, setDockOffset] = useState({ x: 0, y: 0, scale: 0.58 });
 
   // Measure exact offset between laptop and dock target
+  // Measure exact offset between laptop and dock target
   const measureDock = useCallback(() => {
     if (!laptopRef.current || !dockRef.current) return;
     const laptopRect = laptopRef.current.getBoundingClientRect();
@@ -93,9 +94,9 @@ const Home = () => {
     const scrollY = window.scrollY;
     const laptopCenterX = laptopRect.left + laptopRect.width / 2;
     const laptopCenterY = laptopRect.top + scrollY + laptopRect.height / 2;
-    const dockCenterX = dockRect.left + dockRect.width / 2;
-    // Push dock Y center 60px lower to equalize top and bottom margins in the spotlight box
-    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2 + 60;
+    // Push dock target further right (+45px) and lower down (+125px) inside spotlight box:
+    const dockCenterX = dockRect.left + dockRect.width / 2 + 45;
+    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2 + 125;
     const targetScale = Math.min(dockRect.width / laptopRect.width, 0.55);
     setDockOffset({ x: dockCenterX - laptopCenterX, y: dockCenterY - laptopCenterY, scale: targetScale });
   }, []);
@@ -147,7 +148,7 @@ const Home = () => {
       <motion.div style={{ position: 'absolute', top: '40%', left: '-5%', width: '450px', height: '450px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,214,199,0.15) 0%, rgba(255,255,255,0) 70%)', filter: 'blur(60px)', y: floatY2, pointerEvents: 'none', zIndex: -1 }} />
 
       <main style={{ width: 'min(var(--max-width), calc(100% - 32px))', margin: '0 auto' }}>
-        
+
         {/* ═══════════════════════════════════════════════════════
             HERO — Laptop centered with floating pill tubes around it
             Scrolling → pills fly outward, laptop docks into box
@@ -242,7 +243,7 @@ const Home = () => {
                     {/* SCREEN 1: Dashboard (Full Comprehensive Platform Preview) */}
                     <div style={{ position: 'absolute', inset: 0, opacity: showFeatureScreen ? 0 : 1, transition: 'opacity 0.5s ease', pointerEvents: showFeatureScreen ? 'none' : 'auto' }}>
                       <div style={{ padding: '16px 20px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '10px' }}>
-                        
+
                         {/* Top Header Row */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '10px' }}>
                           <div>
