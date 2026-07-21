@@ -94,8 +94,9 @@ const Home = () => {
     const laptopCenterX = laptopRect.left + laptopRect.width / 2;
     const laptopCenterY = laptopRect.top + scrollY + laptopRect.height / 2;
     const dockCenterX = dockRect.left + dockRect.width / 2;
-    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2;
-    const targetScale = Math.min(dockRect.width / laptopRect.width, 0.55);
+    // Push target position further down side:
+    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2 + 75;
+    const targetScale = Math.min(dockRect.width / laptopRect.width, 0.54);
     setDockOffset({ x: dockCenterX - laptopCenterX, y: dockCenterY - laptopCenterY, scale: targetScale });
   }, []);
 
@@ -114,13 +115,13 @@ const Home = () => {
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
-  // Laptop scroll transforms — glides smoothly and docks into right side of spotlight box
-  const laptopX = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.x]);
-  const laptopY = useTransform(scrollYProgress, [0, 0.25], [0, dockOffset.y]);
-  const laptopScale = useTransform(scrollYProgress, [0, 0.25], [1, dockOffset.scale]);
+  // Laptop scroll transforms — fast glide and dock lower down side
+  const laptopX = useTransform(scrollYProgress, [0, 0.15], [0, dockOffset.x]);
+  const laptopY = useTransform(scrollYProgress, [0, 0.15], [0, dockOffset.y]);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.15], [1, dockOffset.scale]);
 
-  // Feature pills fly outward on scroll
-  const pillProgress = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
+  // Feature pills fly outward fast on scroll
+  const pillProgress = useTransform(scrollYProgress, [0, 0.10], [0, 1]);
 
   // Create individual pill transforms
   const pillTransforms = pillPositions.map(pos => ({
@@ -132,7 +133,7 @@ const Home = () => {
 
   // Swap screen content
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    setShowFeatureScreen(latest > 0.13);
+    setShowFeatureScreen(latest > 0.08);
   });
 
   return (
