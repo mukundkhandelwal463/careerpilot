@@ -62,14 +62,14 @@ const featurePills = [
   { icon: Target, bg: '#ecfeff', color: '#0891b2', title: 'Career Roadmap & Keywords' }
 ];
 
-/* Positions for the 6 floating pills — directly touching/overlapping laptop screen edges */
+/* Positions for the 6 floating pills — directly touching/overlapping laptop screen frame */
 const pillPositions = [
-  { top: '12%',  left: '-35px',  flyX: -500,  flyY: -80 },   // top-left
-  { top: '42%',  left: '-50px',  flyX: -550,  flyY: 0 },     // mid-left
-  { top: '72%',  left: '-30px',  flyX: -500,  flyY: 80 },    // bottom-left
-  { top: '12%',  right: '-35px', flyX: 500,   flyY: -80 },   // top-right
-  { top: '42%',  right: '-50px', flyX: 550,   flyY: 0 },     // mid-right
-  { top: '72%',  right: '-30px', flyX: 500,   flyY: 80 }     // bottom-right
+  { top: '14%',  left: '5px',    flyX: -500,  flyY: -80 },   // top-left
+  { top: '44%',  left: '-10px',  flyX: -550,  flyY: 0 },     // mid-left
+  { top: '74%',  left: '10px',   flyX: -500,  flyY: 80 },    // bottom-left
+  { top: '14%',  right: '5px',   flyX: 500,   flyY: -80 },   // top-right
+  { top: '44%',  right: '-10px', flyX: 550,   flyY: 0 },     // mid-right
+  { top: '74%',  right: '10px',  flyX: 500,   flyY: 80 }     // bottom-right
 ];
 
 
@@ -90,7 +90,7 @@ const Home = () => {
     const laptopCenterY = laptopRect.top + scrollY + laptopRect.height / 2;
     const dockCenterX = dockRect.left + dockRect.width / 2;
     const dockCenterY = dockRect.top + scrollY + dockRect.height / 2;
-    const targetScale = Math.min(dockRect.width / laptopRect.width, 0.58);
+    const targetScale = Math.min(dockRect.width / laptopRect.width, 0.52);
     setDockOffset({ x: dockCenterX - laptopCenterX, y: dockCenterY - laptopCenterY, scale: targetScale });
   }, []);
 
@@ -348,8 +348,8 @@ const Home = () => {
               </Link>
             </div>
 
-            {/* RIGHT — DOCK TARGET */}
-            <div ref={dockRef} style={{ height: '300px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+            {/* RIGHT — DOCK TARGET (centers laptop vertically in right half of spotlight box) */}
+            <div ref={dockRef} style={{ height: '100%', minHeight: '440px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
           </div>
         </section>
 
