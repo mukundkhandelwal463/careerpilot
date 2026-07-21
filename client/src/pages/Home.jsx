@@ -52,24 +52,29 @@ const TiltCard = ({ children, className, style = {} }) => {
   );
 };
 
-/* Feature pill tube data */
+/* Feature pill tube data — clicking any tube redirects to that feature */
 const featurePills = [
-  { icon: BarChart3, bg: '#ecfdf5', color: '#10b981', title: 'ATS Resume Analyzer' },
-  { icon: FileCode, bg: '#eff6ff', color: '#3b82f6', title: 'LaTeX Resume Architect' },
-  { icon: Mic, bg: '#fff1f2', color: '#f43f5e', title: 'Voice AI Mock Interview' },
-  { icon: Code2, bg: '#fef3c7', color: '#d97706', title: 'CS Special Evaluation' },
-  { icon: Search, bg: '#f3e8ff', color: '#9333ea', title: 'Live Job Matching' },
-  { icon: Target, bg: '#ecfeff', color: '#0891b2', title: 'Career Roadmap & Keywords' }
+  { icon: BarChart3, bg: '#ecfdf5', color: '#10b981', title: 'ATS Resume Analyzer', link: '/upload' },
+  { icon: Layers, bg: '#fdf4ff', color: '#c026d3', title: 'AI Resume Maker', link: '/app/builder/default' },
+  { icon: FileCode, bg: '#eff6ff', color: '#3b82f6', title: 'LaTeX Resume Architect', link: '/app/builder/default' },
+  { icon: Mic, bg: '#fff1f2', color: '#f43f5e', title: 'Voice AI Mock Interview', link: '/preparation' },
+  { icon: Code2, bg: '#fef3c7', color: '#d97706', title: 'CS Special Evaluation', link: '/preparation' },
+  { icon: Search, bg: '#f3e8ff', color: '#9333ea', title: 'Live Job Matching', link: '/jobs' },
+  { icon: Target, bg: '#ecfeff', color: '#0891b2', title: 'Career Roadmap & Keywords', link: '/app/builder/default' }
 ];
 
-/* Positions for the 6 floating pills — at the front layer overlapping laptop screen bezel */
+/* Positions for the 7 floating pills — generous vertical distance & front layer overlap */
 const pillPositions = [
-  { top: '12%',  left: '-15px',  flyX: -500,  flyY: -80 },   // top-left
-  { top: '42%',  left: '-30px',  flyX: -550,  flyY: 0 },     // mid-left
-  { top: '72%',  left: '-10px',  flyX: -500,  flyY: 80 },    // bottom-left
-  { top: '12%',  right: '-15px', flyX: 500,   flyY: -80 },   // top-right
-  { top: '42%',  right: '-30px', flyX: 550,   flyY: 0 },     // mid-right
-  { top: '72%',  right: '-10px', flyX: 500,   flyY: 80 }     // bottom-right
+  // Left side (4 pills, cleanly spaced vertically)
+  { top: '2%',   left: '-25px',  flyX: -520,  flyY: -100 },  // ATS Resume Analyzer
+  { top: '26%',  left: '-40px',  flyX: -560,  flyY: -30 },   // AI Resume Maker
+  { top: '52%',  left: '-45px',  flyX: -560,  flyY: 30 },    // LaTeX Resume Architect
+  { top: '78%',  left: '-20px',  flyX: -520,  flyY: 100 },   // Voice AI Mock Interview
+
+  // Right side (3 pills, cleanly spaced vertically)
+  { top: '10%',  right: '-25px', flyX: 520,   flyY: -80 },   // CS Special Evaluation
+  { top: '44%',  right: '-40px', flyX: 560,   flyY: 0 },     // Live Job Matching
+  { top: '78%',  right: '-20px', flyX: 520,   flyY: 80 }     // Career Roadmap & Keywords
 ];
 
 
@@ -172,28 +177,31 @@ const Home = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, delay: 0.08 * idx, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <motion.div
-                    whileHover={{ y: -4, scale: 1.05 }}
-                    animate={{ y: [0, idx % 2 === 0 ? -6 : 6, 0] }}
-                    transition={{ duration: 3 + idx * 0.5, repeat: Infinity, ease: 'easeInOut' }}
-                    style={{
-                      background: '#ffffff',
-                      borderRadius: '999px',
-                      padding: '10px 20px',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
-                      border: '1px solid #cbd5e1',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      whiteSpace: 'nowrap',
-                      cursor: 'default'
-                    }}
-                  >
-                    <div style={{ background: pill.bg, padding: '7px', borderRadius: '10px', color: pill.color, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
-                      <Icon className="size-4" />
-                    </div>
-                    <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#1c2427' }}>{pill.title}</span>
-                  </motion.div>
+                  <Link to={pill.link} style={{ textDecoration: 'none' }}>
+                    <motion.div
+                      whileHover={{ y: -5, scale: 1.07 }}
+                      whileTap={{ scale: 0.96 }}
+                      animate={{ y: [0, idx % 2 === 0 ? -6 : 6, 0] }}
+                      transition={{ duration: 3 + idx * 0.5, repeat: Infinity, ease: 'easeInOut' }}
+                      style={{
+                        background: '#ffffff',
+                        borderRadius: '999px',
+                        padding: '10px 20px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
+                        border: '1px solid #cbd5e1',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        whiteSpace: 'nowrap',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <div style={{ background: pill.bg, padding: '7px', borderRadius: '10px', color: pill.color, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+                        <Icon className="size-4" />
+                      </div>
+                      <span style={{ fontSize: '0.86rem', fontWeight: 800, color: '#1c2427' }}>{pill.title}</span>
+                    </motion.div>
+                  </Link>
                 </motion.div>
               );
             })}
