@@ -94,7 +94,8 @@ const Home = () => {
     const laptopCenterX = laptopRect.left + laptopRect.width / 2;
     const laptopCenterY = laptopRect.top + scrollY + laptopRect.height / 2;
     const dockCenterX = dockRect.left + dockRect.width / 2;
-    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2;
+    // Push dock Y center 60px lower to equalize top and bottom margins in the spotlight box
+    const dockCenterY = dockRect.top + scrollY + dockRect.height / 2 + 60;
     const targetScale = Math.min(dockRect.width / laptopRect.width, 0.55);
     setDockOffset({ x: dockCenterX - laptopCenterX, y: dockCenterY - laptopCenterY, scale: targetScale });
   }, []);
