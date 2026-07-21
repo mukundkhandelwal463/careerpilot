@@ -62,14 +62,14 @@ const featurePills = [
   { icon: Target, bg: '#ecfeff', color: '#0891b2', title: 'Career Roadmap & Keywords' }
 ];
 
-/* Positions for the 6 floating pills — touching laptop edges */
+/* Positions for the 6 floating pills — directly touching/overlapping laptop screen edges */
 const pillPositions = [
-  { top: '8%',   left: '-180px',  flyX: -500,  flyY: -80 },   // top-left
-  { top: '40%',  left: '-195px',  flyX: -550,  flyY: 0 },     // mid-left
-  { top: '72%',  left: '-170px',  flyX: -500,  flyY: 80 },    // bottom-left
-  { top: '8%',   right: '-180px', flyX: 500,   flyY: -80 },   // top-right
-  { top: '40%',  right: '-195px', flyX: 550,   flyY: 0 },     // mid-right
-  { top: '72%',  right: '-170px', flyX: 500,   flyY: 80 }     // bottom-right
+  { top: '12%',  left: '-35px',  flyX: -500,  flyY: -80 },   // top-left
+  { top: '42%',  left: '-50px',  flyX: -550,  flyY: 0 },     // mid-left
+  { top: '72%',  left: '-30px',  flyX: -500,  flyY: 80 },    // bottom-left
+  { top: '12%',  right: '-35px', flyX: 500,   flyY: -80 },   // top-right
+  { top: '42%',  right: '-50px', flyX: 550,   flyY: 0 },     // mid-right
+  { top: '72%',  right: '-30px', flyX: 500,   flyY: 80 }     // bottom-right
 ];
 
 
@@ -109,13 +109,13 @@ const Home = () => {
   const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const floatY2 = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
-  // Laptop scroll transforms — docks into spotlight
-  const laptopX = useTransform(scrollYProgress, [0, 0.22], [0, dockOffset.x]);
-  const laptopY = useTransform(scrollYProgress, [0, 0.22], [0, dockOffset.y]);
-  const laptopScale = useTransform(scrollYProgress, [0, 0.22], [1, dockOffset.scale]);
+  // Laptop scroll transforms — docks into spotlight faster on scroll
+  const laptopX = useTransform(scrollYProgress, [0, 0.12], [0, dockOffset.x]);
+  const laptopY = useTransform(scrollYProgress, [0, 0.12], [0, dockOffset.y]);
+  const laptopScale = useTransform(scrollYProgress, [0, 0.12], [1, dockOffset.scale]);
 
-  // Feature pills fly outward on scroll (0 → 0.18 range, before laptop fully docks)
-  const pillProgress = useTransform(scrollYProgress, [0, 0.18], [0, 1]);
+  // Feature pills fly outward faster on scroll
+  const pillProgress = useTransform(scrollYProgress, [0, 0.09], [0, 1]);
 
   // Create individual pill transforms
   const pillTransforms = pillPositions.map(pos => ({
@@ -127,7 +127,7 @@ const Home = () => {
 
   // Swap screen content
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    setShowFeatureScreen(latest > 0.13);
+    setShowFeatureScreen(latest > 0.06);
   });
 
   return (
@@ -146,7 +146,7 @@ const Home = () => {
             HERO — Laptop centered with floating pill tubes around it
             Scrolling → pills fly outward, laptop docks into box
             ═══════════════════════════════════════════════════════ */}
-        <section style={{ padding: '140px 0 60px', textAlign: 'center' }}>
+        <section style={{ padding: '140px 0 180px', textAlign: 'center' }}>
           <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: '1440px', margin: '0 auto' }}>
 
             {/* ── FLOATING FEATURE PILL TUBES ── */}
@@ -310,7 +310,7 @@ const Home = () => {
         {/* ═══════════════════════════════════════════════
             FEATURE SPOTLIGHT — Laptop docks into right side
             ═══════════════════════════════════════════════ */}
-        <section style={{ padding: '40px 0 80px', position: 'relative' }}>
+        <section style={{ padding: '100px 0 100px', position: 'relative' }}>
           <div style={{
             display: 'grid', gridTemplateColumns: '1fr 1fr',
             gap: '32px', alignItems: 'center',
