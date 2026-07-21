@@ -193,3 +193,4 @@ Then redeploy Vercel.
 ---
 
 Built for practical resume optimization, faster candidate screening, and better hiring decisions.
+# careerpilot
