@@ -1,196 +1,179 @@
-# AI-Powered Resume Screener
+# 🚀 CareerPilot — AI-Powered Candidate Career Acceleration Platform
 
-An end-to-end AI career platform that helps:
-- Candidates analyze resume quality, improve ATS match, and get role recommendations.
-- Recruiters rank multiple resumes against one job description.
+<p align="center">
+  <img src="https://img.shields.io/badge/Django-5.0-092E20?style=for-the-badge&logo=django&logoColor=white" />
+  <img src="https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/Vite-7.0-646CFF?style=for-the-badge&logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/Gemini_AI-2.5_Flash-8E75B2?style=for-the-badge&logo=google&logoColor=white" />
+  <img src="https://img.shields.io/badge/AWS-Free_Tier-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" />
+  <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" />
+</p>
 
-It combines classic ML/NLP scoring with Gemini-powered intelligence to deliver practical, real-world resume guidance.
-
----
-
-## What This Project Does
-
-This project takes resume input (`PDF`, `DOCX`, `TXT`) and turns it into actionable career output.
-
-Core engine flow:
-1. Parse resume text.
-2. Clean and normalize resume content.
-3. Detect skills and role signals.
-4. Compute ATS compatibility against job description.
-5. Predict/resolve category using dataset + user input + Gemini fallback.
-6. Generate missing keyword and suggestion insights.
-7. Recommend relevant live jobs.
-
-It also includes:
-- Interactive chatbot-based resume builder.
-- Form-based resume builder.
-- Blank template export to DOCX/PDF.
-- Recruiter mode for bulk candidate ranking.
+**CareerPilot** is an end-to-end, high-performance AI candidate acceleration suite. It bridges the gap between candidate resumes and top tech employers using **ATS resume parsing**, **executive LaTeX compilation**, **interactive AI voice mock interviews**, **CS subject mastery trackers**, and **real-time live job matching**.
 
 ---
 
-## Why This Is Useful
+## 🌟 Core Modules & Features
 
-Most people know their resume is weak, but do not know exactly what to fix. This project solves that by converting resume text into concrete decisions.
+### 1. 📊 ATS Resume Screener & Keyword Engine
+* **Instant Scorecard**: Upload `PDF` or `DOCX` CVs to calculate match scores (0–100%).
+* **Workday & Greenhouse Compatibility**: Scans resume formatting against top ATS ATS parsers.
+* **Gemini AI Keyword Recommendations**: Identifies missing hard/soft skills and recommends contextual bullet point improvements.
 
-Why it matters:
-- Reduces guesswork before applying.
-- Improves ATS visibility through keyword and skills alignment.
-- Gives direct next-step routing:
-  - Good score -> apply to jobs.
-  - Low score -> improve resume first.
-- Helps recruiters quickly shortlist strong candidates using objective scoring.
+### 2. 📄 Executive LaTeX Resume Builder & PDF Compiler
+* **3 Executive Templates**: Tailored for Data Science/ML, Software Engineering, and Product/Executive roles.
+* **AI Autofill**: Automatically converts plain resume notes into polished LaTeX formatting.
+* **Direct Export**: One-click download as high-converting `.pdf` or editable `.docx`.
 
-In short: it saves time, improves quality, and increases decision confidence for both job seekers and hiring teams.
+### 3. 🎙️ AI Voice Mock Interviews & Fluency Scorecards
+* **Speech Recognition**: Practice technical & behavioral interview questions with real-time speech analytics.
+* **Fluency & Accuracy Scoring**: Evaluates candidate confidence, pacing, and domain accuracy.
+* **Full-Length Mock Tests**: 60 MCQ questions + coding problem sandbox with real-time test evaluations.
 
----
+### 4. 📚 CS Core Subjects & Top 50 DSA Pattern Tracker
+* **Subject Theory Notes**: Revision summaries for Operating Systems, DBMS, Computer Networks, and System Design.
+* **Top 50 DSA Sheet**: Track solved algorithms with direct links to LeetCode and GeeksforGeeks.
 
-## Features
-
-### 1) ATS Resume Analyzer
-- Upload resume.
-- Add optional target JD.
-- Add optional `Category / Stream`.
-- Returns:
-  - ATS score
-  - Category
-  - Detected skills
-  - Missing keywords
-  - Unified improvement suggestions
-
-### 2) Smart Category Logic (Dataset + Gemini Routing)
-- If user provides category and it exists in dataset -> dataset-driven flow.
-- If category is not present -> Gemini-only fallback analysis.
-- If user gives category + JD -> uses user category, JD-focused ATS logic.
-
-### 3) Resume Builder (Model 3 Flow)
-- Chatbot Q&A resume generation.
-- Form-based resume generation.
-- Multiple template options.
-- Export to `DOCX` and `PDF`.
-
-### 4) Job Recommendation Engine
-- Skill overlap scoring.
-- Missing-skill awareness.
-- Live-job integration flow.
-- Personalized role mapping.
-
-### 5) Recruiter Mode
-- Upload multiple resumes.
-- Compare against one JD.
-- Get ranked candidate list with ATS scoring.
-
-### 6) Unified Suggestion UX
-- No split suggestion cards.
-- All AI + rule-based advice shown together in one clean suggestion list.
+### 5. 💼 Real-Time Live Job Matcher
+* **Arbeitnow API Integration**: Indexes 100K+ live tech jobs updated daily.
+* **Skill-Graph Alignment**: Automatically filters roles based on extracted candidate resume skills, remote options, and hub locations.
 
 ---
 
-## Tech Stack
+## 🛠️ Technology Stack
 
-### Backend
-- `Python`
-- `Flask`
-- `Flask-CORS`
-- `Gunicorn` (production server)
-
-### AI / NLP / ML
-- `scikit-learn` (TF-IDF, cosine similarity, classification)
-- `pandas`, `numpy`
-- `google-generativeai` (Gemini integration)
-
-### Resume Parsing
-- `pdfplumber`
-- `PyPDF2`
-- `python-docx`
-
-### Frontend
-- `HTML5`
-- `CSS3`
-- `Vanilla JavaScript`
-
-### Deployment
-- `Render` (backend)
-- `Vercel` (frontend)
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 19, Vite 7, TailwindCSS 4, Framer Motion, GSAP, Lenis Smooth Scroll, Lucide Icons |
+| **Backend** | Python 3.12, Django REST Framework, Gunicorn |
+| **AI & ML Engine** | Google Gemini 2.5 Flash API, scikit-learn (TF-IDF), Pandas, NumPy |
+| **Parser & Compiler** | `pdfplumber`, `PyPDF2`, `python-docx`, `fpdf2` |
+| **Database** | SQLite (Dev) / PostgreSQL (Production) |
 
 ---
 
-## Usage
+## 💻 Local Development Setup
 
-### Candidate Workflow (Main User Flow)
-1. Open ATS page.
-2. Upload resume (`PDF` / `DOCX` / `TXT`).
-3. Add optional `Category / Stream`.
-4. Paste target JD (recommended).
-5. Click Analyze.
-6. Review:
-   - ATS score
-   - Category
-   - Missing keywords
-   - Suggestions
-7. Take next action:
-   - Good score -> move to Live Jobs.
-   - Low score -> use Resume Maker and re-check.
+### 1. Clone Repository
+```bash
+git clone https://github.com/mukundkhandelwal463/careerpilot.git
+cd careerpilot
+```
 
-### Resume Builder Workflow
-1. Open Resume Maker.
-2. Choose Chatbot or Form mode.
-3. Fill profile details.
-4. Select template.
-5. Generate and download `DOCX` / `PDF`.
+### 2. Backend Setup (Django)
+```bash
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-### Recruiter Workflow
-1. Open recruiter section in ATS page.
-2. Paste JD.
-3. Upload multiple resumes.
-4. Run ranking.
-5. Review ranked candidates by ATS score.
+# Install dependencies
+pip install -r backend/requirements.txt
 
----
+# Create .env file
+cp backend/.env.example backend/.env
+# Add your GEMINI_API_KEY inside backend/.env
 
-## Step-by-Step Deployment Guide (Frontend on Vercel + Backend on Render)
+# Run migrations & start server
+python backend/manage.py migrate
+python backend/manage.py runserver 8000
+```
 
-### A) Deploy Backend on Render
-1. Open Render dashboard.
-2. Click `New +` -> `Web Service`.
-3. Connect GitHub and select repo: `mukundkhandelwal463/AI-powered-Resume-Screener`.
-4. Configure:
-   - Runtime: `Python`
-   - Build Command: `pip install -r backend/requirements.txt`
-   - Start Command: `cd backend && gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120`
-5. Add Environment Variable:
-   - `GEMINI_API_KEY` = your actual Gemini key
-6. Deploy service.
-7. Verify health:
-   - `https://<your-render-url>/api/health`
-   - Should return: `{ "status": "ok" }`
-
-### B) Deploy Frontend on Vercel
-1. Open Vercel dashboard.
-2. Click `Add New` -> `Project`.
-3. Import same GitHub repo.
-4. Set **Root Directory** to: `forntend`
-5. Deploy.
-
-### C) Connect Frontend to Backend
-`forntend/vercel.json` rewrites `/api/*` to Render backend.
-
-Update this line if your Render URL is different:
-- `https://ai-powered-resume-screener.onrender.com/api/$1`
-
-Then redeploy Vercel.
-
-### D) Final Production Check
-1. Open Vercel app URL.
-2. Go to ATS page.
-3. Upload one resume + JD and run analysis.
-4. Confirm:
-   - ATS result loads
-   - Suggestions are shown
-   - Live jobs and resume maker pages work
-   - No CORS/API errors in browser console
+### 3. Frontend Setup (React / Vite)
+```bash
+cd client
+npm install
+npm run dev
+```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-Built for practical resume optimization, faster candidate screening, and better hiring decisions.
-# careerpilot
+## ☁️ AWS Free Tier Deployment Guide ($0.00 / Low Cost Setup)
+
+This project can be deployed **100% Free** using **AWS Free Tier** + **$100 AWS Credits** for a full 1+ year zero-cost operation.
+
+```
+                  ┌────────────────────────┐
+                  │   AWS S3 + CloudFront  │ (Frontend Static Hosting — $0/mo)
+                  │    React 19 / Vite     │
+                  └───────────┬────────────┘
+                              │ HTTPS API Requests
+                  ┌───────────▼────────────┐
+                  │ AWS EC2 (t3.micro/t4g) │ (Backend API — Free Tier / $0/mo)
+                  │ Nginx + Gunicorn + WSGI│
+                  └────────────────────────┘
+```
+
+### Step 1: Deploy Frontend on AWS S3 + CloudFront (100% Free)
+1. Build the production bundle:
+   ```bash
+   cd client
+   npm run build
+   ```
+2. Create an **AWS S3 Bucket** (e.g. `careerpilot-app`) and enable **Static Website Hosting**.
+3. Upload all contents of `client/dist/` into the S3 bucket.
+4. Create an **AWS CloudFront Distribution** pointing to your S3 bucket for global CDN & free HTTPS SSL.
+
+### Step 2: Deploy Backend on AWS EC2 Free Tier (`t3.micro` / `t4g.small`)
+1. Launch an **AWS EC2 Instance** using Ubuntu 24.04 (`t3.micro` is 12 Months Free Tier eligible, or `t4g.small` covered 100% by $100 credits).
+2. SSH into your instance and install dependencies:
+   ```bash
+   sudo apt update && sudo apt install -y python3-pip python3-venv nginx git
+   ```
+3. Clone your repository:
+   ```bash
+   git clone https://github.com/mukundkhandelwal463/careerpilot.git
+   cd careerpilot
+   python3 -m venv .venv
+   source .venv/bin/activate
+   pip install -r backend/requirements.txt
+   ```
+4. Create production `.env`:
+   ```bash
+   nano backend/.env
+   # Add: GEMINI_API_KEY, SECRET_KEY, FLASK_ENV=production
+   ```
+5. Configure Gunicorn Systemd Service (`/etc/systemd/system/careerpilot.service`):
+   ```ini
+   [Unit]
+   Description=CareerPilot Django Backend
+   After=network.target
+
+   [Service]
+   User=ubuntu
+   WorkingDirectory=/home/ubuntu/careerpilot/backend
+   ExecStart=/home/ubuntu/careerpilot/.venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 2
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+   Enable service: `sudo systemctl start careerpilot && sudo systemctl enable careerpilot`.
+
+6. Configure Nginx Reverse Proxy (`/etc/nginx/sites-available/careerpilot`):
+   ```nginx
+   server {
+       listen 80;
+       server_name your-domain.com;
+
+       location / {
+           proxy_pass http://127.0.0.1:8000;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+       }
+   }
+   ```
+7. Enable SSL via free Let's Encrypt Certbot:
+   ```bash
+   sudo apt install certbot python3-certbot-nginx
+   sudo certbot --nginx -d your-domain.com
+   ```
+
+---
+
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+**Built with ❤️ for candidate success.**
