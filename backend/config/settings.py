@@ -111,6 +111,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Media files (User profile pictures, uploaded resumes)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 STATICFILES_DIRS = []
 client_dist_static = BASE_DIR.parent / 'client' / 'dist'
 if os.path.exists(client_dist_static):

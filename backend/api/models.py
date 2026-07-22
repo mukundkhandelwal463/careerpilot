@@ -8,6 +8,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, db_index=True)
     full_name = models.CharField(max_length=120)
     mobile = models.CharField(max_length=20, blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     interview_score = models.FloatField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -21,6 +22,7 @@ class User(AbstractUser):
             "full_name": self.full_name,
             "email": self.email,
             "mobile": self.mobile,
+            "avatar": self.avatar.url if self.avatar else None,
             "is_verified": self.is_verified,
             "interview_score": self.interview_score,
             "created_at": self.created_at.isoformat() if self.created_at else None,
