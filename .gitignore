@@ -1,29 +1,61 @@
+# Virtual environments
 .venv/
+venv/
+env/
+
+# Python cache & compiled files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
+# IDE & Editor files
 .idea/
+.vscode/
+.DS_Store
 
+# Data & Large Index files
+data/
+*.data
+
+# Environment & Secret files (CRITICAL SECURITY)
+.env
+.env.*
+*.env
 backend/.env
-*.log
-backend/*.db
-backend/server_*.log
+client/.env
 
-# Terraform
+# Databases (SQLite & Local DBs)
+*.db
+*.sqlite3
+backend/*.db
+backend/*.sqlite3
+backend/resume_screener.db
+backend/db.sqlite3
+
+# Server & Build Logs
+*.log
+backend/*.log
+backend/server_*.log
+server_errors.log
+server_stderr.log
+server_stdout.log
+
+# Uploaded Files & Generated Documents
+backend/downloads/
+backend/media/
+uploads/
+downloads/
+
+# Terraform & Certificates
 .terraform/
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
 *.pem
 
-# Node
+# Node & Frontend Build
 node_modules/
 dist/
 client/node_modules/
 client/dist/
-
-# Prometheus / Grafana data
-data/
-
