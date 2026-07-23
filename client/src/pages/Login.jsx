@@ -57,42 +57,55 @@ const Login = () => {
 
   useEffect(() => {
     let attempts = 0;
+    const defaultClientId = "43202687546-67sj16j61ole905gq16di6jo18g2l3e3.apps.googleusercontent.com";
+
+    const renderGoogleBtn = (clientId) => {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: handleGoogleCredentialResponse
+          });
+
+          if (mode !== 'otp') {
+            const container = document.getElementById("googleBtnContainer");
+            if (container) {
+              container.innerHTML = '';
+              window.google.accounts.id.renderButton(container, {
+                theme: "outline",
+                size: "large",
+                shape: "pill",
+                text: "continue_with",
+                logo_alignment: "center",
+                width: 320
+              });
+            }
+          }
+        } catch (e) {
+          console.error("Google button render error:", e);
+        }
+      }
+    };
+
     const initGoogle = async () => {
+      let activeClientId = defaultClientId;
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/google-client-id`);
         const data = await res.json().catch(() => ({}));
         if (data.success && data.google_client_id) {
-          const interval = setInterval(() => {
-            attempts++;
-            if (window.google) {
-              clearInterval(interval);
-              window.google.accounts.id.initialize({
-                client_id: data.google_client_id,
-                callback: handleGoogleCredentialResponse
-              });
-
-              if (mode !== 'otp') {
-                const container = document.getElementById("googleBtnContainer");
-                if (container) {
-                  container.innerHTML = '';
-                  window.google.accounts.id.renderButton(container, {
-                    theme: "outline",
-                    size: "large",
-                    shape: "pill",
-                    text: "continue_with",
-                    logo_alignment: "center",
-                    width: 320
-                  });
-                }
-              }
-            } else if (attempts > 30) {
-              clearInterval(interval);
-            }
-          }, 200);
+          activeClientId = data.google_client_id;
         }
-      } catch (err) {
-        console.error("Google SSO initialization failed:", err);
-      }
+      } catch (err) {}
+
+      const interval = setInterval(() => {
+        attempts++;
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+          clearInterval(interval);
+          renderGoogleBtn(activeClientId);
+        } else if (attempts > 60) {
+          clearInterval(interval);
+        }
+      }, 100);
     };
     initGoogle();
   }, [mode]);
