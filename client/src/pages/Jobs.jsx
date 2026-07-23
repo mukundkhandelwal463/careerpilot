@@ -192,14 +192,15 @@ const Jobs = () => {
       } else {
         d = new Date(dateStr);
       }
+      if (isNaN(d.getTime())) return '';
       const now = new Date();
       const diff = Math.floor((now - d) / (1000 * 60 * 60 * 24));
-      if (diff === 0) return 'Today';
+      if (diff <= 0) return 'Recently';
       if (diff === 1) return 'Yesterday';
       if (diff < 7) return `${diff} days ago`;
       if (diff < 30) return `${Math.floor(diff / 7)} weeks ago`;
       return d.toLocaleDateString();
-    } catch { return dateStr; }
+    } catch { return ''; }
   };
 
   const formatSalary = (job) => {
@@ -532,7 +533,7 @@ const Jobs = () => {
                             🏠 Remote
                           </span>
                         )}
-                        {job.date_posted && (
+                        {job.date_posted && formatDate(job.date_posted) !== '' && (
                           <span style={{ padding: '4px 10px', borderRadius: '8px', background: 'rgba(24,35,38,0.04)', fontSize: '0.76rem', fontWeight: 600, color: 'var(--muted)' }}>
                             🕐 {formatDate(job.date_posted)}
                           </span>

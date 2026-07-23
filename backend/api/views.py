@@ -547,6 +547,38 @@ def generate_summary(request):
 
 
 @api_view(['POST'])
+def _fallback_parse_resume_to_json(resume_text):
+    import re
+    email_match = re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', resume_text)
+    email = email_match.group(0) if email_match else ""
+
+    phone_match = re.search(r'(\+?\d{1,3}[\s\-])?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{4}', resume_text)
+    phone = phone_match.group(0) if phone_match else ""
+
+    lines = [line.strip() for line in resume_text.splitlines() if line.strip()]
+    name = lines[0] if lines else "Candidate Name"
+    if len(name) > 40 or "@" in name or ":" in name or "resume" in name.lower():
+        name = "Candidate Name"
+
+    skills = extract_skills(resume_text)
+
+    return {
+        "full_name": name,
+        "email": email,
+        "phone": phone,
+        "location": "India",
+        "linkedin": "",
+        "github": "",
+        "website": "",
+        "summary": resume_text[:300] if len(resume_text) > 50 else "",
+        "skills": ", ".join(skills),
+        "experience": [],
+        "education": [],
+        "projects": []
+    }
+
+
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def parse_resume_to_json(request):
     try:
@@ -562,10 +594,13 @@ def parse_resume_to_json(request):
             return JsonResponse({"success": False, "error": "Could not extract text from file."}, status=400)
             
         _increment("gemini_calls_total")
-        parsed_data = get_gemini_parse_resume_to_json(resume_text)
+        try:
+            parsed_data = get_gemini_parse_resume_to_json(resume_text)
+        except Exception:
+            parsed_data = None
         
         if not parsed_data:
-            return JsonResponse({"success": False, "error": "Failed to parse resume data."}, status=500)
+            parsed_data = _fallback_parse_resume_to_json(resume_text)
             
         return JsonResponse({"success": True, "data": parsed_data})
     except Exception as exc:
