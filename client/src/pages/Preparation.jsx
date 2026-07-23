@@ -1617,6 +1617,12 @@ const Preparation = () => {
     }
   };
 
+  useEffect(() => {
+    if (interviewCompleted && questionScores.length > 0) {
+      saveFinalScore();
+    }
+  }, [interviewCompleted]);
+
   const saveFinalScore = async () => {
     if (questionScores.length === 0) return;
     const total = questionScores.reduce((sum, item) => sum + item.score, 0);
@@ -1628,6 +1634,7 @@ const Preparation = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          email: user?.email,
           score: avgScore,
           transcript: questionScores,
           feedback: questionScores.map(q => q.feedback?.feedback || '').join(' ')
