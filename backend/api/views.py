@@ -1281,8 +1281,13 @@ def google_auth(request):
 
         user = User.objects.filter(email=email).first()
         if not user:
-            user = User(full_name=full_name, email=email, is_verified=True, is_active=True)
-            user.username = email
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                full_name=full_name,
+                is_verified=True,
+                is_active=True
+            )
             user.set_password(os.urandom(24).hex())
             user.save()
         else:

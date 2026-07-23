@@ -17,12 +17,19 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['full_name']
 
     def to_dict(self):
+        avatar_url = None
+        try:
+            if self.avatar and hasattr(self.avatar, 'name') and self.avatar.name:
+                avatar_url = self.avatar.url
+        except Exception:
+            avatar_url = None
+
         return {
             "id": self.id,
             "full_name": self.full_name,
             "email": self.email,
             "mobile": self.mobile,
-            "avatar": self.avatar.url if self.avatar else None,
+            "avatar": avatar_url,
             "is_verified": self.is_verified,
             "interview_score": self.interview_score,
             "created_at": self.created_at.isoformat() if self.created_at else None,
