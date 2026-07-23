@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { Sparkles, HelpCircle, FileText, Briefcase, Award, Github, Linkedin, Mail, AlertTriangle, MessageSquare, Terminal, Code2, Layers } from 'lucide-react';
 
 const Footer = () => {
-  const googleFormReportUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc_Problem_Report_Form/viewform?usp=sf_link";
-  const googleFormFeedbackUrl = "https://docs.google.com/forms/d/e/1FAIpQLSc_Feedback_Form/viewform?usp=sf_link";
+  const googleFormReportUrl = "https://forms.gle/tyv5pqaYjGpbrT8c7";
+  const googleFormFeedbackUrl = "https://forms.gle/77srxKxzcddWGdPF7";
 
   return (
     <footer style={{
@@ -67,7 +67,7 @@ const Footer = () => {
             </a>
 
             <a
-              href="https://linkedin.com/in/mukundkhandelwal463"
+              href="https://www.linkedin.com/in/mukund-khandelwal-6a8663283/"
               target="_blank"
               rel="noopener noreferrer"
               title="LinkedIn Profile"
@@ -84,7 +84,7 @@ const Footer = () => {
             </a>
 
             <a
-              href="mailto:mukundkhandelwal23@lpu.in"
+              href="mailto:mukundkhandelwal463@gmail.com"
               title="Send Email"
               style={{
                 width: '42px', height: '42px', borderRadius: '12px',
@@ -171,7 +171,7 @@ const Footer = () => {
             </li>
             <li>
               <a
-                href="mailto:mukundkhandelwal23@lpu.in"
+                href="mailto:mukundkhandelwal463@gmail.com"
                 style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', transition: 'color 0.2s' }}
                 onMouseOver={(e) => e.target.style.color = '#ff6b4a'} onMouseOut={(e) => e.target.style.color = '#94a3b8'}
               >
@@ -189,8 +189,9 @@ const Footer = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.86rem', color: '#64748b' }}>
             <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.98rem' }}>Mukund Khandelwal</span>
             <span style={{ color: '#94a3b8' }}>Software Engineer & AI Architect</span>
-            <span style={{ color: '#94a3b8' }}>✉️ mukundkhandelwal23@lpu.in</span>
-            <span style={{ color: '#94a3b8' }}>🔗 github.com/mukundkhandelwal463</span>
+            <a href="mailto:mukundkhandelwal463@gmail.com" style={{ color: '#94a3b8', textDecoration: 'none' }}>✉️ mukundkhandelwal463@gmail.com</a>
+            <a href="https://github.com/mukundkhandelwal463" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', textDecoration: 'none' }}>🔗 github.com/mukundkhandelwal463</a>
+            <a href="https://www.linkedin.com/in/mukund-khandelwal-6a8663283/" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', textDecoration: 'none' }}>💼 linkedin.com/in/mukund-khandelwal</a>
           </div>
         </div>
       </div>
