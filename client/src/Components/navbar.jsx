@@ -108,20 +108,22 @@ const Navbar = () => {
       top: '8px',
       zIndex: 10
     }}>
-      {/* Left side: logo in pill wrapper (aligned to far left edge of viewport) */}
+      {/* Left side: logo in pill wrapper (shifted right with larger logo image) */}
       <Link to="/" style={{
         background: '#ffffff',
         borderRadius: '999px',
-        padding: '8px 21px',
+        padding: '10px 26px',
+        marginLeft: '20px',
         border: '1px solid rgba(24, 35, 38, 0.08)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         textDecoration: 'none',
-        height: '50px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.02)'
+        height: '56px',
+        boxShadow: '0 4px 14px rgba(0, 0, 0, 0.04)',
+        transition: 'all 0.2s'
       }}>
-        <img src="/logo.png" alt="Logo" style={{ height: '27px', objectFit: 'contain' }} />
+        <img src="/logo.png" alt="Logo" style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
       </Link>
 
       {/* Right side container: holds nav links and actions (aligned to far right edge of viewport) */}
