@@ -516,7 +516,7 @@ const Dashboard = () => {
                   {user.full_name || 'Candidate'}
                 </h3>
                 <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '10px', fontWeight: 600 }}>
-                  {targetRole || user?.target_role || (bestResumeItem?.category) || 'Data / Software Engineer'}
+                  {targetRole || user?.target_role || bestResumeItem?.category || ''}
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.8rem', color: '#64748b', overflow: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
