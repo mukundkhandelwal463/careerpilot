@@ -45,11 +45,11 @@ const Login = () => {
         body: JSON.stringify({ id_token: response.credential })
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.success) {
+      if (res.ok && data.success && data.user) {
         setAuthUser(data.user);
-        navigate('/dashboard');
+        window.location.href = '/dashboard';
       } else {
-        showStatus(data.error || 'Google sign-in failed. Please try email login.', 'error');
+        showStatus(data.error || `Google sign-in error (${res.status}). Please try again.`, 'error');
       }
     } catch (err) {
       showStatus('Google SSO connection error: ' + (err.message || 'Server unreachable'), 'error');
