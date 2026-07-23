@@ -29,7 +29,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: ⚙️ Django System & Migration Check
+      - name: ⚙️ Django System Check
         run: |
           python backend/manage.py check
         env:
@@ -46,7 +46,7 @@ jobs:
       - name: 📦 Install Frontend Dependencies
         run: |
           cd client
-          npm ci
+          npm ci || npm install
 
       - name: 🏗️ Build Vite Production Bundle
         run: |
@@ -63,7 +63,7 @@ jobs:
   # JOB 2: AWS Deployment (Runs on Push to Main)
   # ════════════════════════════════════════════════════════════
   deploy-aws:
-    name: 🚀 Deploy to AWS Free Tier
+    name: 🚀 Deploy to AWS EC2
     runs-on: ubuntu-latest
     needs: [build-and-test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -71,12 +71,6 @@ jobs:
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
-
-      - name: 📥 Download Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: client-dist
-          path: client/dist/
 
       - name: 🔑 SSH Deploy to AWS EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -88,9 +82,7 @@ jobs:
           script: |
             cd /home/ubuntu/careerpilot
             git pull origin main
-            source .venv/bin/activate
-            pip install -r backend/requirements.txt
-            python backend/manage.py migrate
+            cd client && npm run build && cd ..
             sudo systemctl restart careerpilot
             sudo systemctl restart nginx
-            echo "✅ Deployment completed successfully!"
+            echo "✅ Deployment to AWS EC2 completed successfully!"
