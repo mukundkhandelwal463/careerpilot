@@ -30,15 +30,16 @@ const Footer = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#ffffff' }}>
             <div style={{
               width: '44px', height: '44px', borderRadius: '14px',
-              background: 'linear-gradient(135deg, #ff6b4a, #ff8f57)',
-              display: 'grid', placeItems: 'center', fontWeight: 800, color: '#ffffff',
-              boxShadow: '0 4px 14px rgba(255, 107, 74, 0.35)', fontSize: '1.25rem'
+              background: '#ffffff',
+              display: 'grid', placeItems: 'center',
+              boxShadow: '0 4px 14px rgba(0, 0, 0, 0.15)',
+              padding: '6px'
             }}>
-              🚀
+              <img src="/logo.png" alt="CareerPilot Logo" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
             </div>
             <div>
               <strong style={{ fontSize: '1.35rem', letterSpacing: '-0.02em', color: '#ffffff', display: 'block', lineHeight: 1.2 }}>
-                CareerPilot AI
+                CareerPilot
               </strong>
             </div>
           </div>
