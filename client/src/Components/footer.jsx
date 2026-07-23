@@ -170,12 +170,6 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <Link to="/chatbot" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', transition: 'color 0.2s' }}
-                    onMouseOver={(e) => e.target.style.color = '#ff6b4a'} onMouseOut={(e) => e.target.style.color = '#94a3b8'}>
-                <HelpCircle className="size-4.5 text-indigo-400" /> AI Resume Assistant
-              </Link>
-            </li>
-            <li>
               <a
                 href="mailto:mukundkhandelwal23@lpu.in"
                 style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', transition: 'color 0.2s' }}

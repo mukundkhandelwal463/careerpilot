@@ -10,7 +10,6 @@ import Preview from './pages/Preview.jsx'
 import Upload from './pages/Upload.jsx'
 import Result from './pages/Result.jsx'
 import MakerOptions from './pages/MakerOptions.jsx'
-import Chatbot from './pages/Chatbot.jsx'
 import Jobs from './pages/Jobs.jsx'
 import Preparation from './pages/Preparation.jsx'
 import DetailedTheory from './pages/DetailedTheory.jsx'
@@ -55,7 +54,6 @@ const App = () => {
           <Route path='/upload' element={<ProtectedRoute><Upload /></ProtectedRoute>} />
           <Route path='/result' element={<ProtectedRoute><Result /></ProtectedRoute>} />
           <Route path='/maker_options' element={<Navigate to="/app/builder/default" replace />} />
-          <Route path='/chatbot' element={<ProtectedRoute><Chatbot /></ProtectedRoute>} />
           <Route path='/jobs' element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
           <Route path='/preparation' element={<ProtectedRoute><Preparation /></ProtectedRoute>} />
           <Route path='/preparation/theory/OOPs' element={<ProtectedRoute><OopsTheory /></ProtectedRoute>} />
