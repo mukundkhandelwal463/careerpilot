@@ -95,7 +95,7 @@ const Upload = () => {
       const fetchResumes = async () => {
         setResumesLoading(true);
         try {
-          const res = await fetch('/api/resumes');
+          const res = await fetch(`/api/resumes?email=${encodeURIComponent(user.email)}`);
           const data = await res.json();
           if (data.success) {
             setResumes(data.resumes || []);

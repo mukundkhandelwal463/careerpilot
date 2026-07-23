@@ -1030,7 +1030,7 @@ const Preparation = () => {
         setResultsLoading(true);
         setResultsError(null);
         try {
-          const res = await fetch('/api/results/list');
+          const res = await fetch(`/api/results/list?email=${encodeURIComponent(user.email)}`);
           const data = await res.json();
           if (data.success) {
             setResultsData({ interviews: data.interviews, tests: data.tests });

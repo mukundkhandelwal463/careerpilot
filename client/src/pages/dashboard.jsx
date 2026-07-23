@@ -49,6 +49,7 @@ const Dashboard = () => {
   // Track the number of times user has initiated mock interview for their best resume
   const [interviewCount, setInterviewCount] = useState(0);
   const [bestTestResult, setBestTestResult] = useState(null);
+  const [bestInterviewResult, setBestInterviewResult] = useState(null);
   const [csProgress, setCsProgress] = useState({ dsa: 0, oops: 0, os: 0, dbms: 0, cn: 0, sys: 0 });
 
   const todayStr = getLocalDateString(new Date());
@@ -200,7 +201,7 @@ const Dashboard = () => {
 
     const fetchResumes = async () => {
       try {
-        const res = await fetch('/api/resumes');
+        const res = await fetch(`/api/resumes?email=${encodeURIComponent(user.email)}`);
         const data = await res.json();
         if (data.success) {
           setResumes(data.resumes || []);
@@ -214,11 +215,17 @@ const Dashboard = () => {
 
     const fetchTestResults = async () => {
       try {
-        const res = await fetch('/api/results/list');
+        const res = await fetch(`/api/results/list?email=${encodeURIComponent(user.email)}`);
         const data = await res.json();
-        if (data.success && data.tests && data.tests.length > 0) {
-          const best = data.tests.reduce((prev, current) => (prev.score > current.score ? prev : current));
-          setBestTestResult(best);
+        if (data.success) {
+          if (data.tests && data.tests.length > 0) {
+            const best = data.tests.reduce((prev, current) => (prev.score > current.score ? prev : current));
+            setBestTestResult(best);
+          }
+          if (data.interviews && data.interviews.length > 0) {
+            const bestInter = data.interviews.reduce((prev, current) => (prev.score > current.score ? prev : current));
+            setBestInterviewResult(bestInter);
+          }
         }
       } catch (err) {
         console.error("Error fetching test results:", err);
@@ -283,7 +290,7 @@ const Dashboard = () => {
   const validScores = resumes.map(r => r.ats_score).filter(s => s !== null && s !== undefined);
   const avgAtsScore = validScores.length ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length) : 0;
   const bestAtsScore = validScores.length ? Math.round(Math.max(...validScores)) : 0; // Fallback to 0% for new user
-  const interviewReadiness = user.interview_score ? Math.round(user.interview_score) : 0; // Not Taken represents 0
+  const interviewReadiness = bestInterviewResult ? Math.round(bestInterviewResult.score) : (user.interview_score ? Math.round(user.interview_score) : 0);
   const jobFitScore = bestAtsScore ? Math.round(bestAtsScore * 0.95) : 0; // Mapped fallback to 0%
   const targetPositionsCount = resumes.length > 0 ? 203 : 0;
 
