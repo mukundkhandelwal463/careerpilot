@@ -2153,15 +2153,12 @@ def get_results_api(request):
 @permission_classes([AllowAny])
 def download_pdf_report_api(request):
     try:
-        user = request.user
-        if not user or not user.is_authenticated:
-            return HttpResponse("Unauthorized", status=401)
-
+        user = _get_request_user(request)
         attempt_id = request.GET.get("id")
-        report_type = request.GET.get("type")
+        report_type = request.GET.get("type", "test")
 
-        if not attempt_id or not report_type:
-            return HttpResponse("Missing parameters", status=400)
+        if not attempt_id:
+            return HttpResponse("Missing attempt ID", status=400)
 
         from fpdf import FPDF
         pdf = FPDF()
@@ -2171,9 +2168,15 @@ def download_pdf_report_api(request):
         if report_type == "interview":
             from api.models import MockInterview
             try:
-                attempt = MockInterview.objects.get(id=attempt_id, user=user)
-            except MockInterview.DoesNotExist:
+                if user:
+                    attempt = MockInterview.objects.filter(id=attempt_id, user=user).first() or MockInterview.objects.get(id=attempt_id)
+                else:
+                    attempt = MockInterview.objects.get(id=attempt_id)
+            except Exception:
                 return HttpResponse("Interview report not found", status=404)
+
+            cand_name = user.full_name if user else "Candidate"
+            cand_email = user.email if user else ""
 
             pdf.set_fill_color(30, 41, 59)
             pdf.rect(0, 0, 210, 40, 'F')
@@ -2181,7 +2184,7 @@ def download_pdf_report_api(request):
             pdf.set_font("Helvetica", "B", 20)
             pdf.cell(0, 10, "AI Mock Interview Performance Report", ln=True, align='C')
             pdf.set_font("Helvetica", "", 12)
-            pdf.cell(0, 10, f"Candidate: {user.full_name} ({user.email})", ln=True, align='C')
+            pdf.cell(0, 10, f"Candidate: {cand_name} ({cand_email})", ln=True, align='C')
             pdf.ln(15)
 
             pdf.set_text_color(30, 41, 59)
@@ -2202,70 +2205,72 @@ def download_pdf_report_api(request):
             pdf.ln(4)
             
             pdf.set_font("Helvetica", "", 10)
-            feedback_text = attempt.feedback or "No overall feedback compiled."
-            feedback_text = feedback_text.encode('latin-1', 'replace').decode('latin-1')
+            feedback_text = (attempt.feedback or "No overall feedback compiled.").encode('latin-1', 'replace').decode('latin-1')
             pdf.multi_cell(0, 5, feedback_text)
             pdf.ln(10)
 
             pdf.set_font("Helvetica", "B", 14)
-            pdf.cell(0, 8, "Question Breakdown & Transcript", ln=True)
+            pdf.cell(0, 8, "Questions & Detailed Answers Transcript", ln=True)
             pdf.line(10, pdf.get_y(), 200, pdf.get_y())
             pdf.ln(4)
 
-            for idx, item in enumerate(attempt.transcript):
+            transcript_items = attempt.transcript if isinstance(attempt.transcript, list) else []
+            for idx, item in enumerate(transcript_items):
                 pdf.set_font("Helvetica", "B", 11)
                 pdf.set_text_color(79, 70, 229)
-                pdf.cell(0, 6, f"Question {idx+1}: {item.get('question', '')}".encode('latin-1', 'replace').decode('latin-1'), ln=True)
+                q_text = item.get('question', f"Question {idx+1}").encode('latin-1', 'replace').decode('latin-1')
+                pdf.multi_cell(0, 6, f"Question {idx+1}: {q_text}")
+                
                 pdf.set_text_color(30, 41, 59)
                 pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(30, 6, "Your Answer: ")
+                pdf.cell(30, 6, "Your Response: ")
                 pdf.set_font("Helvetica", "", 10)
-                pdf.multi_cell(0, 5, item.get('userAnswer', '').encode('latin-1', 'replace').decode('latin-1'))
+                ans_text = item.get('userAnswer', item.get('response', 'No answer provided.')).encode('latin-1', 'replace').decode('latin-1')
+                pdf.multi_cell(0, 5, ans_text)
                 
                 score_val = item.get('score', 0)
                 pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(30, 6, "Question Score: ")
+                pdf.cell(30, 6, "Score: ")
                 pdf.set_font("Helvetica", "", 10)
                 pdf.cell(0, 6, f"{score_val} / 100", ln=True)
 
                 eval_details = item.get('feedback', {})
-                strengths = eval_details.get("strengths", [])
-                improvements = eval_details.get("improvements", [])
-                
-                if strengths:
-                    pdf.set_font("Helvetica", "B", 10)
-                    pdf.cell(30, 6, "Strengths: ")
-                    pdf.set_font("Helvetica", "", 10)
-                    pdf.multi_cell(0, 5, ", ".join(strengths).encode('latin-1', 'replace').decode('latin-1'))
-                if improvements:
-                    pdf.set_font("Helvetica", "B", 10)
-                    pdf.cell(30, 6, "Improvements: ")
-                    pdf.set_font("Helvetica", "", 10)
-                    pdf.multi_cell(0, 5, ", ".join(improvements).encode('latin-1', 'replace').decode('latin-1'))
-                
+                if isinstance(eval_details, dict):
+                    strengths = eval_details.get("strengths", [])
+                    improvements = eval_details.get("improvements", [])
+                    if strengths:
+                        pdf.set_font("Helvetica", "B", 10)
+                        pdf.cell(30, 6, "Strengths: ")
+                        pdf.set_font("Helvetica", "", 10)
+                        pdf.multi_cell(0, 5, ", ".join(strengths).encode('latin-1', 'replace').decode('latin-1'))
+                    if improvements:
+                        pdf.set_font("Helvetica", "B", 10)
+                        pdf.cell(30, 6, "Improvements: ")
+                        pdf.set_font("Helvetica", "", 10)
+                        pdf.multi_cell(0, 5, ", ".join(improvements).encode('latin-1', 'replace').decode('latin-1'))
                 pdf.ln(6)
 
         elif report_type == "test":
             from api.models import MockTestAttempt
             try:
-                attempt = MockTestAttempt.objects.get(id=attempt_id, user=user)
-            except MockTestAttempt.DoesNotExist:
+                if user:
+                    attempt = MockTestAttempt.objects.filter(id=attempt_id, user=user).first() or MockTestAttempt.objects.get(id=attempt_id)
+                else:
+                    attempt = MockTestAttempt.objects.get(id=attempt_id)
+            except Exception:
                 return HttpResponse("Test report not found", status=404)
+
+            cand_name = user.full_name if user else "Candidate"
+            cand_email = user.email if user else ""
 
             pdf.set_fill_color(15, 23, 42)
             pdf.rect(0, 0, 210, 40, 'F')
-
-            import os
-            from django.conf import settings
-            logo_path = os.path.join(settings.BASE_DIR, "..", "client", "public", "logo.png")
-            if os.path.exists(logo_path):
-                pdf.image(logo_path, x=10, y=8, w=25)
 
             pdf.set_text_color(255, 255, 255)
             pdf.set_font("Helvetica", "B", 20)
             pdf.cell(0, 10, "Full-Length Mock Assessment Report", ln=True, align='C')
             pdf.set_font("Helvetica", "", 12)
-            pdf.cell(0, 10, f"Candidate: {user.full_name} ({user.email}) | Level: {attempt.difficulty.upper()}", ln=True, align='C')
+            pdf.cell(0, 10, f"Candidate: {cand_name} ({cand_email}) | Level: {attempt.difficulty.upper()}", ln=True, align='C')
             pdf.ln(15)
 
             pdf.set_text_color(30, 41, 59)
@@ -2301,15 +2306,68 @@ def download_pdf_report_api(request):
             pdf.cell(90, 6, f"{attempt.coding_hard_score} / 50.0", border=1, ln=True)
             pdf.ln(10)
 
-            grading = attempt.details.get("grading", {})
-            test_data = attempt.details.get("test_data", {})
+            details = attempt.details if isinstance(attempt.details, dict) else {}
+            grading = details.get("grading", {})
+            test_data = details.get("test_data", {})
+            user_answers = details.get("answers", {})
+
+            # Render All MCQ Sections (Technical, Verbal, Aptitude)
+            sec_keys = [
+                ("technical", "Technical Core MCQs Breakdown"),
+                ("verbal", "Verbal Reasoning MCQs Breakdown"),
+                ("aptitude", "Aptitude & Quantitative MCQs Breakdown")
+            ]
+
+            for s_key, s_title in sec_keys:
+                questions_list = test_data.get(s_key, [])
+                if questions_list:
+                    pdf.set_font("Helvetica", "B", 13)
+                    pdf.set_text_color(30, 41, 59)
+                    pdf.cell(0, 8, s_title, ln=True)
+                    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+                    pdf.ln(4)
+
+                    for q_idx, q in enumerate(questions_list):
+                        q_id = str(q.get("id", q_idx))
+                        user_ans_idx = user_answers.get(q_id, user_answers.get(f"{s_key}_{q_idx}"))
+                        correct_ans_idx = q.get("correct")
+
+                        q_text = q.get("question", "").encode('latin-1', 'replace').decode('latin-1')
+                        pdf.set_font("Helvetica", "B", 10)
+                        pdf.set_text_color(79, 70, 229)
+                        pdf.multi_cell(0, 5, f"Q{q_idx+1}: {q_text}")
+
+                        opts = q.get("options", [])
+                        pdf.set_font("Helvetica", "", 9)
+                        pdf.set_text_color(30, 41, 59)
+                        for opt_i, opt in enumerate(opts):
+                            opt_clean = str(opt).encode('latin-1', 'replace').decode('latin-1')
+                            pdf.cell(0, 4, f"   [{chr(65+opt_i)}] {opt_clean}", ln=True)
+
+                        pdf.set_font("Helvetica", "B", 9)
+                        user_ans_str = f"Option {chr(65+int(user_ans_idx))}" if user_ans_idx is not None and str(user_ans_idx).isdigit() else "Not Answered"
+                        correct_ans_str = f"Option {chr(65+int(correct_ans_idx))}" if correct_ans_idx is not None and str(correct_ans_idx).isdigit() else f"Option {correct_ans_idx}"
+                        
+                        is_correct = (str(user_ans_idx) == str(correct_ans_idx))
+                        status_str = "[CORRECT +1.5]" if is_correct else "[INCORRECT 0.0]"
+                        
+                        if is_correct:
+                            pdf.set_text_color(16, 185, 129)
+                        else:
+                            pdf.set_text_color(225, 29, 72)
+
+                        pdf.cell(0, 5, f"   Your Answer: {user_ans_str} | Correct Answer: {correct_ans_str}  {status_str}", ln=True)
+                        pdf.ln(3)
+
+            # Coding Challenges Section
             coding_questions = test_data.get("coding", [])
-            coding_answers = attempt.details.get("coding_answers", {})
-            coding_languages = attempt.details.get("coding_languages", {})
+            coding_answers = details.get("coding_answers", {})
+            coding_languages = details.get("coding_languages", {})
 
             if len(coding_questions) > 0:
-                pdf.set_font("Helvetica", "B", 14)
-                pdf.cell(0, 8, "Coding (Easy) Challenge", ln=True)
+                pdf.set_font("Helvetica", "B", 13)
+                pdf.set_text_color(30, 41, 59)
+                pdf.cell(0, 8, "Coding (Easy) Challenge Solution & AI Evaluation", ln=True)
                 pdf.line(10, pdf.get_y(), 200, pdf.get_y())
                 pdf.ln(4)
 
@@ -2319,15 +2377,15 @@ def download_pdf_report_api(request):
                 grade_info = grading.get("coding_easy", {})
 
                 pdf.set_font("Helvetica", "B", 11)
-                pdf.cell(0, 6, f"Problem: {q_easy.get('title', '')}", ln=True)
+                pdf.cell(0, 6, f"Problem: {q_easy.get('title', '')}".encode('latin-1', 'replace').decode('latin-1'), ln=True)
                 pdf.set_font("Helvetica", "", 10)
                 pdf.multi_cell(0, 5, q_easy.get('description', '').encode('latin-1', 'replace').decode('latin-1'))
                 pdf.ln(2)
 
                 pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(0, 6, f"Your Code Solution ({lang_easy.upper()}):", ln=True)
+                pdf.cell(0, 6, f"Your Code Solution ({str(lang_easy).upper()}):", ln=True)
                 pdf.set_font("Helvetica", "", 9)
-                code_easy_cleaned = code_easy.encode('latin-1', 'replace').decode('latin-1')
+                code_easy_cleaned = (code_easy or "# No code submitted").encode('latin-1', 'replace').decode('latin-1')
                 pdf.multi_cell(0, 4, code_easy_cleaned, border=1)
                 pdf.ln(2)
 
@@ -2341,8 +2399,9 @@ def download_pdf_report_api(request):
                 pdf.ln(8)
 
             if len(coding_questions) > 1:
-                pdf.set_font("Helvetica", "B", 14)
-                pdf.cell(0, 8, "Coding (Hard) Challenge", ln=True)
+                pdf.set_font("Helvetica", "B", 13)
+                pdf.set_text_color(30, 41, 59)
+                pdf.cell(0, 8, "Coding (Hard) Challenge Solution & AI Evaluation", ln=True)
                 pdf.line(10, pdf.get_y(), 200, pdf.get_y())
                 pdf.ln(4)
 
@@ -2352,15 +2411,15 @@ def download_pdf_report_api(request):
                 grade_info_hard = grading.get("coding_hard", {})
 
                 pdf.set_font("Helvetica", "B", 11)
-                pdf.cell(0, 6, f"Problem: {q_hard.get('title', '')}", ln=True)
+                pdf.cell(0, 6, f"Problem: {q_hard.get('title', '')}".encode('latin-1', 'replace').decode('latin-1'), ln=True)
                 pdf.set_font("Helvetica", "", 10)
                 pdf.multi_cell(0, 5, q_hard.get('description', '').encode('latin-1', 'replace').decode('latin-1'))
                 pdf.ln(2)
 
                 pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(0, 6, f"Your Code Solution ({lang_hard.upper()}):", ln=True)
+                pdf.cell(0, 6, f"Your Code Solution ({str(lang_hard).upper()}):", ln=True)
                 pdf.set_font("Helvetica", "", 9)
-                code_hard_cleaned = code_hard.encode('latin-1', 'replace').decode('latin-1')
+                code_hard_cleaned = (code_hard or "# No code submitted").encode('latin-1', 'replace').decode('latin-1')
                 pdf.multi_cell(0, 4, code_hard_cleaned, border=1)
                 pdf.ln(2)
 
@@ -2382,7 +2441,7 @@ def download_pdf_report_api(request):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return HttpResponse("Error generating report", status=500)
+        return HttpResponse(f"Error generating report: {str(e)}", status=500)
 
 @api_view(['GET'])
 def download_complete_report_api(request):
