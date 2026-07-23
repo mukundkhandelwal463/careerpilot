@@ -55,6 +55,67 @@ const Login = () => {
     }
   };
 
+  useEffect(() => {
+    let attempts = 0;
+    const initGoogle = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/google-client-id`);
+        const data = await res.json().catch(() => ({}));
+        if (data.success && data.google_client_id) {
+          const interval = setInterval(() => {
+            attempts++;
+            if (window.google) {
+              clearInterval(interval);
+              window.google.accounts.id.initialize({
+                client_id: data.google_client_id,
+                callback: handleGoogleCredentialResponse
+              });
+
+              if (mode !== 'otp') {
+                const container = document.getElementById("googleBtnContainer");
+                if (container) {
+                  container.innerHTML = '';
+                  window.google.accounts.id.renderButton(container, {
+                    theme: "outline",
+                    size: "large",
+                    shape: "pill",
+                    text: "continue_with",
+                    logo_alignment: "center",
+                    width: 320
+                  });
+                }
+              }
+            } else if (attempts > 30) {
+              clearInterval(interval);
+            }
+          }, 200);
+        }
+      } catch (err) {
+        console.error("Google SSO initialization failed:", err);
+      }
+    };
+    initGoogle();
+  }, [mode]);
+
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const showStatus = (msg, type) => {
+    setStatus({ text: msg, type: type });
+  };
+
+  const switchTab = (tab) => {
+    setMode(tab);
+    setStatus({ text: '', type: '' });
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     showStatus('', '');
