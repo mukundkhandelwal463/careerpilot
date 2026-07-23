@@ -97,11 +97,15 @@ def _get_request_user(request):
         email = request.session.get('user_email')
 
     if email:
-        u = User.objects.filter(email=email).first()
+        u = User.objects.filter(email__iexact=email).first()
         if u:
             return u
 
-    return User.objects.order_by('-last_login', '-id').first()
+    active_u = User.objects.order_by('-last_login', '-id').first()
+    if active_u:
+        return active_u
+
+    return User.objects.first()
 
 
 # Initialize Resume Service
@@ -832,8 +836,9 @@ def analyze_resume(request):
         _increment("ats_score_sum", ats_score)
         _increment("ats_score_count")
 
-        # Save scan to database for authenticated users
-        if request.user and request.user.is_authenticated:
+        # Save scan to database for registered candidate
+        db_user = _get_request_user(request)
+        if db_user:
             try:
                 file_storage = request.FILES.get("resume")
                 title = file_storage.name if (file_storage and hasattr(file_storage, 'name')) else f"Scan: {response_analysis.get('category') or 'General'}"
@@ -845,7 +850,7 @@ def analyze_resume(request):
                     db_analysis["original_file_name"] = file_storage.name if hasattr(file_storage, 'name') else "resume.pdf"
                 
                 Resume.objects.create(
-                    user=request.user,
+                    user=db_user,
                     title=title,
                     resume_text=resume_text,
                     ats_score=ats_score,
@@ -854,7 +859,7 @@ def analyze_resume(request):
                 )
                 from api.models import ResumeScanResult
                 ResumeScanResult.objects.create(
-                    user=request.user,
+                    user=db_user,
                     filename=title,
                     ats_score=ats_score,
                     category=response_analysis.get("category"),
