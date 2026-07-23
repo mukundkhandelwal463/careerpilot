@@ -456,7 +456,7 @@ const Jobs = () => {
                       ← Previous
                     </button>
                   )}
-                  {jobsList.length >= 10 && (
+                  {jobsList.length >= 12 && (
                     <button
                       onClick={() => handleSearch(null, page + 1)}
                       style={{

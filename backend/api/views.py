@@ -1585,13 +1585,14 @@ def search_jobs_jsearch(request):
                 if location:
                     search_query = f"{search_query} in {location}"
                 
-                start_offset = (page - 1) * 10
+                start_offset = (page - 1) * 12
                 params = {
                     "engine": "google_jobs",
                     "q": search_query,
                     "gl": "in", # India region
                     "hl": "en",
                     "start": str(start_offset),
+                    "num": "12",
                     "api_key": serpapi_key
                 }
                 
@@ -1796,7 +1797,7 @@ def search_jobs_jsearch(request):
             # Sort by match score descending
             jobs.sort(key=lambda x: x.get("match_score", 0), reverse=True)
             # Paginate manually
-            per_page = 10
+            per_page = 12
             start = (page - 1) * per_page
             jobs = jobs[start:start + per_page]
 
