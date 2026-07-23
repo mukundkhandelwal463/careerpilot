@@ -4723,7 +4723,7 @@ const Preparation = () => {
                                       </span>
                                     </div>
                                     <button
-                                      onClick={() => window.open(`/api/results/download-pdf?id=${test.id}&type=test`, '_blank')}
+                                      onClick={() => window.open(`/api/results/download-pdf?id=${test.id}&type=test&email=${encodeURIComponent(user?.email || '')}`, '_blank')}
                                       style={{
                                         background: 'linear-gradient(to right, #4f46e5, #3b82f6)',
                                         color: 'white',
@@ -4820,7 +4820,7 @@ const Preparation = () => {
                                     </span>
                                   </div>
                                   <button
-                                    onClick={() => window.open(`/api/results/download-pdf?id=${interview.id}&type=interview`, '_blank')}
+                                    onClick={() => window.open(`/api/results/download-pdf?id=${interview.id}&type=interview&email=${encodeURIComponent(user?.email || '')}`, '_blank')}
                                     style={{
                                       background: 'linear-gradient(to right, #4f46e5, #3b82f6)',
                                       color: 'white',

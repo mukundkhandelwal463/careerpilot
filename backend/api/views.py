@@ -2558,8 +2558,8 @@ def download_pdf_report_api(request):
                 pdf.multi_cell(0, 5, feedback_hard_cleaned)
                 pdf.ln(8)
 
-        pdf_bytes = pdf.output(dest='S')
-        response = HttpResponse(bytes(pdf_bytes), content_type='application/pdf')
+        pdf_bytes = pdf.output()
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
         filename_prefix = "Mock_Test" if report_type == "test" else "Mock_Interview"
         response['Content-Disposition'] = f'attachment; filename="{filename_prefix}_Report_{attempt_id}.pdf"'
         return response
