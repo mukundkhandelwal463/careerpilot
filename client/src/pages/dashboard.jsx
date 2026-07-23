@@ -374,7 +374,6 @@ const Dashboard = () => {
           <strong style={{ fontSize: '0.94rem', color: '#1c2427', fontFamily: 'Sora, monospace', fontWeight: 800 }}>
             {isNotTaken ? 'N/A' : `${percentage}%`}
           </strong>
-          {isNotTaken && <span style={{ fontSize: '0.8rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>Not Taken</span>}
         </div>
       </div>
     );
