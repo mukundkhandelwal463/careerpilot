@@ -259,23 +259,9 @@ const Login = () => {
             boxShadow: '0 20px 50px rgba(28, 36, 39, 0.08)',
             transition: 'all 0.3s ease'
           }}>
-            {/* Header Brand Icon */}
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <div style={{
-                width: '52px',
-                height: '52px',
-                borderRadius: '16px',
-                background: '#ffffff',
-                border: '1px solid rgba(24, 35, 38, 0.08)',
-                boxShadow: '0 6px 18px rgba(0, 0, 0, 0.06)',
-                margin: '0 auto 14px',
-                display: 'grid',
-                placeItems: 'center',
-                padding: '8px'
-              }}>
-                <img src="/logo.png" alt="CareerPilot" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
-              </div>
-              <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#1c2427', margin: '0 0 6px', letterSpacing: '-0.02em' }}>
+            {/* Header Title */}
+            <div style={{ textAlign: 'center', marginBottom: '22px' }}>
+              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#1c2427', margin: '0 0 6px', letterSpacing: '-0.02em' }}>
                 {mode === 'login' ? 'Welcome Back' : mode === 'register' ? 'Create Account' : 'Email Verification'}
               </h1>
               <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748b', lineHeight: 1.5 }}>
