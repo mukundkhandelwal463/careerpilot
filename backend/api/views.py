@@ -2217,7 +2217,6 @@ def get_results_api(request):
 
         tests = []
         for x in tests_db:
-        for x in tests_db:
             tests.append({
                 "id": x.id,
                 "difficulty": x.difficulty,
