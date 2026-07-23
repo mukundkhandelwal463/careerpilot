@@ -655,14 +655,7 @@ def analyze_resume(request):
             _increment("ats_score_sum", ats_score)
             _increment("ats_score_count")
             
-            return JsonResponse({
-                "success": True,
-                "analysis": response_analysis,
-                "job_recommendations": jobs,
-                "gemini_ats_feedback": None,
-                "gemini_career_map": gemini_career_map,
-                "prefill_data": _build_resume_prefill(resume_text, stream_or_category, response_analysis.get("skills", [])),
-            })
+            # Fall through to common save & return block
 
         if not job_description:
             analysis = service.analyze_resume(resume_text, "")
@@ -813,7 +806,7 @@ def analyze_resume(request):
                 db_analysis = dict(response_analysis)
                 if file_bytes:
                     db_analysis["original_file_b64"] = base64.b64encode(file_bytes).decode('utf-8')
-                    db_analysis["original_file_name"] = file_storage.name
+                    db_analysis["original_file_name"] = file_storage.name if hasattr(file_storage, 'name') else "resume.pdf"
                 
                 Resume.objects.create(
                     user=request.user,
@@ -822,6 +815,17 @@ def analyze_resume(request):
                     ats_score=ats_score,
                     category=response_analysis.get("category"),
                     resume_json=json.dumps(db_analysis)
+                )
+                from api.models import ResumeScanResult
+                ResumeScanResult.objects.create(
+                    user=request.user,
+                    filename=title,
+                    ats_score=ats_score,
+                    category=response_analysis.get("category"),
+                    detected_skills=response_analysis.get("skills", []),
+                    missing_keywords=response_analysis.get("missing_keywords", []),
+                    recommendations=response_analysis.get("suggestions", []),
+                    jd_text=job_description
                 )
             except Exception as db_err:
                 print("Failed to auto-save scan to database:", db_err)
@@ -2601,4 +2605,74 @@ def suggest_stream_keywords_api(request):
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
+def list_or_create_resumes(request):
+    user = request.user
+    if not user or not user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Authentication required to view previous records."}, status=401)
+
+    if request.method == 'GET':
+        user_resumes = Resume.objects.filter(user=user).order_by('-created_at')
+        resumes_list = []
+        for r in user_resumes:
+            resumes_list.append({
+                "id": r.id,
+                "title": r.title,
+                "resume_text": r.resume_text,
+                "ats_score": r.ats_score,
+                "category": r.category,
+                "resume_json": r.resume_json,
+                "created_at": r.created_at.isoformat() if r.created_at else None
+            })
+        return JsonResponse({"success": True, "resumes": resumes_list})
+
+    elif request.method == 'POST':
+        title = request.data.get("title", "New Resume Scan")
+        ats_score = request.data.get("ats_score", 0.0)
+        category = request.data.get("category", "")
+        resume_text = request.data.get("resume_text", "")
+        resume_json = request.data.get("resume_json", "{}")
+
+        resume_obj = Resume.objects.create(
+            user=user,
+            title=title,
+            ats_score=ats_score,
+            category=category,
+            resume_text=resume_text,
+            resume_json=resume_json
+        )
+        return JsonResponse({"success": True, "id": resume_obj.id})
+
+
+@api_view(['GET', 'DELETE'])
+@permission_classes([AllowAny])
+def get_or_delete_resume(request, resume_id):
+    user = request.user
+    if not user or not user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Authentication required."}, status=401)
+
+    try:
+        resume_obj = Resume.objects.get(id=resume_id, user=user)
+    except Resume.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Resume record not found."}, status=404)
+
+    if request.method == 'DELETE':
+        resume_obj.delete()
+        return JsonResponse({"success": True, "message": "Resume record deleted successfully."})
+
+    return JsonResponse({
+        "success": True,
+        "resume": {
+            "id": resume_obj.id,
+            "title": resume_obj.title,
+            "resume_text": resume_obj.resume_text,
+            "ats_score": resume_obj.ats_score,
+            "category": resume_obj.category,
+            "resume_json": resume_obj.resume_json,
+            "created_at": resume_obj.created_at.isoformat() if resume_obj.created_at else None
+        }
+    })
 
