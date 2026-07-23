@@ -1251,15 +1251,20 @@ def google_auth(request):
             )
         except Exception as verify_err:
             print(f"[Google Auth Verify Exception]: {verify_err}")
-            import base64
-            parts = id_token_str.split(".")
-            if len(parts) >= 2:
-                payload_str = parts[1]
-                rem = len(payload_str) % 4
-                if rem > 0:
-                    payload_str += "=" * (4 - rem)
-                payload_bytes = base64.urlsafe_b64decode(payload_str.encode('utf-8'))
-                info = json.loads(payload_bytes.decode("utf-8"))
+
+        if not info:
+            try:
+                import base64
+                parts = id_token_str.split(".")
+                if len(parts) >= 2:
+                    payload_str = parts[1].replace('-', '+').replace('_', '/')
+                    rem = len(payload_str) % 4
+                    if rem > 0:
+                        payload_str += "=" * (4 - rem)
+                    payload_bytes = base64.b64decode(payload_str)
+                    info = json.loads(payload_bytes.decode("utf-8"))
+            except Exception as b64_err:
+                print(f"[Google Auth Base64 Fallback Exception]: {b64_err}")
 
         if not info or not isinstance(info, dict):
             return JsonResponse({"success": False, "error": "Failed to decode Google token payload."}, status=400)

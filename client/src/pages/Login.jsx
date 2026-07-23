@@ -26,11 +26,14 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
     // Auto-redirect raw IP to nip.io domain so Google OAuth works seamlessly without Error 400
     if (window.location.hostname === '3.110.56.125') {
       window.location.replace(`http://3.110.56.125.nip.io${window.location.pathname}${window.location.search}`);
     }
-  }, []);
+  }, [user, navigate]);
 
   const handleGoogleCredentialResponse = async (response) => {
     showStatus('', '');
