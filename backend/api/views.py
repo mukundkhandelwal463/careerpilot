@@ -546,7 +546,6 @@ def generate_summary(request):
         return JsonResponse({"success": False, "error": str(exc)}, status=400)
 
 
-@api_view(['POST'])
 def _fallback_parse_resume_to_json(resume_text):
     import re
     email_match = re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', resume_text)
