@@ -174,12 +174,15 @@ const Login = () => {
         })
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.success) {
+      if ((res.ok || res.status === 201) && data.success) {
         setMode('otp');
         const helperText = data.dev_otp ? ` (Dev Code: ${data.dev_otp})` : '';
         showStatus("Verification code sent to " + email + helperText, 'success');
+      } else if (res.status === 409 || (data.error && data.error.toLowerCase().includes("already registered"))) {
+        setMode('login');
+        showStatus("Account already exists for " + email + "! Switched to Sign In form below.", 'error');
       } else {
-        showStatus(data.error || 'Registration failed.', 'error');
+        showStatus(data.error || 'Registration failed. Please check inputs.', 'error');
       }
     } catch (err) {
       showStatus('Connection failed: ' + (err.message || 'Server offline'), 'error');
