@@ -1663,7 +1663,7 @@ const Preparation = () => {
     formData.append('job_description', targetJd.trim());
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/interview/roadmap`, {
+      const res = await fetch('/api/interview/roadmap', {
         method: 'POST',
         body: formData,
       });

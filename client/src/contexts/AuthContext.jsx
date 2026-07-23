@@ -3,20 +3,46 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('user_session');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   const fetchUser = async () => {
     try {
       const res = await fetch('/api/auth/me');
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.user) {
         setUser(data.user);
+        localStorage.setItem('user_session', JSON.stringify(data.user));
+      } else {
+        const saved = localStorage.getItem('user_session');
+        if (saved) {
+          try {
+            setUser(JSON.parse(saved));
+          } catch {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      }
+    } catch (e) {
+      const saved = localStorage.getItem('user_session');
+      if (saved) {
+        try {
+          setUser(JSON.parse(saved));
+        } catch {
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
-    } catch (e) {
-      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -24,23 +50,24 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData) => {
     setUser(userData);
+    if (userData) {
+      localStorage.setItem('user_session', JSON.stringify(userData));
+    }
   };
 
   const logout = async () => {
     try {
-      const res = await fetch('/api/auth/logout', { 
+      await fetch('/api/auth/logout', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      const data = await res.json();
-      if (data.success) {
-        setUser(null);
-      }
     } catch (e) {
       console.error("Logout failed:", e);
-      setUser(null); // Fallback
+    } finally {
+      setUser(null);
+      localStorage.removeItem('user_session');
     }
   };
 

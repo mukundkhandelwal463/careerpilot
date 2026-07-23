@@ -44,7 +44,7 @@ const MockTest = () => {
   useEffect(() => {
     const fetchTestData = async () => {
       try {
-        const url = `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/mock-test/generate`;
+        const url = '/api/mock-test/generate';
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -195,7 +195,7 @@ const MockTest = () => {
     setEvalResults(prev => ({ ...prev, [qId]: null }));
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/mock-test/run-code`, {
+      const res = await fetch('/api/mock-test/run-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
