@@ -108,22 +108,25 @@ const Navbar = () => {
       top: '8px',
       zIndex: 10
     }}>
-      {/* Left side: logo in pill wrapper (shifted right with larger logo image) */}
+      {/* Left side: logo icon + CareerPilot brand title in pill wrapper */}
       <Link to="/" style={{
         background: '#ffffff',
         borderRadius: '999px',
-        padding: '10px 26px',
+        padding: '10px 24px',
         marginLeft: '20px',
         border: '1px solid rgba(24, 35, 38, 0.08)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        gap: '10px',
         textDecoration: 'none',
         height: '56px',
         boxShadow: '0 4px 14px rgba(0, 0, 0, 0.04)',
         transition: 'all 0.2s'
       }}>
-        <img src="/logo.png" alt="Logo" style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
+        <img src="/logo.png" alt="Logo" style={{ height: '34px', width: 'auto', objectFit: 'contain' }} />
+        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1c2427', fontFamily: 'Sora, sans-serif', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+          Career<span style={{ color: '#ff6b4a' }}>Pilot</span>
+        </span>
       </Link>
 
       {/* Right side container: holds nav links and actions (aligned to far right edge of viewport) */}
