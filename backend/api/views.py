@@ -1254,8 +1254,11 @@ def google_auth(request):
             import base64
             parts = id_token_str.split(".")
             if len(parts) >= 2:
-                payload_b64 = parts[1] + "=="
-                payload_bytes = base64.urlsafe_b64decode(payload_b64.encode('utf-8'))
+                payload_str = parts[1]
+                rem = len(payload_str) % 4
+                if rem > 0:
+                    payload_str += "=" * (4 - rem)
+                payload_bytes = base64.urlsafe_b64decode(payload_str.encode('utf-8'))
                 info = json.loads(payload_bytes.decode("utf-8"))
 
         if not info or not isinstance(info, dict):
