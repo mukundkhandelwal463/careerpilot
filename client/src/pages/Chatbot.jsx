@@ -116,9 +116,6 @@ const Chatbot = () => {
     <div className="page-shell">
       <Navbar />
       <main className="page" id="chatbotPage">
-        <p style={{ color: 'var(--accent-deep)', fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Chatbot Mode
-        </p>
         <h1>AI Resume Builder</h1>
 
         <section className="grid two">
