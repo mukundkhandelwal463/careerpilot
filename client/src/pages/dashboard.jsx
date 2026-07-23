@@ -93,7 +93,17 @@ const Dashboard = () => {
     }
 
     const email = user.email;
-    setProfileImg(localStorage.getItem(`candidate_profile_img_${email}`) || "/candidate_profile.png");
+    // Load profile image: prefer localStorage uploaded photo, then Google OAuth picture, then default
+    const savedProfileImg = localStorage.getItem(`candidate_profile_img_${email}`);
+    if (savedProfileImg) {
+      setProfileImg(savedProfileImg);
+    } else if (user.google_picture) {
+      setProfileImg(user.google_picture);
+    } else if (user.avatar) {
+      setProfileImg(user.avatar);
+    } else {
+      setProfileImg("/candidate_profile.png");
+    }
 
     const savedTasks = localStorage.getItem(`scheduled_tasks_${email}`);
     setScheduledTasks(savedTasks ? JSON.parse(savedTasks) : {});
@@ -225,6 +235,11 @@ const Dashboard = () => {
           if (data.interviews && data.interviews.length > 0) {
             const bestInter = data.interviews.reduce((prev, current) => (prev.score > current.score ? prev : current));
             setBestInterviewResult(bestInter);
+          }
+          // Update interview count from DB data
+          if (data.total_interviews !== undefined) {
+            setInterviewCount(data.total_interviews);
+            localStorage.setItem(`best_resume_interview_count_${user.email}`, String(data.total_interviews));
           }
         }
       } catch (err) {

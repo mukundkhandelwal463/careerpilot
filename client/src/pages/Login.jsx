@@ -46,6 +46,13 @@ const Login = () => {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.success && data.user) {
+        // Save Google profile picture to localStorage for dashboard display
+        if (data.user.google_picture && data.user.email) {
+          const existing = localStorage.getItem(`candidate_profile_img_${data.user.email}`);
+          if (!existing) {
+            localStorage.setItem(`candidate_profile_img_${data.user.email}`, data.user.google_picture);
+          }
+        }
         setAuthUser(data.user);
         window.location.href = '/dashboard';
       } else {

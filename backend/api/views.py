@@ -1276,6 +1276,7 @@ def google_auth(request):
 
         email = info.get("email", "").lower().strip()
         full_name = info.get("name", "").strip() or "Google User"
+        google_picture = info.get("picture", "").strip()
         if not email:
             return JsonResponse({"success": False, "error": "Google account has no verified email."}, status=400)
 
@@ -1297,7 +1298,10 @@ def google_auth(request):
 
         _safe_django_login(request, user)
         _increment("auth_logins_total")
-        return JsonResponse({"success": True, "user": user.to_dict()})
+        user_dict = user.to_dict()
+        if google_picture:
+            user_dict["google_picture"] = google_picture
+        return JsonResponse({"success": True, "user": user_dict})
     except ValueError as e:
         return JsonResponse({"success": False, "error": f"Invalid Google token: {e}"}, status=401)
     except Exception as e:
@@ -1911,20 +1915,30 @@ def save_interview_score(request):
             return JsonResponse({"success": False, "error": "Score is required."}, status=400)
 
         user = _get_request_user(request)
-        if user:
-            user.interview_score = float(score)
-            user.save()
+        if not user:
+            return JsonResponse({"success": False, "error": "User not found. Please log in again."}, status=401)
 
-            from api.models import MockInterview
-            MockInterview.objects.create(
-                user=user,
-                score=float(score),
-                transcript=transcript,
-                feedback=feedback
-            )
-            return JsonResponse({"success": True, "message": "Interview score saved successfully.", "interview_score": user.interview_score})
-        
-        return JsonResponse({"success": True, "message": "Interview completed!", "interview_score": float(score)})
+        user.interview_score = float(score)
+        user.save()
+
+        from api.models import MockInterview
+        interview_obj = MockInterview.objects.create(
+            user=user,
+            score=float(score),
+            transcript=transcript,
+            feedback=feedback
+        )
+
+        # Count total interviews for this user
+        total_interviews = MockInterview.objects.filter(user=user).count()
+
+        return JsonResponse({
+            "success": True,
+            "message": "Interview score saved successfully.",
+            "interview_score": user.interview_score,
+            "interview_id": interview_obj.id,
+            "total_interviews": total_interviews
+        })
     except Exception as exc:
         traceback.print_exc()
         return JsonResponse({"success": False, "error": str(exc)}, status=500)
@@ -2231,7 +2245,12 @@ def get_results_api(request):
                 "created_at": x.created_at.isoformat()
             })
 
-        return JsonResponse({"success": True, "interviews": interviews, "tests": tests})
+        return JsonResponse({
+            "success": True,
+            "interviews": interviews,
+            "tests": tests,
+            "total_interviews": len(interviews_db)
+        })
     except Exception as exc:
         traceback.print_exc()
         return JsonResponse({"success": False, "error": str(exc)}, status=500)

@@ -1627,7 +1627,7 @@ const Preparation = () => {
     if (interviewCompleted && questionScores.length > 0) {
       saveFinalScore();
     }
-  }, [interviewCompleted]);
+  }, [interviewCompleted, questionScores]);
 
   const saveFinalScore = async () => {
     if (questionScores.length === 0) return;
@@ -1651,11 +1651,18 @@ const Preparation = () => {
         setSaveStatus('Saved Successfully! Check dashboard.');
         if (user) {
           user.interview_score = avgScore;
+          // Update interview count in localStorage from server data
+          if (data.total_interviews) {
+            localStorage.setItem(`best_resume_interview_count_${user.email}`, String(data.total_interviews));
+          }
         }
+      } else {
+        console.error('Save interview error:', data.error);
+        setSaveStatus(`Save failed: ${data.error || 'Unknown error'}. Please try again.`);
       }
     } catch (err) {
       console.error(err);
-      setSaveStatus('Network error.');
+      setSaveStatus('Network error. Your score was not saved.');
     }
   };
 
