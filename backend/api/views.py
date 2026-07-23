@@ -2326,36 +2326,50 @@ def download_pdf_report_api(request):
                 pdf.set_font("Helvetica", "B", 11)
                 pdf.set_text_color(79, 70, 229)
                 q_text = item.get('question', f"Question {idx+1}").encode('latin-1', 'replace').decode('latin-1')
-                pdf.multi_cell(0, 6, f"Question {idx+1}: {q_text}")
+                pdf.multi_cell(0, 6, f"Q{idx+1}: {q_text}")
+                pdf.ln(2)
                 
                 pdf.set_text_color(30, 41, 59)
                 pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(30, 6, "Your Response: ")
+                pdf.cell(0, 6, "Your Response:", ln=True)
                 pdf.set_font("Helvetica", "", 10)
                 ans_text = item.get('userAnswer', item.get('response', 'No answer provided.')).encode('latin-1', 'replace').decode('latin-1')
                 pdf.multi_cell(0, 5, ans_text)
+                pdf.ln(2)
                 
                 score_val = item.get('score', 0)
                 pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(30, 6, "Score: ")
-                pdf.set_font("Helvetica", "", 10)
-                pdf.cell(0, 6, f"{score_val} / 100", ln=True)
+                pdf.cell(0, 6, f"Score: {score_val} / 100", ln=True)
 
                 eval_details = item.get('feedback', {})
                 if isinstance(eval_details, dict):
                     strengths = eval_details.get("strengths", [])
                     improvements = eval_details.get("improvements", [])
+                    if isinstance(strengths, str):
+                        strengths = [strengths]
+                    if isinstance(improvements, str):
+                        improvements = [improvements]
                     if strengths:
                         pdf.set_font("Helvetica", "B", 10)
-                        pdf.cell(30, 6, "Strengths: ")
+                        pdf.set_text_color(16, 185, 129)
+                        pdf.cell(0, 6, "Strengths:", ln=True)
                         pdf.set_font("Helvetica", "", 10)
-                        pdf.multi_cell(0, 5, ", ".join(strengths).encode('latin-1', 'replace').decode('latin-1'))
+                        pdf.set_text_color(30, 41, 59)
+                        strengths_text = ", ".join(str(s) for s in strengths).encode('latin-1', 'replace').decode('latin-1')
+                        pdf.multi_cell(0, 5, strengths_text)
                     if improvements:
                         pdf.set_font("Helvetica", "B", 10)
-                        pdf.cell(30, 6, "Improvements: ")
+                        pdf.set_text_color(225, 29, 72)
+                        pdf.cell(0, 6, "Improvements:", ln=True)
                         pdf.set_font("Helvetica", "", 10)
-                        pdf.multi_cell(0, 5, ", ".join(improvements).encode('latin-1', 'replace').decode('latin-1'))
-                pdf.ln(6)
+                        pdf.set_text_color(30, 41, 59)
+                        improvements_text = ", ".join(str(s) for s in improvements).encode('latin-1', 'replace').decode('latin-1')
+                        pdf.multi_cell(0, 5, improvements_text)
+
+                pdf.set_text_color(30, 41, 59)
+                pdf.set_draw_color(226, 232, 240)
+                pdf.line(10, pdf.get_y() + 3, 200, pdf.get_y() + 3)
+                pdf.ln(8)
 
         elif report_type == "test":
             from api.models import MockTestAttempt
