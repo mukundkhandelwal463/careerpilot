@@ -192,7 +192,13 @@ const Upload = () => {
         method: "POST",
         body: formData
       });
-      const data = await res.json();
+      const responseText = await res.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (jsonErr) {
+        throw new Error(`Server returned error (${res.status}). Please verify your resume file and try again.`);
+      }
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to analyze resume.");
       }
