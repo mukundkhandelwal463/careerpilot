@@ -1316,9 +1316,12 @@ const Preparation = () => {
 
   const emailSentRef = useRef(false);
 
-  // Check for missed tasks from past days
+  // 5 PM Check & Custom Email Reminder Dispatcher
   useEffect(() => {
     const todayStr = getLocalDateString(new Date());
+    const todayTasks = scheduledTasks[todayStr] || [];
+    const hasUncompletedToday = todayTasks.some(t => !t.completed);
+
     const pastMissed = Object.keys(scheduledTasks).filter(d => {
       if (d < todayStr) {
         return (scheduledTasks[d] || []).some(t => !t.completed);
@@ -1330,14 +1333,11 @@ const Preparation = () => {
       const missedDates = pastMissed.map(d => new Date(d).getDate()).sort((a, b) => a - b);
       const missedDatesStr = missedDates.join(', ');
       setOverdueReminder(`⚠ Reminder: You missed tasks scheduled for July ${missedDatesStr}! Keep your streak alive.`);
-      
-      // 1. Add notification warning to navbar bell dropdown
+
       const savedNotifs = localStorage.getItem("app_notifications");
       let notifsList = [];
       if (savedNotifs) {
-        try {
-          notifsList = JSON.parse(savedNotifs);
-        } catch (e) { }
+        try { notifsList = JSON.parse(savedNotifs); } catch (e) { }
       }
 
       const notifText = `⚠ You have incomplete preparation tasks from past days (${missedDatesStr})!`;
@@ -1351,32 +1351,38 @@ const Preparation = () => {
         localStorage.setItem("has_unread_notifications", "true");
         window.dispatchEvent(new Event("new_scan_notification"));
       }
+    }
 
-      // 2. Trigger email SMTP dispatch via API ONLY at 5 PM and ONLY once per day
-      const now = new Date();
-      const lastEmailDate = localStorage.getItem("last_email_reminder_date");
-      if (now.getHours() === 17 && lastEmailDate !== todayStr) {
-        localStorage.setItem("last_email_reminder_date", todayStr);
-        fetch('/api/interview/notify-overdue', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ missed_dates: missedDates })
+    const now = new Date();
+    const lastEmailDate = localStorage.getItem("last_email_reminder_date");
+
+    if ((hasUncompletedToday || pastMissed.length > 0) && now.getHours() >= 17 && lastEmailDate !== todayStr) {
+      localStorage.setItem("last_email_reminder_date", todayStr);
+
+      const pendingTaskList = todayTasks.filter(t => !t.completed).map(t => t.text);
+      if (pendingTaskList.length === 0 && pastMissed.length > 0) {
+        pendingTaskList.push("Complete overdue tasks from previous days");
+      }
+
+      fetch('/api/interview/notify-overdue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          missed_dates: pastMissed,
+          pending_tasks: pendingTaskList.length > 0 ? pendingTaskList : ["Complete daily preparation goals"]
         })
-          .then(res => res.json())
-          .then(data => {
-            console.log("[Notification API]", data.message);
-          })
-          .catch(err => console.error("[Notification API Error]", err));
+      })
+        .then(res => res.json())
+        .then(data => console.log("[5 PM Task Email Sent]", data.message))
+        .catch(err => console.error("[5 PM Task Email Error]", err));
 
-        // Request browser notification permission and send alert
-        if (Notification && Notification.permission !== 'granted') {
-          Notification.requestPermission();
-        }
-        if (Notification && Notification.permission === 'granted') {
-          new Notification("AI Career Hub Tracker", {
-            body: `You have incomplete preparation tasks from past days (${missedDatesStr})!`,
-          });
-        }
+      if (Notification && Notification.permission !== 'granted') {
+        Notification.requestPermission();
+      }
+      if (Notification && Notification.permission === 'granted') {
+        new Notification("CareerPilot Daily Task Reminder", {
+          body: `You have pending tasks scheduled for today. Complete them to keep your streak!`,
+        });
       }
     } else {
       setOverdueReminder('');

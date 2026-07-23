@@ -2840,3 +2840,69 @@ def get_or_delete_resume(request, resume_id):
         }
     })
 
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def notify_overdue_tasks(request):
+    """5:00 PM Custom Email Dispatcher for Users with Pending/Incomplete Tasks."""
+    try:
+        user = _get_request_user(request)
+        if not user:
+            from api.models import User
+            user = User.objects.order_by('-last_login', '-id').first()
+
+        user_email = user.email if user else request.data.get("email", "mukundkhandelwal463@gmail.com")
+        user_name = user.full_name.split()[0] if user and user.full_name else "Candidate"
+
+        missed_dates = request.data.get("missed_dates", [])
+        pending_tasks = request.data.get("pending_tasks", ["Complete daily preparation goals"])
+
+        dates_str = ", ".join(str(d) for d in missed_dates) if missed_dates else "today"
+
+        subject = "CareerPilot Task Reminder: You have pending preparation tasks for today!"
+        html_message = f"""
+        <div style="font-family: 'Manrope', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #FAF9F4; border-radius: 20px; padding: 32px; border: 1px solid #e2e8f0;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #ff6b4a, #ff8f57); color: #fff; padding: 12px 24px; border-radius: 999px; font-weight: 800; font-size: 1.2rem;">
+              🚀 CareerPilot Reminder
+            </div>
+          </div>
+          <h2 style="color: #1c2427; font-size: 1.4rem; margin-top: 0;">Hi {user_name},</h2>
+          <p style="color: #475569; font-size: 0.95rem; line-height: 1.6;">
+            It's <strong>5:00 PM</strong>, and you still have incomplete preparation tasks scheduled for <strong>{dates_str}</strong>!
+          </p>
+          <div style="background: #ffffff; border-radius: 14px; padding: 20px; border: 1px solid #cbd5e1; margin: 20px 0;">
+            <strong style="color: #0f172a; display: block; margin-bottom: 10px;">📋 Scheduled Preparation Tasks:</strong>
+            <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 0.9rem; line-height: 1.7;">
+              {''.join(f'<li>{t}</li>' for t in pending_tasks)}
+            </ul>
+          </div>
+          <p style="color: #475569; font-size: 0.9rem; line-height: 1.6;">
+            Keep your streak alive and stay on track with your interview roadmap. Click below to log in and mark your tasks as completed!
+          </p>
+          <div style="text-align: center; margin-top: 28px;">
+            <a href="http://3.110.56.125/preparation" style="background: #ff6b4a; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; display: inline-block;">
+              Complete My Tasks Now →
+            </a>
+          </div>
+          <p style="color: #94a3b8; font-size: 0.78rem; text-align: center; margin-top: 32px;">
+            &copy; 2026 CareerPilot. Created by Mukund Khandelwal.
+          </p>
+        </div>
+        """
+
+        from django.core.mail import EmailMultiAlternatives
+        from django.conf import settings
+
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'mukundkhandelwal23@lpu.in')
+        msg = EmailMultiAlternatives(subject, f"Hi {user_name}, you have pending tasks for {dates_str}. Complete them on CareerPilot: http://3.110.56.125/preparation", from_email, [user_email])
+        msg.attach_alternative(html_message, "text/html")
+        msg.send(fail_silently=True)
+
+        return JsonResponse({"success": True, "message": f"5 PM reminder email sent successfully to {user_email}"})
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"success": False, "error": str(exc)}, status=500)
+
+

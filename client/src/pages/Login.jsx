@@ -394,6 +394,13 @@ const Login = () => {
                 {status.text}
               </div>
             )}
+
+            <p style={{ marginTop: '20px', fontSize: '0.78rem', color: '#64748b', textAlign: 'center', lineHeight: 1.5 }}>
+              By signing in or creating an account, you agree to our{' '}
+              <Link to="/terms" style={{ color: '#ff6b4a', textDecoration: 'underline', fontWeight: 600 }}>Terms & Conditions</Link>
+              {' '}and{' '}
+              <Link to="/privacy" style={{ color: '#ff6b4a', textDecoration: 'underline', fontWeight: 600 }}>Privacy Policy</Link>.
+            </p>
           </div>
         </div>
       </main>
