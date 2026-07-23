@@ -11,38 +11,35 @@ const Footer = () => {
       background: '#090d16',
       color: '#94a3b8',
       borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-      padding: '64px 40px 36px',
+      padding: '70px 60px 40px',
       fontSize: '0.88rem',
       fontFamily: '"Manrope", sans-serif',
       width: '100%',
       marginTop: '60px'
     }}>
       <div style={{
-        maxWidth: '1360px',
+        maxWidth: '1440px',
         margin: '0 auto',
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '60px',
-        marginBottom: '48px'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gap: '90px',
+        marginBottom: '52px'
       }}>
         {/* Brand & Developer Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#ffffff' }}>
             <div style={{
-              width: '42px', height: '42px', borderRadius: '14px',
+              width: '44px', height: '44px', borderRadius: '14px',
               background: 'linear-gradient(135deg, #ff6b4a, #ff8f57)',
               display: 'grid', placeItems: 'center', fontWeight: 800, color: '#ffffff',
-              boxShadow: '0 4px 14px rgba(255, 107, 74, 0.35)', fontSize: '1.2rem'
+              boxShadow: '0 4px 14px rgba(255, 107, 74, 0.35)', fontSize: '1.25rem'
             }}>
               🚀
             </div>
             <div>
-              <strong style={{ fontSize: '1.22rem', letterSpacing: '-0.02em', color: '#ffffff', display: 'block', lineHeight: 1.2 }}>
+              <strong style={{ fontSize: '1.35rem', letterSpacing: '-0.02em', color: '#ffffff', display: 'block', lineHeight: 1.2 }}>
                 CareerPilot AI
               </strong>
-              <span style={{ fontSize: '0.73rem', color: '#ff8f57', fontWeight: 700, letterSpacing: '0.05em' }}>
-                POWERED BY MUKUND KHANDELWAL
-              </span>
             </div>
           </div>
 
@@ -211,7 +208,7 @@ const Footer = () => {
 
       {/* Bottom Copyright & Policy Bar */}
       <div style={{
-        maxWidth: '1360px',
+        maxWidth: '1440px',
         margin: '0 auto',
         paddingTop: '28px',
         borderTop: '1px solid rgba(255, 255, 255, 0.08)',
@@ -219,7 +216,7 @@ const Footer = () => {
         justify: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '20px',
+        gap: '24px',
         fontSize: '0.82rem',
         color: '#64748b'
       }}>
