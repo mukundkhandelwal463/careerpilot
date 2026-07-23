@@ -41,79 +41,18 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id_token: response.credential })
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
         setAuthUser(data.user);
         navigate('/dashboard');
       } else {
-        showStatus(data.error || 'Google sign-in failed.', 'error');
+        showStatus(data.error || 'Google sign-in failed. Please try email login.', 'error');
       }
     } catch (err) {
-      showStatus('Connection failed.', 'error');
+      showStatus('Google SSO connection error: ' + (err.message || 'Server unreachable'), 'error');
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    let attempts = 0;
-    const initGoogle = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/google-client-id`);
-        const data = await res.json();
-        if (data.success && data.google_client_id) {
-          const interval = setInterval(() => {
-            attempts++;
-            if (window.google) {
-              clearInterval(interval);
-              window.google.accounts.id.initialize({
-                client_id: data.google_client_id,
-                callback: handleGoogleCredentialResponse
-              });
-              
-              if (mode !== 'otp') {
-                const container = document.getElementById("googleBtnContainer");
-                if (container) {
-                  container.innerHTML = '';
-                  window.google.accounts.id.renderButton(container, {
-                    theme: "outline",
-                    size: "large",
-                    shape: "pill",
-                    text: "continue_with",
-                    logo_alignment: "center",
-                    width: 320
-                  });
-                }
-              }
-            } else if (attempts > 30) {
-              clearInterval(interval);
-            }
-          }, 200);
-        }
-      } catch (err) {
-        console.error("Google SSO initialization failed:", err);
-      }
-    };
-    initGoogle();
-  }, [mode]);
-
-  useEffect(() => {
-    let timer;
-    if (resendCooldown > 0) {
-      timer = setInterval(() => {
-        setResendCooldown(prev => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
-
-  const showStatus = (msg, type) => {
-    setStatus({ text: msg, type: type });
-  };
-
-  const switchTab = (tab) => {
-    setMode(tab);
-    setStatus({ text: '', type: '' });
   };
 
   const handleLogin = async (e) => {
@@ -127,18 +66,18 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
         setAuthUser(data.user);
         navigate('/dashboard');
       } else if (data.unverified) {
         setMode('otp');
-        showStatus(data.error || 'Account unverified. Verify email.', 'error');
+        showStatus(data.error || 'Account unverified. Check email for OTP.', 'error');
       } else {
-        showStatus(data.error || 'Login failed.', 'error');
+        showStatus(data.error || 'Invalid email or password. Please check your credentials or click Create Account.', 'error');
       }
     } catch (err) {
-      showStatus('Connection failed. Please try again.', 'error');
+      showStatus('Connection failed: ' + (err.message || 'Server offline'), 'error');
     } finally {
       setLoading(false);
     }
@@ -160,8 +99,8 @@ const Login = () => {
           password: password
         })
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
         setMode('otp');
         const helperText = data.dev_otp ? ` (Dev Code: ${data.dev_otp})` : '';
         showStatus("Verification code sent to " + email + helperText, 'success');
@@ -169,7 +108,7 @@ const Login = () => {
         showStatus(data.error || 'Registration failed.', 'error');
       }
     } catch (err) {
-      showStatus('Connection failed. Please try again.', 'error');
+      showStatus('Connection failed: ' + (err.message || 'Server offline'), 'error');
     } finally {
       setLoading(false);
     }
@@ -191,15 +130,15 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code })
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
         setAuthUser(data.user);
         navigate('/dashboard');
       } else {
         showStatus(data.error || 'Verification failed.', 'error');
       }
     } catch (err) {
-      showStatus('Connection failed. Please try again.', 'error');
+      showStatus('Connection failed: ' + (err.message || 'Server offline'), 'error');
     } finally {
       setLoading(false);
     }
