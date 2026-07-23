@@ -387,7 +387,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="page-shell" style={{ background: '#FAF9F4', minHeight: '100vh', paddingBottom: '40px' }}>
+    <div className="page-shell" style={{ background: '#FAF9F4', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
 
       <main className="page" style={{ marginTop: '48px' }}>
