@@ -170,7 +170,7 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <Link to="/upload" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', transition: 'color 0.2s' }}
+              <Link to="/terms" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', transition: 'color 0.2s' }}
                     onMouseOver={(e) => e.target.style.color = '#ff6b4a'} onMouseOut={(e) => e.target.style.color = '#94a3b8'}>
                 <FileCode className="size-4 text-indigo-400" /> Terms & Conditions
               </Link>
@@ -225,8 +225,8 @@ const Footer = () => {
         <span>&copy; {new Date().getFullYear()} CareerPilot. Created by <strong style={{ color: '#e2e8f0' }}>Mukund Khandelwal</strong>. All rights reserved.</span>
         <div style={{ display: 'flex', gap: '24px' }}>
           <a href={googleFormReportUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#ef4444', textDecoration: 'none', fontWeight: 600 }}>Report Bug</a>
-          <Link to="/upload" style={{ color: '#64748b', textDecoration: 'none' }}>Terms & Conditions</Link>
-          <Link to="/upload" style={{ color: '#64748b', textDecoration: 'none' }}>Privacy Policy</Link>
+          <Link to="/terms" style={{ color: '#64748b', textDecoration: 'none' }}>Terms & Conditions</Link>
+          <Link to="/privacy" style={{ color: '#64748b', textDecoration: 'none' }}>Privacy Policy</Link>
         </div>
       </div>
     </footer>

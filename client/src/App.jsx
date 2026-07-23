@@ -19,6 +19,7 @@ import CnTheory from './pages/CnTheory.jsx'
 import DbmsTheory from './pages/DbmsTheory.jsx'
 import SystemDesignTheory from './pages/SystemDesignTheory.jsx'
 import MockTest from './pages/MockTest.jsx'
+import TermsAndConditions from './pages/TermsAndConditions.jsx'
 
 // Protected Route Wrapper Component
 const ProtectedRoute = ({ children }) => {
@@ -48,6 +49,8 @@ const App = () => {
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<Login />} />
           <Route path='/view/:resumeId' element={<Preview />} />
+          <Route path='/terms' element={<TermsAndConditions />} />
+          <Route path='/privacy' element={<TermsAndConditions />} />
 
           {/* Protected Routes */}
           <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
