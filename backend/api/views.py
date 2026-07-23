@@ -1122,6 +1122,11 @@ def register(request):
         return JsonResponse({"success": False, "error": str(exc)}, status=500)
 
 
+def _safe_django_login(request, user):
+    user.backend = 'django.contrib.auth.backends.ModelBackend'
+    django_login(request, user)
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_otp(request):
@@ -1139,7 +1144,7 @@ def verify_otp(request):
         if user:
             user.is_verified = True
             user.save()
-            django_login(request, user)
+            _safe_django_login(request, user)
             _increment("auth_logins_total")
             return JsonResponse({"success": True, "user": user.to_dict()})
 
@@ -1156,7 +1161,7 @@ def verify_otp(request):
         otp_record.delete() # Cleanup
         
         # Log user in
-        django_login(request, user)
+        _safe_django_login(request, user)
         
         # Increment login metrics
         _increment("auth_logins_total")
@@ -1213,7 +1218,7 @@ def login(request):
             "email": user.email
         }, status=403)
 
-    django_login(request, user)
+    _safe_django_login(request, user)
     _increment("auth_logins_total")
     return JsonResponse({"success": True, "user": user.to_dict()})
 
@@ -1285,7 +1290,7 @@ def google_auth(request):
                 user.is_verified = True
                 user.save()
 
-        django_login(request, user)
+        _safe_django_login(request, user)
         _increment("auth_logins_total")
         return JsonResponse({"success": True, "user": user.to_dict()})
     except ValueError as e:
