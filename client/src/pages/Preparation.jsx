@@ -419,16 +419,16 @@ const dsaSheetData = [
 {
     patternName: "Advanced Data Structures",
     problems: [
-      { id: "ads1", name: "Range Sum Query", level: "Easy", leetcode: "https://leetcode.com/problems/range-sum-query-immutable/", gfg: "https://www.geeksforgeeks.org/problems/range-sum-query-immutable/1" },
-      { id: "ads2", name: "Dynamic Range Sum", level: "Easy", leetcode: "https://leetcode.com/problems/range-sum-query-mutable/", gfg: "https://www.geeksforgeeks.org/problems/range-sum-query-mutable/1" },
+      { id: "ads1", name: "Range Sum Query", level: "Easy", leetcode: "https://leetcode.com/problems/range-sum-query-immutable/", gfg: "" },
+      { id: "ads2", name: "Dynamic Range Sum", level: "Easy", leetcode: "https://leetcode.com/problems/range-sum-query-mutable/", gfg: "" },
       { id: "ads3", name: "Union Find Basic", level: "Easy", leetcode: "https://leetcode.com/problems/number-of-provinces/", gfg: "https://www.geeksforgeeks.org/problems/disjoint-set-union-find/1" },
-      { id: "ads4", name: "Mutable Segment Tree", level: "Medium", leetcode: "https://leetcode.com/problems/range-sum-query-mutable/", gfg: "https://www.geeksforgeeks.org/problems/segment-tree-operations/1" },
-      { id: "ads5", name: "Range Minimum Query", level: "Medium", leetcode: "https://leetcode.com/problems/range-sum-query-mutable/", gfg: "https://www.geeksforgeeks.org/problems/range-minimum-query/1" },
-      { id: "ads6", name: "Fenwick Tree Basic", level: "Medium", leetcode: "https://leetcode.com/problems/range-sum-query-mutable/", gfg: "https://www.geeksforgeeks.org/problems/binary-indexed-tree-basic/1" },
-      { id: "ads7", name: "Redundant Connection", level: "Medium", leetcode: "https://leetcode.com/problems/redundant-connection/", gfg: "https://www.geeksforgeeks.org/problems/redundant-connection/1" },
-      { id: "ads8", name: "Rectangle Area II", level: "Hard", leetcode: "https://leetcode.com/problems/rectangle-area-ii/", gfg: "https://www.geeksforgeeks.org/problems/rectangle-area-ii/1" },
-      { id: "ads9", name: "Smaller Numbers After Self", level: "Hard", leetcode: "https://leetcode.com/problems/count-of-smaller-numbers-after-self/", gfg: "https://www.geeksforgeeks.org/problems/count-of-smaller-numbers-after-self/1" },
-      { id: "ads10", name: "Range Sum Query 2D Mutable", level: "Hard", leetcode: "https://leetcode.com/problems/range-sum-query-2d-mutable/", gfg: "https://www.geeksforgeeks.org/problems/range-sum-query-2d-mutable/1" }
+      { id: "ads4", name: "Mutable Segment Tree", level: "Medium", leetcode: "https://leetcode.com/problems/range-sum-query-mutable/", gfg: "" },
+      { id: "ads5", name: "Range Minimum Query", level: "Medium", leetcode: "https://leetcode.com/problems/range-sum-query-mutable/", gfg: "" },
+      { id: "ads6", name: "Fenwick Tree Basic", level: "Medium", leetcode: "https://leetcode.com/problems/range-sum-query-mutable/", gfg: "" },
+      { id: "ads7", name: "Redundant Connection", level: "Medium", leetcode: "https://leetcode.com/problems/redundant-connection/", gfg: "" },
+      { id: "ads8", name: "Rectangle Area II", level: "Hard", leetcode: "https://leetcode.com/problems/rectangle-area-ii/", gfg: "" },
+      { id: "ads9", name: "Smaller Numbers After Self", level: "Hard", leetcode: "https://leetcode.com/problems/count-of-smaller-numbers-after-self/", gfg: "" },
+      { id: "ads10", name: "Range Sum Query 2D Mutable", level: "Hard", leetcode: "https://leetcode.com/problems/range-sum-query-2d-mutable/", gfg: "" }
     ]
   }
 ]
@@ -3463,47 +3463,51 @@ const Preparation = () => {
 
                                             {/* Practice Links */}
                                             <td style={{ padding: '12px 20px', textAlign: 'right' }}>
-                                              <a
-                                                href={prob.leetcode}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{
-                                                  display: 'inline-flex',
-                                                  alignItems: 'center',
-                                                  padding: '5px 12px',
-                                                  borderRadius: '8px',
-                                                  fontSize: '0.72rem',
-                                                  fontWeight: 700,
-                                                  background: 'rgba(245, 158, 11, 0.08)',
-                                                  color: '#d97706',
-                                                  border: '1px solid rgba(245, 158, 11, 0.15)',
-                                                  textDecoration: 'none',
-                                                  marginRight: '8px',
-                                                  transition: 'all 0.2s'
-                                                }}
-                                              >
-                                                LeetCode
-                                              </a>
-                                              <a
-                                                href={prob.gfg}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{
-                                                  display: 'inline-flex',
-                                                  alignItems: 'center',
-                                                  padding: '5px 12px',
-                                                  borderRadius: '8px',
-                                                  fontSize: '0.72rem',
-                                                  fontWeight: 700,
-                                                  background: 'rgba(16, 185, 129, 0.08)',
-                                                  color: '#16a34a',
-                                                  border: '1px solid rgba(16, 185, 129, 0.15)',
-                                                  textDecoration: 'none',
-                                                  transition: 'all 0.2s'
-                                                }}
-                                              >
-                                                GFG
-                                              </a>
+                                              {prob.leetcode && prob.leetcode.trim() !== '' && (
+                                                <a
+                                                  href={prob.leetcode}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    padding: '5px 12px',
+                                                    borderRadius: '8px',
+                                                    fontSize: '0.72rem',
+                                                    fontWeight: 700,
+                                                    background: 'rgba(245, 158, 11, 0.08)',
+                                                    color: '#d97706',
+                                                    border: '1px solid rgba(245, 158, 11, 0.15)',
+                                                    textDecoration: 'none',
+                                                    marginRight: prob.gfg && prob.gfg.trim() !== '' ? '8px' : '0px',
+                                                    transition: 'all 0.2s'
+                                                  }}
+                                                >
+                                                  LeetCode
+                                                </a>
+                                              )}
+                                              {prob.gfg && prob.gfg.trim() !== '' && (
+                                                <a
+                                                  href={prob.gfg}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    padding: '5px 12px',
+                                                    borderRadius: '8px',
+                                                    fontSize: '0.72rem',
+                                                    fontWeight: 700,
+                                                    background: 'rgba(16, 185, 129, 0.08)',
+                                                    color: '#16a34a',
+                                                    border: '1px solid rgba(16, 185, 129, 0.15)',
+                                                    textDecoration: 'none',
+                                                    transition: 'all 0.2s'
+                                                  }}
+                                                >
+                                                  GFG
+                                                </a>
+                                              )}
                                             </td>
                                           </tr>
                                         );
