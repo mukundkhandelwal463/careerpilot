@@ -11,51 +11,51 @@ const Footer = () => {
       background: '#090d16',
       color: '#94a3b8',
       borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-      padding: '64px 40px 40px',
+      padding: '70px 50px 40px',
       fontSize: '0.88rem',
       fontFamily: '"Manrope", sans-serif',
       width: '100%',
       marginTop: '60px'
     }}>
       <div style={{
-        maxWidth: '1280px',
+        maxWidth: '1440px',
         margin: '0 auto',
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '50px',
-        marginBottom: '48px'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gap: '80px',
+        marginBottom: '52px'
       }}>
         {/* Brand & Developer Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#ffffff' }}>
             <div style={{
-              width: '42px', height: '42px', borderRadius: '12px',
+              width: '44px', height: '44px', borderRadius: '14px',
               background: 'linear-gradient(135deg, #ff6b4a, #ff8f57)',
               display: 'grid', placeItems: 'center', fontWeight: 800, color: '#ffffff',
-              boxShadow: '0 4px 14px rgba(255, 107, 74, 0.35)', fontSize: '1.2rem'
+              boxShadow: '0 4px 14px rgba(255, 107, 74, 0.35)', fontSize: '1.25rem'
             }}>
               🚀
             </div>
             <div>
-              <strong style={{ fontSize: '1.3rem', letterSpacing: '-0.02em', color: '#ffffff', display: 'block', lineHeight: 1.2 }}>
+              <strong style={{ fontSize: '1.35rem', letterSpacing: '-0.02em', color: '#ffffff', display: 'block', lineHeight: 1.2 }}>
                 CareerPilot AI
               </strong>
             </div>
           </div>
 
-          <p style={{ margin: 0, lineHeight: 1.65, fontSize: '0.84rem', color: '#64748b', maxWidth: '320px' }}>
+          <p style={{ margin: 0, lineHeight: 1.65, fontSize: '0.84rem', color: '#64748b', maxWidth: '340px' }}>
             Empowering candidates worldwide with AI ATS Benchmark Scoring, Voice Mock Interviews, full-length tests, and real-time job search engines.
           </p>
 
           {/* Contact / Social Links */}
-          <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '6px' }}>
             <a
               href="https://github.com/mukundkhandelwal463"
               target="_blank"
               rel="noopener noreferrer"
               title="GitHub Profile"
               style={{
-                width: '38px', height: '38px', borderRadius: '10px',
+                width: '40px', height: '40px', borderRadius: '12px',
                 background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
                 display: 'grid', placeItems: 'center', color: '#e2e8f0',
                 transition: 'all 0.2s'
@@ -72,7 +72,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               title="LinkedIn Profile"
               style={{
-                width: '38px', height: '38px', borderRadius: '10px',
+                width: '40px', height: '40px', borderRadius: '12px',
                 background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
                 display: 'grid', placeItems: 'center', color: '#e2e8f0',
                 transition: 'all 0.2s'
@@ -87,7 +87,7 @@ const Footer = () => {
               href="mailto:mukundkhandelwal463@gmail.com"
               title="Send Email"
               style={{
-                width: '38px', height: '38px', borderRadius: '10px',
+                width: '40px', height: '40px', borderRadius: '12px',
                 background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
                 display: 'grid', placeItems: 'center', color: '#e2e8f0',
                 transition: 'all 0.2s'
@@ -102,7 +102,7 @@ const Footer = () => {
 
         {/* Feature / Product Links Column */}
         <div>
-          <h4 style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 18px', letterSpacing: '0.02em' }}>
+          <h4 style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 20px', letterSpacing: '0.02em' }}>
             Products & Features
           </h4>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -141,7 +141,7 @@ const Footer = () => {
 
         {/* Support & Problem Report Column */}
         <div>
-          <h4 style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 18px', letterSpacing: '0.02em' }}>
+          <h4 style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 20px', letterSpacing: '0.02em' }}>
             Support & Legal
           </h4>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -189,19 +189,19 @@ const Footer = () => {
 
         {/* Developer Contact Column */}
         <div>
-          <h4 style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 18px', letterSpacing: '0.02em' }}>
+          <h4 style={{ color: '#ffffff', fontSize: '0.95rem', fontWeight: 700, margin: '0 0 20px', letterSpacing: '0.02em' }}>
             Developer Contact
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.84rem', color: '#64748b' }}>
-            <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.95rem' }}>Mukund Khandelwal</span>
+            <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.98rem' }}>Mukund Khandelwal</span>
             <span style={{ color: '#94a3b8' }}>Software Engineer & AI Architect</span>
-            <a href="mailto:mukundkhandelwal463@gmail.com" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', wordBreak: 'break-all' }}>
+            <a href="mailto:mukundkhandelwal463@gmail.com" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
               ✉️ mukundkhandelwal463@gmail.com
             </a>
-            <a href="https://github.com/mukundkhandelwal463" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <a href="https://github.com/mukundkhandelwal463" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
               🔗 github.com/mukundkhandelwal463
             </a>
-            <a href="https://www.linkedin.com/in/mukund-khandelwal-6a8663283/" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <a href="https://www.linkedin.com/in/mukund-khandelwal-6a8663283/" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
               💼 linkedin.com/in/mukund-khandelwal
             </a>
           </div>
@@ -210,20 +210,20 @@ const Footer = () => {
 
       {/* Bottom Copyright & Policy Bar */}
       <div style={{
-        maxWidth: '1280px',
+        maxWidth: '1440px',
         margin: '0 auto',
-        paddingTop: '24px',
+        paddingTop: '28px',
         borderTop: '1px solid rgba(255, 255, 255, 0.08)',
         display: 'flex',
         justify: 'space-between',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: '20px',
+        gap: '24px',
         fontSize: '0.82rem',
         color: '#64748b'
       }}>
         <span>&copy; {new Date().getFullYear()} CareerPilot. Created by <strong style={{ color: '#e2e8f0' }}>Mukund Khandelwal</strong>. All rights reserved.</span>
-        <div style={{ display: 'flex', gap: '20px' }}>
+        <div style={{ display: 'flex', gap: '24px' }}>
           <a href={googleFormReportUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#ef4444', textDecoration: 'none', fontWeight: 600 }}>Report Bug</a>
           <Link to="/upload" style={{ color: '#64748b', textDecoration: 'none' }}>Terms & Conditions</Link>
           <Link to="/upload" style={{ color: '#64748b', textDecoration: 'none' }}>Privacy Policy</Link>
