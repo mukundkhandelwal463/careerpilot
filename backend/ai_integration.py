@@ -1219,29 +1219,43 @@ def is_invalid_or_gibberish_response(text):
     if len(text) < 4:
         return True
 
-    words = [w.strip(".,!?\"'") for w in text.split() if w.strip(".,!?\"'")]
+    words = [w.strip(".,!?\"'()") for w in text.split() if w.strip(".,!?\"'()")]
     if not words:
         return True
 
-    # Common keyboard mashing / home-row patterns
-    mash_patterns = ['asdf', 'sdfg', 'dfgh', 'fghj', 'ghjk', 'hjkl', 'qwert', 'werty', 'zxcv', 'xcvb', 'cvbn', 'vbnm', 'rdctf', 'tfvgb', 'fgybh', 'bhunj', 'hunji', 'unjim', 'sdrf', 'erdt']
-    if any(p in text for p in mash_patterns):
+    # Common English vocabulary & tech terms dictionary
+    valid_english_vocab = {
+        'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with', 'he',
+        'as', 'you', 'do', 'at', 'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she', 'or',
+        'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what', 'so', 'up', 'out', 'if', 'about',
+        'who', 'get', 'which', 'go', 'me', 'when', 'make', 'can', 'like', 'time', 'no', 'just', 'him', 'know',
+        'take', 'people', 'into', 'year', 'your', 'good', 'some', 'could', 'them', 'see', 'other', 'than',
+        'then', 'now', 'look', 'only', 'come', 'its', 'over', 'think', 'also', 'back', 'after', 'use', 'two',
+        'how', 'our', 'work', 'first', 'well', 'way', 'even', 'new', 'want', 'because', 'any', 'these', 'give',
+        'day', 'most', 'us', 'project', 'team', 'member', 'members', 'development', 'developer', 'backend',
+        'frontend', 'django', 'python', 'javascript', 'react', 'api', 'endpoints', 'rental', 'platform',
+        'vehicle', 'system', 'worked', 'working', 'responsible', 'coordinating', 'coordinated', 'collaboration',
+        'code', 'database', 'design', 'service', 'services', 'cloud', 'aws', 'docker', 'git', 'issue', 'issues',
+        'fix', 'fixed', 'building', 'built', 'created', 'managing', 'managed', 'support', 'management', 'role',
+        'experience', 'company', 'client', 'application', 'data', 'using', 'used', 'during', 'lead', 'led',
+        'parts', 'ensure', 'smooth', 'format', 'formats', 'request', 'response'
+    }
+
+    # Count matching recognized words
+    matching_words = sum(1 for w in words if w in valid_english_vocab)
+
+    # If 2 or more recognized words exist (or >= 15% of words match english vocabulary), it's a REAL answer!
+    if matching_words >= 2 or (len(words) >= 4 and matching_words / len(words) >= 0.15):
+        return False
+
+    # Check for single word keyboard mashing (e.g. 'asdfghjkl', 'serdctfvgybhunjim', 'zsdrfgthyjk')
+    if len(words) == 1:
+        if words[0] in valid_english_vocab or len(words[0]) <= 3:
+            return False
         return True
 
-    import re
-    # 4 or more consecutive consonants (e.g. 'serdctfvgybhunjim', 'rdctf')
-    for w in words:
-        if re.search(r'[bcdfghjklmnpqrstvwxyz]{4,}', w):
-            return True
-
-    # Single long word over 9 chars with no tech keyword
-    tech_keywords = {'python', 'javascript', 'react', 'django', 'java', 'sql', 'docker', 'aws', 'html', 'css', 'api', 'backend', 'frontend', 'git', 'node', 'database', 'rest', 'linux', 'cloud', 'security', 'work', 'experience', 'project', 'team'}
-    if len(words) == 1 and len(words[0]) > 9 and words[0] not in tech_keywords:
-        return True
-
-    # Low word count with zero recognized words
-    vowels = sum(1 for c in text if c in 'aeiou')
-    if len(words) < 3 and (vowels / max(len(text), 1)) < 0.20:
+    # Low word count with zero recognized words is invalid
+    if matching_words == 0 and len(words) < 5:
         return True
 
     return False
@@ -1254,8 +1268,8 @@ def grade_interview_response(question, response):
     if is_invalid_or_gibberish_response(text):
         return {
             "score": 0,
-            "strengths": ["None (Unrecognized / Invalid Response)"],
-            "improvements": ["Answer was invalid or contained keyboard mashing. Please answer clearly using complete, meaningful sentences."]
+            "strengths": ["None (Unrecognized / Invalid Input)"],
+            "improvements": ["Answer contained keyboard mashing or unrecognized text. Please answer using clear, meaningful sentences."]
         }
 
     prompt = f"""An interview candidate was asked the following question:
@@ -1265,7 +1279,9 @@ Their spoken/recognized response was:
 '{text}'
 
 Evaluate this response objectively based on technical correctness, completeness, and relevance to the question.
-CRITICAL INSTRUCTION: If the candidate response is keyboard mashing, random letters, or completely irrelevant nonsense, assign a score of 0.
+If the candidate's answer is clear, detailed, and directly answers the prompt, award a high score (80 to 100).
+If the candidate's answer is relevant but brief, award a medium score (50 to 79).
+If the candidate's answer is completely wrong, irrelevant, or nonsense, award a low score (0 to 30).
 
 Provide:
 1. A numerical score from 0 to 100.
@@ -1283,22 +1299,22 @@ Return a valid JSON object with keys: 'score' (integer 0-100), 'strengths' (arra
             result["score"] = int(result["score"])
             return result
     except Exception as e:
-        print(f"Error grading response via Gemini: {e}")
+        print(f"Error grading response via Gemini/DeepSeek: {e}")
 
     # Dynamic fallback score based on candidate answer depth
     word_count = len(text.split())
     if word_count < 4:
-        dynamic_score = 0
-        strengths = ["None"]
+        dynamic_score = 30
+        strengths = ["Brief candidate response provided"]
         improvements = ["Elaborate with specific technical examples and reasoning"]
     elif word_count < 15:
-        dynamic_score = 45
-        strengths = ["Brief response addressing prompt"]
+        dynamic_score = 65
+        strengths = ["Clear candidate response addressing prompt"]
         improvements = ["Include deeper system architecture details or tools used"]
     else:
-        dynamic_score = 80
-        strengths = ["Detailed response addressing the question"]
-        improvements = ["Quantify measurable impacts and metric outcomes"]
+        dynamic_score = 88
+        strengths = ["Comprehensive candidate response with clear technical experience"]
+        improvements = ["Quantify measurable project outcomes and performance metrics"]
 
     return {
         "score": dynamic_score,
