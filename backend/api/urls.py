@@ -58,4 +58,6 @@ urlpatterns = [
     path('dashboard', views.get_dashboard, name='get_dashboard'),
     path('resumes', views.list_or_create_resumes, name='list_or_create_resumes'),
     path('resumes/<int:resume_id>', views.get_or_delete_resume, name='get_or_delete_resume'),
+    path('user/export-data', views.export_user_data_api, name='export_user_data_api'),
+    path('admin/export-all-users-data', views.export_all_users_data_admin_api, name='export_all_users_data_admin_api'),
 ]
