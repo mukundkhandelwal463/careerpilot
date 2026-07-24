@@ -18,6 +18,22 @@ import { questionBankData } from '../data/questionBankData.js';
 
 const cnConcepts = [
   {
+    "id": "cn_what_why",
+    "index": "00",
+    "name": "What is a Computer Network & Why do we use it?",
+    "overview": "A Computer Network is an interconnected collection of autonomous computers and devices that exchange data using common communication protocols.",
+    "detailedTheory": "Computer networks allow computing devices to share resources (files, internet, hardware), communicate in real-time (email, messaging, video), distribute computational workloads across servers, and store centralized database records securely across geographic regions.",
+    "dryRun": "1. Client node initiates TCP socket connection to server IP.\n2. Routers inspect destination IP headers to route packets across intermediate hops.\n3. Server node receives, reassembles packets, and sends HTTP response.",
+    "visualTrace": "+---------------+           Internet / Routers           +---------------+\n| Client Device | <====================================> | Target Server |\n| (IP: 192.168) |      Packets (TCP/IP Protocols)        | (IP: 8.8.8.8) |\n+---------------+                                        +---------------+",
+    "code": {
+      "python": "# Simple TCP Socket Server in Python\nimport socket\ns = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\ns.bind(('127.0.0.1', 8080))\ns.listen(1)\nprint(\"Server listening on port 8080...\")",
+      "js": "// HTTP Client request in JavaScript\nfetch('https://api.github.com')\n  .then(res => res.json())\n  .then(data => console.log('Network Response Received'));",
+      "cpp": "// Basic socket connection in C++\n#include <sys/socket.h>\nint sock = socket(AF_INET, SOCK_STREAM, 0);"
+    },
+    "interviewQ": "What is the primary purpose of a Computer Network?",
+    "interviewA": "Computer networks enable resource sharing, remote communication, centralized data management, and distributed computing across interconnected systems worldwide using standard protocol suites like TCP/IP."
+  },
+  {
     "id": "cn_osi_model",
     "index": "01",
     "name": "OSI 7-Layer Model",

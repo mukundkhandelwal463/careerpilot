@@ -18,6 +18,22 @@ import { questionBankData } from '../data/questionBankData.js';
 
 const osConcepts = [
   {
+    "id": "os_what_why",
+    "index": "00",
+    "name": "What is an Operating System & Why do we use it?",
+    "overview": "An Operating System (OS) is system software that manages computer hardware and software resources and provides common services for computer programs.",
+    "detailedTheory": "The OS acts as an intermediary between user applications and system hardware. Without an OS, every application would need to write low-level code to communicate with CPU registers, memory chips, hard drives, and network controllers. The OS provides hardware abstraction, process scheduling, memory management, file system organization, and security protection.",
+    "dryRun": "1. User opens a program -> OS allocates RAM pages and assigns a Process Control Block (PCB).\n2. Program calls CPU for computation -> OS CPU scheduler allocates time slices.\n3. Program accesses disk file -> OS file system translates request into low-level drive I/O operations.",
+    "visualTrace": "+---------------------------------------------------+\n| User Applications (Browser, IDE, Games)            |\n+---------------------------------------------------+\n| OPERATING SYSTEM KERNEL (Process, Memory, File I/O)|\n+---------------------------------------------------+\n| Hardware (CPU, RAM, SSD, NIC)                      |\n+---------------------------------------------------+",
+    "code": {
+      "cpp": "// System Call example executing OS Kernel function\n#include <unistd.h>\nint main() {\n    write(1, \"Hello OS Kernel\\n\", 16); // Direct POSIX System Call\n    return 0;\n}",
+      "python": "import os\n# Querying Operating System Kernel details\nprint(f\"Process ID: {os.getpid()}\")\nprint(f\"System Name: {os.name}\")",
+      "java": "public class OSInfo {\n    public static void main(String[] args) {\n        System.out.println(\"OS Name: \" + System.getProperty(\"os.name\"));\n        System.out.println(\"CPU Cores: \" + Runtime.getRuntime().availableProcessors());\n    }\n}"
+    },
+    "interviewQ": "What is the primary function of an Operating System?",
+    "interviewA": "An OS serves two main purposes: (1) Resource Manager (allocates and manages CPU, RAM, disk space, and I/O devices efficiently and securely) and (2) Extended Machine / Abstraction Layer (hides hardware complexity behind simple interfaces like system calls)."
+  },
+  {
     "id": "os_process_thread",
     "index": "01",
     "name": "Process vs Thread",

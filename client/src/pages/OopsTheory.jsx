@@ -18,6 +18,23 @@ import { questionBankData } from '../data/questionBankData.js';
 
 const oopsConcepts = [
   {
+    "id": "oops_what_why",
+    "index": "00",
+    "name": "What is OOPs & Why do we use it?",
+    "overview": "Object-Oriented Programming (OOP) is a programming paradigm based on objects containing data (attributes) and code (methods).",
+    "detailedTheory": "OOP allows software developers to structure code into modular, reusable blueprints (classes) and memory instances (objects). It solves software complexity by enforcing encapsulation, reusability via inheritance, flexibility via polymorphism, and security via abstraction.",
+    "dryRun": "1. Define a domain entity blueprint (e.g., User, BankAccount).\n2. Encapsulate data state so external code cannot corrupt balance directly.\n3. Instantiate objects to manage complex business logic cleanly.",
+    "visualTrace": "+-----------------------------------------------------------+\n| Real-World Domain Entity (e.g. Bank Account)               |\n| -> State: balance, accountNo                               |\n| -> Behavior: deposit(), withdraw()                         |\n+-----------------------------------------------------------+",
+    "code": {
+      "java": "public class BankAccount {\n    private double balance;\n    public void deposit(double amount) { balance += amount; }\n}",
+      "cpp": "class BankAccount {\nprivate:\n    double balance;\npublic:\n    void deposit(double amount) { balance += amount; }\n};",
+      "python": "class BankAccount:\n    def __init__(self):\n        self._balance = 0.0\n    def deposit(self, amount):\n        self._balance += amount",
+      "js": "class BankAccount {\n    #balance = 0;\n    deposit(amount) { this.#balance += amount; }\n}"
+    },
+    "interviewQ": "Why do we use OOP over procedural programming?",
+    "interviewA": "OOP provides modularity, maintainability, code reusability (via inheritance), and data security (via encapsulation), making large software systems significantly easier to scale and maintain."
+  },
+  {
     "id": "classes_objects",
     "index": "01",
     "name": "Classes & Objects",

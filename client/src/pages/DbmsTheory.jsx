@@ -20,6 +20,22 @@ import { questionBankData } from '../data/questionBankData.js';
 
 const dbmsConcepts = [
   {
+    "id": "dbms_what_why",
+    "index": "00",
+    "name": "What is a DBMS & Why do we use it?",
+    "overview": "A Database Management System (DBMS) is software used to store, manage, query, and retrieve structured or unstructured data efficiently and securely.",
+    "detailedTheory": "Traditional file systems suffer from data redundancy, inconsistency, difficulty in accessing data, concurrency conflicts, and lack of security. A DBMS provides a centralized software system to define, create, maintain, and control database access with transaction ACID compliance and data independence.",
+    "dryRun": "1. Client submits query -> DBMS Query Processor parses & optimizes request.\n2. Transaction Manager ensures ACID compliance during concurrent reads/writes.\n3. Buffer Manager caches data pages in RAM to minimize disk I/O.",
+    "visualTrace": "+---------------------------------------------------+\n| Client Applications (Web, Mobile, Enterprise)      |\n+---------------------------------------------------+\n| DBMS ENGINE (Query Processor, Transaction Manager)|\n+---------------------------------------------------+\n| Physical Data Files (Disk Tables, B+ Tree Indexes)|\n+---------------------------------------------------+",
+    "code": {
+      "python": "# Interacting with a SQLite DBMS engine\nimport sqlite3\nconn = sqlite3.connect(':memory:')\ncur = conn.cursor()\ncur.execute('CREATE TABLE users (id INT, name TEXT)')\ncur.execute('INSERT INTO users VALUES (1, \"Mukund\")')\nconn.commit()",
+      "js": "// Interacting with database via SQL query\nconst query = 'SELECT id, name FROM users WHERE id = $1';\nconst values = [1];\nconst res = await db.query(query, values);",
+      "java": "Statement stmt = conn.createStatement();\nResultSet rs = stmt.executeQuery(\"SELECT * FROM users\");"
+    },
+    "interviewQ": "Why do we use a DBMS instead of storing data in flat files?",
+    "interviewA": "A DBMS prevents data redundancy/inconsistency, enables concurrent multi-user access without data corruption, provides backup/recovery, enforces security access controls, and guarantees ACID transaction compliance."
+  },
+  {
     "id": "dbms_rdbms_basics",
     "index": "01",
     "name": "RDBMS Basics (MySQL & PostgreSQL)",

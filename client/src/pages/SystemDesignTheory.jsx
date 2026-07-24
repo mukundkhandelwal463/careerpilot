@@ -22,6 +22,36 @@ import '../css/style.css';
 
 const systemDesignConcepts = [
   {
+    "id": "sys_what_why",
+    "index": "00",
+    "name": "What is System Design & Why do we use it?",
+    "overview": "System Design is the technical process of defining architecture, components, modules, interfaces, and data models for a system to satisfy specific requirements.",
+    "detailedTheory": "As user traffic grows from thousands to millions of concurrent requests, single-monolith applications fail due to CPU bottlenecks, memory limits, and database locks. System Design provides architectural patterns (Load Balancing, Caching, Sharding, Message Queues, Microservices) to ensure systems remain Scalable, Available, Reliable, and Maintainable.",
+    "dryRun": "1. Define Functional Requirements (what app does) and Non-Functional Requirements (traffic scale, latency SLA).\n2. Back-of-the-envelope calculations for storage & bandwidth.\n3. Design High-Level Architecture (Clients -> CDN -> Load Balancer -> Services -> Cache -> DB).",
+    "visualTrace": "[Clients] -> [CDN / DNS] -> [Load Balancer] -> [App Services] -> [Cache / DB Shards]",
+    "code": {
+      "python": "# High-level architecture component simulation in Python\nclass SystemArchitecture:\n    def __init__(self):\n        self.load_balancer = \"Round-Robin Nginx\"\n        self.cache = \"Redis Cluster\"\n        self.database = \"PostgreSQL Primary-Replica\"",
+      "js": "// API Gateway routing entry point\napp.use('/api/v1/users', userServiceProxy);\napp.use('/api/v1/orders', orderServiceProxy);"
+    },
+    "interviewQ": "Why is System Design critical for senior engineering roles?",
+    "interviewA": "System Design demonstrates a candidate's ability to trade off architecture options (e.g. SQL vs NoSQL, Consistency vs Availability) to build resilient systems that handle high throughput, fault tolerance, and low latency under real-world production scale."
+  },
+  {
+    "id": "sys_hld_vs_lld",
+    "index": "00B",
+    "name": "High-Level Design (HLD) vs Low-Level Design (LLD)",
+    "overview": "HLD outlines overall macro architecture and service interactions. LLD details micro-level class structures, design patterns, and database schemas.",
+    "detailedTheory": "High-Level Design (HLD) covers system topology, service boundaries, data flows, load balancing, caching layers, and storage engine choices. Low-Level Design (LLD) dives into class diagrams, object-oriented design patterns (Factory, Strategy, Singleton), API signatures, DB schema tables, and algorithm logic.",
+    "dryRun": "1. HLD Stage: Draw architecture diagram showing API Gateway, Auth Microservice, Redis Cache, and DB Shards.\n2. LLD Stage: Write class interfaces (e.g., IUserAuthService, PasswordHasher), define DB table columns, and implement concrete design patterns.",
+    "visualTrace": "HLD (Macro View): [Client] ---> [Load Balancer] ---> [Services Cluster] ---> [DB]\n                                    │\nLLD (Micro View): class UserService { private IDatabase db; public User getUser(id); }",
+    "code": {
+      "java": "// LLD Example: Strategy Pattern for Payment System\npublic interface PaymentStrategy {\n    void pay(double amount);\n}\npublic class CreditCardPayment implements PaymentStrategy {\n    public void pay(double amount) { /* Implementation */ }\n}",
+      "python": "# LLD Example: Factory Pattern\nclass DatabaseFactory:\n    @staticmethod\n    def get_db(db_type):\n        if db_type == 'sql': return PostgresDB()\n        return MongoDB()"
+    },
+    "interviewQ": "What is the difference between HLD and LLD?",
+    "interviewA": "HLD (System Architecture) focuses on overall system components, network boundaries, protocols, and data flow across servers. LLD (Object/Software Design) focuses on individual component implementations, class structures, OOP design patterns, and detailed database schemas."
+  },
+  {
     "id": "sys_scaling",
     "index": "01",
     "name": "Horizontal vs Vertical Scaling",
