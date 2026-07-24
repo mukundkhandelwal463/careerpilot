@@ -118,11 +118,11 @@ const ResumeBuilder = () => {
     return Array.from(new Set([...words, 'System Design', 'Agile Methodology', 'Git / GitHub', 'Problem Solving', 'REST APIs', 'Unit Testing', 'CI/CD', 'Performance Optimization']));
   };
 
-  // Fetch Gemini Keywords for User-Entered Stream
+  // Fetch AI Engine Keywords for User-Entered Stream
   const handleFetchGeminiKeywords = async () => {
     if (!customStream.trim()) return;
     setIsFetchingKeywords(true);
-    setStatusMsg(`Gemini AI is generating ATS keywords for "${customStream}"...`);
+    setStatusMsg(`AI Engine is generating ATS keywords for "${customStream}"...`);
 
     try {
       const res = await fetch('/api/suggest-stream-keywords', {
@@ -134,7 +134,7 @@ const ResumeBuilder = () => {
         const data = await res.json();
         if (data.success && Array.isArray(data.keywords) && data.keywords.length > 0) {
           setDynamicKeywords(data.keywords);
-          setStatusMsg(`Gemini AI generated ${data.keywords.length} ATS keywords for "${customStream}"!`);
+          setStatusMsg(`AI Engine generated ${data.keywords.length} ATS keywords for "${customStream}"!`);
           setTimeout(() => setStatusMsg(''), 3000);
           setIsFetchingKeywords(false);
           return;
@@ -941,14 +941,14 @@ ${achievementsContent}
                     }}
                   >
                     {isFetchingKeywords ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5 text-amber-400" />}
-                    {isFetchingKeywords ? 'Asking Gemini...' : 'Gemini AI Keywords'}
+                    {isFetchingKeywords ? 'Generating...' : 'AI Engine Keywords'}
                   </button>
                 </div>
 
-                {/* Gemini Suggested Keywords Pills */}
+                {/* AI Engine Suggested Keywords Pills */}
                 <div>
                   <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
-                    <Lightbulb className="size-3 text-amber-500" /> Gemini ATS Keywords for "{customStream}" (Click to add to Skills):
+                    <Lightbulb className="size-3 text-amber-500" /> AI Recommended Keywords for "{customStream}" (Click to add to Skills):
                   </span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {dynamicKeywords.map((kw, i) => (

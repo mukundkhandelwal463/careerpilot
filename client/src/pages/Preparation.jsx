@@ -2406,7 +2406,7 @@ const Preparation = () => {
                   <h2 style={{ fontSize: '1.31rem', fontWeight: 800, margin: 0 }}>Career Roadmap Visualizer</h2>
                 </div>
                 <p style={{ color: 'var(--muted)', marginBottom: '24px', fontSize: '0.87rem' }}>
-                  Provide your target career goal and CV. Gemini will generate a custom learning roadmap showing what you've achieved, what is left to study, and a level-by-level study plan.
+                  Provide your target career goal and CV. CareerPilot AI Engine will generate a custom learning roadmap showing what you've achieved, what is left to study, and a level-by-level study plan.
                 </p>
 
                 {!careerRoadmap && (

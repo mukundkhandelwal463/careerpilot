@@ -332,7 +332,7 @@ const MockTest = () => {
           <Loader2 className="size-12 text-indigo-600" style={{ animation: 'spin 1.5s linear infinite' }} />
           <h2 style={{ marginTop: '20px', fontSize: '1.4rem', color: '#1e293b', fontWeight: 800 }}>Analyzing & Grading Assessment...</h2>
           <p style={{ color: '#64748b', marginTop: '8px', textAlign: 'center', maxWidth: '440px', padding: '0 20px' }}>
-            Gemini is grading your programming solutions and checking MCQs. This will take about 20-30 seconds.
+            CareerPilot AI Engine is grading your programming solutions and checking MCQs. This will take about 20-30 seconds.
           </p>
         </div>
       </div>

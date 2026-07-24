@@ -79,7 +79,7 @@ const Chatbot = () => {
   };
 
   const handleGenerate = async () => {
-    setStatus({ text: "Consulting Gemini AI and Generating Resume files...", type: 'info' });
+    setStatus({ text: "Consulting CareerPilot AI Engine and Generating Resume files...", type: 'info' });
     setGenerating(true);
 
     try {

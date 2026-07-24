@@ -1377,21 +1377,21 @@ JSON Roadmap:"""
     except Exception as exc:
         print(f"DeepSeek direct fallback error: {exc}")
 
-    # Role-based fallback generator
+    # Dynamic Role-based fallback generator
     role_lower = str(target_role).lower()
     if any(k in role_lower for k in ['data', 'ds', 'ml', 'machine learning', 'ai', 'python', 'science', 'analytic']):
         return {
             "match_percentage": 70,
             "current_skills": ["Python Fundamentals", "Basic Data Analysis", "SQL Basics"],
             "gap_skills": ["NumPy & Pandas Data Manipulation", "Scikit-Learn Machine Learning", "Deep Learning (PyTorch/TensorFlow)", "Model Deployment & MLOps"],
-            "career_gaps_summary": f"To transition into a {target_role}, the candidate should build from Python & math foundations into exploratory data analysis, machine learning algorithms, deep learning, and production model deployment.",
+            "career_gaps_summary": f"To crack the {target_role} position, the candidate should build from Python & mathematical foundations into exploratory data analysis, machine learning algorithms, deep learning, and production MLOps deployment.",
             "levels": [
                 {
                     "level": 1,
-                    "title": "Level 1: Python Programming, Math & Data Foundations",
+                    "title": f"Level 1: Python Programming & Math Foundations for {target_role}",
                     "topics": ["Python 3 Object-Oriented Programming", "Linear Algebra & Vector Operations", "Probability Distributions & Statistics", "NumPy Array Operations", "Pandas DataFrames & Data Cleaning"],
                     "duration": "3 weeks",
-                    "focus": "Master Python programming and foundational mathematical/statistical concepts for Data Science."
+                    "focus": f"Master Python programming and foundational mathematical/statistical concepts for {target_role}."
                 },
                 {
                     "level": 2,
@@ -1409,10 +1409,10 @@ JSON Roadmap:"""
                 },
                 {
                     "level": 4,
-                    "title": "Level 4: Model Deployment, MLOps & Capstone",
-                    "topics": ["Model Serialization (Joblib/ONNX)", "REST API Model Serving with FastAPI", "Containerizing ML Applications (Docker)", "MLOps Pipelines & Model Monitoring", "DS/ML Technical System Design Mock"],
+                    "title": f"Level 4: Model Deployment, MLOps & {target_role} Interview Readiness",
+                    "topics": ["Model Serialization (Joblib/ONNX)", "REST API Model Serving with FastAPI", "Containerizing ML Applications (Docker)", "MLOps Pipelines & Model Monitoring", f"{target_role} Technical Interview Preparation"],
                     "duration": "2 weeks",
-                    "focus": "Deploy machine learning models into production and prepare for technical AI/ML interviews."
+                    "focus": f"Deploy machine learning models into production and prepare for {target_role} technical interviews."
                 }
             ]
         }
@@ -1421,14 +1421,14 @@ JSON Roadmap:"""
             "match_percentage": 72,
             "current_skills": ["HTML/CSS Basics", "JavaScript Syntax", "Web Browsers"],
             "gap_skills": ["Modern ES6+ JavaScript", "React Hooks & State Management", "TypeScript for React", "Production Web Testing"],
-            "career_gaps_summary": f"To master {target_role}, transition from static web design into component-driven React architecture, state management, TypeScript, and modern frontend testing.",
+            "career_gaps_summary": f"To master the {target_role} role, transition from static web design into component-driven React architecture, state management, TypeScript, and modern frontend testing.",
             "levels": [
                 {
                     "level": 1,
-                    "title": "Level 1: Core Web & JavaScript ES6+ Foundations",
+                    "title": f"Level 1: Core Web & JavaScript ES6+ Foundations for {target_role}",
                     "topics": ["Semantic HTML5 & Accessibility (a11y)", "CSS Flexbox & Grid Layouts", "Modern JavaScript (ES6+ Modules, Promises, Async/Await)", "DOM Manipulation & Event Handling"],
                     "duration": "2 weeks",
-                    "focus": "Build a rock-solid foundation in modern JavaScript, responsive CSS, and web standards."
+                    "focus": f"Build a rock-solid foundation in modern JavaScript, responsive CSS, and web standards for {target_role}."
                 },
                 {
                     "level": 2,
@@ -1446,47 +1446,47 @@ JSON Roadmap:"""
                 },
                 {
                     "level": 4,
-                    "title": "Level 4: Frontend Testing, Performance & CI/CD",
-                    "topics": ["Unit Testing with Jest & React Testing Library", "Web Vitals & Performance Optimization", "CI/CD Deployment to Vercel/Netlify", "Frontend Architecture & System Design"],
+                    "title": f"Level 4: Frontend Testing, Performance & {target_role} Interview Readiness",
+                    "topics": ["Unit Testing with Jest & React Testing Library", "Web Vitals & Performance Optimization", "CI/CD Deployment to Vercel/Netlify", f"{target_role} System Design & Live Coding Prep"],
                     "duration": "2 weeks",
-                    "focus": "Optimize web application performance, implement test suites, and deploy to production."
+                    "focus": f"Optimize web application performance, implement test suites, and prepare for {target_role} interviews."
                 }
             ]
         }
     else:
         return {
-            "match_percentage": 68,
-            "current_skills": ["Core Software Development", "Version Control (Git)", "Database Fundamentals"],
-            "gap_skills": ["Enterprise System Design", "Container Orchestration (Docker/K8s)", "Cloud Infrastructure (AWS)"],
-            "career_gaps_summary": f"To transition effectively into a {target_role}, focus on moving from individual module development into scalable cloud architecture, production CI/CD pipelines, and microservices patterns.",
+            "match_percentage": 75,
+            "current_skills": ["Core Data Structures & Algorithms", "Version Control (Git)", "Database Management (SQL)", "Object-Oriented Programming"],
+            "gap_skills": ["Low-Level System Design", "High-Throughput Microservices", "Distributed Caching & Message Queues", "Cloud Infrastructure & CI/CD"],
+            "career_gaps_summary": f"To crack the {target_role} position, the candidate must expand from core algorithm problem solving into scalable system design, distributed systems architecture, caching strategies, and company-specific technical interview rounds for {target_role}.",
             "levels": [
                 {
                     "level": 1,
-                    "title": "Level 1: Core Programming & Computer Science Foundations",
-                    "topics": ["Object-Oriented Programming & Clean Code", "Data Structures & Algorithms", "Relational Database Schema Design (SQL)", "Git & Collaborative Workflow"],
+                    "title": f"Level 1: Advanced Algorithms & Data Structures for {target_role}",
+                    "topics": ["Advanced Graph Algorithms (Dijkstra, Topological Sort)", "Dynamic Programming & Memory Optimization", "Bit Manipulation & System Primitives", "Clean Code & Refactoring Principles"],
                     "duration": "2 weeks",
-                    "focus": "Strengthen core programming, data structures, and database principles."
+                    "focus": f"Master advanced algorithmic problem solving and coding efficiency required for {target_role} interviews."
                 },
                 {
                     "level": 2,
-                    "title": "Level 2: Web Frameworks, APIs & ORM",
-                    "topics": ["Backend Web Frameworks (Django / Node / Spring)", "RESTful API Specification & OpenAPI", "Database ORM & Query Optimization", "Authentication & Security (JWT, OAuth)"],
+                    "title": f"Level 2: Enterprise Backend, APIs & Database Tuning",
+                    "topics": ["RESTful & gRPC Microservice Standards", "Database Indexing, B-Trees & Query Optimization", "ORM Transaction Management & Concurrency", "API Security, OAuth2 & Rate Limiting"],
                     "duration": "3 weeks",
-                    "focus": "Develop scalable web services, API endpoints, and secure application backends."
+                    "focus": f"Build high-performance, secure backend services suited for {target_role} expectations."
                 },
                 {
                     "level": 3,
-                    "title": "Level 3: Distributed Systems & Caching",
-                    "topics": ["Microservices Architecture Patterns", "Caching & Message Queues (Redis/RabbitMQ)", "System Scalability & Load Balancing", "Asynchronous Job Processing"],
+                    "title": "Level 3: Distributed Systems & High-Availability Design",
+                    "topics": ["Distributed Caching (Redis/Memcached)", "Asynchronous Messaging & Event Streams (Kafka/RabbitMQ)", "Load Balancing & Horizontal Scaling", "Database Sharding & Replication"],
                     "duration": "3 weeks",
-                    "focus": "Learn to design highly available, decoupled, and fault-tolerant microservices."
+                    "focus": f"Architect resilient, high-throughput distributed systems for {target_role} scale."
                 },
                 {
                     "level": 4,
-                    "title": "Level 4: Cloud Infrastructure, DevOps & System Design",
-                    "topics": ["Containerization with Docker", "CI/CD Automation Pipelines (GitHub Actions)", "Cloud Services (AWS ECS/S3/RDS)", "System Design Mock Interviews"],
+                    "title": f"Level 4: System Design Drills & {target_role} Mock Interviews",
+                    "topics": [f"Company-Specific {target_role} System Design Mock", "Containerization & Cloud Deployment (Docker/AWS)", "CI/CD Pipeline Automation", "Behavioral & Leadership Principles"],
                     "duration": "2 weeks",
-                    "focus": "Deploy applications securely to production and master technical system design interviews."
+                    "focus": f"Perform comprehensive mock system design interviews and prepare for {target_role} hiring loops."
                 }
             ]
         }
