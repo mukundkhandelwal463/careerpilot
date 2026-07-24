@@ -82,7 +82,7 @@ jobs:
           script: |
             cd /home/ubuntu/careerpilot
             git pull origin main
-            cd client && npm run build && cd ..
+            cd client && NODE_OPTIONS=--max-old-space-size=512 npm run build && cd ..
             sudo systemctl restart careerpilot
             sudo systemctl restart nginx
             echo "✅ Deployment to AWS EC2 completed successfully!"
