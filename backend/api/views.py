@@ -2628,6 +2628,7 @@ def download_pdf_report_api(request):
             details = attempt.details if isinstance(attempt.details, dict) else {}
             grading = details.get("grading", {})
             test_data = details.get("test_data", {})
+            answers = details.get("answers", {})
             coding_questions = test_data.get("coding", [])
             coding_answers = details.get("coding_answers", {})
             coding_languages = details.get("coding_languages", {})
