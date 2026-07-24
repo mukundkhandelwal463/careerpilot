@@ -2366,51 +2366,59 @@ def download_pdf_report_api(request):
             gap = 4.0
 
             # Card 1: Score
+            x1 = 10.0
             pdf.set_fill_color(238, 242, 255)
             pdf.set_draw_color(199, 210, 254)
-            pdf.rect(10, cur_y, card_w, 22, 'FD')
-            pdf.set_xy(10, cur_y + 3)
+            pdf.rect(x1, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(x1, cur_y + 3)
             pdf.set_font("Helvetica", "B", 7.5)
             pdf.set_text_color(79, 70, 229)
-            pdf.cell(card_w, 4, "OVERALL SCORE", align='C', ln=True)
-            pdf.set_font("Helvetica", "B", 14)
-            pdf.cell(card_w, 10, f"{overall_score} / 100", align='C', ln=True)
+            pdf.cell(card_w, 4, "OVERALL SCORE", align='C')
+            pdf.set_xy(x1, cur_y + 10)
+            pdf.set_font("Helvetica", "B", 13)
+            pdf.cell(card_w, 8, f"{overall_score} / 100", align='C')
 
             # Card 2: Rating Tier
+            x2 = 10.0 + card_w + gap
             tier = "EXCELLENT" if overall_score >= 80 else ("VERY GOOD" if overall_score >= 60 else "NEEDS PRACTICE")
             pdf.set_fill_color(236, 253, 245)
             pdf.set_draw_color(167, 243, 208)
-            pdf.rect(10 + card_w + gap, cur_y, card_w, 22, 'FD')
-            pdf.set_xy(10 + card_w + gap, cur_y + 3)
+            pdf.rect(x2, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(x2, cur_y + 3)
             pdf.set_font("Helvetica", "B", 7.5)
             pdf.set_text_color(5, 150, 105)
-            pdf.cell(card_w, 4, "PERFORMANCE TIER", align='C', ln=True)
+            pdf.cell(card_w, 4, "PERFORMANCE TIER", align='C')
+            pdf.set_xy(x2, cur_y + 10)
             pdf.set_font("Helvetica", "B", 10)
-            pdf.cell(card_w, 10, tier, align='C', ln=True)
+            pdf.cell(card_w, 8, tier, align='C')
 
             # Card 3: Questions count
+            x3 = 10.0 + (card_w + gap)*2
             transcript_items = attempt.transcript if isinstance(attempt.transcript, list) else []
             pdf.set_fill_color(248, 250, 252)
             pdf.set_draw_color(226, 232, 240)
-            pdf.rect(10 + (card_w + gap)*2, cur_y, card_w, 22, 'FD')
-            pdf.set_xy(10 + (card_w + gap)*2, cur_y + 3)
+            pdf.rect(x3, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(x3, cur_y + 3)
             pdf.set_font("Helvetica", "B", 7.5)
             pdf.set_text_color(100, 116, 139)
-            pdf.cell(card_w, 4, "TOTAL QUESTIONS", align='C', ln=True)
-            pdf.set_font("Helvetica", "B", 13)
+            pdf.cell(card_w, 4, "TOTAL QUESTIONS", align='C')
+            pdf.set_xy(x3, cur_y + 10)
+            pdf.set_font("Helvetica", "B", 11)
             pdf.set_text_color(30, 41, 59)
-            pdf.cell(card_w, 10, f"{len(transcript_items)} Questions", align='C', ln=True)
+            pdf.cell(card_w, 8, f"{len(transcript_items)} Questions", align='C')
 
             # Card 4: Market Readiness
+            x4 = 10.0 + (card_w + gap)*3
             pdf.set_fill_color(254, 243, 199)
             pdf.set_draw_color(253, 230, 138)
-            pdf.rect(10 + (card_w + gap)*3, cur_y, card_w, 22, 'FD')
-            pdf.set_xy(10 + (card_w + gap)*3, cur_y + 3)
+            pdf.rect(x4, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(x4, cur_y + 3)
             pdf.set_font("Helvetica", "B", 7.5)
             pdf.set_text_color(180, 83, 9)
-            pdf.cell(card_w, 4, "JOB FIT STATUS", align='C', ln=True)
+            pdf.cell(card_w, 4, "JOB FIT STATUS", align='C')
+            pdf.set_xy(x4, cur_y + 10)
             pdf.set_font("Helvetica", "B", 9.5)
-            pdf.cell(card_w, 10, "MARKET READY", align='C', ln=True)
+            pdf.cell(card_w, 8, "MARKET READY", align='C')
 
             pdf.set_y(cur_y + 28)
 
@@ -2533,51 +2541,59 @@ def download_pdf_report_api(request):
             gap = 4.0
 
             # Card 1: Score
+            x1 = 10.0
             pdf.set_fill_color(236, 253, 245)
             pdf.set_draw_color(167, 243, 208)
-            pdf.rect(10, cur_y, card_w, 22, 'FD')
-            pdf.set_xy(10, cur_y + 3)
+            pdf.rect(x1, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(x1, cur_y + 3)
             pdf.set_font("Helvetica", "B", 7.5)
             pdf.set_text_color(5, 150, 105)
-            pdf.cell(card_w, 4, "TOTAL MARKS", align='C', ln=True)
+            pdf.cell(card_w, 4, "TOTAL MARKS", align='C')
+            pdf.set_xy(x1, cur_y + 10)
             pdf.set_font("Helvetica", "B", 13)
-            pdf.cell(card_w, 10, f"{total_marks} / {max_marks}", align='C', ln=True)
+            pdf.cell(card_w, 8, f"{total_marks} / {max_marks}", align='C')
 
             # Card 2: Percentage
+            x2 = 10.0 + card_w + gap
             pdf.set_fill_color(238, 242, 255)
             pdf.set_draw_color(199, 210, 254)
-            pdf.rect(10 + card_w + gap, cur_y, card_w, 22, 'FD')
-            pdf.set_xy(10 + card_w + gap, cur_y + 3)
+            pdf.rect(x2, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(x2, cur_y + 3)
             pdf.set_font("Helvetica", "B", 7.5)
             pdf.set_text_color(79, 70, 229)
-            pdf.cell(card_w, 4, "PERCENTAGE ACCURACY", align='C', ln=True)
+            pdf.cell(card_w, 4, "PERCENTAGE ACCURACY", align='C')
+            pdf.set_xy(x2, cur_y + 10)
             pdf.set_font("Helvetica", "B", 13)
-            pdf.cell(card_w, 10, f"{pct}% Match", align='C', ln=True)
+            pdf.cell(card_w, 8, f"{pct}% Match", align='C')
 
             # Card 3: MCQs Score
+            x3 = 10.0 + (card_w + gap)*2
             pdf.set_fill_color(248, 250, 252)
             pdf.set_draw_color(226, 232, 240)
-            pdf.rect(10 + (card_w + gap)*2, cur_y, card_w, 22, 'FD')
-            pdf.set_xy(10 + (card_w + gap)*2, cur_y + 3)
+            pdf.rect(x3, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(x3, cur_y + 3)
             pdf.set_font("Helvetica", "B", 7.5)
             pdf.set_text_color(100, 116, 139)
-            pdf.cell(card_w, 4, "MCQ MARKS (120 MAX)", align='C', ln=True)
+            pdf.cell(card_w, 4, "MCQ MARKS (120 MAX)", align='C')
             mcq_total = attempt.technical_score + attempt.verbal_score + attempt.aptitude_score
+            pdf.set_xy(x3, cur_y + 10)
             pdf.set_font("Helvetica", "B", 12)
             pdf.set_text_color(30, 41, 59)
-            pdf.cell(card_w, 10, f"{mcq_total} / 120.0", align='C', ln=True)
+            pdf.cell(card_w, 8, f"{mcq_total} / 120.0", align='C')
 
             # Card 4: Coding Score
+            x4 = 10.0 + (card_w + gap)*3
             pdf.set_fill_color(254, 243, 199)
             pdf.set_draw_color(253, 230, 138)
-            pdf.rect(10 + (card_w + gap)*3, cur_y, card_w, 22, 'FD')
-            pdf.set_xy(10 + (card_w + gap)*3, cur_y + 3)
+            pdf.rect(x4, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(x4, cur_y + 3)
             pdf.set_font("Helvetica", "B", 7.5)
             pdf.set_text_color(180, 83, 9)
-            pdf.cell(card_w, 4, "CODING MARKS (80 MAX)", align='C', ln=True)
+            pdf.cell(card_w, 4, "CODING MARKS (80 MAX)", align='C')
             coding_total = attempt.coding_easy_score + attempt.coding_hard_score
+            pdf.set_xy(x4, cur_y + 10)
             pdf.set_font("Helvetica", "B", 12)
-            pdf.cell(card_w, 10, f"{coding_total} / 80.0", align='C', ln=True)
+            pdf.cell(card_w, 8, f"{coding_total} / 80.0", align='C')
 
             pdf.set_y(cur_y + 28)
 
