@@ -74,7 +74,11 @@ const Login = () => {
         try {
           window.google.accounts.id.initialize({
             client_id: clientId,
-            callback: handleGoogleCredentialResponse
+            callback: handleGoogleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true,
+            ux_mode: 'popup',
+            context: 'use'
           });
 
           if (mode !== 'otp') {
