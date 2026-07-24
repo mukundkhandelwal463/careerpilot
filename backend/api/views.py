@@ -2640,25 +2640,34 @@ def download_pdf_report_api(request):
                 code_easy = coding_answers.get(str(q_easy.get("id")), "")
                 grade_info = grading.get("coding_easy", {})
 
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "B", 10)
                 pdf.set_text_color(79, 70, 229)
                 pdf.multi_cell(190, 5, f"Problem: {q_easy.get('title', '')}".encode('latin-1', 'replace').decode('latin-1'))
+                
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "", 8.5)
                 pdf.set_text_color(71, 85, 105)
                 pdf.multi_cell(190, 4, q_easy.get('description', '')[:300].encode('latin-1', 'replace').decode('latin-1'))
                 pdf.ln(2)
 
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "B", 8.5)
                 pdf.set_text_color(51, 65, 85)
                 pdf.cell(190, 5, f"Your Code Solution ({str(lang_easy).upper()}):", ln=True)
+                
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "", 8)
                 code_easy_cleaned = (code_easy or "# No code submitted").encode('latin-1', 'replace').decode('latin-1')
                 pdf.multi_cell(190, 4, code_easy_cleaned[:400], border=1)
                 pdf.ln(2)
 
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "B", 9)
                 pdf.set_text_color(16, 185, 129)
                 pdf.cell(190, 5, f"Marks Awarded: {grade_info.get('score', 0.0)} / 30.0", ln=True)
+                
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "", 8.5)
                 pdf.set_text_color(51, 65, 85)
                 fb_cleaned = grade_info.get('feedback', '').encode('latin-1', 'replace').decode('latin-1')
@@ -2673,25 +2682,34 @@ def download_pdf_report_api(request):
                 code_hard = coding_answers.get(str(q_hard.get("id")), "")
                 grade_info_hard = grading.get("coding_hard", {})
 
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "B", 10)
                 pdf.set_text_color(79, 70, 229)
                 pdf.multi_cell(190, 5, f"Problem: {q_hard.get('title', '')}".encode('latin-1', 'replace').decode('latin-1'))
+                
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "", 8.5)
                 pdf.set_text_color(71, 85, 105)
                 pdf.multi_cell(190, 4, q_hard.get('description', '')[:300].encode('latin-1', 'replace').decode('latin-1'))
                 pdf.ln(2)
 
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "B", 8.5)
                 pdf.set_text_color(51, 65, 85)
                 pdf.cell(190, 5, f"Your Code Solution ({str(lang_hard).upper()}):", ln=True)
+                
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "", 8)
                 code_hard_cleaned = (code_hard or "# No code submitted").encode('latin-1', 'replace').decode('latin-1')
                 pdf.multi_cell(190, 4, code_hard_cleaned[:400], border=1)
                 pdf.ln(2)
 
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "B", 9)
                 pdf.set_text_color(16, 185, 129)
                 pdf.cell(190, 5, f"Marks Awarded: {grade_info_hard.get('score', 0.0)} / 50.0", ln=True)
+                
+                pdf.set_x(10)
                 pdf.set_font("Helvetica", "", 8.5)
                 pdf.set_text_color(51, 65, 85)
                 fb_hard_cleaned = grade_info_hard.get('feedback', '').encode('latin-1', 'replace').decode('latin-1')
