@@ -4847,28 +4847,33 @@ const Preparation = () => {
                                     <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#334155', lineHeight: 1.5 }}>
                                       {interview.feedback || "Good performance! Review individual question evaluations below for detailed suggestions."}
                                     </p>
-                                  </div>
-                                </div>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                                  <strong style={{ fontSize: '0.9rem', color: '#1e293b' }}>Detailed Q&A Transcript ({interview.transcript?.length || 0} Questions):</strong>
-                                  {(interview.transcript || []).map((tr, idx) => (
-                                    <div key={tr.id || idx} style={{ background: '#f8fafc', border: '1px solid #f1f5f9', borderRadius: '12px', padding: '16px' }}>
-                                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.82rem', fontWeight: 700 }}>
-                                        <span style={{ color: '#4f46e5' }}>Q{idx + 1}: {tr.question}</span>
-                                        <span style={{ color: '#059669' }}>Grade: {tr.score}/100</span>
-                                      </div>
-                                      <div style={{ fontSize: '0.82rem', color: '#334155', marginBottom: '8px' }}>
-                                        <strong>Your Answer:</strong> {tr.userAnswer}
-                                      </div>
-                                      {tr.feedback && (
-                                        <div style={{ fontSize: '0.78rem', color: '#475569', borderLeft: '3px solid #cbd5e1', paddingLeft: '8px' }}>
-                                          {tr.feedback.strengths && <div><strong>Strengths:</strong> {tr.feedback.strengths.join(', ')}</div>}
-                                          {tr.feedback.improvements && <div style={{ marginTop: '2px' }}><strong>Improvements:</strong> {tr.feedback.improvements.join(', ')}</div>}
+                                <div>
+                                  <strong style={{ fontSize: '0.9rem', color: '#1e293b', display: 'block', marginBottom: '10px' }}>
+                                    Detailed Q&A Transcript ({interview.transcript?.length || 0} Questions):
+                                  </strong>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '380px', overflowY: 'auto', paddingRight: '6px' }}>
+                                    {(interview.transcript || []).map((tr, idx) => (
+                                      <div key={tr.id || idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.82rem', fontWeight: 700 }}>
+                                          <span style={{ color: '#4f46e5' }}>Q{idx + 1}: {tr.question}</span>
+                                          <span style={{ color: '#059669', minWidth: '70px', textAlign: 'right' }}>Grade: {tr.score}/100</span>
                                         </div>
-                                      )}
-                                    </div>
-                                  ))}
+                                        <div style={{ fontSize: '0.82rem', color: '#334155', marginBottom: '8px', lineHeight: 1.5 }}>
+                                          <strong>Your Answer:</strong> {tr.userAnswer}
+                                        </div>
+                                        {tr.feedback && (
+                                          <div style={{ fontSize: '0.78rem', color: '#475569', borderLeft: '3px solid #cbd5e1', paddingLeft: '8px', lineHeight: 1.4 }}>
+                                            {tr.feedback.strengths && (
+                                              <div><strong>Strengths:</strong> {Array.isArray(tr.feedback.strengths) ? tr.feedback.strengths.join(', ') : tr.feedback.strengths}</div>
+                                            )}
+                                            {tr.feedback.improvements && (
+                                              <div style={{ marginTop: '2px' }}><strong>Improvements:</strong> {Array.isArray(tr.feedback.improvements) ? tr.feedback.improvements.join(', ') : tr.feedback.improvements}</div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               </div>
                             ))}

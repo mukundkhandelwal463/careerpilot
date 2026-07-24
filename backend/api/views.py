@@ -2568,11 +2568,17 @@ def download_pdf_report_api(request):
                 pdf.multi_cell(0, 5, feedback_hard_cleaned)
                 pdf.ln(8)
 
-        pdf_bytes = pdf.output()
-        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        import io
+        from django.http import FileResponse
+
+        pdf_bytes = bytes(pdf.output())
         filename_prefix = "Mock_Test" if report_type == "test" else "Mock_Interview"
-        response['Content-Disposition'] = f'attachment; filename="{filename_prefix}_Report_{attempt_id}.pdf"'
-        return response
+        return FileResponse(
+            io.BytesIO(pdf_bytes),
+            as_attachment=True,
+            filename=f"{filename_prefix}_Report_{attempt_id}.pdf",
+            content_type='application/pdf'
+        )
 
     except Exception as e:
         import traceback
@@ -2806,15 +2812,16 @@ def download_complete_report_api(request):
             draw_progress_bar(85, cur_y, 105, 4, pct_val, color_rgb)
             pdf.ln(6.5)
 
-        pdf_output = pdf.output(dest='S')
-        if isinstance(pdf_output, str):
-            pdf_bytes = pdf_output.encode('latin1')
-        else:
-            pdf_bytes = bytes(pdf_output)
+        import io
+        from django.http import FileResponse
 
-        response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="CareerPilot_Complete_Evaluation_Report.pdf"'
-        return response
+        pdf_bytes = bytes(pdf.output())
+        return FileResponse(
+            io.BytesIO(pdf_bytes),
+            as_attachment=True,
+            filename="CareerPilot_Complete_Evaluation_Report.pdf",
+            content_type='application/pdf'
+        )
 
     except Exception as e:
         import traceback
