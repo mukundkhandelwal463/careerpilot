@@ -252,6 +252,256 @@ export const questionBankData = [
     answer: "Kruskal's Algorithm",
     explanation: "Kruskal's sorting-based edge choice constructs the Minimum Spanning Tree using a transient-set (Union-Find) data structure."
   },
+  {
+    id: "dsa_26",
+    conceptId: "Recursion",
+    subject: "dsa",
+    type: "theoretical",
+    question: "What is the primary cause of a StackOverflowError in recursive function calls?",
+    options: ["Base case missing or never reached", "Too many local variables in main", "Heap memory limit exceeded", "Infinite loop in iteration"],
+    answer: "Base case missing or never reached",
+    explanation: "Without a valid base case or termination condition, recursive calls build up stack frames infinitely until call stack memory is exhausted."
+  },
+  {
+    id: "dsa_27",
+    conceptId: "Recursion",
+    subject: "dsa",
+    type: "theoretical",
+    question: "What is tail recursion?",
+    options: ["Recursion returning multiple values", "Recursion where the recursive call is the final operation in the function", "Recursion with two base cases", "Recursion using a loop internally"],
+    answer: "Recursion where the recursive call is the final operation in the function",
+    explanation: "In tail recursion, the recursive call is the last statement executed, allowing compiler tail-call optimization to reuse stack frames."
+  },
+  {
+    id: "dsa_28",
+    conceptId: "Two Pointers",
+    subject: "dsa",
+    type: "numerical",
+    question: "In a sorted array of size N, what is the optimal time complexity to find two elements that sum to a target value using Two Pointers?",
+    options: ["O(N^2)", "O(N log N)", "O(N)", "O(1)"],
+    answer: "O(N)",
+    explanation: "Placing one pointer at the start and one at the end allows shrinking the candidate search space in a single O(N) pass."
+  },
+  {
+    id: "dsa_29",
+    conceptId: "Two Pointers",
+    subject: "dsa",
+    type: "theoretical",
+    question: "Floyd's Cycle Finding algorithm (Tortoise and Hare) uses two pointers to detect cycles in a linked list. What is its auxiliary space complexity?",
+    options: ["O(N)", "O(1)", "O(log N)", "O(N^2)"],
+    answer: "O(1)",
+    explanation: "Floyd's algorithm uses two pointer variables (slow and fast) without allocating additional memory arrays, maintaining O(1) space."
+  },
+  {
+    id: "dsa_30",
+    conceptId: "Sliding Window",
+    subject: "dsa",
+    type: "theoretical",
+    question: "What is the main advantage of the Sliding Window technique over brute-force nested loops for subarray problems?",
+    options: ["Reduces time complexity from O(N^2) to O(N)", "Reduces space complexity to O(2^N)", "Maintains array sorting", "Eliminates recursion"],
+    answer: "Reduces time complexity from O(N^2) to O(N)",
+    explanation: "Sliding window updates window metrics incrementally by adding new elements and dropping old elements in O(N) time."
+  },
+  {
+    id: "dsa_31",
+    conceptId: "Sliding Window",
+    subject: "dsa",
+    type: "theoretical",
+    question: "Which data structure maintains the maximum element of a sliding window of size K in O(1) amortized time per step?",
+    options: ["Stack", "Monotonic Deque", "Binary Search Tree", "Hash Map"],
+    answer: "Monotonic Deque",
+    explanation: "A double-ended queue (deque) kept in monotonic decreasing order allows retrieving window maximums in O(1) time."
+  },
+  {
+    id: "dsa_32",
+    conceptId: "Binary Search",
+    subject: "dsa",
+    type: "numerical",
+    question: "What is the time complexity of finding a target element in a sorted array of size N using Binary Search?",
+    options: ["O(1)", "O(log N)", "O(N)", "O(N log N)"],
+    answer: "O(log N)",
+    explanation: "Binary Search divides the remaining search interval in half at each step, yielding O(log N) logarithmic time complexity."
+  },
+  {
+    id: "dsa_33",
+    conceptId: "Binary Search",
+    subject: "dsa",
+    type: "theoretical",
+    question: "Which formula calculates the middle index in Binary Search while preventing integer overflow when low + high > Integer.MAX_VALUE?",
+    options: ["mid = (low + high) / 2", "mid = low + (high - low) / 2", "mid = high - (low + high) / 2", "mid = (low * high) / 2"],
+    answer: "mid = low + (high - low) / 2",
+    explanation: "Subtracting low from high avoids summing two large positive integers that could exceed standard 32-bit signed integer limits."
+  },
+  {
+    id: "dsa_34",
+    conceptId: "Matrix / Grid",
+    subject: "dsa",
+    type: "theoretical",
+    question: "How can an N x N 2D matrix be rotated 90 degrees clockwise in-place?",
+    options: ["Transpose the matrix, then reverse each row", "Reverse each row, then reverse each column", "Transpose the matrix, then reverse each column", "Rotate matrix corners recursively"],
+    answer: "Transpose the matrix, then reverse each row",
+    explanation: "Transposing matrix[i][j] into matrix[j][i] followed by reversing each row achieves a 90-degree clockwise rotation in-place."
+  },
+  {
+    id: "dsa_35",
+    conceptId: "Matrix / Grid",
+    subject: "dsa",
+    type: "numerical",
+    question: "What is the time complexity of exploring all cells in an M x N grid using BFS or DFS traversal?",
+    options: ["O(M + N)", "O(M * N)", "O(2^(M+N))", "O(M^2 * N^2)"],
+    answer: "O(M * N)",
+    explanation: "Both BFS and DFS visit each cell in the M x N grid at most once, running in O(M * N) total time."
+  },
+  {
+    id: "dsa_36",
+    conceptId: "Tries",
+    subject: "dsa",
+    type: "numerical",
+    question: "What is the time complexity to search for a word of length L in a Trie containing N stored words?",
+    options: ["O(N)", "O(L)", "O(N * L)", "O(log N)"],
+    answer: "O(L)",
+    explanation: "Trie search traverses one character node per step, taking time proportional only to the target word length L, independent of N."
+  },
+  {
+    id: "dsa_37",
+    conceptId: "Tries",
+    subject: "dsa",
+    type: "theoretical",
+    question: "What is the primary use-case of a Trie (Prefix Tree) data structure?",
+    options: ["Sorting numerical arrays", "Fast prefix matching and autocomplete search", "Finding shortest path in weighted graphs", "Calculating range sums"],
+    answer: "Fast prefix matching and autocomplete search",
+    explanation: "Tries share node paths for common prefixes, enabling prefix lookups and autocomplete suggestions in O(L) time."
+  },
+  {
+    id: "dsa_38",
+    conceptId: "Backtracking",
+    subject: "dsa",
+    type: "theoretical",
+    question: "How does Backtracking differ from pure Depth First Search (DFS)?",
+    options: ["Backtracking uses BFS internally", "Backtracking undoes choices (pruning/reverting state) when a path fails to meet constraints", "Backtracking only works on binary trees", "Backtracking runs in O(1) space"],
+    answer: "Backtracking undoes choices (pruning/reverting state) when a path fails to meet constraints",
+    explanation: "Backtracking builds solution candidates incrementally and abandons (prunes/reverts) a branch as soon as constraints are violated."
+  },
+  {
+    id: "dsa_39",
+    conceptId: "Backtracking",
+    subject: "dsa",
+    type: "numerical",
+    question: "What is the time complexity of generating all permutations of an array of N distinct elements?",
+    options: ["O(N^2)", "O(2^N)", "O(N!)", "O(N log N)"],
+    answer: "O(N!)",
+    explanation: "There are N! distinct permutations for N distinct items, requiring O(N!) work to generate all possibilities."
+  },
+  {
+    id: "dsa_40",
+    conceptId: "Greedy",
+    subject: "dsa",
+    type: "theoretical",
+    question: "In the Activity Selection Problem, which greedy choice yields the optimal number of non-overlapping activities?",
+    options: ["Select activity with shortest duration", "Select activity with earliest finish time", "Select activity with earliest start time", "Select activity with maximum profit"],
+    answer: "Select activity with earliest finish time",
+    explanation: "Choosing the activity with the earliest finish time leaves the maximum remaining time for subsequent activities."
+  },
+  {
+    id: "dsa_41",
+    conceptId: "Greedy",
+    subject: "dsa",
+    type: "theoretical",
+    question: "Why does a Greedy algorithm fail to solve the 0/1 Knapsack Problem optimally?",
+    options: ["Items cannot be divided into fractional parts", "Greedy algorithms require sorted inputs", "Knapsack problems have negative weights", "0/1 Knapsack requires recursion"],
+    answer: "Items cannot be divided into fractional parts",
+    explanation: "0/1 Knapsack does not allow taking fractional items, so greedy ratio choices can leave unused capacity that defeats global optimality."
+  },
+  {
+    id: "dsa_42",
+    conceptId: "Intervals",
+    subject: "dsa",
+    type: "theoretical",
+    question: "To merge overlapping intervals efficiently in O(N log N) time, how should intervals be pre-sorted first?",
+    options: ["By interval duration", "By interval start time", "By interval end time descending", "No pre-sorting needed"],
+    answer: "By interval start time",
+    explanation: "Sorting intervals by start time guarantees that adjacent overlapping intervals can be merged in a single linear pass."
+  },
+  {
+    id: "dsa_43",
+    conceptId: "Intervals",
+    subject: "dsa",
+    type: "theoretical",
+    question: "Two closed intervals A [a_start, a_end] and B [b_start, b_end] overlap if and only if:",
+    options: ["a_start == b_start", "a_start <= b_end AND b_start <= a_end", "a_end > b_end", "a_start > b_start"],
+    answer: "a_start <= b_end AND b_start <= a_end",
+    explanation: "Two intervals overlap whenever each interval starts before or at the finish of the other interval."
+  },
+  {
+    id: "dsa_44",
+    conceptId: "Advanced Graphs",
+    subject: "dsa",
+    type: "theoretical",
+    question: "Why does Dijkstra's algorithm fail on graphs containing negative edge weights?",
+    options: ["It causes stack overflow", "It greedily locks shortest distances once a node is visited and cannot update them later", "It fails to traverse directed graphs", "It runs in O(V^3) time"],
+    answer: "It greedily locks shortest distances once a node is visited and cannot update them later",
+    explanation: "Dijkstra assumes paths grow monotonically. Negative edge weights can shorten previously finalized distances, violating Dijkstra's greedy choice."
+  },
+  {
+    id: "dsa_45",
+    conceptId: "Bit Manipulation",
+    subject: "dsa",
+    type: "theoretical",
+    question: "What does the bitwise operation `n & (n - 1)` accomplish on a positive integer n?",
+    options: ["Multiplies n by 2", "Flips all bits of n", "Clears (unsets) the lowest set bit of n", "Checks if n is odd"],
+    answer: "Clears (unsets) the lowest set bit of n",
+    explanation: "Subtracting 1 flips all bits up to the rightmost 1-bit. Performing bitwise AND with n zeroes out that lowest set bit."
+  },
+  {
+    id: "dsa_46",
+    conceptId: "Bit Manipulation",
+    subject: "dsa",
+    type: "numerical",
+    question: "How do you check if a positive integer n is a power of 2 using bitwise operations?",
+    options: ["(n & 1) == 0", "(n & (n - 1)) == 0", "(n | (n - 1)) == 0", "(n ^ (n - 1)) == 0"],
+    answer: "(n & (n - 1)) == 0",
+    explanation: "A power of 2 has exactly one set bit in binary. Clearing that single bit using n & (n - 1) produces 0."
+  },
+  {
+    id: "dsa_47",
+    conceptId: "Math & Geometry",
+    subject: "dsa",
+    type: "numerical",
+    question: "What is the time complexity of computing the Greatest Common Divisor (GCD) using the Euclidean algorithm?",
+    options: ["O(a * b)", "O(log(min(a, b)))", "O(a + b)", "O(1)"],
+    answer: "O(log(min(a, b)))",
+    explanation: "The Euclidean algorithm reduces input values by at least half every two iterations, running in logarithmic time."
+  },
+  {
+    id: "dsa_48",
+    conceptId: "2-D DP",
+    subject: "dsa",
+    type: "numerical",
+    question: "What is the time complexity to find the Longest Common Subsequence (LCS) of two strings of length M and N using 2-D Dynamic Programming?",
+    options: ["O(M + N)", "O(M * N)", "O(2^(M+N))", "O(M^2 + N^2)"],
+    answer: "O(M * N)",
+    explanation: "Filling a 2D table of dimensions (M+1) x (N+1) using O(1) state transitions takes O(M * N) total time."
+  },
+  {
+    id: "dsa_49",
+    conceptId: "Design",
+    subject: "dsa",
+    type: "theoretical",
+    question: "Which pair of data structures achieves O(1) get and O(1) put operations in an LRU (Least Recently Used) Cache?",
+    options: ["Array and Stack", "HashMap and Doubly Linked List", "Binary Search Tree and Queue", "Priority Queue and Array"],
+    answer: "HashMap and Doubly Linked List",
+    explanation: "HashMap provides O(1) key-to-node lookups, while a Doubly Linked List provides O(1) node removal and insertion for recency tracking."
+  },
+  {
+    id: "dsa_50",
+    conceptId: "Advanced Data Structures",
+    subject: "dsa",
+    type: "theoretical",
+    question: "What is the time complexity of range sum query and point update in a Fenwick Tree (Binary Indexed Tree)?",
+    options: ["O(1) query, O(N) update", "O(log N) query, O(log N) update", "O(N) query, O(1) update", "O(N log N) query, O(N) update"],
+    answer: "O(log N) query, O(log N) update",
+    explanation: "A Fenwick Tree / BIT performs both point updates and prefix sum queries in O(log N) time using binary LSB index shifts."
+  },
 
   // ==========================================
   // OBJECT-ORIENTED PROGRAMMING (25 Questions)
