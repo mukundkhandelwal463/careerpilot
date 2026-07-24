@@ -1214,18 +1214,48 @@ Resume Text:
     return selected
 
 
+def is_invalid_or_gibberish_response(text):
+    text = (text or "").strip().lower()
+    if len(text) < 4:
+        return True
+
+    words = [w.strip(".,!?\"'") for w in text.split() if w.strip(".,!?\"'")]
+    if not words:
+        return True
+
+    # Common keyboard mashing / home-row patterns
+    mash_patterns = ['asdf', 'sdfg', 'dfgh', 'fghj', 'ghjk', 'hjkl', 'qwert', 'werty', 'zxcv', 'xcvb', 'cvbn', 'vbnm', 'rdctf', 'tfvgb', 'fgybh', 'bhunj', 'hunji', 'unjim', 'sdrf', 'erdt']
+    if any(p in text for p in mash_patterns):
+        return True
+
+    import re
+    # 4 or more consecutive consonants (e.g. 'serdctfvgybhunjim', 'rdctf')
+    for w in words:
+        if re.search(r'[bcdfghjklmnpqrstvwxyz]{4,}', w):
+            return True
+
+    # Single long word over 9 chars with no tech keyword
+    tech_keywords = {'python', 'javascript', 'react', 'django', 'java', 'sql', 'docker', 'aws', 'html', 'css', 'api', 'backend', 'frontend', 'git', 'node', 'database', 'rest', 'linux', 'cloud', 'security', 'work', 'experience', 'project', 'team'}
+    if len(words) == 1 and len(words[0]) > 9 and words[0] not in tech_keywords:
+        return True
+
+    # Low word count with zero recognized words
+    vowels = sum(1 for c in text if c in 'aeiou')
+    if len(words) < 3 and (vowels / max(len(text), 1)) < 0.20:
+        return True
+
+    return False
+
+
 def grade_interview_response(question, response):
     text = (response or "").strip()
 
-    # Detect gibberish or non-answer (e.g. random letters like 'zsdrfgthyjk')
-    vowels = sum(1 for c in text.lower() if c in 'aeiou')
-    word_count = len(text.split())
-    
-    if len(text) < 4 or (word_count <= 2 and vowels == 0) or (len(text) > 5 and vowels / max(len(text), 1) < 0.1):
+    # Detect gibberish, keyboard mashing, or non-answer (e.g. 'serdctfvgybhunjim', 'zsdrfgthyjk')
+    if is_invalid_or_gibberish_response(text):
         return {
-            "score": 10,
-            "strengths": ["Spoken/typed audio input received"],
-            "improvements": ["Please provide a meaningful, structured response with clear technical details."]
+            "score": 0,
+            "strengths": ["None (Unrecognized / Invalid Response)"],
+            "improvements": ["Answer was invalid or contained keyboard mashing. Please answer clearly using complete, meaningful sentences."]
         }
 
     prompt = f"""An interview candidate was asked the following question:
@@ -1234,7 +1264,9 @@ def grade_interview_response(question, response):
 Their spoken/recognized response was:
 '{text}'
 
-Evaluate this response objectively based on technical correctness, completeness, and clarity.
+Evaluate this response objectively based on technical correctness, completeness, and relevance to the question.
+CRITICAL INSTRUCTION: If the candidate response is keyboard mashing, random letters, or completely irrelevant nonsense, assign a score of 0.
+
 Provide:
 1. A numerical score from 0 to 100.
 2. A short list of strengths (1-2 bullet points).
@@ -1254,17 +1286,18 @@ Return a valid JSON object with keys: 'score' (integer 0-100), 'strengths' (arra
         print(f"Error grading response via Gemini: {e}")
 
     # Dynamic fallback score based on candidate answer depth
-    if word_count < 6:
-        dynamic_score = 35
-        strengths = ["Brief response provided"]
+    word_count = len(text.split())
+    if word_count < 4:
+        dynamic_score = 0
+        strengths = ["None"]
         improvements = ["Elaborate with specific technical examples and reasoning"]
-    elif word_count < 20:
-        dynamic_score = 65
-        strengths = ["Clear candidate response addressing the prompt"]
-        improvements = ["Include deeper system architecture trade-offs or tools used"]
+    elif word_count < 15:
+        dynamic_score = 45
+        strengths = ["Brief response addressing prompt"]
+        improvements = ["Include deeper system architecture details or tools used"]
     else:
-        dynamic_score = 82
-        strengths = ["Comprehensive answer with detailed explanation"]
+        dynamic_score = 80
+        strengths = ["Detailed response addressing the question"]
         improvements = ["Quantify measurable impacts and metric outcomes"]
 
     return {
