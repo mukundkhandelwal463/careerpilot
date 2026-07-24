@@ -3152,14 +3152,7 @@ def export_user_data_api(request):
         # 2. Resumes
         resumes_list = []
         for r in Resume.objects.filter(user=user).order_by('-created_at'):
-            resumes_list.append({
-                "id": r.id,
-                "title": r.title,
-                "category": r.category,
-                "ats_score": r.ats_score,
-                "created_at": r.created_at.isoformat() if r.created_at else None,
-                "analysis": r.analysis
-            })
+            resumes_list.append(r.to_dict())
 
         # 3. Mock Interviews
         interviews_list = []
@@ -3259,14 +3252,7 @@ def export_all_users_data_admin_api(request):
             # Resumes
             user_resumes = []
             for r in Resume.objects.filter(user=u).order_by('-created_at'):
-                user_resumes.append({
-                    "id": r.id,
-                    "title": r.title,
-                    "category": r.category,
-                    "ats_score": r.ats_score,
-                    "created_at": r.created_at.isoformat() if r.created_at else None,
-                    "analysis": r.analysis
-                })
+                user_resumes.append(r.to_dict())
 
             # Mock Interviews
             user_interviews = []
