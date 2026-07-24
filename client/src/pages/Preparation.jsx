@@ -4847,6 +4847,9 @@ const Preparation = () => {
                                     <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#334155', lineHeight: 1.5 }}>
                                       {interview.feedback || "Good performance! Review individual question evaluations below for detailed suggestions."}
                                     </p>
+                                  </div>
+                                </div>
+
                                 <div>
                                   <strong style={{ fontSize: '0.9rem', color: '#1e293b', display: 'block', marginBottom: '10px' }}>
                                     Detailed Q&A Transcript ({interview.transcript?.length || 0} Questions):
