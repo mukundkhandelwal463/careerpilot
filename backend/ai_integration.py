@@ -1326,7 +1326,7 @@ Return a valid JSON object with keys: 'score' (integer 0-100), 'strengths' (arra
 def generate_career_roadmap(resume_text, target_role, job_description=""):
     jd_clause = f"\nTarget Job Description to crack:\n{job_description}" if job_description else ""
     prompt = f"""You are a top-tier AI career counselor and technical roadmap designer.
-Analyze the candidate's resume and target role to perform an in-depth Career Gap & Skill Analysis and build a step-by-step learning roadmap.
+Analyze the candidate's resume and target role to perform an in-depth Career Gap & Skill Analysis and build a step-by-step personalized learning roadmap.
 
 Candidate Resume Text:
 {_clip_text(resume_text, max_chars=4000)}
@@ -1334,7 +1334,12 @@ Candidate Resume Text:
 Target Role to Achieve:
 {target_role}{jd_clause}
 
-Analyze their background, calculate their skill match percentage, identify their career skill gaps, and outline a complete 4-level study roadmap.
+CRITICAL ROADMAP CONSTRUCTION INSTRUCTIONS:
+The 4-level roadmap MUST be specifically tailored to the requested target role ({target_role}) and MUST start from absolute role-specific foundations in Level 1:
+- Level 1 MUST focus on foundational languages, core math, or primary tools required for {target_role} (e.g. for DS/ML: Python programming, Linear Algebra, Probability, NumPy & Pandas; for Frontend: HTML5, CSS, Modern JS ES6+; for Mobile: Swift/Kotlin basics).
+- Level 2 MUST focus on primary frameworks, libraries, and core domain concepts for {target_role} (e.g. for DS/ML: Exploratory Data Analysis, Scikit-Learn, Feature Engineering, Supervised/Unsupervised ML; for Frontend: React, State Management, Hooks).
+- Level 3 MUST focus on advanced specialization, deep learning/architecture, and complex projects for {target_role} (e.g. for DS/ML: Deep Learning with PyTorch/TensorFlow, Computer Vision/NLP, Hyperparameter Tuning).
+- Level 4 MUST focus on production deployment, MLOps/DevOps, portfolio capstones, and interview preparation for {target_role} (e.g. for DS/ML: Model Deployment with FastAPI & Docker, Model Monitoring, MLOps, ML System Design).
 
 Return a STRICT valid JSON object with EXACT keys:
 - 'match_percentage': integer (0 to 100)
@@ -1372,43 +1377,119 @@ JSON Roadmap:"""
     except Exception as exc:
         print(f"DeepSeek direct fallback error: {exc}")
 
-    return {
-        "match_percentage": 68,
-        "current_skills": ["Core Software Development", "Version Control (Git)", "Database Fundamentals"],
-        "gap_skills": ["Enterprise System Design", "Container Orchestration (Docker/K8s)", "Cloud Infrastructure (AWS)"],
-        "career_gaps_summary": f"To transition effectively into a {target_role}, focus on moving from individual module development into scalable cloud architecture, production CI/CD pipelines, and microservices patterns.",
-        "levels": [
-            {
-                "level": 1,
-                "title": "Level 1: Specialization & Core Foundations",
-                "topics": ["Advanced Language Constructs", "Relational & NoSQL Schema Design", "RESTful API Best Practices"],
-                "duration": "2 weeks",
-                "focus": "Strengthen domain-specific developer foundations."
-            },
-            {
-                "level": 2,
-                "title": "Level 2: Distributed Systems & Caching",
-                "topics": ["Microservices Architecture Patterns", "Caching & Message Queues (Redis/RabbitMQ)", "Query Profiling & Indexing"],
-                "duration": "3 weeks",
-                "focus": "Learn to design highly available and decoupled services."
-            },
-            {
-                "level": 3,
-                "title": "Level 3: Cloud & Production Mastery",
-                "topics": ["CI/CD Automation (GitHub Actions)", "Docker Image Optimization", "AWS Deployment & Cloud Monitoring"],
-                "duration": "3 weeks",
-                "focus": "Master production deployment, cloud infrastructure, and DevOps pipelines."
-            },
-            {
-                "level": 4,
-                "title": "Level 4: Interview & Capstone Readiness",
-                "topics": ["System Design Mock Interview Drills", "Capstone Portfolio Project Refinement", "Leadership & Architecture Communication"],
-                "duration": "2 weeks",
-                "focus": "Prepare for technical system design interviews and senior candidate presentation."
-            }
-        ]
-    }
-
+    # Role-based fallback generator
+    role_lower = str(target_role).lower()
+    if any(k in role_lower for k in ['data', 'ds', 'ml', 'machine learning', 'ai', 'python', 'science', 'analytic']):
+        return {
+            "match_percentage": 70,
+            "current_skills": ["Python Fundamentals", "Basic Data Analysis", "SQL Basics"],
+            "gap_skills": ["NumPy & Pandas Data Manipulation", "Scikit-Learn Machine Learning", "Deep Learning (PyTorch/TensorFlow)", "Model Deployment & MLOps"],
+            "career_gaps_summary": f"To transition into a {target_role}, the candidate should build from Python & math foundations into exploratory data analysis, machine learning algorithms, deep learning, and production model deployment.",
+            "levels": [
+                {
+                    "level": 1,
+                    "title": "Level 1: Python Programming, Math & Data Foundations",
+                    "topics": ["Python 3 Object-Oriented Programming", "Linear Algebra & Vector Operations", "Probability Distributions & Statistics", "NumPy Array Operations", "Pandas DataFrames & Data Cleaning"],
+                    "duration": "3 weeks",
+                    "focus": "Master Python programming and foundational mathematical/statistical concepts for Data Science."
+                },
+                {
+                    "level": 2,
+                    "title": "Level 2: Exploratory Data Analysis & Machine Learning",
+                    "topics": ["Data Visualization (Matplotlib & Seaborn)", "Feature Engineering & Scaling", "Supervised Learning (Regression & Classification)", "Unsupervised Learning (K-Means & PCA)", "Model Evaluation Metrics (ROC-AUC, F1)"],
+                    "duration": "3 weeks",
+                    "focus": "Perform exploratory data analysis and train classic Scikit-Learn machine learning models."
+                },
+                {
+                    "level": 3,
+                    "title": "Level 3: Deep Learning & Advanced Model Tuning",
+                    "topics": ["Neural Network Architectures (ANNs/CNNs)", "PyTorch / TensorFlow Frameworks", "Hyperparameter Tuning & Cross-Validation", "Natural Language Processing (NLP) Basics", "Computer Vision Fundamentals"],
+                    "duration": "3 weeks",
+                    "focus": "Build and optimize deep learning models for complex unstructured data."
+                },
+                {
+                    "level": 4,
+                    "title": "Level 4: Model Deployment, MLOps & Capstone",
+                    "topics": ["Model Serialization (Joblib/ONNX)", "REST API Model Serving with FastAPI", "Containerizing ML Applications (Docker)", "MLOps Pipelines & Model Monitoring", "DS/ML Technical System Design Mock"],
+                    "duration": "2 weeks",
+                    "focus": "Deploy machine learning models into production and prepare for technical AI/ML interviews."
+                }
+            ]
+        }
+    elif any(k in role_lower for k in ['frontend', 'react', 'ui', 'web', 'javascript', 'js']):
+        return {
+            "match_percentage": 72,
+            "current_skills": ["HTML/CSS Basics", "JavaScript Syntax", "Web Browsers"],
+            "gap_skills": ["Modern ES6+ JavaScript", "React Hooks & State Management", "TypeScript for React", "Production Web Testing"],
+            "career_gaps_summary": f"To master {target_role}, transition from static web design into component-driven React architecture, state management, TypeScript, and modern frontend testing.",
+            "levels": [
+                {
+                    "level": 1,
+                    "title": "Level 1: Core Web & JavaScript ES6+ Foundations",
+                    "topics": ["Semantic HTML5 & Accessibility (a11y)", "CSS Flexbox & Grid Layouts", "Modern JavaScript (ES6+ Modules, Promises, Async/Await)", "DOM Manipulation & Event Handling"],
+                    "duration": "2 weeks",
+                    "focus": "Build a rock-solid foundation in modern JavaScript, responsive CSS, and web standards."
+                },
+                {
+                    "level": 2,
+                    "title": "Level 2: React Component Framework & State",
+                    "topics": ["React JSX & Component Lifecycle", "React Hooks (useState, useEffect, useMemo)", "Global State Management (Redux Toolkit / Context API)", "Client-Side Routing (React Router v6)"],
+                    "duration": "3 weeks",
+                    "focus": "Develop single-page web applications using React and state management libraries."
+                },
+                {
+                    "level": 3,
+                    "title": "Level 3: TypeScript, UI Design Systems & Next.js",
+                    "topics": ["TypeScript Types & Interfaces for React", "Utility CSS Frameworks (Tailwind CSS)", "Next.js Server-Side Rendering (SSR/SSG)", "API Integration & Axios Interceptors"],
+                    "duration": "3 weeks",
+                    "focus": "Build type-safe, performant React applications with server-side rendering."
+                },
+                {
+                    "level": 4,
+                    "title": "Level 4: Frontend Testing, Performance & CI/CD",
+                    "topics": ["Unit Testing with Jest & React Testing Library", "Web Vitals & Performance Optimization", "CI/CD Deployment to Vercel/Netlify", "Frontend Architecture & System Design"],
+                    "duration": "2 weeks",
+                    "focus": "Optimize web application performance, implement test suites, and deploy to production."
+                }
+            ]
+        }
+    else:
+        return {
+            "match_percentage": 68,
+            "current_skills": ["Core Software Development", "Version Control (Git)", "Database Fundamentals"],
+            "gap_skills": ["Enterprise System Design", "Container Orchestration (Docker/K8s)", "Cloud Infrastructure (AWS)"],
+            "career_gaps_summary": f"To transition effectively into a {target_role}, focus on moving from individual module development into scalable cloud architecture, production CI/CD pipelines, and microservices patterns.",
+            "levels": [
+                {
+                    "level": 1,
+                    "title": "Level 1: Core Programming & Computer Science Foundations",
+                    "topics": ["Object-Oriented Programming & Clean Code", "Data Structures & Algorithms", "Relational Database Schema Design (SQL)", "Git & Collaborative Workflow"],
+                    "duration": "2 weeks",
+                    "focus": "Strengthen core programming, data structures, and database principles."
+                },
+                {
+                    "level": 2,
+                    "title": "Level 2: Web Frameworks, APIs & ORM",
+                    "topics": ["Backend Web Frameworks (Django / Node / Spring)", "RESTful API Specification & OpenAPI", "Database ORM & Query Optimization", "Authentication & Security (JWT, OAuth)"],
+                    "duration": "3 weeks",
+                    "focus": "Develop scalable web services, API endpoints, and secure application backends."
+                },
+                {
+                    "level": 3,
+                    "title": "Level 3: Distributed Systems & Caching",
+                    "topics": ["Microservices Architecture Patterns", "Caching & Message Queues (Redis/RabbitMQ)", "System Scalability & Load Balancing", "Asynchronous Job Processing"],
+                    "duration": "3 weeks",
+                    "focus": "Learn to design highly available, decoupled, and fault-tolerant microservices."
+                },
+                {
+                    "level": 4,
+                    "title": "Level 4: Cloud Infrastructure, DevOps & System Design",
+                    "topics": ["Containerization with Docker", "CI/CD Automation Pipelines (GitHub Actions)", "Cloud Services (AWS ECS/S3/RDS)", "System Design Mock Interviews"],
+                    "duration": "2 weeks",
+                    "focus": "Deploy applications securely to production and master technical system design interviews."
+                }
+            ]
+        }
 
 MOCK_TEST_FALLBACK_DATA = {
     "technical": [
