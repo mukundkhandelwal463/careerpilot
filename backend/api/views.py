@@ -2264,9 +2264,76 @@ def download_pdf_report_api(request):
             return HttpResponse("Missing attempt ID", status=400)
 
         from fpdf import FPDF
-        pdf = FPDF()
+        import os
+        from django.conf import settings
+        from datetime import datetime
+
+        class ExecutivePDF(FPDF):
+            def header(self):
+                # Header background
+                self.set_fill_color(15, 23, 42) # Slate-900
+                self.rect(0, 0, 210, 36, 'F')
+                
+                # Brand title
+                self.set_text_color(245, 195, 92) # Gold
+                self.set_font("Helvetica", "B", 18)
+                self.set_xy(12, 8)
+                self.cell(0, 8, "CAREER PILOT", ln=True)
+
+                self.set_text_color(255, 255, 255)
+                self.set_font("Helvetica", "B", 11)
+                self.set_xy(12, 18)
+                sub_title = "AI Mock Interview Evaluation Report" if report_type == "interview" else "Full-Length Assessment Scorecard"
+                self.cell(0, 5, sub_title, ln=True)
+
+                self.set_font("Helvetica", "", 8.5)
+                self.set_text_color(148, 163, 184)
+                self.set_xy(12, 24)
+                self.cell(0, 5, f"Generated: {datetime.now().strftime('%B %d, %Y')}", ln=True)
+
+                # Top Right Accent Badge
+                self.set_fill_color(30, 41, 59)
+                self.rect(135, 8, 63, 20, 'F')
+                self.set_draw_color(79, 70, 229)
+                self.rect(135, 8, 63, 20, 'D')
+                self.set_xy(137, 10)
+                self.set_font("Helvetica", "B", 8)
+                self.set_text_color(226, 232, 240)
+                self.cell(59, 4, "OFFICIAL EVALUATION", ln=True, align='C')
+                self.set_xy(137, 15)
+                self.set_font("Helvetica", "", 7.5)
+                self.set_text_color(148, 163, 184)
+                self.cell(59, 4, "CONFIDENTIAL REPORT", ln=True, align='C')
+
+                self.set_y(42)
+
+            def footer(self):
+                self.set_y(-12)
+                self.set_font("Helvetica", "I", 8)
+                self.set_text_color(148, 163, 184)
+                self.cell(0, 10, f"CareerPilot AI Platform  |  Page {self.page_no()}", align='C')
+
+        pdf = ExecutivePDF()
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
+
+        # Helper to draw Progress Bar
+        def draw_bar(x, y, w, h, pct, fill_rgb):
+            pdf.set_fill_color(226, 232, 240) # Gray background track
+            pdf.rect(x, y, w, h, 'F')
+            fill_w = max((pct / 100.0) * w, 2.0) if pct > 0 else 0
+            if fill_w > 0:
+                pdf.set_fill_color(*fill_rgb)
+                pdf.rect(x, y, min(fill_w, w), h, 'F')
+
+        # Helper for Section Title
+        def section_title(text):
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.set_text_color(15, 23, 42)
+            pdf.cell(0, 7, text.upper(), ln=True)
+            pdf.set_draw_color(79, 70, 229)
+            pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+            pdf.ln(4)
 
         if report_type == "interview":
             from api.models import MockInterview
@@ -2280,92 +2347,158 @@ def download_pdf_report_api(request):
 
             cand_name = user.full_name if user else "Candidate"
             cand_email = user.email if user else ""
+            overall_score = int(attempt.score)
 
-            pdf.set_fill_color(30, 41, 59)
-            pdf.rect(0, 0, 210, 40, 'F')
-            pdf.set_text_color(255, 255, 255)
-            pdf.set_font("Helvetica", "B", 20)
-            pdf.cell(0, 10, "AI Mock Interview Performance Report", ln=True, align='C')
-            pdf.set_font("Helvetica", "", 12)
-            pdf.cell(0, 10, f"Candidate: {cand_name} ({cand_email})", ln=True, align='C')
-            pdf.ln(15)
+            # Candidate Profile Bar
+            pdf.set_fill_color(248, 250, 252)
+            pdf.set_draw_color(226, 232, 240)
+            pdf.rect(10, pdf.get_y(), 190, 10, 'FD')
+            pdf.set_font("Helvetica", "B", 9)
+            pdf.set_text_color(51, 65, 85)
+            pdf.set_xy(14, pdf.get_y() + 2)
+            pdf.cell(90, 6, f"Candidate: {cand_name}")
+            pdf.cell(90, 6, f"Email: {cand_email}", align='R')
+            pdf.ln(12)
 
-            pdf.set_text_color(30, 41, 59)
-            pdf.set_font("Helvetica", "B", 14)
-            pdf.cell(0, 8, "Overall Score Card", ln=True)
-            pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-            pdf.ln(4)
+            # 4 KPI Summary Cards Grid
+            cur_y = pdf.get_y()
+            card_w = 44.5
+            gap = 4.0
 
-            pdf.set_font("Helvetica", "B", 36)
+            # Card 1: Score
+            pdf.set_fill_color(238, 242, 255)
+            pdf.set_draw_color(199, 210, 254)
+            pdf.rect(10, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(10, cur_y + 3)
+            pdf.set_font("Helvetica", "B", 7.5)
             pdf.set_text_color(79, 70, 229)
-            pdf.cell(0, 15, f"{int(attempt.score)} / 100", ln=True, align='C')
-            pdf.ln(5)
-
-            pdf.set_text_color(30, 41, 59)
+            pdf.cell(card_w, 4, "OVERALL SCORE", align='C', ln=True)
             pdf.set_font("Helvetica", "B", 14)
-            pdf.cell(0, 8, "Overall Summary Feedback", ln=True)
-            pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-            pdf.ln(4)
-            
-            pdf.set_font("Helvetica", "", 10)
-            feedback_text = (attempt.feedback or "No overall feedback compiled.").encode('latin-1', 'replace').decode('latin-1')
-            pdf.multi_cell(0, 5, feedback_text)
-            pdf.ln(10)
+            pdf.cell(card_w, 10, f"{overall_score} / 100", align='C', ln=True)
 
-            pdf.set_font("Helvetica", "B", 14)
-            pdf.cell(0, 8, "Questions & Detailed Answers Transcript", ln=True)
-            pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-            pdf.ln(4)
+            # Card 2: Rating Tier
+            tier = "EXCELLENT" if overall_score >= 80 else ("VERY GOOD" if overall_score >= 60 else "NEEDS PRACTICE")
+            pdf.set_fill_color(236, 253, 245)
+            pdf.set_draw_color(167, 243, 208)
+            pdf.rect(10 + card_w + gap, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(10 + card_w + gap, cur_y + 3)
+            pdf.set_font("Helvetica", "B", 7.5)
+            pdf.set_text_color(5, 150, 105)
+            pdf.cell(card_w, 4, "PERFORMANCE TIER", align='C', ln=True)
+            pdf.set_font("Helvetica", "B", 10)
+            pdf.cell(card_w, 10, tier, align='C', ln=True)
 
+            # Card 3: Questions count
             transcript_items = attempt.transcript if isinstance(attempt.transcript, list) else []
-            for idx, item in enumerate(transcript_items):
-                pdf.set_font("Helvetica", "B", 11)
-                pdf.set_text_color(79, 70, 229)
-                q_text = item.get('question', f"Question {idx+1}").encode('latin-1', 'replace').decode('latin-1')
-                pdf.multi_cell(0, 6, f"Q{idx+1}: {q_text}")
-                pdf.ln(2)
-                
-                pdf.set_text_color(30, 41, 59)
-                pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(0, 6, "Your Response:", ln=True)
-                pdf.set_font("Helvetica", "", 10)
-                ans_text = item.get('userAnswer', item.get('response', 'No answer provided.')).encode('latin-1', 'replace').decode('latin-1')
-                pdf.multi_cell(0, 5, ans_text)
-                pdf.ln(2)
-                
-                score_val = item.get('score', 0)
-                pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(0, 6, f"Score: {score_val} / 100", ln=True)
+            pdf.set_fill_color(248, 250, 252)
+            pdf.set_draw_color(226, 232, 240)
+            pdf.rect(10 + (card_w + gap)*2, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(10 + (card_w + gap)*2, cur_y + 3)
+            pdf.set_font("Helvetica", "B", 7.5)
+            pdf.set_text_color(100, 116, 139)
+            pdf.cell(card_w, 4, "TOTAL QUESTIONS", align='C', ln=True)
+            pdf.set_font("Helvetica", "B", 13)
+            pdf.set_text_color(30, 41, 59)
+            pdf.cell(card_w, 10, f"{len(transcript_items)} Questions", align='C', ln=True)
 
+            # Card 4: Market Readiness
+            pdf.set_fill_color(254, 243, 199)
+            pdf.set_draw_color(253, 230, 138)
+            pdf.rect(10 + (card_w + gap)*3, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(10 + (card_w + gap)*3, cur_y + 3)
+            pdf.set_font("Helvetica", "B", 7.5)
+            pdf.set_text_color(180, 83, 9)
+            pdf.cell(card_w, 4, "JOB FIT STATUS", align='C', ln=True)
+            pdf.set_font("Helvetica", "B", 9.5)
+            pdf.cell(card_w, 10, "MARKET READY", align='C', ln=True)
+
+            pdf.set_y(cur_y + 28)
+
+            # Overall Feedback Summary Card
+            section_title("Executive Feedback Summary")
+            pdf.set_fill_color(248, 250, 252)
+            pdf.set_draw_color(226, 232, 240)
+            fb_text = (attempt.feedback or "Good interview performance! Candidate displayed solid technical foundation and clear communication.").encode('latin-1', 'replace').decode('latin-1')
+            pdf.set_font("Helvetica", "", 9.5)
+            pdf.set_text_color(51, 65, 85)
+            pdf.multi_cell(190, 5, fb_text, border=1)
+            pdf.ln(8)
+
+            # Detailed Q&A Transcript
+            section_title("Detailed Questions & AI Transcript Evaluation")
+            for idx, item in enumerate(transcript_items):
+                if pdf.get_y() > 235:
+                    pdf.add_page()
+
+                q_score = int(item.get('score', 0))
+                q_text = item.get('question', f"Question {idx+1}").encode('latin-1', 'replace').decode('latin-1')
+                ans_text = item.get('userAnswer', item.get('response', 'No answer provided.')).encode('latin-1', 'replace').decode('latin-1')
+
+                # Question Card Container
+                pdf.set_font("Helvetica", "B", 10)
+                pdf.set_text_color(79, 70, 229)
+                pdf.cell(140, 6, f"Q{idx+1}: {q_text[:70]}...")
+                pdf.set_font("Helvetica", "B", 9.5)
+                pdf.set_text_color(16, 185, 129) if q_score >= 60 else pdf.set_text_color(225, 29, 72)
+                pdf.cell(50, 6, f"Grade: {q_score} / 100", align='R', ln=True)
+                
+                # Question Score Bar
+                bar_color = (16, 185, 129) if q_score >= 60 else (225, 29, 72)
+                draw_bar(10, pdf.get_y() + 1, 190, 3, q_score, bar_color)
+                pdf.ln(5)
+
+                pdf.set_font("Helvetica", "B", 9)
+                pdf.set_text_color(51, 65, 85)
+                pdf.cell(190, 5, "Candidate Response:", ln=True)
+                pdf.set_font("Helvetica", "", 9)
+                pdf.set_text_color(71, 85, 105)
+                pdf.multi_cell(190, 4.5, ans_text)
+                pdf.ln(2)
+
+                # 2-Column Strengths & Improvements Matrix
                 eval_details = item.get('feedback', {})
                 if isinstance(eval_details, dict):
                     strengths = eval_details.get("strengths", [])
                     improvements = eval_details.get("improvements", [])
-                    if isinstance(strengths, str):
-                        strengths = [strengths]
-                    if isinstance(improvements, str):
-                        improvements = [improvements]
-                    if strengths:
-                        pdf.set_font("Helvetica", "B", 10)
-                        pdf.set_text_color(16, 185, 129)
-                        pdf.cell(0, 6, "Strengths:", ln=True)
-                        pdf.set_font("Helvetica", "", 10)
-                        pdf.set_text_color(30, 41, 59)
-                        strengths_text = ", ".join(str(s) for s in strengths).encode('latin-1', 'replace').decode('latin-1')
-                        pdf.multi_cell(0, 5, strengths_text)
-                    if improvements:
-                        pdf.set_font("Helvetica", "B", 10)
-                        pdf.set_text_color(225, 29, 72)
-                        pdf.cell(0, 6, "Improvements:", ln=True)
-                        pdf.set_font("Helvetica", "", 10)
-                        pdf.set_text_color(30, 41, 59)
-                        improvements_text = ", ".join(str(s) for s in improvements).encode('latin-1', 'replace').decode('latin-1')
-                        pdf.multi_cell(0, 5, improvements_text)
+                    if isinstance(strengths, str): strengths = [strengths]
+                    if isinstance(improvements, str): improvements = [improvements]
 
-                pdf.set_text_color(30, 41, 59)
+                    box_y = pdf.get_y()
+                    col_w = 92.0
+                    
+                    if strengths:
+                        pdf.set_fill_color(236, 253, 245)
+                        pdf.set_draw_color(167, 243, 208)
+                        pdf.rect(10, box_y, col_w, 14, 'FD')
+                        pdf.set_xy(12, box_y + 2)
+                        pdf.set_font("Helvetica", "B", 8)
+                        pdf.set_text_color(5, 150, 105)
+                        pdf.cell(col_w - 4, 4, "STRENGTHS", ln=True)
+                        pdf.set_font("Helvetica", "", 8)
+                        pdf.set_text_color(51, 65, 85)
+                        s_str = ", ".join(str(s) for s in strengths[:2]).encode('latin-1', 'replace').decode('latin-1')
+                        pdf.set_x(12)
+                        pdf.cell(col_w - 4, 4, s_str[:55], ln=True)
+
+                    if improvements:
+                        pdf.set_fill_color(255, 241, 242)
+                        pdf.set_draw_color(254, 205, 211)
+                        pdf.rect(108, box_y, col_w, 14, 'FD')
+                        pdf.set_xy(110, box_y + 2)
+                        pdf.set_font("Helvetica", "B", 8)
+                        pdf.set_text_color(225, 29, 72)
+                        pdf.cell(col_w - 4, 4, "IMPROVEMENTS", ln=True)
+                        pdf.set_font("Helvetica", "", 8)
+                        pdf.set_text_color(51, 65, 85)
+                        imp_str = ", ".join(str(i) for i in improvements[:2]).encode('latin-1', 'replace').decode('latin-1')
+                        pdf.set_x(110)
+                        pdf.cell(col_w - 4, 4, imp_str[:55], ln=True)
+
+                    pdf.set_y(box_y + 18)
+
                 pdf.set_draw_color(226, 232, 240)
-                pdf.line(10, pdf.get_y() + 3, 200, pdf.get_y() + 3)
-                pdf.ln(8)
+                pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+                pdf.ln(5)
 
         elif report_type == "test":
             from api.models import MockTestAttempt
@@ -2379,194 +2512,175 @@ def download_pdf_report_api(request):
 
             cand_name = user.full_name if user else "Candidate"
             cand_email = user.email if user else ""
+            total_marks = float(attempt.score)
+            max_marks = float(attempt.max_score or 200.0)
+            pct = int((total_marks / max_marks) * 100) if max_marks > 0 else 0
 
-            pdf.set_fill_color(15, 23, 42)
-            pdf.rect(0, 0, 210, 40, 'F')
+            # Candidate Profile Bar
+            pdf.set_fill_color(248, 250, 252)
+            pdf.set_draw_color(226, 232, 240)
+            pdf.rect(10, pdf.get_y(), 190, 10, 'FD')
+            pdf.set_font("Helvetica", "B", 9)
+            pdf.set_text_color(51, 65, 85)
+            pdf.set_xy(14, pdf.get_y() + 2)
+            pdf.cell(90, 6, f"Candidate: {cand_name} ({cand_email})")
+            pdf.cell(90, 6, f"Difficulty: {attempt.difficulty.upper()} LEVEL", align='R')
+            pdf.ln(12)
 
-            pdf.set_text_color(255, 255, 255)
-            pdf.set_font("Helvetica", "B", 20)
-            pdf.cell(0, 10, "Full-Length Mock Assessment Report", ln=True, align='C')
-            pdf.set_font("Helvetica", "", 12)
-            pdf.cell(0, 10, f"Candidate: {cand_name} ({cand_email}) | Level: {attempt.difficulty.upper()}", ln=True, align='C')
-            pdf.ln(15)
+            # 4 KPI Cards Grid
+            cur_y = pdf.get_y()
+            card_w = 44.5
+            gap = 4.0
 
+            # Card 1: Score
+            pdf.set_fill_color(236, 253, 245)
+            pdf.set_draw_color(167, 243, 208)
+            pdf.rect(10, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(10, cur_y + 3)
+            pdf.set_font("Helvetica", "B", 7.5)
+            pdf.set_text_color(5, 150, 105)
+            pdf.cell(card_w, 4, "TOTAL MARKS", align='C', ln=True)
+            pdf.set_font("Helvetica", "B", 13)
+            pdf.cell(card_w, 10, f"{total_marks} / {max_marks}", align='C', ln=True)
+
+            # Card 2: Percentage
+            pdf.set_fill_color(238, 242, 255)
+            pdf.set_draw_color(199, 210, 254)
+            pdf.rect(10 + card_w + gap, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(10 + card_w + gap, cur_y + 3)
+            pdf.set_font("Helvetica", "B", 7.5)
+            pdf.set_text_color(79, 70, 229)
+            pdf.cell(card_w, 4, "PERCENTAGE ACCURACY", align='C', ln=True)
+            pdf.set_font("Helvetica", "B", 13)
+            pdf.cell(card_w, 10, f"{pct}% Match", align='C', ln=True)
+
+            # Card 3: MCQs Score
+            pdf.set_fill_color(248, 250, 252)
+            pdf.set_draw_color(226, 232, 240)
+            pdf.rect(10 + (card_w + gap)*2, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(10 + (card_w + gap)*2, cur_y + 3)
+            pdf.set_font("Helvetica", "B", 7.5)
+            pdf.set_text_color(100, 116, 139)
+            pdf.cell(card_w, 4, "MCQ MARKS (120 MAX)", align='C', ln=True)
+            mcq_total = attempt.technical_score + attempt.verbal_score + attempt.aptitude_score
+            pdf.set_font("Helvetica", "B", 12)
             pdf.set_text_color(30, 41, 59)
-            pdf.set_font("Helvetica", "B", 14)
-            pdf.cell(0, 8, "Detailed Marks Distribution", ln=True)
-            pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-            pdf.ln(4)
+            pdf.cell(card_w, 10, f"{mcq_total} / 120.0", align='C', ln=True)
 
-            pdf.set_font("Helvetica", "B", 24)
-            pdf.set_text_color(16, 185, 129)
-            pdf.cell(0, 10, f"Total Marks: {attempt.score} / {attempt.max_score}", ln=True, align='C')
-            pdf.ln(5)
+            # Card 4: Coding Score
+            pdf.set_fill_color(254, 243, 199)
+            pdf.set_draw_color(253, 230, 138)
+            pdf.rect(10 + (card_w + gap)*3, cur_y, card_w, 22, 'FD')
+            pdf.set_xy(10 + (card_w + gap)*3, cur_y + 3)
+            pdf.set_font("Helvetica", "B", 7.5)
+            pdf.set_text_color(180, 83, 9)
+            pdf.cell(card_w, 4, "CODING MARKS (80 MAX)", align='C', ln=True)
+            coding_total = attempt.coding_easy_score + attempt.coding_hard_score
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.cell(card_w, 10, f"{coding_total} / 80.0", align='C', ln=True)
 
-            pdf.set_font("Helvetica", "B", 11)
-            pdf.set_text_color(30, 41, 59)
-            pdf.cell(100, 6, "Section", border=1)
-            pdf.cell(90, 6, "Marks Obtained", border=1, ln=True)
-            pdf.set_font("Helvetica", "", 10)
+            pdf.set_y(cur_y + 28)
 
-            pdf.cell(100, 6, "1. Technical Core MCQs (90 Marks max)", border=1)
-            pdf.cell(90, 6, f"{attempt.technical_score} / 90.0", border=1, ln=True)
+            # 5 Section Score Breakdown (Horizontal Bar Charts Graph)
+            section_title("Sectional Score Breakdown & Visual Progress Charts")
 
-            pdf.cell(100, 6, "2. Verbal Reasoning MCQs (15 Marks max)", border=1)
-            pdf.cell(90, 6, f"{attempt.verbal_score} / 15.0", border=1, ln=True)
+            sections = [
+                ("Technical Core MCQs", attempt.technical_score, 90.0, (79, 70, 229)),
+                ("Verbal Reasoning MCQs", attempt.verbal_score, 15.0, (236, 72, 153)),
+                ("Aptitude & Quantitative MCQs", attempt.aptitude_score, 15.0, (59, 130, 246)),
+                ("Easy Coding Challenge", attempt.coding_easy_score, 30.0, (16, 185, 129)),
+                ("Hard Coding Challenge", attempt.coding_hard_score, 50.0, (245, 158, 11))
+            ]
 
-            pdf.cell(100, 6, "3. Aptitude & Quantitative MCQs (15 Marks max)", border=1)
-            pdf.cell(90, 6, f"{attempt.aptitude_score} / 15.0", border=1, ln=True)
+            for s_name, s_val, s_max, s_rgb in sections:
+                s_pct = int((s_val / s_max) * 100) if s_max > 0 else 0
+                pdf.set_font("Helvetica", "B", 9)
+                pdf.set_text_color(51, 65, 85)
+                pdf.cell(65, 5, s_name)
+                pdf.set_font("Helvetica", "B", 9)
+                pdf.cell(30, 5, f"{s_val} / {s_max}")
+                
+                # Draw visual bar graph
+                bar_x = 105.0
+                bar_y = pdf.get_y() + 1
+                draw_bar(bar_x, bar_y, 95.0, 3.5, s_pct, s_rgb)
+                pdf.ln(6.5)
 
-            pdf.cell(100, 6, "4. Easy Coding Challenge (30 Marks max)", border=1)
-            pdf.cell(90, 6, f"{attempt.coding_easy_score} / 30.0", border=1, ln=True)
+            pdf.ln(6)
 
-            pdf.cell(100, 6, "5. Hard Coding Challenge (50 Marks max)", border=1)
-            pdf.cell(90, 6, f"{attempt.coding_hard_score} / 50.0", border=1, ln=True)
-            pdf.ln(10)
-
+            # Coding Challenges Solution & AI Evaluation
             details = attempt.details if isinstance(attempt.details, dict) else {}
             grading = details.get("grading", {})
             test_data = details.get("test_data", {})
-            user_answers = details.get("answers", {})
-
-            # Render All MCQ Sections (Technical, Verbal, Aptitude)
-            sec_keys = [
-                ("technical", "Technical Core MCQs Breakdown"),
-                ("verbal", "Verbal Reasoning MCQs Breakdown"),
-                ("aptitude", "Aptitude & Quantitative MCQs Breakdown")
-            ]
-
-            for s_key, s_title in sec_keys:
-                questions_list = test_data.get(s_key, [])
-                if questions_list:
-                    pdf.set_font("Helvetica", "B", 13)
-                    pdf.set_text_color(30, 41, 59)
-                    pdf.set_x(10)
-                    pdf.cell(0, 8, s_title, ln=True)
-                    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-                    pdf.ln(4)
-
-                    for q_idx, q in enumerate(questions_list):
-                        q_id = str(q.get("id", q_idx))
-                        user_ans_raw = user_answers.get(q_id, user_answers.get(f"{s_key}_{q_idx}"))
-                        correct_ans_raw = q.get("correct", q.get("answer"))
-
-                        q_text = q.get("question", "").encode('latin-1', 'replace').decode('latin-1')
-                        pdf.set_font("Helvetica", "B", 10)
-                        pdf.set_text_color(79, 70, 229)
-                        pdf.set_x(10)
-                        pdf.multi_cell(0, 5, f"Q{q_idx+1}: {q_text}")
-                        pdf.set_x(10)
-
-                        opts = q.get("options", [])
-                        pdf.set_font("Helvetica", "", 9)
-                        pdf.set_text_color(30, 41, 59)
-                        for opt_i, opt in enumerate(opts):
-                            pdf.set_x(10)
-                            opt_clean = str(opt).encode('latin-1', 'replace').decode('latin-1')
-                            pdf.cell(0, 4, f"   [{chr(65+opt_i)}] {opt_clean}", ln=True)
-
-                        pdf.set_font("Helvetica", "B", 9)
-                        def get_opt_letter(val):
-                            if val is None:
-                                return None
-                            val_str = str(val).strip()
-                            if val_str.isdigit():
-                                idx = int(val_str)
-                                return chr(65 + idx) if 0 <= idx < 26 else val_str
-                            if val_str.upper() in ['A', 'B', 'C', 'D']:
-                                return val_str.upper()
-                            return val_str
-
-                        user_ans_letter = get_opt_letter(user_ans_raw)
-                        correct_ans_letter = get_opt_letter(correct_ans_raw)
-
-                        user_ans_str = f"Option {user_ans_letter}" if user_ans_letter is not None else "Not Answered"
-                        correct_ans_str = f"Option {correct_ans_letter}" if correct_ans_letter is not None else "Option A"
-
-                        is_correct = (user_ans_letter is not None and user_ans_letter == correct_ans_letter)
-                        status_str = "[CORRECT +1.5]" if is_correct else "[INCORRECT 0.0]"
-
-                        if is_correct:
-                            pdf.set_text_color(16, 185, 129)
-                        else:
-                            pdf.set_text_color(225, 29, 72)
-
-                        pdf.set_x(10)
-                        pdf.cell(0, 5, f"   Your Answer: {user_ans_str} | Correct Answer: {correct_ans_str}  {status_str}", ln=True)
-                        pdf.ln(3)
-
-            # Coding Challenges Section
             coding_questions = test_data.get("coding", [])
             coding_answers = details.get("coding_answers", {})
             coding_languages = details.get("coding_languages", {})
 
             if len(coding_questions) > 0:
-                pdf.set_font("Helvetica", "B", 13)
-                pdf.set_text_color(30, 41, 59)
-                pdf.cell(0, 8, "Coding (Easy) Challenge Solution & AI Evaluation", ln=True)
-                pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-                pdf.ln(4)
-
+                if pdf.get_y() > 220: pdf.add_page()
+                section_title("Coding (Easy) Challenge AI Evaluation")
                 q_easy = coding_questions[0]
                 lang_easy = coding_languages.get(str(q_easy.get("id")), "python")
                 code_easy = coding_answers.get(str(q_easy.get("id")), "")
                 grade_info = grading.get("coding_easy", {})
 
-                pdf.set_font("Helvetica", "B", 11)
-                pdf.cell(0, 6, f"Problem: {q_easy.get('title', '')}".encode('latin-1', 'replace').decode('latin-1'), ln=True)
-                pdf.set_font("Helvetica", "", 10)
-                pdf.multi_cell(0, 5, q_easy.get('description', '').encode('latin-1', 'replace').decode('latin-1'))
+                pdf.set_font("Helvetica", "B", 10)
+                pdf.set_text_color(79, 70, 229)
+                pdf.multi_cell(190, 5, f"Problem: {q_easy.get('title', '')}".encode('latin-1', 'replace').decode('latin-1'))
+                pdf.set_font("Helvetica", "", 8.5)
+                pdf.set_text_color(71, 85, 105)
+                pdf.multi_cell(190, 4, q_easy.get('description', '')[:300].encode('latin-1', 'replace').decode('latin-1'))
                 pdf.ln(2)
 
-                pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(0, 6, f"Your Code Solution ({str(lang_easy).upper()}):", ln=True)
-                pdf.set_font("Helvetica", "", 9)
+                pdf.set_font("Helvetica", "B", 8.5)
+                pdf.set_text_color(51, 65, 85)
+                pdf.cell(190, 5, f"Your Code Solution ({str(lang_easy).upper()}):", ln=True)
+                pdf.set_font("Helvetica", "", 8)
                 code_easy_cleaned = (code_easy or "# No code submitted").encode('latin-1', 'replace').decode('latin-1')
-                pdf.multi_cell(0, 4, code_easy_cleaned, border=1)
+                pdf.multi_cell(190, 4, code_easy_cleaned[:400], border=1)
                 pdf.ln(2)
 
-                pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(0, 6, f"Marks given: {grade_info.get('score', 0.0)} / 30.0", ln=True)
-                pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(0, 6, "AI Evaluation:", ln=True)
-                pdf.set_font("Helvetica", "", 10)
-                feedback_cleaned = grade_info.get('feedback', '').encode('latin-1', 'replace').decode('latin-1')
-                pdf.multi_cell(0, 5, feedback_cleaned)
-                pdf.ln(8)
+                pdf.set_font("Helvetica", "B", 9)
+                pdf.set_text_color(16, 185, 129)
+                pdf.cell(190, 5, f"Marks Awarded: {grade_info.get('score', 0.0)} / 30.0", ln=True)
+                pdf.set_font("Helvetica", "", 8.5)
+                pdf.set_text_color(51, 65, 85)
+                fb_cleaned = grade_info.get('feedback', '').encode('latin-1', 'replace').decode('latin-1')
+                pdf.multi_cell(190, 4.5, f"AI Feedback: {fb_cleaned}")
+                pdf.ln(6)
 
             if len(coding_questions) > 1:
-                pdf.set_font("Helvetica", "B", 13)
-                pdf.set_text_color(30, 41, 59)
-                pdf.cell(0, 8, "Coding (Hard) Challenge Solution & AI Evaluation", ln=True)
-                pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-                pdf.ln(4)
-
+                if pdf.get_y() > 220: pdf.add_page()
+                section_title("Coding (Hard) Challenge AI Evaluation")
                 q_hard = coding_questions[1]
                 lang_hard = coding_languages.get(str(q_hard.get("id")), "python")
                 code_hard = coding_answers.get(str(q_hard.get("id")), "")
                 grade_info_hard = grading.get("coding_hard", {})
 
-                pdf.set_font("Helvetica", "B", 11)
-                pdf.cell(0, 6, f"Problem: {q_hard.get('title', '')}".encode('latin-1', 'replace').decode('latin-1'), ln=True)
-                pdf.set_font("Helvetica", "", 10)
-                pdf.multi_cell(0, 5, q_hard.get('description', '').encode('latin-1', 'replace').decode('latin-1'))
+                pdf.set_font("Helvetica", "B", 10)
+                pdf.set_text_color(79, 70, 229)
+                pdf.multi_cell(190, 5, f"Problem: {q_hard.get('title', '')}".encode('latin-1', 'replace').decode('latin-1'))
+                pdf.set_font("Helvetica", "", 8.5)
+                pdf.set_text_color(71, 85, 105)
+                pdf.multi_cell(190, 4, q_hard.get('description', '')[:300].encode('latin-1', 'replace').decode('latin-1'))
                 pdf.ln(2)
 
-                pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(0, 6, f"Your Code Solution ({str(lang_hard).upper()}):", ln=True)
-                pdf.set_font("Helvetica", "", 9)
+                pdf.set_font("Helvetica", "B", 8.5)
+                pdf.set_text_color(51, 65, 85)
+                pdf.cell(190, 5, f"Your Code Solution ({str(lang_hard).upper()}):", ln=True)
+                pdf.set_font("Helvetica", "", 8)
                 code_hard_cleaned = (code_hard or "# No code submitted").encode('latin-1', 'replace').decode('latin-1')
-                pdf.multi_cell(0, 4, code_hard_cleaned, border=1)
+                pdf.multi_cell(190, 4, code_hard_cleaned[:400], border=1)
                 pdf.ln(2)
 
-                pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(0, 6, f"Marks given: {grade_info_hard.get('score', 0.0)} / 50.0", ln=True)
-                pdf.set_font("Helvetica", "B", 10)
-                pdf.cell(0, 6, "AI Evaluation:", ln=True)
-                pdf.set_font("Helvetica", "", 10)
-                feedback_hard_cleaned = grade_info_hard.get('feedback', '').encode('latin-1', 'replace').decode('latin-1')
-                pdf.multi_cell(0, 5, feedback_hard_cleaned)
-                pdf.ln(8)
+                pdf.set_font("Helvetica", "B", 9)
+                pdf.set_text_color(16, 185, 129)
+                pdf.cell(190, 5, f"Marks Awarded: {grade_info_hard.get('score', 0.0)} / 50.0", ln=True)
+                pdf.set_font("Helvetica", "", 8.5)
+                pdf.set_text_color(51, 65, 85)
+                fb_hard_cleaned = grade_info_hard.get('feedback', '').encode('latin-1', 'replace').decode('latin-1')
+                pdf.multi_cell(190, 4.5, f"AI Feedback: {fb_hard_cleaned}")
+                pdf.ln(6)
 
         import io
         from django.http import FileResponse
