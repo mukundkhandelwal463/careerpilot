@@ -2716,6 +2716,67 @@ def download_pdf_report_api(request):
                 pdf.multi_cell(190, 4.5, f"AI Feedback: {fb_hard_cleaned}")
                 pdf.ln(6)
 
+            # Detailed MCQ Questions & Answer Key Evaluation
+            mcq_categories = [
+                ("Technical Core MCQs", test_data.get("technical", [])),
+                ("Verbal Reasoning MCQs", test_data.get("verbal", [])),
+                ("Aptitude & Quantitative MCQs", test_data.get("aptitude", []))
+            ]
+
+            total_mcqs_found = sum(len(qs) for _, qs in mcq_categories)
+            if total_mcqs_found > 0:
+                if pdf.get_y() > 210: pdf.add_page()
+                section_title("Detailed MCQ Evaluation & Answer Key")
+
+                q_counter = 1
+                for cat_title, q_list in mcq_categories:
+                    if not q_list: continue
+                    
+                    if pdf.get_y() > 230: pdf.add_page()
+                    pdf.set_x(10)
+                    pdf.set_font("Helvetica", "B", 9.5)
+                    pdf.set_text_color(79, 70, 229)
+                    pdf.cell(190, 6, f"=== {cat_title.upper()} ({len(q_list)} Questions) ===", ln=True)
+                    pdf.ln(2)
+
+                    for q_item in q_list:
+                        if pdf.get_y() > 240: pdf.add_page()
+                        
+                        q_id = str(q_item.get("id", ""))
+                        q_text = str(q_item.get("question", "")).encode('latin-1', 'replace').decode('latin-1')
+                        correct_ans = str(q_item.get("answer", "")).encode('latin-1', 'replace').decode('latin-1')
+                        user_ans = str(answers.get(q_id, "Not Answered")).encode('latin-1', 'replace').decode('latin-1')
+                        explanation = str(q_item.get("explanation", "")).encode('latin-1', 'replace').decode('latin-1')
+
+                        is_correct = (user_ans.strip().lower() == correct_ans.strip().lower())
+                        is_skipped = (user_ans in ["Not Answered", "", "None", "undefined"])
+
+                        pdf.set_x(10)
+                        pdf.set_font("Helvetica", "B", 8.5)
+                        pdf.set_text_color(30, 41, 59)
+                        pdf.multi_cell(190, 4.5, f"Q{q_counter}. {q_text}")
+
+                        pdf.set_x(14)
+                        pdf.set_font("Helvetica", "", 8)
+                        if is_correct:
+                            pdf.set_text_color(16, 185, 129)
+                            pdf.cell(186, 4, f"[CORRECT] Your Choice: {user_ans} | Correct: {correct_ans}", ln=True)
+                        elif is_skipped:
+                            pdf.set_text_color(100, 116, 139)
+                            pdf.cell(186, 4, f"[SKIPPED] Correct Choice: {correct_ans}", ln=True)
+                        else:
+                            pdf.set_text_color(225, 29, 72)
+                            pdf.cell(186, 4, f"[INCORRECT] Your Choice: {user_ans} | Correct: {correct_ans}", ln=True)
+
+                        if explanation and explanation.strip() != "":
+                            pdf.set_x(14)
+                            pdf.set_font("Helvetica", "I", 7.5)
+                            pdf.set_text_color(71, 85, 105)
+                            pdf.multi_cell(186, 3.8, f"Explanation: {explanation[:200]}")
+
+                        pdf.ln(2.5)
+                        q_counter += 1
+
         import io
         from django.http import FileResponse
 
