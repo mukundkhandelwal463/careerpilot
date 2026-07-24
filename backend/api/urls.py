@@ -50,6 +50,7 @@ urlpatterns = [
     path('auth/google-client-id', views.get_google_client_id, name='get_google_client_id'),
     path('auth/me', views.get_current_user, name='get_current_user'),
     path('auth/update', views.update_profile, name='update_profile'),
+    path('auth/upload-avatar', views.upload_avatar, name='upload_avatar'),
 
     # Session Analysis
     path('session/analysis', views.session_analysis, name='session_analysis'),

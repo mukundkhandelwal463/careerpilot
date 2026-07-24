@@ -1327,15 +1327,58 @@ def get_current_user(request):
     return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
 
 
-@api_view(['PUT'])
+@api_view(['PUT', 'POST'])
 def update_profile(request):
+    if not request.user or not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
     user = request.user
     data = request.data
-    if "full_name" in data:
-        user.full_name = data["full_name"].strip()
-    if "mobile" in data:
-        user.mobile = data["mobile"].strip()
+    if "full_name" in data and data["full_name"]:
+        user.full_name = str(data["full_name"]).strip()
+    if "mobile" in data and data["mobile"]:
+        user.mobile = str(data["mobile"]).strip()
+    
+    avatar_base64 = data.get("avatar_base64")
+    if avatar_base64:
+        import base64
+        from django.core.files.base import ContentFile
+        try:
+            fmt, imgstr = avatar_base64.split(';base64,') if ';base64,' in avatar_base64 else ('', avatar_base64)
+            ext = fmt.split('/')[-1] if '/' in fmt else 'png'
+            file_name = f"user_{user.id}_avatar.{ext}"
+            content = ContentFile(base64.b64decode(imgstr), name=file_name)
+            user.avatar.save(file_name, content, save=False)
+        except Exception as err:
+            print(f"[Update Profile Avatar Exception]: {err}")
+
     user.save()
+    return JsonResponse({"success": True, "user": user.to_dict()})
+
+
+@api_view(['POST'])
+def upload_avatar(request):
+    if not request.user or not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
+    
+    user = request.user
+    avatar_file = request.FILES.get('avatar')
+    avatar_base64 = request.data.get('avatar_base64')
+
+    if avatar_file:
+        user.avatar = avatar_file
+        user.save()
+    elif avatar_base64:
+        import base64
+        from django.core.files.base import ContentFile
+        try:
+            fmt, imgstr = avatar_base64.split(';base64,') if ';base64,' in avatar_base64 else ('', avatar_base64)
+            ext = fmt.split('/')[-1] if '/' in fmt else 'png'
+            file_name = f"user_{user.id}_avatar.{ext}"
+            content = ContentFile(base64.b64decode(imgstr), name=file_name)
+            user.avatar.save(file_name, content, save=True)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
+            
     return JsonResponse({"success": True, "user": user.to_dict()})
 
 

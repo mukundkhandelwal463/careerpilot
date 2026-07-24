@@ -63,7 +63,7 @@ const Navbar = () => {
 
   const renderAvatar = () => {
     const userEmail = user?.email || "default";
-    const savedImg = localStorage.getItem(`candidate_profile_img_${userEmail}`);
+    const savedImg = localStorage.getItem(`candidate_profile_img_${userEmail}`) || localStorage.getItem('candidate_profile_img_global');
     if (savedImg) {
       return (
         <img 
@@ -73,10 +73,11 @@ const Navbar = () => {
         />
       );
     }
-    if (user && user.profile_image) {
+    if (user && (user.avatar || user.profile_image || user.google_picture)) {
+      const src = user.avatar || user.profile_image || user.google_picture;
       return (
         <img 
-          src={user.profile_image} 
+          src={src} 
           alt="Profile" 
           style={{ width: '41px', height: '41px', borderRadius: '50%', objectFit: 'cover' }} 
         />

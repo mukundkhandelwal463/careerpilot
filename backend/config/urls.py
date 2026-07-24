@@ -6,7 +6,17 @@ from django.http import HttpResponse
 from api.views import prometheus_metrics
 
 def serve_spa(request, path=''):
-    """Serve the React single page app. Serves assets directly and maps paths to index.html."""
+    """Serve the React single page app and media assets."""
+    # Serve uploaded media files (e.g. /media/avatars/...)
+    if path.startswith('media/'):
+        media_relative = path[6:]
+        media_file = settings.MEDIA_ROOT / media_relative
+        if os.path.isfile(media_file):
+            import mimetypes
+            content_type, _ = mimetypes.guess_type(str(media_file))
+            with open(media_file, 'rb') as f:
+                return HttpResponse(f.read(), content_type=content_type or 'image/jpeg')
+
     dist_dir = settings.BASE_DIR.parent / 'client' / 'dist'
     
     # If the path points to an actual file in the build directory, serve it
