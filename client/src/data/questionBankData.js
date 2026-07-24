@@ -507,6 +507,26 @@ export const questionBankData = [
   // OBJECT-ORIENTED PROGRAMMING (25 Questions)
   // ==========================================
   {
+    id: "oops_basics_01",
+    conceptId: "oops_what_why",
+    subject: "oops",
+    type: "theoretical",
+    question: "What is the primary motivation for using Object-Oriented Programming (OOPs)?",
+    options: ["To eliminate all memory allocations", "To model real-world entities into reusable, modular objects with data encapsulation", "To execute code faster than C assembly", "To force single-threaded execution"],
+    answer: "To model real-world entities into reusable, modular objects with data encapsulation",
+    explanation: "OOPs structures software around objects representing real-world entities, promoting code reusability, maintainability, and data security."
+  },
+  {
+    id: "oops_basics_02",
+    conceptId: "oops_vs_procedural",
+    subject: "oops",
+    type: "theoretical",
+    question: "How does Object-Oriented Programming differ from Procedural Programming?",
+    options: ["Procedural focuses on data security while OOPs ignores data", "Procedural organizes code into top-down functions operating on global data, whereas OOPs bundles data and methods into objects", "Procedural programming does not allow functions", "OOPs cannot use conditional loops"],
+    answer: "Procedural organizes code into top-down functions operating on global data, whereas OOPs bundles data and methods into objects",
+    explanation: "Procedural programming follows a top-down function-centric approach, while OOPs uses bottom-up object-centric design with encapsulated states."
+  },
+  {
     id: "oops_01",
     conceptId: "encapsulation",
     subject: "oops",
@@ -1616,6 +1636,36 @@ export const questionBankData = [
     options: ["5", "4", "6", "3"],
     answer: "4",
     explanation: "Initial state: 1. Iteration 1 (n=1 < 5 -> yields 2). Iteration 2 (n=2 < 5 -> yields 3). Iteration 3 (n=3 < 5 -> yields 4). Iteration 4 (n=4 < 5 -> yields 5). Next check (n=5 < 5 is false) terminates. So it runs exactly 4 iterations."
+  },
+  {
+    id: "sys_basics_01",
+    conceptId: "sys_what_why",
+    subject: "system_design",
+    type: "theoretical",
+    question: "What is System Design and why is it essential for software engineering?",
+    options: ["It is the process of writing SQL database migrations", "It is the process of defining architecture, components, modules, interfaces, and data for a system to satisfy specified requirements", "It is a front-end CSS framework for responsive web design", "It is an automated unit testing suite"],
+    answer: "It is the process of defining architecture, components, modules, interfaces, and data for a system to satisfy specified requirements",
+    explanation: "System Design provides a blueprint for building scalable, resilient software systems that handle high traffic, data persistence, and low latency."
+  },
+  {
+    id: "sys_basics_02",
+    conceptId: "sys_hld_vs_lld",
+    subject: "system_design",
+    type: "theoretical",
+    question: "What is the key difference between High-Level Design (HLD) and Low-Level Design (LLD)?",
+    options: ["HLD focuses on UI colors while LLD focuses on backend databases", "HLD defines high-level architecture, component blocks, load balancers, and data flows, while LLD details micro-level class diagrams, design patterns, schemas, and algorithms", "HLD is written in Python while LLD is written in C++", "HLD is only used for mobile apps while LLD is for web servers"],
+    answer: "HLD defines high-level architecture, component blocks, load balancers, and data flows, while LLD details micro-level class diagrams, design patterns, schemas, and algorithms",
+    explanation: "HLD covers macro system architecture (Load Balancers, Microservices, DB Shards), while LLD covers detailed class hierarchies, interfaces, methods, and algorithms."
+  },
+  {
+    id: "sys_basics_03",
+    conceptId: "sys_functional_requirements",
+    subject: "system_design",
+    type: "theoretical",
+    question: "In System Design, what differentiates Functional Requirements from Non-Functional Requirements?",
+    options: ["Functional requirements define specific user-facing features/APIs, while Non-Functional requirements define system qualities like latency, throughput, and availability", "Functional requirements are optional while Non-Functional requirements are mandatory", "Functional requirements deal with security while Non-Functional requirements deal with HTML UI", "There is no difference between them"],
+    answer: "Functional requirements define specific user-facing features/APIs, while Non-Functional requirements define system qualities like latency, throughput, and availability",
+    explanation: "Functional requirements specify WHAT the system should do (e.g. 'User can post a tweet'), whereas Non-Functional requirements define HOW WELL the system performs (e.g. 'p99 latency < 200ms, 99.99% availability')."
   },
   {
     id: "sys_01",

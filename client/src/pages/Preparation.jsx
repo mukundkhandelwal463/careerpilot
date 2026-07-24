@@ -725,6 +725,14 @@ const dsaTheoryData = {
 // ── OOPs Concept Tracker Data ──────────────────────────────────
 const oopsTrackerData = [
   {
+    categoryName: "Foundations & Why OOPs?",
+    concepts: [
+      { id: "oops_what_why", name: "What is OOPs & Why do we use it?" },
+      { id: "oops_vs_procedural", name: "Procedural vs Object-Oriented Programming" },
+      { id: "oops_entity_modeling", name: "Real-World Entity Modeling & Reusability" }
+    ]
+  },
+  {
     categoryName: "Core Pillars",
     concepts: [
       { id: "classes_objects", name: "Classes & Objects" },
@@ -772,6 +780,14 @@ const oopsTrackerData = [
 // ── OS Concept Tracker Data ──────────────────────────────────────
 const osTrackerData = [
   {
+    categoryName: "Foundations & Why OS?",
+    concepts: [
+      { id: "os_what_why", name: "What is an Operating System & Why do we use it?" },
+      { id: "os_kernel_userspace", name: "Kernel vs User Space & System Calls" },
+      { id: "os_resource_manager", name: "Hardware-Software Abstraction & Resource Management" }
+    ]
+  },
+  {
     categoryName: "Process Management",
     concepts: [
       { id: "os_process_thread", name: "Process vs Thread" },
@@ -815,6 +831,14 @@ const osTrackerData = [
 // ── CN Concept Tracker Data ──────────────────────────────────────
 const cnTrackerData = [
   {
+    categoryName: "Foundations & Why Computer Networks?",
+    concepts: [
+      { id: "cn_what_why", name: "What is a Computer Network & Why do we use it?" },
+      { id: "cn_client_server_p2p", name: "Client-Server Architecture vs Peer-to-Peer (P2P)" },
+      { id: "cn_bandwidth_latency", name: "Bandwidth, Latency & Packet Switching Fundamentals" }
+    ]
+  },
+  {
     categoryName: "Network Models & Layers",
     concepts: [
       { id: "cn_osi_model", name: "OSI 7-Layer Model" },
@@ -857,6 +881,15 @@ const cnTrackerData = [
 
 // ── DBMS & SQL 50 Concept Tracker Data ────────────────────────────
 const dbmsTrackerData = [
+  {
+    isTheory: true,
+    categoryName: "Foundations & Why DBMS?",
+    concepts: [
+      { id: "dbms_what_why", name: "What is a DBMS & Why do we use it?" },
+      { id: "dbms_vs_filesystem", name: "File System vs Database Management System" },
+      { id: "dbms_data_independence", name: "Data Independence & 3-Schema Architecture" }
+    ]
+  },
   {
     isTheory: true,
     categoryName: "Relational Databases (RDBMS)",
@@ -935,6 +968,15 @@ const dbmsTrackerData = [
 
 // ── System Design Concept Tracker Data ───────────────────────────
 const systemDesignTrackerData = [
+  {
+    categoryName: "Foundations, HLD & LLD",
+    concepts: [
+      { id: "sys_what_why", name: "What is System Design & Why do we use it?" },
+      { id: "sys_hld_vs_lld", name: "High-Level Design (HLD) vs Low-Level Design (LLD)" },
+      { id: "sys_functional_requirements", name: "Functional vs Non-Functional Requirements" },
+      { id: "sys_system_qualities", name: "Scalability, Availability, Reliability & Maintainability" }
+    ]
+  },
   {
     categoryName: "Scalability & Load Balancing",
     concepts: [
