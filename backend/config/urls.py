@@ -31,6 +31,7 @@ def serve_spa(request, path=''):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/admin/', admin.site.urls),
     path('metrics', prometheus_metrics, name='metrics'),
     path('api/', include('api.urls')),
     
