@@ -2210,14 +2210,10 @@ def get_results_api(request):
 
         if user:
             interviews_db = list(MockInterview.objects.filter(user=user).order_by("-created_at"))
-            if not interviews_db:
-                interviews_db = list(MockInterview.objects.all().order_by("-created_at"))
             tests_db = list(MockTestAttempt.objects.filter(user=user).order_by("-created_at"))
-            if not tests_db:
-                tests_db = list(MockTestAttempt.objects.all().order_by("-created_at"))
         else:
-            interviews_db = list(MockInterview.objects.all().order_by("-created_at"))
-            tests_db = list(MockTestAttempt.objects.all().order_by("-created_at"))
+            interviews_db = []
+            tests_db = []
 
         interviews = []
         for x in interviews_db:

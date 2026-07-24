@@ -672,10 +672,39 @@ ${achievementsContent}
   }, [template, name, location, phone, email, linkedin, github, educationList, skillsList, projectsList, trainingList, certificationsList, achievementsList]);
 
   // Copy LaTeX
-  const handleCopyLatex = () => {
-    navigator.clipboard.writeText(latexCode);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+  const handleCopyLatex = async () => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(latexCode);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = latexCode;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-999999px';
+        textarea.style.top = '-999999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Copy failed, using fallback:', err);
+      const textarea = document.createElement('textarea');
+      textarea.value = latexCode;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-999999px';
+      textarea.style.top = '-999999px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }
   };
 
   // Download .tex

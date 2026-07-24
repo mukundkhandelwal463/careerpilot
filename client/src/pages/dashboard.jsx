@@ -231,10 +231,14 @@ const Dashboard = () => {
           if (data.tests && data.tests.length > 0) {
             const best = data.tests.reduce((prev, current) => (prev.score > current.score ? prev : current));
             setBestTestResult(best);
+          } else {
+            setBestTestResult(null);
           }
           if (data.interviews && data.interviews.length > 0) {
             const bestInter = data.interviews.reduce((prev, current) => (prev.score > current.score ? prev : current));
             setBestInterviewResult(bestInter);
+          } else {
+            setBestInterviewResult(null);
           }
           // Update interview count from DB data
           if (data.total_interviews !== undefined) {
