@@ -3131,6 +3131,110 @@ def notify_overdue_tasks(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+def export_user_data_api(request):
+    try:
+        user = request.user
+        if not user or not user.is_authenticated:
+            email_param = request.GET.get('email') or request.GET.get('id')
+            if email_param:
+                from api.models import User
+                user = User.objects.filter(email=email_param).first()
+
+        if not user:
+            return JsonResponse({"success": False, "error": "Unauthorized"}, status=401)
+
+        from api.models import Resume, MockInterview, MockTestAttempt, CareerMap, CSSubjectProgress
+        from datetime import datetime
+
+        # 1. Profile Data
+        profile_data = user.to_dict()
+
+        # 2. Resumes
+        resumes_list = []
+        for r in Resume.objects.filter(user=user).order_by('-created_at'):
+            resumes_list.append({
+                "id": r.id,
+                "title": r.title,
+                "category": r.category,
+                "ats_score": r.ats_score,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+                "analysis": r.analysis
+            })
+
+        # 3. Mock Interviews
+        interviews_list = []
+        for mi in MockInterview.objects.filter(user=user).order_by('-created_at'):
+            interviews_list.append({
+                "id": mi.id,
+                "score": mi.score,
+                "feedback": mi.feedback,
+                "transcript": mi.transcript,
+                "created_at": mi.created_at.isoformat() if mi.created_at else None
+            })
+
+        # 4. Mock Tests
+        tests_list = []
+        for mt in MockTestAttempt.objects.filter(user=user).order_by('-created_at'):
+            tests_list.append({
+                "id": mt.id,
+                "difficulty": mt.difficulty,
+                "score": mt.score,
+                "max_score": mt.max_score,
+                "technical_score": mt.technical_score,
+                "verbal_score": mt.verbal_score,
+                "aptitude_score": mt.aptitude_score,
+                "coding_easy_score": mt.coding_easy_score,
+                "coding_hard_score": mt.coding_hard_score,
+                "details": mt.details,
+                "created_at": mt.created_at.isoformat() if mt.created_at else None
+            })
+
+        # 5. Career Roadmap
+        cmap = CareerMap.objects.filter(user=user).first()
+        roadmap_data = None
+        if cmap:
+            roadmap_data = {
+                "target_role": cmap.target_role,
+                "roadmap_data": cmap.roadmap_data,
+                "updated_at": cmap.updated_at.isoformat() if cmap.updated_at else None
+            }
+
+        # 6. CS Progress
+        cs_progress_list = []
+        for cp in CSSubjectProgress.objects.filter(user=user):
+            cs_progress_list.append({
+                "subject": cp.subject,
+                "completed_concept_ids": cp.completed_concept_ids
+            })
+
+        complete_data = {
+            "export_date": datetime.now().isoformat(),
+            "profile": profile_data,
+            "resumes": resumes_list,
+            "mock_interviews": interviews_list,
+            "mock_tests": tests_list,
+            "career_roadmap": roadmap_data,
+            "cs_progress": cs_progress_list
+        }
+
+        import json
+        json_bytes = json.dumps(complete_data, indent=2).encode('utf-8')
+        from django.http import FileResponse
+        import io
+        return FileResponse(
+            io.BytesIO(json_bytes),
+            as_attachment=True,
+            filename=f"CareerPilot_Complete_User_Data_{user.id}.json",
+            content_type='application/json'
+        )
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"success": False, "error": str(exc)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def export_all_users_data_admin_api(request):
     try:
         email = request.GET.get('email') or ''
