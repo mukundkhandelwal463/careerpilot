@@ -2499,10 +2499,40 @@ const Preparation = () => {
 
                 {careerRoadmap && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    {/* Match Score & Executive Summary Banner */}
+                    <div style={{
+                      background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+                      borderRadius: '20px',
+                      padding: '24px',
+                      color: 'white',
+                      boxShadow: '0 10px 25px -5px rgba(49, 46, 129, 0.25)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '14px' }}>
+                        <div>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c7d2fe' }}>
+                            AI Profile & Gap Match
+                          </span>
+                          <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: '2px 0 0 0', color: 'white' }}>
+                            Target Role: {targetRole}
+                          </h3>
+                        </div>
+                        <div style={{ background: 'rgba(255, 255, 255, 0.15)', border: '1px solid rgba(255, 255, 255, 0.3)', backdropFilter: 'blur(8px)', padding: '8px 18px', borderRadius: '999px' }}>
+                          <strong style={{ fontSize: '1.1rem', color: '#a7f3d0' }}>
+                            {careerRoadmap.match_percentage || 75}% Skill Match
+                          </strong>
+                        </div>
+                      </div>
+                      {careerRoadmap.career_gaps_summary && (
+                        <p style={{ margin: 0, fontSize: '0.86rem', color: '#e0e7ff', lineHeight: 1.6, borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '12px' }}>
+                          <strong>AI Career Gap Analysis:</strong> {careerRoadmap.career_gaps_summary}
+                        </p>
+                      )}
+                    </div>
+
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                       <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '16px', padding: '20px' }}>
                         <strong style={{ display: 'block', fontSize: '0.9rem', color: '#166534', marginBottom: '10px' }}>
-                          ✓ Your Alignment Skills
+                          ✓ Your Alignment Skills ({careerRoadmap.current_skills?.length || 0})
                         </strong>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                           {careerRoadmap.current_skills?.map((sk, i) => (
@@ -2515,7 +2545,7 @@ const Preparation = () => {
 
                       <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '16px', padding: '20px' }}>
                         <strong style={{ display: 'block', fontSize: '0.9rem', color: '#92400e', marginBottom: '10px' }}>
-                          ⚠ Gap Analysis (What is left to learn)
+                          ⚠ Identified Career Gaps ({careerRoadmap.gap_skills?.length || 0} missing skills)
                         </strong>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                           {careerRoadmap.gap_skills?.map((sk, i) => (

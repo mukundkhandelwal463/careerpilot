@@ -1324,106 +1324,90 @@ Return a valid JSON object with keys: 'score' (integer 0-100), 'strengths' (arra
 
 
 def generate_career_roadmap(resume_text, target_role, job_description=""):
-    if not is_valid_key():
-        return {
-            "current_skills": ["Python", "Git", "Software engineering basic principles"],
-            "gap_skills": ["Advanced System Design", "Docker & Kubernetes", "Cloud Architecture (AWS)"],
-            "levels": [
-                {
-                    "level": 1,
-                    "title": "Level 1: Specialization Fundamentals",
-                    "topics": ["Advanced programming language constructs", "Data storage modeling (SQL vs NoSQL)"],
-                    "duration": "2 weeks",
-                    "focus": "Establish strong backend and role specialization foundations."
-                },
-                {
-                    "level": 2,
-                    "title": "Level 2: Distributed Systems",
-                    "topics": ["Microservices architecture pattern", "Caching & message queues (Redis/Kafka)"],
-                    "duration": "3 weeks",
-                    "focus": "Learn to design highly available and decoupled services."
-                }
-            ]
-        }
-
     jd_clause = f"\nTarget Job Description to crack:\n{job_description}" if job_description else ""
-    prompt = f"""You are a top-tier career counselor and technical roadmap designer.
-The candidate has the following resume:
+    prompt = f"""You are a top-tier AI career counselor and technical roadmap designer.
+Analyze the candidate's resume and target role to perform an in-depth Career Gap & Skill Analysis and build a step-by-step learning roadmap.
+
+Candidate Resume Text:
 {_clip_text(resume_text, max_chars=4000)}
 
-They want to study and plan a learning path to become a:
+Target Role to Achieve:
 {target_role}{jd_clause}
 
-Analyze their background, skills gap, and outline a complete, comprehensive level-by-level study roadmap. You MUST generate at least 3 to 4 levels (e.g., Level 1, Level 2, Level 3, etc.) covering everything from foundations to mastery.
-Include a precise gap analysis showing what skills they already have (relative to target role) and what they have left to learn.
+Analyze their background, calculate their skill match percentage, identify their career skill gaps, and outline a complete 4-level study roadmap.
 
-Return a valid JSON object with the following keys:
-- 'current_skills': list of strings
-- 'gap_skills': list of strings
-- 'levels': list of objects, where each object has keys:
-  - 'level': integer (1, 2, 3, etc.)
+Return a STRICT valid JSON object with EXACT keys:
+- 'match_percentage': integer (0 to 100)
+- 'current_skills': list of strings (skills candidate already has from CV)
+- 'gap_skills': list of strings (career gaps / missing skills required to crack the role)
+- 'career_gaps_summary': string (2-3 sentence executive explanation of career gaps and strategic focus)
+- 'levels': list of 4 objects, where each object has keys:
+  - 'level': integer (1, 2, 3, 4)
   - 'title': string
-  - 'topics': list of strings. IMPORTANT: Instead of broad topics like 'Advanced algorithms', you MUST provide exactly 2 highly specific, actionable sub-topic names for each broad concept (e.g., 'Advanced algorithms: Dijkstra', 'Advanced algorithms: A* Search'). This flat list of strings will be mapped directly to daily tasks, 2 per day.
-  - 'duration': string
+  - 'duration': string (e.g. '2 weeks', '3 weeks')
   - 'focus': string
+  - 'topics': list of strings (provide 4-6 specific actionable sub-topic names for study tasks)
 
-Format the response strictly as valid JSON (start with '{{' and end with '}}'). Do not add markdown backticks (e.g. ```json) or any extra text before or after the JSON response.
+Format the response strictly as valid JSON (start with '{{' and end with '}}'). Do not add markdown backticks.
 
 JSON Roadmap:"""
 
     try:
-        raw_response = _generate_with_model_fallback(prompt, timeout_sec=16)
+        raw_response = _generate_with_model_fallback(prompt, timeout_sec=18)
         cleaned = re.sub(r"```json\s*", "", raw_response)
         cleaned = re.sub(r"```\s*", "", cleaned).strip()
-        return json.loads(cleaned)
+        parsed = json.loads(cleaned)
+        if isinstance(parsed, dict) and "levels" in parsed:
+            return parsed
     except Exception as e:
-        print(f"Error generating roadmap: {e}")
-        return {
-            "current_skills": ["Python", "Basic JavaScript"],
-            "gap_skills": ["Deep Learning", "A/B Testing", "ETL Systems", "System Architecture"],
-            "levels": [
-                {
-                    "level": 1,
-                    "title": "Level 1: Core Foundations",
-                    "topics": [
-                        "Advanced algorithms: Dijkstra & Bellman-Ford", 
-                        "Advanced algorithms: A* Search Pattern", 
-                        "Specialized packages: React Router in-depth", 
-                        "Specialized packages: Redux State Management"
-                    ],
-                    "duration": "3 weeks",
-                    "focus": "Strengthen domain-specific developer foundations and core coding skills."
-                },
-                {
-                    "level": 2,
-                    "title": "Level 2: Advanced Application Design",
-                    "topics": [
-                        "Microservices patterns: API Gateways", 
-                        "Microservices patterns: Service Discovery", 
-                        "Database optimization: B-Tree Indexing", 
-                        "Database optimization: Query Profiling",
-                        "Asynchronous processing: Celery tasks",
-                        "Asynchronous processing: RabbitMQ queues"
-                    ],
-                    "duration": "4 weeks",
-                    "focus": "Build robust, scalable systems and understand architecture tradeoffs."
-                },
-                {
-                    "level": 3,
-                    "title": "Level 3: Production Mastery",
-                    "topics": [
-                        "CI/CD pipelines: GitHub Actions", 
-                        "CI/CD pipelines: Docker Image Optimization", 
-                        "Monitoring & Logging: Prometheus metrics", 
-                        "Monitoring & Logging: ELK Stack", 
-                        "Cloud deployment: AWS ECS/EKS",
-                        "Cloud deployment: Terraform basics"
-                    ],
-                    "duration": "2 weeks",
-                    "focus": "Deploy applications securely to production and handle scale."
-                }
-            ]
-        }
+        print(f"Error generating roadmap via Gemini/DeepSeek: {e}")
+
+    try:
+        raw_response = _generate_with_deepseek_fallback(prompt, timeout_sec=18)
+        cleaned = re.sub(r"```json\s*", "", raw_response)
+        cleaned = re.sub(r"```\s*", "", cleaned).strip()
+        parsed = json.loads(cleaned)
+        if isinstance(parsed, dict) and "levels" in parsed:
+            return parsed
+    except Exception as exc:
+        print(f"DeepSeek direct fallback error: {exc}")
+
+    return {
+        "match_percentage": 68,
+        "current_skills": ["Core Software Development", "Version Control (Git)", "Database Fundamentals"],
+        "gap_skills": ["Enterprise System Design", "Container Orchestration (Docker/K8s)", "Cloud Infrastructure (AWS)"],
+        "career_gaps_summary": f"To transition effectively into a {target_role}, focus on moving from individual module development into scalable cloud architecture, production CI/CD pipelines, and microservices patterns.",
+        "levels": [
+            {
+                "level": 1,
+                "title": "Level 1: Specialization & Core Foundations",
+                "topics": ["Advanced Language Constructs", "Relational & NoSQL Schema Design", "RESTful API Best Practices"],
+                "duration": "2 weeks",
+                "focus": "Strengthen domain-specific developer foundations."
+            },
+            {
+                "level": 2,
+                "title": "Level 2: Distributed Systems & Caching",
+                "topics": ["Microservices Architecture Patterns", "Caching & Message Queues (Redis/RabbitMQ)", "Query Profiling & Indexing"],
+                "duration": "3 weeks",
+                "focus": "Learn to design highly available and decoupled services."
+            },
+            {
+                "level": 3,
+                "title": "Level 3: Cloud & Production Mastery",
+                "topics": ["CI/CD Automation (GitHub Actions)", "Docker Image Optimization", "AWS Deployment & Cloud Monitoring"],
+                "duration": "3 weeks",
+                "focus": "Master production deployment, cloud infrastructure, and DevOps pipelines."
+            },
+            {
+                "level": 4,
+                "title": "Level 4: Interview & Capstone Readiness",
+                "topics": ["System Design Mock Interview Drills", "Capstone Portfolio Project Refinement", "Leadership & Architecture Communication"],
+                "duration": "2 weeks",
+                "focus": "Prepare for technical system design interviews and senior candidate presentation."
+            }
+        ]
+    }
 
 
 MOCK_TEST_FALLBACK_DATA = {
