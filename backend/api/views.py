@@ -2801,9 +2801,6 @@ def download_complete_report_api(request):
             ("System Design", clean_pct(request.GET.get('sys')), (6, 182, 212))
         ]
 
-        pdf.set_font("Helvetica", "", 9.5)
-        pdf.set_text_color(51, 65, 85)
-
         for subj_name, pct_str, color_rgb in cs_subjects:
             pct_val = int(pct_str)
             pdf.cell(55, 6, f"{subj_name}")
