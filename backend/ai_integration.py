@@ -1167,98 +1167,111 @@ Resume Text:
         return {}
 
 
-def generate_interview_questions(resume_text):
-    if not is_valid_key():
-        return [
-            {"id": 1, "type": "Technical", "question": "Explain your experience with Python, javascript or other skills listed in your CV."},
-            {"id": 2, "type": "Technical", "question": "What is the most complex backend system issue you solved?"},
-            {"id": 3, "type": "HR", "question": "Why do you want to join our organization?"},
-            {"id": 4, "type": "HR", "question": "Describe a situation where you had to work under tight constraints."},
-            {"id": 5, "type": "Management", "question": "How do you manage deadlines and prioritize tasks?"},
-            {"id": 6, "type": "Management", "question": "Explain a time when you coordinated a multi-developer project."},
-            {"id": 7, "type": "Technical", "question": "Describe a system architecture challenge you faced."},
-            {"id": 8, "type": "HR", "question": "How do you handle negative feedback from a senior stakeholder?"},
-            {"id": 9, "type": "Management", "question": "How do you handle scope creep mid-project?"},
-            {"id": 10, "type": "Technical", "question": "Explain your understanding of CI/CD and production deployment."}
-        ]
+def generate_interview_questions(resume_text=""):
+    import random
 
-    prompt = f"""Based on the following candidate's resume/CV text, generate exactly 10 interview questions.
-The questions should be a mix of:
-- Technical questions (based on the candidate's skills, tools, frameworks, and achievements mentioned in the resume)
-- HR questions (behavioral, teamwork, conflict resolution, situational)
-- Management questions (leadership, project coordination, priority setting)
+    question_pool = [
+        {"type": "Technical", "question": "Explain your experience with Python, JavaScript, and backend frameworks listed in your CV."},
+        {"type": "Technical", "question": "What is the most complex database query or API performance issue you resolved?"},
+        {"type": "Technical", "question": "How do you handle authentication, session management, and security in web applications?"},
+        {"type": "Technical", "question": "Describe a system architecture trade-off you made in one of your recent projects."},
+        {"type": "Technical", "question": "Explain your understanding of CI/CD pipelines, Docker containerization, and cloud deployment."},
+        {"type": "HR", "question": "Why are you interested in this role, and how does your background align with our technology stack?"},
+        {"type": "HR", "question": "Describe a situation where you had to work under tight project constraints or sudden requirement changes."},
+        {"type": "HR", "question": "How do you handle constructive criticism or disagreement with a senior engineer or product manager?"},
+        {"type": "HR", "question": "What is a project you built that you are most proud of, and what key lesson did you learn?"},
+        {"type": "Management", "question": "How do you prioritize competing tasks and manage project deadlines effectively?"},
+        {"type": "Management", "question": "Explain a situation where you led or coordinated work across multiple team members."},
+        {"type": "Management", "question": "How do you handle scope creep or shifting priorities mid-sprint?"}
+    ]
 
-Return a JSON array of objects. Each object should have three fields:
-- 'id': integer from 1 to 10
-- 'type': 'Technical', 'HR', or 'Management'
-- 'question': the actual question text.
+    if resume_text:
+        prompt = f"""Based on the candidate's resume/CV text below, generate 10 customized interview questions.
+Ensure a mix of Technical, HR, and Management questions focused on their listed skills.
 
-Format the response strictly as valid JSON (start with '[' and end with ']'). Do not add markdown backticks or any other text before/after the JSON array.
+Return a JSON array of objects with keys: 'id' (1-10), 'type' ('Technical', 'HR', or 'Management'), and 'question' (string).
 
-Candidate Resume Text:
+Resume Text:
 {_clip_text(resume_text, max_chars=4000)}"""
 
-    try:
-        raw_response = _generate_with_model_fallback(prompt, timeout_sec=15)
-        cleaned = re.sub(r"```json\s*", "", raw_response)
-        cleaned = re.sub(r"```\s*", "", cleaned).strip()
-        return json.loads(cleaned)
-    except Exception as e:
-        print(f"Error generating questions via Gemini: {e}")
-        return [
-            {"id": 1, "type": "Technical", "question": "Explain your experience with Python, javascript or other skills listed in your CV."},
-            {"id": 2, "type": "Technical", "question": "What is the most complex backend system issue you solved?"},
-            {"id": 3, "type": "HR", "question": "Why do you want to join our organization?"},
-            {"id": 4, "type": "HR", "question": "Describe a situation where you had to work under tight constraints."},
-            {"id": 5, "type": "Management", "question": "How do you manage deadlines and prioritize tasks?"},
-            {"id": 6, "type": "Management", "question": "Explain a time when you coordinated a multi-developer project."},
-            {"id": 7, "type": "Technical", "question": "Describe a system architecture challenge you faced."},
-            {"id": 8, "type": "HR", "question": "How do you handle negative feedback from a senior stakeholder?"},
-            {"id": 9, "type": "Management", "question": "How do you handle scope creep mid-project?"},
-            {"id": 10, "type": "Technical", "question": "Explain your understanding of CI/CD and production deployment."}
-        ]
+        try:
+            raw_response = _generate_with_model_fallback(prompt, timeout_sec=15)
+            cleaned = re.sub(r"```json\s*", "", raw_response)
+            cleaned = re.sub(r"```\s*", "", cleaned).strip()
+            parsed = json.loads(cleaned)
+            if isinstance(parsed, list) and len(parsed) >= 5:
+                random.shuffle(parsed)
+                for idx, q in enumerate(parsed):
+                    q["id"] = idx + 1
+                return parsed[:10]
+        except Exception as e:
+            print(f"Error generating questions via Gemini: {e}")
+
+    # Fallback: Shuffle pool and return 10 questions
+    selected = random.sample(question_pool, min(10, len(question_pool)))
+    for idx, q in enumerate(selected):
+        q["id"] = idx + 1
+    return selected
 
 
 def grade_interview_response(question, response):
-    if not is_valid_key():
+    text = (response or "").strip()
+
+    # Detect gibberish or non-answer (e.g. random letters like 'zsdrfgthyjk')
+    vowels = sum(1 for c in text.lower() if c in 'aeiou')
+    word_count = len(text.split())
+    
+    if len(text) < 4 or (word_count <= 2 and vowels == 0) or (len(text) > 5 and vowels / max(len(text), 1) < 0.1):
         return {
-            "score": 80,
-            "strengths": ["Spoken response received", "Provided direct answer"],
-            "improvements": ["Unlock full AI evaluation by adding GEMINI_API_KEY to your .env file"]
+            "score": 10,
+            "strengths": ["Spoken/typed audio input received"],
+            "improvements": ["Please provide a meaningful, structured response with clear technical details."]
         }
 
     prompt = f"""An interview candidate was asked the following question:
 '{question}'
 
 Their spoken/recognized response was:
-'{response}'
+'{text}'
 
-Evaluate this response. Provide:
-1. A numerical score from 0 to 100 based on completeness, correctness, clarity, and professionalism.
+Evaluate this response objectively based on technical correctness, completeness, and clarity.
+Provide:
+1. A numerical score from 0 to 100.
 2. A short list of strengths (1-2 bullet points).
 3. A short list of suggested improvements (1-2 bullet points).
 
-Return a valid JSON object with the keys:
-- 'score': integer (0 to 100)
-- 'strengths': array of strings
-- 'improvements': array of strings
-
-Format the response strictly as valid JSON (start with '{{' and end with '}}'). Do not add markdown backticks or any other text before/after the JSON object.
-
-Evaluation:"""
+Return a valid JSON object with keys: 'score' (integer 0-100), 'strengths' (array of strings), 'improvements' (array of strings). Do not use markdown backticks."""
 
     try:
         raw_response = _generate_with_model_fallback(prompt, timeout_sec=12)
         cleaned = re.sub(r"```json\s*", "", raw_response)
         cleaned = re.sub(r"```\s*", "", cleaned).strip()
-        return json.loads(cleaned)
+        result = json.loads(cleaned)
+        if isinstance(result, dict) and "score" in result:
+            result["score"] = int(result["score"])
+            return result
     except Exception as e:
         print(f"Error grading response via Gemini: {e}")
-        return {
-            "score": 75,
-            "strengths": ["Clear spoken articulation"],
-            "improvements": ["Clarify technical trade-offs in candidate response"]
-        }
+
+    # Dynamic fallback score based on candidate answer depth
+    if word_count < 6:
+        dynamic_score = 35
+        strengths = ["Brief response provided"]
+        improvements = ["Elaborate with specific technical examples and reasoning"]
+    elif word_count < 20:
+        dynamic_score = 65
+        strengths = ["Clear candidate response addressing the prompt"]
+        improvements = ["Include deeper system architecture trade-offs or tools used"]
+    else:
+        dynamic_score = 82
+        strengths = ["Comprehensive answer with detailed explanation"]
+        improvements = ["Quantify measurable impacts and metric outcomes"]
+
+    return {
+        "score": dynamic_score,
+        "strengths": strengths,
+        "improvements": improvements
+    }
 
 
 def generate_career_roadmap(resume_text, target_role, job_description=""):

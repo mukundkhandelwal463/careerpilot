@@ -4706,7 +4706,7 @@ const Preparation = () => {
                             No mock test reports found. Start a mock test to see your score cards!
                           </div>
                         ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxHeight: '440px', overflowY: 'auto', paddingRight: '8px' }}>
                             {resultsData.tests.map(test => {
                               const grading = test.details?.grading || {};
                               const coding_easy = grading.coding_easy || {};
@@ -4809,7 +4809,7 @@ const Preparation = () => {
                             No interview reports found. Start an AI Interview to see your score cards!
                           </div>
                         ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxHeight: '360px', overflowY: 'auto', paddingRight: '8px' }}>
                             {resultsData.interviews.map(interview => (
                               <div key={interview.id} style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px', marginBottom: '16px' }}>
