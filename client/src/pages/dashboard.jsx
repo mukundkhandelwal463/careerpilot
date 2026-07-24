@@ -76,22 +76,11 @@ const Dashboard = () => {
     const file = e.target.files[0];
     if (file && user) {
       const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64Img = reader.result;
-        setProfileImg(base64Img);
-        localStorage.setItem(`candidate_profile_img_${user.email}`, base64Img);
-        localStorage.setItem('candidate_profile_img_global', base64Img);
+      reader.onloadend = () => {
+        localStorage.setItem(`candidate_profile_img_${user.email}`, reader.result);
+        setProfileImg(reader.result);
+        // Force header update by triggering storage event
         window.dispatchEvent(new Event('storage'));
-
-        try {
-          await fetch('/api/auth/upload-avatar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ avatar_base64: base64Img })
-          });
-        } catch (err) {
-          console.error("Failed to upload avatar to backend:", err);
-        }
       };
       reader.readAsDataURL(file);
     }
@@ -104,18 +93,16 @@ const Dashboard = () => {
     }
 
     const email = user.email;
-    // Load profile image: prefer localStorage uploaded photo, then user avatar from backend DB, then Google picture
-    const savedProfileImg = localStorage.getItem(`candidate_profile_img_${email}`) || localStorage.getItem('candidate_profile_img_global');
+    // Load profile image: prefer localStorage uploaded photo, then Google OAuth picture, then default
+    const savedProfileImg = localStorage.getItem(`candidate_profile_img_${email}`);
     if (savedProfileImg) {
       setProfileImg(savedProfileImg);
-    } else if (user.avatar) {
-      setProfileImg(user.avatar);
-      localStorage.setItem(`candidate_profile_img_${email}`, user.avatar);
     } else if (user.google_picture) {
       setProfileImg(user.google_picture);
-      localStorage.setItem(`candidate_profile_img_${email}`, user.google_picture);
+    } else if (user.avatar) {
+      setProfileImg(user.avatar);
     } else {
-      setProfileImg("");
+      setProfileImg("/candidate_profile.png");
     }
 
     const savedTasks = localStorage.getItem(`scheduled_tasks_${email}`);
@@ -489,19 +476,19 @@ const Dashboard = () => {
               <div
                 onClick={() => fileInputRef.current.click()}
                 style={{
-                  width: '100%',
-                  height: profileImg ? '240px' : '150px',
+                  position: 'relative',
+                  height: profileImg && profileImg !== "/candidate_profile.png" ? '240px' : '150px',
                   cursor: 'pointer',
                   overflow: 'hidden',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: profileImg ? 'transparent' : '#f8fafc',
+                  background: profileImg && profileImg !== "/candidate_profile.png" ? 'transparent' : '#f8fafc',
                   transition: 'height 0.3s'
                 }}
                 className="group"
               >
-                {profileImg ? (
+                {profileImg && profileImg !== "/candidate_profile.png" ? (
                   <img
                     src={profileImg}
                     alt="Profile photo"
@@ -512,7 +499,7 @@ const Dashboard = () => {
                     <div style={{ width: '70px', height: '70px', borderRadius: '50%', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
                       <UserIcon className="size-8 text-slate-400" />
                     </div>
-                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Upload Photo</span>
+                    <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>No Photo</span>
                   </div>
                 )}
                 {/* Photo hover overlay */}
