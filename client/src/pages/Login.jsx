@@ -45,16 +45,19 @@ const Login = () => {
         body: JSON.stringify({ id_token: response.credential })
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.success && data.user) {
-        // Save Google profile picture to localStorage for dashboard display
-        if (data.user.google_picture && data.user.email) {
-          const existing = localStorage.getItem(`candidate_profile_img_${data.user.email}`);
-          if (!existing) {
+      if (res.ok && data.success) {
+        if (data.require_otp) {
+          setEmail(data.email);
+          setMode('otp');
+          const helperText = data.dev_otp ? ` (Dev Code: ${data.dev_otp})` : '';
+          showStatus(`Security Verification: 6-digit OTP code sent to your Google email (${data.email}). Enter the OTP below to complete sign-in.${helperText}`, 'success');
+        } else if (data.user) {
+          if (data.user.google_picture && data.user.email) {
             localStorage.setItem(`candidate_profile_img_${data.user.email}`, data.user.google_picture);
           }
+          setAuthUser(data.user);
+          window.location.href = '/dashboard';
         }
-        setAuthUser(data.user);
-        window.location.href = '/dashboard';
       } else {
         showStatus(data.error || `Google sign-in error (${res.status}). Please try again.`, 'error');
       }

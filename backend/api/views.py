@@ -1323,22 +1323,31 @@ def google_auth(request):
                 username=email,
                 email=email,
                 full_name=full_name,
-                is_verified=True,
+                is_verified=False,
                 is_active=True
             )
             user.set_password(os.urandom(24).hex())
             user.save()
-        else:
-            if not user.is_verified:
-                user.is_verified = True
-                user.save()
 
-        _safe_django_login(request, user)
-        _increment("auth_logins_total")
-        user_dict = user.to_dict()
-        if google_picture:
-            user_dict["google_picture"] = google_picture
-        return JsonResponse({"success": True, "user": user_dict})
+        # Generate 6-digit OTP code & send to Google email address
+        otp_code = generate_otp(6)
+        OTP.objects.filter(email=email).delete()
+        OTP.objects.create(email=email, code=otp_code, purpose="google_auth")
+
+        email_html = _build_otp_email_html(user.full_name or full_name, otp_code)
+        sent = _send_email_sync("CareerPilot Google Sign-In Verification Code", email, email_html)
+        print(f"[GOOGLE AUTH OTP] Sent OTP {otp_code} to {email} (Sent={sent})")
+
+        response_data = {
+            "success": True,
+            "require_otp": True,
+            "email": email,
+            "message": f"Verification code sent to {email}. Enter the 6-digit OTP to complete Google Sign-In."
+        }
+        if settings.DEBUG:
+            response_data["dev_otp"] = otp_code
+
+        return JsonResponse(response_data)
     except ValueError as e:
         return JsonResponse({"success": False, "error": f"Invalid Google token: {e}"}, status=401)
     except Exception as e:
