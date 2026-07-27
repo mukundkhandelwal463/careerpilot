@@ -612,7 +612,7 @@ const Login = () => {
               </form>
             )}
 
-            {status.text && (
+            {status.text && (mode !== 'otp' || status.type === 'error') && (
               <div id="authStatus" className={`auth-status ${status.type}`} style={{ marginTop: '16px', borderRadius: '12px', padding: '10px 14px', fontSize: '0.86rem', textAlign: 'center' }}>
                 {status.text}
               </div>
