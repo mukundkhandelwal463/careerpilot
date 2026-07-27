@@ -24,6 +24,7 @@
 
 ## 📖 Table of Contents
 - [🌐 Project Overview](#-project-overview)
+- [🔗 Live Production URLs & Quick Directory](#-live-production-urls--quick-directory)
 - [🌟 Complete Feature Suite & Real UI Screenshots](#-complete-feature-suite--real-ui-screenshots)
 - [📸 Application UI Screenshots & Gallery](#-application-ui-screenshots--gallery)
 - [🎬 UI Animation & Visual Design Engine](#-ui-animation--visual-design-engine)
@@ -41,6 +42,38 @@
 **CareerPilot** is a comprehensive, enterprise-grade **AI candidate career acceleration suite**. It empowers candidates to optimize their job application lifecycle through **ATS resume scorecards**, **executive LaTeX PDF compiling**, **AI voice mock interviews**, **CS core subject trackers**, **career roadmap generation**, and **real-time live job matching**.
 
 Powered by Google's **Gemini AI**, **scikit-learn TF-IDF similarity vectorizers**, and an ultra-fluid **React 19 / Vite 7** frontend, CareerPilot provides instant feedback, bullet point optimization, and candidate scoring.
+
+---
+
+## 🔗 Live Production URLs & Quick Directory
+
+> [!IMPORTANT]
+> CareerPilot is deployed 24/7 on AWS EC2 (`t3.small`) backed by a static AWS Elastic IP.
+
+- **Main Domain**: [https://careerpilot.website](https://careerpilot.website)
+- **Direct Static IP Access**: [http://15.252.51.16](http://15.252.51.16)
+
+### 📍 Web Application Page Directory
+
+| Feature / Page Module | Production Web URL |
+| :--- | :--- |
+| **🏠 Home Landing Page** | [https://careerpilot.website/](https://careerpilot.website/) |
+| **📊 ATS Resume Screener** | [https://careerpilot.website/upload](https://careerpilot.website/upload) |
+| **📄 Executive LaTeX Resume Architect** | [https://careerpilot.website/app/builder/default](https://careerpilot.website/app/builder/default) |
+| **🎙️ AI Voice Mock Interview Hub** | [https://careerpilot.website/preparation](https://careerpilot.website/preparation) |
+| **🎓 Computer Science Special Hub** | [https://careerpilot.website/preparation](https://careerpilot.website/preparation) |
+| ├── **Operating Systems Theory** | [https://careerpilot.website/preparation/theory/OS](https://careerpilot.website/preparation/theory/OS) |
+| ├── **DBMS Theory** | [https://careerpilot.website/preparation/theory/DBMS](https://careerpilot.website/preparation/theory/DBMS) |
+| ├── **Computer Networks Theory** | [https://careerpilot.website/preparation/theory/CN](https://careerpilot.website/preparation/theory/CN) |
+| ├── **System Design Theory** | [https://careerpilot.website/preparation/theory/SystemDesign](https://careerpilot.website/preparation/theory/SystemDesign) |
+| └── **OOPs Theory** | [https://careerpilot.website/preparation/theory/OOPs](https://careerpilot.website/preparation/theory/OOPs) |
+| **💼 Real-Time Live Job Matcher** | [https://careerpilot.website/jobs](https://careerpilot.website/jobs) |
+| **📈 Candidate Scorecard Dashboard** | [https://careerpilot.website/dashboard](https://careerpilot.website/dashboard) |
+| **🔐 Login & Authentication** | [https://careerpilot.website/login](https://careerpilot.website/login) |
+
+### 🛠️ Backend API & Admin Endpoints
+- **API Health Check**: [https://careerpilot.website/api/health](https://careerpilot.website/api/health)
+- **Django Admin Panel**: [https://careerpilot.website/admin/](https://careerpilot.website/admin/)
 
 ---
 
@@ -130,6 +163,8 @@ Powered by Google's **Gemini AI**, **scikit-learn TF-IDF similarity vectorizers*
 > Slide through actual screenshots of CareerPilot modules in action:
 
 ```carousel
+![Hero Banner](home_hero_banner.png)
+<!-- slide -->
 ![Computer Science Special Hub](cse_special_preview.png)
 <!-- slide -->
 ![DSA Masterclass & Theory](dsa_masterclass_theory.png)
