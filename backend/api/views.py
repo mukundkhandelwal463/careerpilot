@@ -1261,7 +1261,8 @@ def logout(request):
     return JsonResponse({"success": True})
 
 
-@api_view(['POST'])
+@csrf_exempt
+@api_view(['POST', 'GET'])
 @permission_classes([AllowAny])
 def google_auth(request):
     data = request.data
