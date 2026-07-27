@@ -15,13 +15,19 @@ def serve_spa(request, path=''):
         import mimetypes
         content_type, _ = mimetypes.guess_type(str(file_path))
         with open(file_path, 'rb') as f:
-            return HttpResponse(f.read(), content_type=content_type or 'application/octet-stream')
+            data = f.read()
+            res = HttpResponse(data, content_type=content_type or 'application/octet-stream')
+            res['Content-Length'] = str(len(data))
+            return res
             
     # Otherwise, fall back to serving index.html for React Router
     index_path = dist_dir / 'index.html'
     if os.path.exists(index_path):
-        with open(index_path, 'r', encoding='utf-8') as f:
-            return HttpResponse(f.read())
+        with open(index_path, 'rb') as f:
+            data = f.read()
+            res = HttpResponse(data, content_type='text/html; charset=utf-8')
+            res['Content-Length'] = str(len(data))
+            return res
     else:
         return HttpResponse(
             "<h3>React build index.html not found.</h3>"
