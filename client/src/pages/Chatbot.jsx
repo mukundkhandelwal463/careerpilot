@@ -210,7 +210,7 @@ const Chatbot = () => {
                   marginBottom: '15px' 
                 }}
               >
-                <strong>Model 3 AI Tips:</strong><br/><br/>
+                <strong>AI Resume Optimization Tips:</strong><br/><br/>
                 {geminiSuggestions}
               </div>
             )}
