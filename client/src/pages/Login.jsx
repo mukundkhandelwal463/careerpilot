@@ -90,11 +90,10 @@ const Login = () => {
           window.google.accounts.id.initialize({
             client_id: clientId,
             callback: handleGoogleCredentialResponse,
+            login_uri: `${window.location.origin}/login`,
             auto_select: false,
             cancel_on_tap_outside: true,
-            use_fedcm_for_prompt: true,
-            allowed_parent_origin: window.location.origin,
-            ux_mode: 'popup',
+            ux_mode: 'redirect',
             context: 'use'
           });
 
