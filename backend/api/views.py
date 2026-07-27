@@ -689,11 +689,29 @@ def analyze_resume(request):
                     merged.append(text)
             return merged
 
+        def merge_keywords(*groups):
+            merged = []
+            seen = set()
+            for group in groups:
+                if not group:
+                    continue
+                for item in group:
+                    text = str(item or "").strip()
+                    if not text:
+                        continue
+                    key = text.lower()
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    merged.append(text)
+            return merged
+
         # Run Analysis
         _increment("resumes_analyzed_total")
         
         if stream_or_category and job_description:
             analysis = active_service.analyze_resume(resume_text, job_description)
+            model1_ats = float(getattr(analysis, "ats_score", 0.0) or 0.0)
             _increment("gemini_calls_total")
             try:
                 gemini_full = get_gemini_full_resume_analysis(
@@ -706,18 +724,21 @@ def analyze_resume(request):
                 gemini_full = {"gemini_ok": False}
 
             if gemini_full.get("gemini_ok"):
-                gemini_ats = gemini_full.get("ats_score", analysis.ats_score)
-                ats_score = round((analysis.ats_score + gemini_ats) / 2, 2)
+                gemini_ats = float(gemini_full.get("ats_score", model1_ats) or model1_ats)
+                ats_score = round((model1_ats + gemini_ats) / 2, 2)
                 merged_suggestions = merge_suggestions(analysis.suggestions, gemini_full.get("suggestions", []))
-                missing_keywords = gemini_full.get("missing_keywords", analysis.missing_keywords)
+                missing_keywords = merge_keywords(analysis.missing_keywords, gemini_full.get("missing_keywords", []))
             else:
-                ats_score = analysis.ats_score
+                gemini_ats = model1_ats
+                ats_score = model1_ats
                 merged_suggestions = list(analysis.suggestions)
-                missing_keywords = analysis.missing_keywords
+                missing_keywords = list(analysis.missing_keywords)
             
             response_analysis = {
                 "category": stream_or_category,
                 "ats_score": ats_score,
+                "model1_score": round(model1_ats, 2),
+                "ai_score": round(gemini_ats, 2),
                 "skills": analysis.resume_skills,
                 "missing_keywords": missing_keywords,
                 "suggestions": merged_suggestions,
@@ -731,9 +752,10 @@ def analyze_resume(request):
             
             # Fall through to common save & return block
 
-        if not job_description:
+        elif not job_description:
             analysis = active_service.analyze_resume(resume_text, "")
-            final_category = stream_or_category or analysis.category
+            final_category = stream_or_category or getattr(analysis, "category", "General")
+            model1_ats = float(active_service.estimate_ats_without_jd(resume_text, final_category) or 0.0)
             _increment("gemini_calls_total")
             try:
                 gemini_full = get_gemini_full_resume_analysis(
@@ -746,36 +768,41 @@ def analyze_resume(request):
                 gemini_full = {"gemini_ok": False}
 
             if gemini_full.get("gemini_ok"):
-                dataset_ats = active_service.estimate_ats_without_jd(resume_text, final_category)
-                gemini_ats = gemini_full.get("ats_score", 0.0)
-                ats_score = round((dataset_ats + gemini_ats) / 2, 2)
+                gemini_ats = float(gemini_full.get("ats_score", model1_ats) or model1_ats)
+                ats_score = round((model1_ats + gemini_ats) / 2, 2)
+                missing_keywords = merge_keywords(analysis.missing_keywords, gemini_full.get("missing_keywords", []))
                 response_analysis = {
                     "category": gemini_full.get("category", final_category),
                     "ats_score": ats_score,
+                    "model1_score": round(model1_ats, 2),
+                    "ai_score": round(gemini_ats, 2),
                     "ats_available": True,
                     "skills": analysis.resume_skills,
-                    "missing_keywords": gemini_full.get("missing_keywords", []),
+                    "missing_keywords": missing_keywords,
                     "suggestions": merge_suggestions(analysis.suggestions, gemini_full.get("suggestions", [])),
                     "mode": "gemini_no_jd",
                 }
             else:
-                dataset_ats = active_service.estimate_ats_without_jd(resume_text, final_category)
-                ats_score = dataset_ats
+                gemini_ats = model1_ats
+                ats_score = model1_ats
                 response_analysis = {
                     "category": final_category,
-                    "ats_score": dataset_ats,
+                    "ats_score": ats_score,
+                    "model1_score": round(model1_ats, 2),
+                    "ai_score": round(gemini_ats, 2),
                     "ats_available": True,
                     "skills": analysis.resume_skills,
-                    "missing_keywords": [],
+                    "missing_keywords": list(analysis.missing_keywords),
                     "suggestions": merge_suggestions(
                         analysis.suggestions,
-                        ["Gemini unavailable, so ATS is estimated using the resume dataset profile."],
+                        ["AI fallback: ATS score estimated using dataset model."],
                     ),
                     "mode": "dataset_no_jd_fallback",
                 }
         elif use_dataset_for_category:
             analysis = active_service.analyze_resume(resume_text, job_description)
-            final_category = stream_or_category or analysis.category
+            final_category = stream_or_category or getattr(analysis, "category", "General")
+            model1_ats = float(getattr(analysis, "ats_score", 0.0) or 0.0)
             _increment("gemini_calls_total")
             try:
                 gemini_full = get_gemini_full_resume_analysis(
@@ -788,21 +815,24 @@ def analyze_resume(request):
                 gemini_full = {"gemini_ok": False}
 
             if gemini_full.get("gemini_ok"):
-                gemini_ats = gemini_full.get("ats_score", analysis.ats_score)
-                ats_score = round((analysis.ats_score + gemini_ats) / 2, 2)
+                gemini_ats = float(gemini_full.get("ats_score", model1_ats) or model1_ats)
+                ats_score = round((model1_ats + gemini_ats) / 2, 2)
                 merged_suggestions = merge_suggestions(analysis.suggestions, gemini_full.get("suggestions", []))
-                missing_keywords = gemini_full.get("missing_keywords", analysis.missing_keywords)
+                missing_keywords = merge_keywords(analysis.missing_keywords, gemini_full.get("missing_keywords", []))
             else:
-                ats_score = analysis.ats_score
+                gemini_ats = model1_ats
+                ats_score = model1_ats
                 merged_suggestions = merge_suggestions(
                     analysis.suggestions,
-                    ["Gemini analysis failed, using dataset analysis fallback suggestions."]
+                    ["AI service offline, using dataset TF-IDF analysis."]
                 )
-                missing_keywords = analysis.missing_keywords
+                missing_keywords = list(analysis.missing_keywords)
 
             response_analysis = {
                 "category": final_category,
                 "ats_score": ats_score,
+                "model1_score": round(model1_ats, 2),
+                "ai_score": round(gemini_ats, 2),
                 "ats_available": True,
                 "skills": analysis.resume_skills,
                 "missing_keywords": missing_keywords,
@@ -811,6 +841,7 @@ def analyze_resume(request):
             }
         else:
             analysis = active_service.analyze_resume(resume_text, job_description)
+            model1_ats = float(getattr(analysis, "ats_score", 0.0) or 0.0)
             _increment("gemini_calls_total")
             try:
                 gemini_full = get_gemini_full_resume_analysis(
@@ -823,28 +854,34 @@ def analyze_resume(request):
                 gemini_full = {"gemini_ok": False}
 
             if gemini_full.get("gemini_ok"):
-                gemini_ats = gemini_full.get("ats_score", analysis.ats_score)
-                ats_score = round((analysis.ats_score + gemini_ats) / 2, 2)
+                gemini_ats = float(gemini_full.get("ats_score", model1_ats) or model1_ats)
+                ats_score = round((model1_ats + gemini_ats) / 2, 2)
+                missing_keywords = merge_keywords(analysis.missing_keywords, gemini_full.get("missing_keywords", []))
                 response_analysis = {
                     "category": gemini_full.get("category", stream_or_category or "General"),
                     "ats_score": ats_score,
+                    "model1_score": round(model1_ats, 2),
+                    "ai_score": round(gemini_ats, 2),
                     "ats_available": True,
                     "skills": analysis.resume_skills,
-                    "missing_keywords": gemini_full.get("missing_keywords", []),
+                    "missing_keywords": missing_keywords,
                     "suggestions": merge_suggestions(analysis.suggestions, gemini_full.get("suggestions", [])),
                     "mode": "gemini_only_unknown_category",
                 }
             else:
-                ats_score = analysis.ats_score
+                gemini_ats = model1_ats
+                ats_score = model1_ats
                 response_analysis = {
-                    "category": stream_or_category or analysis.category,
+                    "category": stream_or_category or getattr(analysis, "category", "General"),
                     "ats_score": ats_score,
+                    "model1_score": round(model1_ats, 2),
+                    "ai_score": round(gemini_ats, 2),
                     "ats_available": True,
                     "skills": analysis.resume_skills,
-                    "missing_keywords": analysis.missing_keywords,
+                    "missing_keywords": list(analysis.missing_keywords),
                     "suggestions": merge_suggestions(
                         analysis.suggestions,
-                        ["Gemini analysis failed, so dataset ATS scoring is used as fallback."],
+                        ["AI fallback: ATS scoring derived from dataset TF-IDF similarity."],
                     ),
                     "mode": "dataset_fallback_unknown_category",
                 }

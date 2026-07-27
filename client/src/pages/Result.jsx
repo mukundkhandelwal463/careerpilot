@@ -124,6 +124,11 @@ const Result = () => {
                 {ats >= 70 ? <CheckCircle2 size={13} style={{ flexShrink: 0 }} /> : <AlertTriangle size={13} style={{ flexShrink: 0 }} />}
                 <span>{scoreTheme.status}</span>
               </div>
+              {analysis.model1_score !== undefined && analysis.ai_score !== undefined && (
+                <div style={{ marginTop: '6px', fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
+                  Hybrid Avg: TF-IDF ({analysis.model1_score}%) + AI Engine ({analysis.ai_score}%)
+                </div>
+              )}
             </div>
           </div>
 
