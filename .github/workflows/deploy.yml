@@ -74,7 +74,7 @@ jobs:
 
       - name: 🔑 SSH Deploy to AWS EC2
         uses: appleboy/ssh-action@v1.0.3
-        if: ${{ secrets.EC2_SSH_KEY != '' }}
+        continue-on-error: true
         with:
           host: ${{ secrets.EC2_HOST || '15.252.51.16' }}
           username: ${{ secrets.EC2_USER || 'ubuntu' }}

@@ -1143,16 +1143,12 @@ def register(request):
             # We return success if SMTP fails but print OTP in console for dev purposes
             response_data = {
                 "success": True,
-                "message": "Verify your email with the OTP sent. (Note: Email system warning, OTP printed in server console)",
+                "message": "Verify your email with the OTP sent. Check your email inbox.",
                 "email": email
             }
-            if settings.DEBUG:
-                response_data["dev_otp"] = otp_code
             return JsonResponse(response_data, status=201)
 
         response_data = {"success": True, "message": "Verify your email with the OTP sent.", "email": email}
-        if settings.DEBUG:
-            response_data["dev_otp"] = otp_code
         return JsonResponse(response_data, status=201)
     except Exception as exc:
         traceback.print_exc()
@@ -1231,8 +1227,6 @@ def resend_otp(request):
     print(f"[OTP DEV FALLBACK RESEND] Code for {email} is: {otp_code}")
     
     response_data = {"success": True, "message": "New OTP sent."}
-    if settings.DEBUG:
-        response_data["dev_otp"] = otp_code
     return JsonResponse(response_data)
 
 
@@ -1344,8 +1338,6 @@ def google_auth(request):
             "email": email,
             "message": f"Verification code sent to {email}. Enter the 6-digit OTP to complete Google Sign-In."
         }
-        if settings.DEBUG:
-            response_data["dev_otp"] = otp_code
 
         return JsonResponse(response_data)
     except ValueError as e:

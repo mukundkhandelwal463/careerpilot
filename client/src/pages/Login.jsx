@@ -49,8 +49,7 @@ const Login = () => {
         if (data.require_otp) {
           setEmail(data.email);
           setMode('otp');
-          const helperText = data.dev_otp ? ` (Dev Code: ${data.dev_otp})` : '';
-          showStatus(`Security Verification: 6-digit OTP code sent to your Google email (${data.email}). Enter the OTP below to complete sign-in.${helperText}`, 'success');
+          showStatus(`Security Verification: 6-digit OTP code sent to your Google email (${data.email}). Please check your inbox and enter the OTP below to complete sign-in.`, 'success');
         } else if (data.user) {
           if (data.user.google_picture && data.user.email) {
             localStorage.setItem(`candidate_profile_img_${data.user.email}`, data.user.google_picture);
@@ -193,8 +192,7 @@ const Login = () => {
       const data = await res.json().catch(() => ({}));
       if ((res.ok || res.status === 201) && data.success) {
         setMode('otp');
-        const helperText = data.dev_otp ? ` (Dev Code: ${data.dev_otp})` : '';
-        showStatus("Verification code sent to " + email + helperText, 'success');
+        showStatus("Verification code sent to " + email + ". Please check your inbox.", 'success');
       } else if (res.status === 409 || (data.error && data.error.toLowerCase().includes("already registered"))) {
         setMode('login');
         showStatus("Account already exists for " + email + "! Switched to Sign In form below.", 'error');
@@ -250,8 +248,7 @@ const Login = () => {
       });
       const data = await res.json();
       if (data.success) {
-        const helperText = data.dev_otp ? ` (Dev Code: ${data.dev_otp})` : '';
-        showStatus("New OTP sent to " + email + helperText, 'success');
+        showStatus("New verification code sent to " + email + ". Please check your inbox.", 'success');
         setResendCooldown(30);
       } else {
         showStatus(data.error || 'Failed to resend OTP.', 'error');
