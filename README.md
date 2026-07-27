@@ -285,6 +285,22 @@ CareerPilot is deployed on **AWS Cloud** using an optimized, high-availability a
 
 ---
 
+## 🔄 Automated GitHub Actions CI/CD Pipeline
+
+CareerPilot uses an automated **GitHub Actions CI/CD pipeline** ([deploy.yml](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/.github/workflows/deploy.yml)) triggered on every `git push` to `main`:
+
+```
+┌───────────────────────────┐      ┌───────────────────────────┐      ┌───────────────────────────┐
+│  1. Checkout & Setup      │ ───> │  2. Test & Build          │ ───> │  3. SSH AWS EC2 Deploy    │
+│  (Python 3.12 + Node 20)  │      │  (Django Check + Vite)    │      │  (Pull + Migrate + Reload)│
+└───────────────────────────┘      └───────────────────────────┘      └───────────────────────────┘
+```
+
+1. **Automated Testing & Build**: Runs Django system diagnostics (`manage.py check`) and compiles the Vite React production bundle.
+2. **Zero-Downtime Deployment**: Connects via SSH to your AWS EC2 instance (`15.252.51.16`), pulls the latest code, runs database migrations, builds frontend assets, and smoothly reloads Gunicorn and Nginx.
+
+---
+
 ## 🛡️ Production Hardening & Resilience
 
 1. **2 GB Swap Memory Protection**: `/swapfile` enabled to buffer RAM spikes.

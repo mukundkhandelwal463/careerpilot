@@ -74,15 +74,32 @@ jobs:
 
       - name: 🔑 SSH Deploy to AWS EC2
         uses: appleboy/ssh-action@v1.0.3
-        if: ${{ secrets.EC2_HOST != '' }}
+        if: ${{ secrets.EC2_SSH_KEY != '' }}
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          host: ${{ secrets.EC2_HOST || '15.252.51.16' }}
+          username: ${{ secrets.EC2_USER || 'ubuntu' }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo "🚀 Starting Deployment to AWS EC2..."
             cd /home/ubuntu/careerpilot
             git pull origin main
-            cd client && NODE_OPTIONS=--max-old-space-size=512 npm run build && cd ..
+            
+            # Backend updates
+            source .venv/bin/activate
+            pip install -r backend/requirements.txt
+            python backend/manage.py migrate
+            
+            # Frontend build
+            cd client
+            npm ci || npm install
+            NODE_OPTIONS=--max-old-space-size=512 npm run build
+            cd ..
+            
+            # Nginx permissions & Service restarts
+            sudo mkdir -p /var/lib/nginx/proxy /var/lib/nginx/body
+            sudo chown -R www-data:www-data /var/lib/nginx/
+            sudo systemctl daemon-reload
             sudo systemctl restart careerpilot
             sudo systemctl restart nginx
-            echo "✅ Deployment to AWS EC2 completed successfully!"
+            
+            echo "✅ CareerPilot AWS EC2 Deployment Completed Successfully!"
