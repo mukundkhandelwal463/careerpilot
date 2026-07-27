@@ -46,7 +46,7 @@ Powered by Google's **Gemini AI**, **scikit-learn TF-IDF similarity vectorizers*
 
 ## 🌟 Complete Feature Suite & Real UI Screenshots
 
-### 1. 🎓 Computer Science Special & Top 50 DSA Masterclass Tracker
+### 1. 🎓 Computer Science Special & Top 260 DSA Masterclass Tracker
 - **CSE Special Hub**: Dedicated preparation dashboard covering Data Structures & Algorithms (DSA), Object-Oriented Programming (OOPs), Operating Systems (OS), Database Management Systems (DBMS), Computer Networks (CN), and System Design.
 - **DSA Sheet Master Tracker**: Real-time progress tracking across 260 curated algorithms with completion metrics and category filters.
 - **In-Depth Theory Revision**: High-yield technical pattern breakdowns featuring *Why This Pattern?*, *When to Use*, and *Complexity Reference Cards* ($O(1)$ lookup, $O(N)$ space).
