@@ -25,7 +25,7 @@
 ## 📖 Table of Contents
 - [🌐 Project Overview](#-project-overview)
 - [🌟 Complete Feature Suite & Real UI Screenshots](#-complete-feature-suite--real-ui-screenshots)
-- [📸 Interactive Application UI Gallery](#-interactive-application-ui-gallery)
+- [📸 Application UI Screenshots & Gallery](#-application-ui-screenshots--gallery)
 - [🎬 UI Animation & Visual Design Engine](#-ui-animation--visual-design-engine)
 - [🏗 System Architecture & Flow](#-system-architecture--flow)
 - [🛠 Technology Stack](#-technology-stack)
@@ -48,24 +48,15 @@ Powered by Google's **Gemini AI**, **scikit-learn TF-IDF similarity vectorizers*
 
 ### 1. 📈 Interactive Candidate Dashboard & Score Analytics
 - **Centralized Candidate Scorecard**: Displays historical ATS scores, resume versions, DSA tracker progress, and mock test performances.
+- **Sample Candidate Profile**: Cleaned sample candidate scorecard interface without private personal data.
 - **1-Click Complete PDF Diagnostic Export**: Generates and downloads a complete candidate evaluation report in PDF format.
 - 📁 **Source Code**: [dashboard.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/dashboard.jsx)
 
 <p align="center">
-  <img src="dashboard_preview.png" alt="Anonymized Candidate Dashboard UI" width="850" />
+  <img src="dashboard_preview.png" alt="Sample Candidate Dashboard UI" width="850" />
 </p>
 
-### 2. 📊 ATS Resume Screener & Skill Alignment Engine
-- **Instant Match Scorecard (0–100%)**: Evaluates uploaded `PDF` and `DOCX` CVs against target job descriptions using scikit-learn TF-IDF cosine similarity.
-- **ATS Parser Compatibility**: Simulates Workday, Greenhouse, and Lever parsing engines to detect formatting flaws and keyword gaps.
-- **Gemini AI Skill Booster**: Recommends missing hard/soft technical skills and contextual action verbs to maximize interview call rates.
-- 📁 **Source Code**: [Upload.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/Upload.jsx), [Result.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/Result.jsx), [views.py](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/backend/api/views.py)
-
-<p align="center">
-  <img src="ats_screener_preview.png" alt="ATS Resume Screener UI" width="850" />
-</p>
-
-### 3. 📄 Executive LaTeX Resume Architect & PDF Compiler
+### 2. 📄 Executive LaTeX Resume Architect & PDF Compiler
 - **Dynamic Template Selection**: Choose from 3 executive LaTeX templates (Data & ML Specialist, Classic Software Engineer, Corporate Modern).
 - **AI Keyword Auto-Recommendation**: Generates Stream-specific skills (e.g. Scikit-learn, PyTorch, Feature Engineering, Model Deployment) directly into resume sections.
 - **Side-by-Side Code Viewer & Live Compilation**: Real-time LaTeX source code editing with instantaneous PDF compilation.
@@ -73,6 +64,16 @@ Powered by Google's **Gemini AI**, **scikit-learn TF-IDF similarity vectorizers*
 
 <p align="center">
   <img src="latex_resume_builder.png" alt="LaTeX Resume Architect UI" width="850" />
+</p>
+
+### 3. 📊 ATS Resume Screener & Skill Alignment Engine
+- **Instant Match Scorecard (0–100%)**: Evaluates uploaded `PDF` and `DOCX` CVs against target job descriptions using scikit-learn TF-IDF cosine similarity.
+- **ATS Parser Compatibility**: Simulates Workday, Greenhouse, and Lever parsing engines to detect formatting flaws and keyword gaps.
+- **Gemini AI Skill Booster**: Recommends missing hard/soft technical skills and contextual action verbs.
+- 📁 **Source Code**: [Upload.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/Upload.jsx), [Result.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/Result.jsx), [views.py](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/backend/api/views.py)
+
+<p align="center">
+  <img src="ats_screener_preview.png" alt="ATS Resume Screener UI" width="850" />
 </p>
 
 ### 4. 🎙️ AI Voice-Based CV Mock Interviews & Fluency Analytics
@@ -128,11 +129,11 @@ Powered by Google's **Gemini AI**, **scikit-learn TF-IDF similarity vectorizers*
 ```carousel
 ![Hero Banner](home_hero_banner.png)
 <!-- slide -->
-![Candidate Dashboard](dashboard_preview.png)
-<!-- slide -->
-![ATS Resume Screener](ats_screener_preview.png)
+![Sample Candidate Dashboard](dashboard_preview.png)
 <!-- slide -->
 ![LaTeX Resume Architect](latex_resume_builder.png)
+<!-- slide -->
+![ATS Resume Screener](ats_screener_preview.png)
 <!-- slide -->
 ![AI Voice Mock Interview](mock_interview_preview.png)
 <!-- slide -->
