@@ -49,7 +49,7 @@ const Login = () => {
         if (data.require_otp) {
           setEmail(data.email);
           setMode('otp');
-          showStatus(`Security Verification: 6-digit OTP code sent to your Google email (${data.email}). Please check your inbox and enter the OTP below to complete sign-in.`, 'success');
+          showStatus('', '');
         } else if (data.user) {
           if (data.user.google_picture && data.user.email) {
             localStorage.setItem(`candidate_profile_img_${data.user.email}`, data.user.google_picture);
@@ -612,7 +612,7 @@ const Login = () => {
               </form>
             )}
 
-            {status.text && (mode !== 'otp' || status.type === 'error') && (
+            {status.text && status.type === 'error' && (
               <div id="authStatus" className={`auth-status ${status.type}`} style={{ marginTop: '16px', borderRadius: '12px', padding: '10px 14px', fontSize: '0.86rem', textAlign: 'center' }}>
                 {status.text}
               </div>
