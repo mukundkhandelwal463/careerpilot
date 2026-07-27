@@ -19,7 +19,7 @@
 ## 📖 Table of Contents
 - [🌐 Project Overview](#-project-overview)
 - [🌟 Complete Feature Suite & Screenshots](#-complete-feature-suite--screenshots)
-- [📊 Interactive Dashboard Preview](#-interactive-dashboard-preview)
+- [📊 Interactive Dashboard & Screener Preview](#-interactive-dashboard--screener-preview)
 - [🎬 UI Animation & Visual Design Engine](#-ui-animation--visual-design-engine)
 - [🏗 System Architecture & Flow](#-system-architecture--flow)
 - [🛠 Technology Stack](#-technology-stack)
@@ -46,13 +46,17 @@ Powered by Google's **Gemini AI**, **scikit-learn TF-IDF similarity vectorizers*
 - **Gemini AI Skill Booster**: Recommends missing hard/soft technical skills and contextual action verbs to maximize interview call rates.
 - 📁 **Source Code**: [Upload.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/Upload.jsx), [Result.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/Result.jsx), [views.py](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/backend/api/views.py)
 
+<p align="center">
+  <img src="ats_screener_preview.png" alt="ATS Resume Screener Preview" width="850" />
+</p>
+
 ### 2. 📈 Interactive Candidate Dashboard & Score Analytics
 - **Centralized Metrics**: Displays historical ATS scores, resume versions, DSA tracker progress, and mock test performances.
 - **1-Click PDF Report Export**: Generates and downloads a complete candidate diagnostic PDF report containing detailed analytics.
 - 📁 **Source Code**: [dashboard.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/dashboard.jsx)
 
 <p align="center">
-  <img src="client/dist/dashboard_preview.png" alt="Candidate Dashboard Preview" width="850" />
+  <img src="dashboard_preview.png" alt="Candidate Dashboard Preview" width="850" />
 </p>
 
 ### 3. 📄 Executive LaTeX Resume Builder & PDF Compiler
@@ -61,11 +65,19 @@ Powered by Google's **Gemini AI**, **scikit-learn TF-IDF similarity vectorizers*
 - **Direct Export**: One-click download as high-converting compiled `.pdf` or editable `.docx`.
 - 📁 **Source Code**: [ResumeBuilder.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/ResumeBuilder.jsx), [Preview.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/Preview.jsx), [MakerOptions.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/MakerOptions.jsx)
 
+<p align="center">
+  <img src="resume_builder_preview.png" alt="Executive LaTeX Resume Builder Preview" width="850" />
+</p>
+
 ### 4. 🎙️ AI Voice Mock Interviews & Fluency Analytics
 - **Speech-to-Text Analytics**: Practice technical & behavioral interview questions with real-time speech analytics.
 - **Fluency & Accuracy Scoring**: Evaluates candidate confidence, pacing, domain accuracy, and filler words.
 - **Automated Roadmap Generator**: Delivers a personalized study plan targeting identified technical weak points.
 - 📁 **Source Code**: [Preparation.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/Preparation.jsx), [MockTest.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/client/src/pages/MockTest.jsx)
+
+<p align="center">
+  <img src="mock_interview_preview.png" alt="AI Voice Mock Interview Preview" width="850" />
+</p>
 
 ### 5. 📚 CS Core Subjects & Top 50 DSA Sheet Tracker
 - **Subject Theory Revision**: In-depth notes for Operating Systems (OS), Database Management Systems (DBMS), Computer Networks (CN), System Design, and Object-Oriented Programming (OOPs).
@@ -87,13 +99,19 @@ Powered by Google's **Gemini AI**, **scikit-learn TF-IDF similarity vectorizers*
 
 ---
 
-## 📊 Interactive Dashboard Preview
+## 📊 Interactive Dashboard & Screener Preview
 
 > [!NOTE]
 > Below is the candidate scorecard and diagnostic profile output generated after analyzing an uploaded resume against target job requirements:
 
 ```carousel
-![Candidate Profile & Dashboard](client/dist/dashboard_preview.png)
+![Candidate Dashboard Preview](dashboard_preview.png)
+<!-- slide -->
+![ATS Screener Interface](ats_screener_preview.png)
+<!-- slide -->
+![LaTeX Resume Builder](resume_builder_preview.png)
+<!-- slide -->
+![AI Voice Mock Interview](mock_interview_preview.png)
 <!-- slide -->
 ![CareerPilot Logo](logo.png)
 ```
