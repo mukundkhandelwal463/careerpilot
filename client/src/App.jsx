@@ -21,6 +21,8 @@ import SystemDesignTheory from './pages/SystemDesignTheory.jsx'
 import MockTest from './pages/MockTest.jsx'
 import TermsAndConditions from './pages/TermsAndConditions.jsx'
 
+import MobileBottomDock from './Components/MobileBottomDock.jsx'
+
 // Protected Route Wrapper Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -70,6 +72,7 @@ const App = () => {
           
           <Route path='*' element={<Navigate to="/" replace />} />
         </Routes>
+        <MobileBottomDock />
       </AuthProvider>
     </ThemeProvider>
   )
