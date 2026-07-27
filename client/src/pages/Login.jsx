@@ -68,6 +68,19 @@ const Login = () => {
   };
 
   useEffect(() => {
+    // Check URL hash or search params for id_token from OAuth redirect fallback
+    const hashStr = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : window.location.hash;
+    const hashParams = new URLSearchParams(hashStr);
+    const searchParams = new URLSearchParams(window.location.search);
+    const idToken = hashParams.get('id_token') || searchParams.get('credential') || searchParams.get('id_token');
+
+    if (idToken) {
+      handleGoogleCredentialResponse({ credential: idToken });
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
     let attempts = 0;
     const defaultClientId = "43202687546-67sj16j61ole905gq16di6jo18g2l3e3.apps.googleusercontent.com";
 
