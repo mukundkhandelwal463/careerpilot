@@ -39,6 +39,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/admin/', admin.site.urls),
     path('metrics', prometheus_metrics, name='metrics'),
+    path('api/auth/', include('auth_app.urls')),
+    path('api/screener/', include('screener_app.urls')),
+    path('api/builder/', include('builder_app.urls')),
+    path('api/interview/', include('interview_app.urls')),
+    path('api/learning/', include('learning_app.urls')),
+    path('api/tracker/', include('tracker_app.urls')),
     path('api/', include('api.urls')),
     
     # Catch-all route to serve the React SPA

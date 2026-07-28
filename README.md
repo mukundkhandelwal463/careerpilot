@@ -28,7 +28,7 @@
 - [🌟 Complete Feature Suite & Real UI Screenshots](#-complete-feature-suite--real-ui-screenshots)
 - [📸 Application UI Screenshots & Gallery](#-application-ui-screenshots--gallery)
 - [🎬 UI Animation & Visual Design Engine](#-ui-animation--visual-design-engine)
-- [🏗 System Architecture & Flow](#-system-architecture--flow)
+- [🏗 System Architecture & Modular Django MTV App Design](#-system-architecture--modular-django-mtv-app-design)
 - [🛠 Technology Stack](#-technology-stack)
 - [💻 Local Development Setup](#-local-development-setup)
 - [☁️ AWS Production Cloud Architecture](#%EF%B8%8F-aws-production-cloud-architecture)
@@ -196,29 +196,44 @@ The landing page ([Home.jsx](file:///c:/Users/Mukund/PycharmProjects/Resume_Scre
 
 ---
 
-## 🏗 System Architecture & Flow
+## 🏗 System Architecture & Modular Django MTV App Design
+
+CareerPilot adopts a modular **Django MTV (Model-Template-View)** app architecture decoupled with a modern **React 19 / Vite 7** presentation layer:
 
 ```mermaid
 flowchart TD
-    User([Candidate / Recruiter]) -->|HTTPS Requests| CloudFront[AWS CloudFront CDN / S3]
-    User -->|API / Web Traffic| Nginx[Nginx 1.28.3 Reverse Proxy]
+    User([Candidate / Recruiter]) -->|HTTPS Traffic| Nginx[Nginx 1.28.3 Reverse Proxy]
     
     subgraph AWS EC2 Server (t3.small / 2GB RAM / 20GB SSD)
-        Nginx -->|Static Assets /assets/| Dist[Client Static Build /client/dist/]
-        Nginx -->|Proxy Pass http://127.0.0.1:8000| Gunicorn[Gunicorn WSGI / 3 Workers 2 Threads]
+        Nginx -->|Static Assets /assets/| Dist[Client Build /client/dist/]
+        Nginx -->|Proxy Pass http://127.0.0.1:8000| Gunicorn[Gunicorn WSGI Application]
         
-        subgraph Django REST Backend
-            Gunicorn --> Django[Django 5.0 REST Framework]
-            Django --> Auth[Authentication & JWT Engine]
-            Django --> TFIDF[Scikit-Learn TF-IDF Cosine Similarity]
-            Django --> PDFCompiler[PDFPlumber & PyPDF2 Parser]
-            Django --> DB[(SQLite / PostgreSQL DB)]
+        subgraph Django MTV Modular Apps
+            Gunicorn --> AuthApp[1. auth_app: User Auth, Google SSO & Email OTP]
+            Gunicorn --> ScreenerApp[2. screener_app: ATS Resume Analyzer & TF-IDF Vectorizer]
+            Gunicorn --> BuilderApp[3. builder_app: LaTeX Resume Architect & PDF Compiler]
+            Gunicorn --> InterviewApp[4. interview_app: Voice AI Mock Interview & Coding Evaluator]
+            Gunicorn --> LearningApp[5. learning_app: CS Special Hub & Top 260 DSA Tracker]
+            Gunicorn --> TrackerApp[6. tracker_app: Candidate Dashboard & Career Roadmap]
         end
+
+        AuthApp & ScreenerApp & BuilderApp & InterviewApp & LearningApp & TrackerApp --> DB[(SQLite / PostgreSQL DB)]
     end
     
-    Django -->|API Calls| Gemini[Google Gemini 2.5 Flash AI API]
-    Django -->|API Calls| JobAPI[Arbeitnow / JSearch Live Job APIs]
+    ScreenerApp & InterviewApp & BuilderApp -->|API Calls| Gemini[Google Gemini 2.5 Flash / DeepSeek AI]
+    ScreenerApp -->|API Calls| JobAPI[Arbeitnow / JSearch Live Job APIs]
 ```
+
+### 📦 6 Domain Django MTV Apps Breakdown
+
+| App Name | Path | Purpose & Responsibilities | Key Endpoints |
+| :--- | :--- | :--- | :--- |
+| **`auth_app`** | `backend/auth_app/` | User Account Registration, Password Hashing, Google SSO, 6-digit Email OTP Verification, Profile Management | `/api/auth/register`, `/api/auth/login`, `/api/auth/verify-otp`, `/api/auth/google` |
+| **`screener_app`** | `backend/screener_app/` | ATS Resume Scoring, Hybrid Score Averaging (Model1 TF-IDF + Gemini AI), Missing High-Yield Keyword Extraction | `/api/screener/analyze-resume`, `/api/screener/generate-summary`, `/api/screener/recommend-jobs` |
+| **`builder_app`** | `backend/builder_app/` | Executive LaTeX Resume Architect, Live PDF Compilation, DOCX Exporter & Chatbot Resume Assistant | `/api/builder/parse-resume-to-json`, `/api/builder/build-resume`, `/api/builder/download-docx` |
+| **`interview_app`** | `backend/interview_app/` | Voice AI Mock Interviewer, Technical Question Generation, Audio Response Grading & Coding Test Evaluator | `/api/interview/interview/start`, `/api/interview/interview/grade`, `/api/interview/mock-test/submit` |
+| **`learning_app`** | `backend/learning_app/` | Computer Science Special Hub (OS, DBMS, CN, OOPS, System Design Theory) & Top 260 DSA Masterclass Tracker | `/api/learning/suggest-stream-keywords`, CS Theory Handlers |
+| **`tracker_app`** | `backend/tracker_app/` | Central Candidate Dashboard Metrics, Preparation Task Schedule, Overdue Notifications & Career Roadmap | `/api/tracker/dashboard`, `/api/tracker/resumes`, `/api/tracker/interview/roadmap` |
 
 ---
 
