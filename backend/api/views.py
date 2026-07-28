@@ -131,23 +131,23 @@ def _send_email_sync(subject, recipient, body_html):
     smtp_user = os.environ.get("SMTP_USER", "").strip()
     smtp_pass_raw = os.environ.get("SMTP_PASS", "").strip()
     smtp_pass = smtp_pass_raw.replace(" ", "")
-    default_sender = smtp_user if smtp_user else "noreply@airesume.com"
+    default_sender = smtp_user if smtp_user else "noreply@careerpilot.website"
     mail_sender = os.environ.get("MAIL_SENDER", "").strip() or default_sender
-    sender_email = parseaddr(mail_sender)[1].lower().strip()
-    smtp_user_lower = smtp_user.lower().strip()
-
-    if "gmail.com" in smtp_server.lower() and sender_email and sender_email != smtp_user_lower:
-        print(f"[SMTP] Using SMTP_USER as sender for Gmail compatibility.")
-        mail_sender = smtp_user
 
     if not all([smtp_server, smtp_user, smtp_pass]):
         print("[SMTP] Error: Missing configuration in .env")
         return False
 
-    msg = MIMEMultipart()
-    msg["From"] = mail_sender
+    msg = MIMEMultipart("alternative")
+    msg["From"] = f"CareerPilot Security <{smtp_user}>"
     msg["To"] = recipient
     msg["Subject"] = subject
+    msg["Reply-To"] = smtp_user
+    msg["Auto-Submitted"] = "auto-generated"
+    msg["X-Auto-Response-Suppress"] = "All"
+
+    plain_text = f"CareerPilot Security Verification Code\n\nYour code is provided in the HTML version of this email.\nThis code expires in 10 minutes."
+    msg.attach(MIMEText(plain_text, "plain"))
     msg.attach(MIMEText(body_html, "html"))
 
     # Try STARTTLS (port 587)
@@ -181,18 +181,37 @@ def generate_otp(length=6):
     return "".join(random.choices(string.digits, k=length))
 
 def _build_otp_email_html(full_name: str, otp_code: str) -> str:
-    return f"""
-    <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-        <h2 style="color: #ff6b6b;">Confirm Your AI Resume Account</h2>
-        <p>Hello {full_name or 'there'},</p>
-        <p>Use the code below to verify your email address and continue:</p>
-        <div style="background: #f8f9fa; padding: 15px; font-size: 24px; font-weight: bold; text-align: center; color: #333; letter-spacing: 5px;">
-            {otp_code}
+    name_display = full_name.strip() if full_name else 'Candidate'
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>CareerPilot Security Verification Code</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 30px 10px;">
+    <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="color: #0f172a; font-size: 22px; font-weight: 800; margin: 0;">CareerPilot Security Verification</h1>
+            <p style="color: #64748b; font-size: 14px; margin-top: 6px;">Your account authentication OTP code</p>
         </div>
-        <p>This code will expire in 10 minutes.</p>
-        <p>Best regards,<br>The AI Resume Team</p>
+        
+        <p style="color: #334155; font-size: 15px; line-height: 1.6;">Hello <strong>{name_display}</strong>,</p>
+        <p style="color: #334155; font-size: 15px; line-height: 1.6;">Use the 6-digit security code below to complete your verification on CareerPilot:</p>
+        
+        <div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 14px; padding: 20px; text-align: center; margin: 24px 0;">
+            <span style="font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 800; letter-spacing: 10px; color: #ff6b4a; display: inline-block;">{otp_code}</span>
+        </div>
+        
+        <p style="color: #64748b; font-size: 13px; line-height: 1.5; text-align: center;">This code will expire in 10 minutes. If you did not request this code, please ignore this email.</p>
+        
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 28px 0 20px 0;" />
+        
+        <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">
+            CareerPilot Candidate Platform • Official Account Security
+        </p>
     </div>
-    """
+</body>
+</html>"""
 
 def _fallback_professional_summary(professional_title: str, stream_or_category: str, skills: str, experience: str) -> str:
     role_anchor = (professional_title or stream_or_category or "professional").strip()
@@ -1131,7 +1150,7 @@ def register(request):
         otp_entry.save()
 
         email_body = _build_otp_email_html(full_name, otp_code)
-        sent = _send_email_sync("Verify your AI Resume Account", email, email_body)
+        sent = _send_email_sync(f"{otp_code} is your CareerPilot verification code", email, email_body)
         
         # Log OTP to console in development as fallback
         print(f"[OTP DEV FALLBACK] Verification code for {email} is: {otp_code}")
@@ -1222,7 +1241,7 @@ def resend_otp(request):
     otp_entry.save()
 
     email_body = _build_otp_email_html(user.full_name, otp_code)
-    sent = _send_email_sync("New Verification Code", email, email_body)
+    sent = _send_email_sync(f"{otp_code} is your CareerPilot verification code", email, email_body)
     
     print(f"[OTP DEV FALLBACK RESEND] Code for {email} is: {otp_code}")
     
@@ -1330,7 +1349,7 @@ def google_auth(request):
         OTP.objects.create(email=email, code=otp_code, purpose="google_auth")
 
         email_html = _build_otp_email_html(user.full_name or full_name, otp_code)
-        sent = _send_email_sync("CareerPilot Google Sign-In Verification Code", email, email_html)
+        sent = _send_email_sync(f"{otp_code} is your CareerPilot verification code", email, email_html)
         print(f"[GOOGLE AUTH OTP] Sent OTP {otp_code} to {email} (Sent={sent})")
 
         response_data = {
