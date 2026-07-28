@@ -1150,7 +1150,7 @@ def register(request):
         otp_entry.save()
 
         email_body = _build_otp_email_html(full_name, otp_code)
-        sent = _send_email_sync(f"{otp_code} is your CareerPilot verification code", email, email_body)
+        sent = _send_email_sync("CareerPilot Security Verification Code", email, email_body)
         
         # Log OTP to console in development as fallback
         print(f"[OTP DEV FALLBACK] Verification code for {email} is: {otp_code}")
@@ -1241,7 +1241,7 @@ def resend_otp(request):
     otp_entry.save()
 
     email_body = _build_otp_email_html(user.full_name, otp_code)
-    sent = _send_email_sync(f"{otp_code} is your CareerPilot verification code", email, email_body)
+    sent = _send_email_sync("CareerPilot Security Verification Code", email, email_body)
     
     print(f"[OTP DEV FALLBACK RESEND] Code for {email} is: {otp_code}")
     
@@ -1349,7 +1349,7 @@ def google_auth(request):
         OTP.objects.create(email=email, code=otp_code, purpose="google_auth")
 
         email_html = _build_otp_email_html(user.full_name or full_name, otp_code)
-        sent = _send_email_sync(f"{otp_code} is your CareerPilot verification code", email, email_html)
+        sent = _send_email_sync("CareerPilot Security Verification Code", email, email_html)
         print(f"[GOOGLE AUTH OTP] Sent OTP {otp_code} to {email} (Sent={sent})")
 
         response_data = {
