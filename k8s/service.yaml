@@ -1,0 +1,68 @@
+# ==============================================================================
+# CareerPilot Kubernetes Services
+# Reference: CareerPilot Project Synopsis Section 8 (Orchestration on Amazon EKS)
+# Exposes pods behind AWS Application Load Balancer and internal networking
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Main LoadBalancer Service (careerpilot-svc)
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: careerpilot-svc
+  namespace: careerpilot
+  labels:
+    app.kubernetes.io/name: careerpilot
+    app.kubernetes.io/component: load-balancer
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: https
+      port: 443
+      targetPort: 80
+  selector:
+    app: careerpilot-frontend
+
+---
+# ------------------------------------------------------------------------------
+# 2. Frontend Internal Service
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: careerpilot-frontend-svc
+  namespace: careerpilot
+  labels:
+    app: careerpilot-frontend
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+    app: careerpilot-frontend
+
+---
+# ------------------------------------------------------------------------------
+# 3. Backend REST API Internal Service
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: careerpilot-backend-svc
+  namespace: careerpilot
+  labels:
+    app: careerpilot-backend
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+  selector:
+    app: careerpilot-backend

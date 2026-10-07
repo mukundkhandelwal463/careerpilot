@@ -1951,11 +1951,12 @@ def grade_response(request):
     try:
         question = request.data.get("question", "").strip()
         response = request.data.get("response", "").strip()
+        mode = request.data.get("mode", "voice").strip()
 
         if not question or not response:
             return JsonResponse({"success": False, "error": "Question and response are required."}, status=400)
 
-        evaluation = grade_interview_response(question, response)
+        evaluation = grade_interview_response(question, response, mode=mode)
         return JsonResponse({"success": True, "evaluation": evaluation})
     except Exception as exc:
         traceback.print_exc()

@@ -1122,35 +1122,71 @@ def get_gemini_parse_resume_to_json(resume_text):
     if not is_valid_key():
         raise RuntimeError("No valid Gemini API key found.")
     try:
-        prompt = f"""You are an expert ATS data extraction system.
-I am providing you with the text extracted from a user's resume.
-Your job is to extract the following fields and return ONLY a valid JSON object.
-Fields to extract:
-- full_name
-- headline (professional title)
-- email
-- phone
-- location (city, state, country)
-- summary (a brief professional summary)
-- skills (comma separated list)
-- experience (a block of text outlining work experience, keep it concise but informative)
-- education (a block of text outlining education, keep it concise)
-- address
-- city
-- state
-- zip_code
-- country
-- linkedin (url if present)
-- github (url if present)
-- website (url if present)
+        prompt = f"""You are an elite ATS resume parser and structuring engine.
+Analyze the following resume text and extract all details into a clean, comprehensive JSON object.
 
-Do NOT return markdown blocks like ```json. Return JUST the raw JSON string starting with {{ and ending with }}.
-If a field is not found, leave it as an empty string.
+Extract into this exact JSON schema:
+{{
+  "full_name": "Full name of candidate",
+  "email": "Email address",
+  "phone": "Phone number with country code if available",
+  "location": "City, State, Country",
+  "linkedin": "LinkedIn profile URL or username if found",
+  "github": "GitHub profile URL or username if found",
+  "education": [
+    {{
+      "school": "Institution name (e.g. Lovely Professional University)",
+      "degree": "Degree and major (e.g. B.Tech in Computer Science and Engineering)",
+      "location": "City or campus location",
+      "dates": "Dates attended (e.g. Aug 2023 -- Present)"
+    }}
+  ],
+  "skills": [
+    {{
+      "category": "Category name (e.g. Programming & Frameworks, Cloud & DevOps, Data & Tools)",
+      "items": "Comma-separated list of skills"
+    }}
+  ],
+  "projects": [
+    {{
+      "title": "Project name (e.g. CareerPilot - AI Career Acceleration Platform)",
+      "tech": "Technologies used (e.g. Django REST, React, AWS, Docker, Scikit-learn)",
+      "date": "Date or duration if present",
+      "link": "Project link or GitHub link if present",
+      "bullets": "Key achievements, metrics, bullet points separated by newlines"
+    }}
+  ],
+  "experience": [
+    {{
+      "title": "Job Title / Role / Intern Title",
+      "company": "Company or Organization name",
+      "location": "City, State",
+      "date": "Employment duration",
+      "tech": "Key tech used",
+      "bullets": "Responsibilities and accomplishments separated by newlines"
+    }}
+  ],
+  "certifications": [
+    {{
+      "title": "Certification name",
+      "issuer": "Issuing organization",
+      "date": "Year or date"
+    }}
+  ],
+  "achievements": [
+    "Honor, hackathon win, or competitive programming rank"
+  ]
+}}
+
+CRITICAL RULES:
+1. Do NOT put Projects into Experience. Separate software/data projects into the "projects" array, and employment/internships/training into the "experience" array.
+2. In Education, DO NOT lump school, degree, and dates into one string. Separate them cleanly into "school", "degree", "location", and "dates".
+3. Return ONLY a valid JSON string starting with {{ and ending with }}. Do NOT wrap with markdown backticks or commentary.
 
 Resume Text:
-{_clip_text(resume_text, 6000)}
+{_clip_text(resume_text, 7000)}
 """
-        response_text = _generate_with_model_fallback(prompt, timeout_sec=20)
+        response_text = _generate_with_model_fallback(prompt, timeout_sec=25)
         
         # Clean up any potential markdown formatting from Gemini
         response_text = response_text.strip()
@@ -1161,7 +1197,10 @@ Resume Text:
         if response_text.endswith("```"):
             response_text = response_text[:-3]
             
-        return json.loads(response_text.strip())
+        parsed = json.loads(response_text.strip())
+        if isinstance(parsed, dict):
+            return parsed
+        return {}
     except Exception as e:
         print(f"Error parsing resume to JSON: {e}")
         return {}
@@ -1261,34 +1300,66 @@ def is_invalid_or_gibberish_response(text):
     return False
 
 
-def grade_interview_response(question, response):
+def grade_interview_response(question, response, mode="voice"):
     text = (response or "").strip()
 
     # Detect gibberish, keyboard mashing, or non-answer (e.g. 'serdctfvgybhunjim', 'zsdrfgthyjk')
     if is_invalid_or_gibberish_response(text):
         return {
             "score": 0,
+            "technical_score": 0,
+            "english_score": 0,
+            "fluency_score": 0,
             "strengths": ["None (Unrecognized / Invalid Input)"],
-            "improvements": ["Answer contained keyboard mashing or unrecognized text. Please answer using clear, meaningful sentences."]
+            "improvements": ["Answer contained keyboard mashing or unrecognized text. Please answer using clear, meaningful concepts."]
         }
 
-    prompt = f"""An interview candidate was asked the following question:
+    is_voice = str(mode).lower() == "voice"
+    mode_guidance = (
+        "The candidate answered VERBALLY using live microphone voice recognition (Speech-to-Text). "
+        "EVALUATION WEIGHT DISTRIBUTION: "
+        "- 70% Technical Concept: Evaluate correctness of core principles, logic, system architecture, and relevance to the prompt. "
+        "- 20% English & Communication: Evaluate basic sentence clarity, clear vocabulary, and effective explanation. (Do not harshly deduct for minor spoken slips or accents). "
+        "- 10% Fluency & Articulation: Evaluate smoothness, coherence, structured flow, and delivery confidence."
+        if is_voice
+        else
+        "The candidate submitted a WRITTEN response. "
+        "EVALUATION WEIGHT DISTRIBUTION: "
+        "- 70% Technical Concept: Evaluate conceptual depth, accuracy, logic, and concrete examples. "
+        "- 20% English & Communication: Evaluate clarity of written explanation and technical vocabulary. "
+        "- 10% Fluency & Structure: Evaluate organization, bulleting, and structured articulation."
+    )
+
+    prompt = f"""You are a professional human technical interviewer evaluating a candidate's response.
+The candidate was asked the following question:
 '{question}'
 
-Their spoken/recognized response was:
+Their response ({'Spoken Voice Recording Transcript' if is_voice else 'Written Answer'}):
 '{text}'
 
-Evaluate this response objectively based on technical correctness, completeness, and relevance to the question.
-If the candidate's answer is clear, detailed, and directly answers the prompt, award a high score (80 to 100).
-If the candidate's answer is relevant but brief, award a medium score (50 to 79).
-If the candidate's answer is completely wrong, irrelevant, or nonsense, award a low score (0 to 30).
+{mode_guidance}
 
-Provide:
-1. A numerical score from 0 to 100.
-2. A short list of strengths (1-2 bullet points).
-3. A short list of suggested improvements (1-2 bullet points).
+Evaluate this response objectively into 3 distinct components (each on a 0-100 scale):
+1. 'technical_score' (0-100): 70% weight. How accurate, deep, and correct are their technical concepts and problem-solving logic?
+2. 'english_score' (0-100): 20% weight. How clear, understandable, and coherent is their English communication and technical vocabulary?
+3. 'fluency_score' (0-100): 10% weight. How smooth, structured, and confident is their articulation and flow?
 
-Return a valid JSON object with keys: 'score' (integer 0-100), 'strengths' (array of strings), 'improvements' (array of strings). Do not use markdown backticks."""
+Calculate the final weighted score as:
+overall_score = round(technical_score * 0.70 + english_score * 0.20 + fluency_score * 0.10)
+
+Also provide:
+- A short list of strengths (1-2 bullet points highlighting strong technical concepts or clear communication).
+- A short list of suggested improvements (1-2 bullet points offering actionable technical advice).
+
+Return a valid JSON object with keys:
+- 'score' (integer 0-100, weighted overall)
+- 'technical_score' (integer 0-100)
+- 'english_score' (integer 0-100)
+- 'fluency_score' (integer 0-100)
+- 'strengths' (array of strings)
+- 'improvements' (array of strings)
+
+Do not use markdown backticks."""
 
     try:
         raw_response = _generate_with_model_fallback(prompt, timeout_sec=12)
@@ -1296,7 +1367,14 @@ Return a valid JSON object with keys: 'score' (integer 0-100), 'strengths' (arra
         cleaned = re.sub(r"```\s*", "", cleaned).strip()
         result = json.loads(cleaned)
         if isinstance(result, dict) and "score" in result:
-            result["score"] = int(result["score"])
+            tech = int(result.get("technical_score", result["score"]))
+            eng = int(result.get("english_score", max(50, result["score"])))
+            fl = int(result.get("fluency_score", max(60, result["score"])))
+            weighted = round(tech * 0.70 + eng * 0.20 + fl * 0.10)
+            result["score"] = weighted
+            result["technical_score"] = tech
+            result["english_score"] = eng
+            result["fluency_score"] = fl
             return result
     except Exception as e:
         print(f"Error grading response via Gemini/DeepSeek: {e}")
@@ -1304,20 +1382,31 @@ Return a valid JSON object with keys: 'score' (integer 0-100), 'strengths' (arra
     # Dynamic fallback score based on candidate answer depth
     word_count = len(text.split())
     if word_count < 4:
-        dynamic_score = 30
-        strengths = ["Brief candidate response provided"]
-        improvements = ["Elaborate with specific technical examples and reasoning"]
-    elif word_count < 15:
-        dynamic_score = 65
-        strengths = ["Clear candidate response addressing prompt"]
-        improvements = ["Include deeper system architecture details or tools used"]
+        tech_score = 38
+        eng_score = 55
+        fluency_score = 50
+        strengths = ["Candidate attempted an answer addressing the topic"]
+        improvements = ["Elaborate further with specific technical mechanisms and concepts"]
+    elif word_count < 14:
+        tech_score = 72
+        eng_score = 76
+        fluency_score = 70
+        strengths = ["Solid technical understanding addressing core principles"]
+        improvements = ["Include architectural trade-offs or implementation nuances"]
     else:
-        dynamic_score = 88
-        strengths = ["Comprehensive candidate response with clear technical experience"]
-        improvements = ["Quantify measurable project outcomes and performance metrics"]
+        tech_score = 88
+        eng_score = 84
+        fluency_score = 82
+        strengths = ["Strong conceptual depth demonstrating clear problem-solving and domain expertise"]
+        improvements = ["Optionally mention performance optimizations or edge cases"]
+
+    final_score = round(tech_score * 0.70 + eng_score * 0.20 + fluency_score * 0.10)
 
     return {
-        "score": dynamic_score,
+        "score": final_score,
+        "technical_score": tech_score,
+        "english_score": eng_score,
+        "fluency_score": fluency_score,
         "strengths": strengths,
         "improvements": improvements
     }

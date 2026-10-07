@@ -1,0 +1,51 @@
+# ==============================================================================
+# CareerPilot Horizontal Pod Autoscaler (HPA)
+# Reference: CareerPilot Project Synopsis Section 8 (Orchestration on Amazon EKS)
+# Dynamically scales backend pods based on CPU and memory demand (e.g. placement drives)
+# ==============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: careerpilot-backend-hpa
+  namespace: careerpilot
+  labels:
+    app: careerpilot-backend
+    app.kubernetes.io/name: careerpilot
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: careerpilot-backend
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 4
+          periodSeconds: 15
+      selectPolicy: Max
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+      selectPolicy: Min

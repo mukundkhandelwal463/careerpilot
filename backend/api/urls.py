@@ -4,6 +4,7 @@ from api import views
 urlpatterns = [
     # Metrics and Diagnostics
     path('health', views.health, name='health'),
+    path('metrics', views.prometheus_metrics, name='api_metrics'),
     path('test-smtp', views.test_smtp, name='test_smtp'),
 
     # Core AI and resume screener

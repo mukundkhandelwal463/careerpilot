@@ -1,0 +1,61 @@
+# ==============================================================================
+# CareerPilot Backend - Multi-Stage Production Dockerfile (Python 3.12-slim)
+# Reference: CareerPilot Project Synopsis Section 7 (Containerization)
+# ==============================================================================
+
+# Stage 1: Build stage compiles Python dependencies
+FROM python:3.12-slim AS builder
+
+WORKDIR /build
+
+# Install build dependencies required for C extensions (psycopg2, numpy, scikit-learn)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies to user site-packages
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# ==============================================================================
+# Stage 2: Minimal runtime image
+# ==============================================================================
+FROM python:3.12-slim AS runner
+
+WORKDIR /app
+
+# Install runtime libraries and curl for container health checks
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy compiled Python packages from builder stage
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=8000
+
+# Copy backend application source code
+COPY backend/ /app/backend/
+
+WORKDIR /app/backend
+
+# Create non-root user for security compliance
+RUN useradd -u 1001 -m careerpilot && \
+    chown -R careerpilot:careerpilot /app
+USER careerpilot
+
+# Expose backend REST API port
+EXPOSE 8000
+
+# Container liveness probe against Django health endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:8000/api/health || exit 1
+
+# Production WSGI server (Gunicorn 3 workers x 2 threads as documented in architecture)
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "2", "--timeout", "120", "--graceful-timeout", "30", "--keep-alive", "5"]

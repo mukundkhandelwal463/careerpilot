@@ -22,7 +22,10 @@ import {
   BarChart3,
   Lightbulb,
   Search,
-  Loader2
+  Loader2,
+  FileText,
+  RefreshCw,
+  Edit3
 } from 'lucide-react';
 import '../css/style.css';
 
@@ -44,6 +47,589 @@ const DEFAULT_STREAM_KEYWORDS = [
   'Feature Engineering', 'EDA', 'Outlier Detection', 'Model Deployment', 
   'Cosine Similarity', 'Pandas', 'SciPy'
 ];
+
+// Rich, Production-Grade Sample Resumes tailored to each template
+const SAMPLE_RESUMES = {
+  mukund_ml: {
+    stream: 'Data Science & Machine Learning',
+    name: 'Alex Morgan',
+    location: 'San Francisco, CA',
+    phone: '+1 (555) 234-5678',
+    email: 'alex.morgan@example.com',
+    linkedin: 'https://linkedin.com/in/alexmorgan-ai',
+    github: 'https://github.com/alexmorgan-ml',
+    educationList: [
+      {
+        school: 'University of California, Berkeley',
+        location: 'Berkeley, CA',
+        degree: 'B.S. in Computer Science & Data Science (GPA: 3.88 / 4.0)',
+        dates: 'Aug 2021 -- May 2025'
+      }
+    ],
+    skillsList: [
+      { category: 'Machine Learning & AI', items: 'PyTorch, Scikit-learn, TensorFlow, Hugging Face, Transformers, NLP Pipelines, Computer Vision, LLMs' },
+      { category: 'Languages & Tools', items: 'Python, SQL, C++, R, Docker, Kubernetes, FastAPI, Git, Linux' },
+      { category: 'Data Engineering & Cloud', items: 'Apache Spark, Kafka, AWS (EC2, S3, SageMaker), PostgreSQL, Vector DBs (FAISS, Pinecone)' }
+    ],
+    projectsList: [
+      {
+        title: 'Multimodal Retrieval-Augmented Generation (RAG) System',
+        link: 'https://github.com/alexmorgan-ml/rag-assistant',
+        tech: 'PyTorch, FAISS, LangChain, FastAPI, Docker',
+        date: 'Jan 2025 -- Mar 2025',
+        bullets: 'Engineered an enterprise RAG knowledge engine utilizing vector embeddings and hybrid BM25 semantic retrieval.\nReduced query latency by 42% through embedding caching and quantization while achieving 94% answer accuracy.\nDeployed containerized microservice on AWS EC2 with automated CI/CD pipeline supporting 5,000+ daily queries.'
+      },
+      {
+        title: 'Real-Time Fraud Detection & Anomaly Pipeline',
+        link: 'https://github.com/alexmorgan-ml/fraud-detect',
+        tech: 'Scikit-learn, XGBoost, Kafka, Pandas, Streamlit',
+        date: 'Sep 2024 -- Dec 2024',
+        bullets: 'Built an end-to-end streaming anomaly detection architecture processing 50k transactions/minute with sub-15ms inference.\nTrained gradient-boosted ensemble models achieving 0.96 ROC-AUC and reducing false positives by 31%.\nDesigned an interactive observability dashboard featuring real-time drift monitoring and SHAP explainability graphs.'
+      }
+    ],
+    trainingList: [
+      {
+        title: 'Machine Learning Engineer Intern',
+        date: 'Jun 2024 -- Aug 2024',
+        projectTitle: 'Enterprise AI Lab, San Francisco, CA',
+        tech: 'PyTorch, ONNX, Ray, Docker, GCP',
+        bullets: 'Developed automated feature extraction pipelines processing 10M+ rows of multimodal tabular and time-series data.\nOptimized model inference latency by 3.2x via INT8 quantization and ONNX Runtime compilation for production edge deployment.\nCollaborated with cross-functional product teams to release an AI-assisted recommendation engine driving 14% user engagement lift.'
+      }
+    ],
+    certificationsList: [
+      { title: 'AWS Certified Machine Learning -- Specialty', issuer: 'Amazon Web Services', date: '2024' },
+      { title: 'Deep Learning Specialization', issuer: 'DeepLearning.AI / Coursera', date: '2023' },
+      { title: 'TensorFlow Developer Certificate', issuer: 'Google Developers', date: '2023' }
+    ],
+    achievementsList: [
+      '1st Place Winner at National AI & Data Hackathon (out of 350+ competitive collegiate teams).',
+      'Published peer-reviewed workshop paper on Efficient Transformer Quantization at NeurIPS Workshop.',
+      'Solved 450+ Data Structures and Algorithm problems on LeetCode (Knight rank, top 4% globally).'
+    ]
+  },
+  abey_classic: {
+    stream: 'Full Stack & Software Engineering',
+    name: 'Jordan Lee',
+    location: 'Seattle, WA',
+    phone: '+1 (555) 987-6543',
+    email: 'jordan.lee@example.com',
+    linkedin: 'https://linkedin.com/in/jordanlee-dev',
+    github: 'https://github.com/jordanlee-code',
+    educationList: [
+      {
+        school: 'University of Washington',
+        location: 'Seattle, WA',
+        degree: 'B.S. in Computer Science (Major GPA: 3.9 / 4.0)',
+        dates: 'Sep 2021 -- Jun 2025'
+      }
+    ],
+    skillsList: [
+      { category: 'Languages & Frameworks', items: 'Java, Python, C/C++, TypeScript, React.js, Node.js, Next.js, Go' },
+      { category: 'Systems & Cloud', items: 'Distributed Systems, Docker, Kubernetes, AWS, PostgreSQL, Redis, Kafka, GraphQL' },
+      { category: 'Developer Practices', items: 'RESTful APIs, Microservices, CI/CD, Git, Linux, TDD, Agile & Scrum' }
+    ],
+    projectsList: [
+      {
+        title: 'CloudScale: High-Throughput Distributed Key-Value Store',
+        link: 'https://github.com/jordanlee-code/cloudscale',
+        tech: 'Go, Raft Consensus, gRPC, Docker',
+        date: 'Jan 2025 -- Present',
+        bullets: 'Implemented a distributed, fault-tolerant key-value store in Go implementing Raft consensus protocol.\nAchieved linear scalability handling 120,000 requests/second with 99th-percentile latency under 8ms.\nEngineered continuous leader-election and log-replication test harness simulating network partitions.'
+      },
+      {
+        title: 'DevPulse: Real-Time Collaborative Workspace',
+        link: 'https://github.com/jordanlee-code/devpulse',
+        tech: 'React, Node.js, WebSockets, Redis, PostgreSQL',
+        date: 'Aug 2024 -- Nov 2024',
+        bullets: 'Architected a real-time collaborative coding platform with operational transformation algorithm for conflict resolution.\nIntegrated Redis Pub/Sub backplane supporting 10,000 simultaneous active WebSocket connections.\nImplemented end-to-end user authentication with JWT and granular role-based workspace access controls.'
+      }
+    ],
+    trainingList: [
+      {
+        title: 'Software Engineering Intern',
+        date: 'Jun 2024 -- Sep 2024',
+        projectTitle: 'Cloud Infrastructure Team, Seattle, WA',
+        tech: 'Python, Go, AWS, Terraform, Docker',
+        bullets: 'Designed internal metrics aggregation microservice processing 2TB daily log telemetry with Prometheus & Grafana.\nRefactored deployment workflows reducing Docker image build and deployment turnaround time from 22 mins to 6 mins.\nWrote comprehensive integration test suites boosting code coverage from 68% to 91% across 14 microservices.'
+      }
+    ],
+    certificationsList: [
+      { title: 'AWS Certified Solutions Architect -- Associate', issuer: 'Amazon Web Services', date: '2024' },
+      { title: 'Certified Kubernetes Application Developer (CKAD)', issuer: 'CNCF', date: '2024' }
+    ],
+    achievementsList: [
+      'Finalist at ACM ICPC Regional Programming Contest (Pacific Northwest).',
+      'President of Association for Computing Machinery (ACM) Student Chapter (500+ members).'
+    ]
+  },
+  executive: {
+    stream: 'Engineering Leadership & Architecture',
+    name: 'Morgan Taylor',
+    location: 'New York, NY',
+    phone: '+1 (555) 456-7890',
+    email: 'morgan.taylor@example.com',
+    linkedin: 'https://linkedin.com/in/morgantaylor-lead',
+    github: 'https://github.com/morgantaylor-eng',
+    educationList: [
+      {
+        school: 'Columbia University',
+        location: 'New York, NY',
+        degree: 'M.S. in Computer Science & Technology Management',
+        dates: '2020 -- 2022'
+      },
+      {
+        school: 'Cornell University',
+        location: 'Ithaca, NY',
+        degree: 'B.S. in Electrical & Computer Engineering',
+        dates: '2016 -- 2020'
+      }
+    ],
+    skillsList: [
+      { category: 'Executive Leadership', items: 'Engineering Strategy, Cross-Functional Team Leadership, Technical Architecture, Agile Coaching' },
+      { category: 'Platforms & Systems', items: 'Cloud-Native Architectures, Kubernetes, Microservices, AWS/GCP, Python, TypeScript, Kafka' },
+      { category: 'Governance & Security', items: 'SOC2 Compliance, System Reliability Engineering, FinOps, CI/CD Automation' }
+    ],
+    projectsList: [
+      {
+        title: 'Global Payment Modernization Platform',
+        link: 'https://github.com/morgantaylor-eng/payment-platform',
+        tech: 'Kafka, Golang, AWS, Microservices, Terraform',
+        date: '2023 -- 2024',
+        bullets: 'Led architectural overhaul of legacy payment infrastructure, migrating to event-driven microservices processing $40M daily volume.\nAchieved 99.999% platform availability while cutting infrastructure overhead by $350k annually.\nCoached and mentored 18 engineers across 3 distributed cross-functional agile pods.'
+      },
+      {
+        title: 'Enterprise Multi-Cloud Observability Mesh',
+        link: 'https://github.com/morgantaylor-eng/cloud-mesh',
+        tech: 'OpenTelemetry, Grafana, Kubernetes, Go',
+        date: '2022 -- 2023',
+        bullets: 'Spearheaded organization-wide rollout of unified telemetry mesh across 60+ microservices spanning AWS and GCP.\nDecreased Mean Time to Detection (MTTD) by 64% and Mean Time to Resolution (MTTR) by 48%.'
+      }
+    ],
+    trainingList: [
+      {
+        title: 'Staff Engineering Lead',
+        date: '2022 -- Present',
+        projectTitle: 'Core Platform Engineering, New York, NY',
+        tech: 'Kubernetes, Go, AWS, Architecture Strategy',
+        bullets: 'Defined the 3-year technical roadmap for scalable cloud infrastructure supporting 15M active mobile users.'
+      }
+    ],
+    certificationsList: [
+      { title: 'TOGAF 9 Enterprise Architecture Certified', issuer: 'The Open Group', date: '2023' },
+      { title: 'AWS Certified Solutions Architect -- Professional', issuer: 'Amazon Web Services', date: '2022' }
+    ],
+    achievementsList: [
+      'Keynote speaker at Cloud Native Summit NYC on Microservices Resilience at Scale.',
+      'Recipient of Annual Engineering Excellence Award for Zero-Downtime Migration.'
+    ]
+  }
+};
+
+// Pure function to generate complete LaTeX string from form parameters
+const generateLatexString = ({
+  template,
+  name,
+  location,
+  phone,
+  email,
+  linkedin,
+  github,
+  educationList = [],
+  skillsList = [],
+  projectsList = [],
+  trainingList = [],
+  certificationsList = [],
+  achievementsList = []
+}) => {
+  const displayName = name || 'YOUR FULL NAME';
+  const displayLocation = location || '';
+  const displayPhone = phone || '';
+  const displayEmail = email || '';
+
+  // Clean Contact Line using standard LaTeX mathematical pipe \mid
+  const contactParts = [];
+  if (displayPhone) contactParts.push(`\\href{tel:${esc(displayPhone)}}{${esc(displayPhone)}}`);
+  if (displayEmail) contactParts.push(`\\href{mailto:${esc(displayEmail)}}{${esc(displayEmail)}}`);
+  if (linkedin && linkedin.trim() && linkedin.trim() !== 'LinkedIn') {
+    const lUrl = linkedin.startsWith('http') ? linkedin : `https://${linkedin}`;
+    contactParts.push(`\\href{${esc(lUrl)}}{LinkedIn}`);
+  }
+  if (github && github.trim() && github.trim() !== 'GitHub') {
+    const gUrl = github.startsWith('http') ? github : `https://${github}`;
+    contactParts.push(`\\href{${esc(gUrl)}}{GitHub}`);
+  }
+  const contactLine = contactParts.length > 0
+    ? contactParts.join(' ~$\\mid$~ ')
+    : `${esc(displayEmail || 'email@example.com')}${displayPhone ? ` ~$\\mid$~ ${esc(displayPhone)}` : ''}`;
+
+  // Education Section
+  const validEdu = educationList.filter(e => e.school && e.school.trim());
+  const eduContent = validEdu.length > 0
+    ? validEdu.map(e => `    \\resumeSubheading\n      {${esc(e.school)}}{${esc(e.location || '')}}\n      {${esc(e.degree || '')}}{${esc(e.dates || '')}}`).join('\n')
+    : (name ? '' : `    \\resumeSubheading\n      {University / School Name}{Location}\n      {Degree / Major}{Dates}`);
+
+  // Skills Section
+  const validSkills = skillsList.filter(s => s.items && s.items.trim());
+  const skillsContent = validSkills.length > 0
+    ? validSkills.map(s => `     \\textbf{\\normalsize{${esc(s.category || 'Skills')}:}}{\\normalsize{ ${esc(s.items)}}} \\\\`).join('\n')
+    : (name ? '' : `     \\textbf{\\normalsize{Technical Skills:}}{\\normalsize{ Core Competencies, Tools, Technologies}} \\\\`);
+
+  // Projects Section
+  const validProjects = projectsList.filter(p => (p.title && p.title.trim()) || (p.bullets && p.bullets.trim()));
+  const projectsContent = validProjects.length > 0
+    ? validProjects.map(p => {
+        const title = esc(p.title || 'Project');
+        const techStr = p.tech ? ` $|$ \\large{${esc(p.tech)}}` : '';
+        const titlePart = p.link && p.link !== '#'
+          ? `\\href{${esc(p.link)}}{\\textbf{\\large{${title}}}}${techStr}`
+          : `\\textbf{\\large{${title}}}${techStr}`;
+        const date = esc(p.date || '');
+        const bullets = (p.bullets || '').split('\n').filter(Boolean);
+        const bulletItems = bullets.length > 0
+          ? bullets.map(b => `            \\resumeItem{\\normalsize{${esc(b)}}}`).join('\n')
+          : `            \\resumeItem{\\normalsize{${esc(p.title || 'Key project achievement.')}}}`;
+        return `      \\resumeProjectHeading\n          {${titlePart}}{${date}}\n          \\resumeItemListStart\n${bulletItems}\n          \\resumeItemListEnd`;
+      }).join('\n\\vspace{-4pt}\n')
+    : '';
+
+  // Training / Experience Section
+  const validTraining = trainingList.filter(t => (t.title && t.title.trim()) || (t.projectTitle && t.projectTitle.trim()) || (t.bullets && t.bullets.trim()));
+  const trainingContent = validTraining.length > 0
+    ? validTraining.map(t => {
+        const title = esc(t.title || 'Professional Experience');
+        const date = esc(t.date || '');
+        const projTitle = esc(t.projectTitle || '');
+        const techStr = t.tech ? ` $|$ \\large{${esc(t.tech)}}` : '';
+        const titlePart = t.link && t.link !== '#'
+          ? `\\href{${esc(t.link)}}{\\textbf{\\large{${projTitle}}}}${techStr}`
+          : `\\textbf{\\large{${projTitle}}}${techStr}`;
+        const bullets = (t.bullets || '').split('\n').filter(Boolean);
+        const bulletItems = bullets.length > 0
+          ? bullets.map(b => `          \\resumeItem{\\normalsize{${esc(b)}}}`).join('\n')
+          : '';
+        return `  \\resumeSubheading\n    {${title}}{${date}}\n    {}{}\n  \\vspace{-10pt}\n  \\begin{itemize}[leftmargin=0.15in, label={}]\n    \\resumeProjectHeading\n        {${titlePart}}{}\n        \\resumeItemListStart\n${bulletItems}\n        \\resumeItemListEnd\n  \\end{itemize}`;
+      }).join('\n')
+    : '';
+
+  // Certifications Section
+  const validCerts = certificationsList.filter(c => c.title && c.title.trim());
+  const certsContent = validCerts.length > 0
+    ? validCerts.map(c => `        \\resumeItem{\\normalsize{${esc(c.title)}${c.issuer ? ` -- \\textbf{(${esc(c.issuer)})}` : ''}${c.date ? ` \\hfill \\textbf{${esc(c.date)}}` : ''}}}`).join('\n')
+    : '';
+
+  // Achievements Section
+  const validAchievements = achievementsList.filter(a => a && String(a).trim());
+  const achievementsContent = validAchievements.length > 0
+    ? validAchievements.map(a => `    \\item ${esc(a)}`).join('\n')
+    : '';
+
+  // Dynamic modular section blocks
+  const eduSection = eduContent ? `
+%-----------EDUCATION-----------
+\\section{EDUCATION}
+\\vspace{3pt}
+  \\resumeSubHeadingListStart
+${eduContent}
+  \\resumeSubHeadingListEnd
+` : '';
+
+  const skillsSection = skillsContent ? `
+%-----------TECHNICAL SKILLS-----------
+\\section{TECHNICAL SKILLS}
+\\vspace{2pt}
+ \\begin{itemize}[leftmargin=0.15in, label={}]
+    \\small{\\item{
+${skillsContent}
+    }}
+ \\end{itemize}
+ \\vspace{-8pt}
+` : '';
+
+  const projectsSection = projectsContent ? `
+%-----------PROJECTS-----------
+\\section{PROJECTS}
+    \\vspace{-2pt}
+    \\resumeSubHeadingListStart
+${projectsContent}
+    \\resumeSubHeadingListEnd
+    \\vspace{-4pt}
+` : '';
+
+  const trainingSection = trainingContent ? `
+%-----------EXPERIENCE & TRAINING-----------
+\\section{EXPERIENCE \\& TRAINING}
+\\vspace{-2pt}
+\\resumeSubHeadingListStart
+${trainingContent}
+\\resumeSubHeadingListEnd
+\\vspace{-4pt}
+` : '';
+
+  const certsSection = certsContent ? `
+%-----------CERTIFICATIONS-----------
+\\section{CERTIFICATIONS}
+\\resumeSubHeadingListStart
+    \\resumeItemListStart
+${certsContent}
+    \\resumeItemListEnd
+\\resumeSubHeadingListEnd
+\\vspace{-4pt}
+` : '';
+
+  const achievementsSection = achievementsContent ? `
+%-----------ACHIEVEMENTS-----------
+\\section{ACHIEVEMENTS}
+\\begin{itemize}[leftmargin=0.15in, label={$\\bullet$}, itemsep=1pt]
+    \\small{
+${achievementsContent}
+    }
+\\end{itemize}
+` : '';
+
+  if (template === 'abey_classic') {
+    return `%-------------------------
+% Resume in Latex - Abey George Classic Style
+%------------------------
+
+\\documentclass[letterpaper,11pt]{article}
+
+\\usepackage{latexsym}
+\\usepackage[empty]{fullpage}
+\\usepackage{titlesec}
+\\usepackage{marvosym}
+\\usepackage[usenames,dvipsnames]{color}
+\\usepackage{verbatim}
+\\usepackage{enumitem}
+\\usepackage[hidelinks]{hyperref}
+\\usepackage[english]{babel}
+\\usepackage{tabularx}
+\\usepackage{multicol}
+\\usepackage{graphicx}
+\\setlength{\\multicolsep}{-3.0pt}
+\\setlength{\\columnsep}{-1pt}
+\\input{glyphtounicode}
+
+\\RequirePackage{tikz}
+\\RequirePackage{xcolor}
+\\usepackage{tikz}
+\\usetikzlibrary{svg.path}
+
+\\definecolor{cvblue}{HTML}{0E5484}
+\\definecolor{black}{HTML}{130810}
+\\definecolor{darkcolor}{HTML}{0F4539}
+\\definecolor{cvgreen}{HTML}{3BD80D}
+\\definecolor{taggreen}{HTML}{00E278}
+\\definecolor{SlateGrey}{HTML}{2E2E2E}
+\\definecolor{LightGrey}{HTML}{666666}
+\\colorlet{name}{black}
+\\colorlet{tagline}{darkcolor}
+\\colorlet{heading}{darkcolor}
+\\colorlet{headingrule}{cvblue}
+\\colorlet{accent}{darkcolor}
+\\colorlet{emphasis}{SlateGrey}
+\\colorlet{body}{LightGrey}
+
+\\addtolength{\\oddsidemargin}{-0.6in}
+\\addtolength{\\evensidemargin}{-0.5in}
+\\addtolength{\\textwidth}{1.19in}
+\\addtolength{\\topmargin}{-.7in}
+\\addtolength{\\textheight}{1.4in}
+
+\\urlstyle{same}
+\\raggedbottom
+\\raggedright
+\\setlength{\\tabcolsep}{0in}
+
+\\titleformat{\\section}{
+  \\vspace{-4pt}\\scshape\\raggedright\\large\\bfseries
+}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
+
+\\pdfgentounicode=1
+
+\\newcommand{\\resumeItem}[1]{
+  \\item\\small{{#1 \\vspace{-2pt}}}
+}
+
+\\newcommand{\\resumeSubheading}[4]{
+  \\vspace{-2pt}\\item
+    \\begin{tabular*}{1.0\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
+      \\textbf{\\large#1} & \\textbf{\\small #2} \\\\
+      \\textit{\\large#3} & \\textit{\\small #4} \\\\
+    \\end{tabular*}\\vspace{-7pt}
+}
+
+\\newcommand{\\resumeProjectHeading}[2]{
+    \\item
+    \\begin{tabular*}{1.001\\textwidth}{l@{\\extracolsep{\\fill}}r}
+      \\small#1 & \\textbf{\\small #2}\\\\
+    \\end{tabular*}\\vspace{-7pt}
+}
+
+\\newcommand{\\resumeSubItem}[1]{\\resumeItem{#1}\\vspace{-4pt}}
+
+\\renewcommand\\labelitemi{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
+\\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
+
+\\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.0in, label={}]}
+\\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
+\\newcommand{\\resumeItemListStart}{\\begin{itemize}}
+\\newcommand{\\resumeItemListEnd}{\\end{itemize}\\vspace{-5pt}}
+
+\\newcommand\\sbullet[1][.5]{\\mathbin{\\vcenter{\\hbox{\\scalebox{#1}{$\\bullet$}}}}}
+
+\\begin{document}
+
+%----------HEADING----------
+\\begin{center}
+    {\\Huge \\scshape ${esc(displayName)}} \\\\ \\vspace{2pt}
+    ${displayLocation ? `${esc(displayLocation)} \\\\ \\vspace{2pt}` : ''}
+    \\small
+    ${contactLine}
+\\end{center}
+\\vspace{2mm}
+
+${eduSection}
+${skillsSection}
+${projectsSection}
+${trainingSection}
+${certsSection}
+${achievementsSection}
+
+\\end{document}`;
+  }
+
+  if (template === 'executive') {
+    return `\\documentclass[10pt,a4paper]{article}
+\\usepackage[margin=0.75in]{geometry}
+\\usepackage{titlesec}
+\\usepackage{xcolor}
+\\usepackage[hidelinks]{hyperref}
+
+\\definecolor{primary}{RGB}{28, 36, 39}
+\\definecolor{accent}{RGB}{16, 185, 129}
+
+\\titleformat{\\section}{\\color{primary}\\large\\bfseries\\uppercase}{}{0em}{}[\\titlerule]
+
+\\begin{document}
+
+\\begin{center}
+{\\Huge \\bfseries \\color{primary} ${esc(displayName)}} \\\\[4pt]
+${displayLocation ? `{\\color{accent} \\bfseries ${esc(displayLocation)}} \\\\[6pt]` : ''}
+\\small ${contactLine}
+\\end{center}
+
+\\vspace{8pt}
+
+${eduSection}
+${skillsSection}
+${projectsSection}
+${trainingSection}
+${certsSection}
+
+\\end{document}`;
+  }
+
+  // Default: 'mukund_ml' (Data & ML Specialist Template)
+  return `\\documentclass[letterpaper,11pt]{article}
+
+\\usepackage{latexsym}
+\\usepackage[empty]{fullpage}
+\\usepackage{titlesec}
+\\usepackage{marvosym}
+\\usepackage[usenames,dvipsnames]{color}
+\\usepackage{verbatim}
+\\usepackage{enumitem}
+\\usepackage[hidelinks]{hyperref}
+\\usepackage[english]{babel}
+\\usepackage{tabularx}
+\\usepackage{multicol}
+\\usepackage{graphicx}
+\\setlength{\\multicolsep}{-3.0pt}
+\\setlength{\\columnsep}{-1pt}
+\\input{glyphtounicode}
+
+\\RequirePackage{tikz}
+\\RequirePackage{xcolor}
+\\usepackage{tikz}
+\\usetikzlibrary{svg.path}
+
+\\definecolor{cvblue}{HTML}{0E5484}
+\\definecolor{black}{HTML}{130810}
+\\definecolor{darkcolor}{HTML}{0F4539}
+\\definecolor{SlateGrey}{HTML}{2E2E2E}
+\\definecolor{LightGrey}{HTML}{666666}
+\\colorlet{heading}{darkcolor}
+\\colorlet{headingrule}{cvblue}
+
+\\addtolength{\\oddsidemargin}{-0.6in}
+\\addtolength{\\evensidemargin}{-0.5in}
+\\addtolength{\\textwidth}{1.19in}
+\\addtolength{\\topmargin}{-.7in}
+\\addtolength{\\textheight}{1.4in}
+
+\\urlstyle{same}
+\\raggedbottom
+\\raggedright
+\\setlength{\\tabcolsep}{0in}
+
+\\titleformat{\\section}{
+  \\vspace{-4pt}\\scshape\\raggedright\\large\\bfseries
+}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
+
+\\pdfgentounicode=1
+
+\\newcommand{\\resumeItem}[1]{
+  \\item\\small{{#1 \\vspace{-2pt}}}
+}
+
+\\newcommand{\\resumeSubheading}[4]{
+  \\vspace{-2pt}\\item
+    \\begin{tabular*}{1.0\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
+      \\textbf{\\large#1} & \\textbf{\\small #2} \\\\
+      \\textit{\\large#3} & \\textit{\\small #4} \\\\
+    \\end{tabular*}\\vspace{-7pt}
+}
+
+\\newcommand{\\resumeProjectHeading}[2]{
+    \\item
+    \\begin{tabular*}{1.001\\textwidth}{l@{\\extracolsep{\\fill}}r}
+      \\small#1 & \\textbf{\\small #2}\\\\
+    \\end{tabular*}\\vspace{-7pt}
+}
+
+\\newcommand{\\resumeSubItem}[1]{\\resumeItem{#1}\\vspace{-4pt}}
+
+\\renewcommand\\labelitemi{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
+\\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
+
+\\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.0in, label={}]}
+\\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
+\\newcommand{\\resumeItemListStart}{\\begin{itemize}}
+\\newcommand{\\resumeItemListEnd}{\\end{itemize}\\vspace{-5pt}}
+
+\\newcommand\\sbullet[1][.5]{\\mathbin{\\vcenter{\\hbox{\\scalebox{#1}{$\\bullet$}}}}}
+
+%-------------------------------------------
+\\begin{document}
+
+%----------HEADING----------
+\\begin{center}
+    {\\Huge \\scshape ${esc(displayName)}} \\\\ \\vspace{2pt}
+    ${displayLocation ? `${esc(displayLocation)} \\\\ \\vspace{2pt}` : ''}
+    \\small
+    ${contactLine}
+\\end{center}
+\\vspace{2mm}
+
+${eduSection}
+${skillsSection}
+${projectsSection}
+${trainingSection}
+${certsSection}
+${achievementsSection}
+
+\\end{document}`;
+};
 
 const ResumeBuilder = () => {
   const { resumeId } = useParams();
@@ -222,32 +808,142 @@ const ResumeBuilder = () => {
         if (pd.linkedin) setLinkedin(pd.linkedin);
         if (pd.github) setGithub(pd.github);
 
-        // Parse Education
+        // 1. Parse Education
         if (pd.education) {
           if (Array.isArray(pd.education)) {
-            setEducationList(pd.education.map(e => (typeof e === 'string' ? { school: e, location: '', degree: '', dates: '' } : e)));
+            const parsedEdu = pd.education.map(e => {
+              if (typeof e === 'object' && e !== null) {
+                return {
+                  school: e.school || e.institution || '',
+                  degree: e.degree || e.major || '',
+                  location: e.location || '',
+                  dates: e.dates || e.date || e.year || ''
+                };
+              }
+              const str = String(e).trim();
+              let school = str;
+              let degree = '';
+              let dates = '';
+              const dateMatch = str.match(/\(([^)]*(?:20\d\d|19\d\d|Present)[^)]*)\)/i);
+              if (dateMatch) {
+                dates = dateMatch[1];
+                school = str.replace(dateMatch[0], '').trim();
+              }
+              const parts = school.split(/\s*[-–—|]\s*/);
+              if (parts.length >= 2) {
+                school = parts[0].trim();
+                degree = parts.slice(1).join(' - ').trim();
+              }
+              return { school, degree, dates, location: '' };
+            });
+            setEducationList(parsedEdu);
           } else if (typeof pd.education === 'string') {
-            setEducationList([{ school: pd.education, location: '', degree: '', dates: '' }]);
+            const str = pd.education.trim();
+            let school = str;
+            let degree = '';
+            let dates = '';
+            const dateMatch = str.match(/\(([^)]*(?:20\d\d|19\d\d|Present)[^)]*)\)/i);
+            if (dateMatch) {
+              dates = dateMatch[1];
+              school = str.replace(dateMatch[0], '').trim();
+            }
+            const parts = school.split(/\s*[-–—|]\s*/);
+            if (parts.length >= 2) {
+              school = parts[0].trim();
+              degree = parts.slice(1).join(' - ').trim();
+            }
+            setEducationList([{ school, degree, dates, location: '' }]);
           }
         }
 
-        // Parse Skills
+        // 2. Parse Skills
         if (pd.skills) {
           if (Array.isArray(pd.skills)) {
-            setSkillsList([{ category: 'Technical Skills', items: pd.skills.join(', ') }]);
+            if (pd.skills.length > 0 && typeof pd.skills[0] === 'object' && pd.skills[0] !== null) {
+              setSkillsList(pd.skills.map(s => ({ category: s.category || 'Technical Skills', items: s.items || '' })));
+            } else {
+              setSkillsList([{ category: 'Technical Skills', items: pd.skills.join(', ') }]);
+            }
           } else if (typeof pd.skills === 'string') {
             setSkillsList([{ category: 'Technical Skills', items: pd.skills }]);
           }
         }
 
-        // Parse Projects / Experience
-        if (pd.experience) {
-          if (typeof pd.experience === 'string') {
-            setTrainingList([{ title: 'Professional Experience', date: '', link: '', projectTitle: 'Key Responsibilities', tech: '', bullets: pd.experience }]);
+        // 3. Parse Projects
+        let extractedProjects = [];
+        if (pd.projects && Array.isArray(pd.projects) && pd.projects.length > 0) {
+          extractedProjects = pd.projects.map(p => ({
+            title: p.title || p.name || 'Project',
+            tech: p.tech || p.technologies || p.stack || '',
+            date: p.date || p.duration || '',
+            link: p.link || p.github || '',
+            bullets: Array.isArray(p.bullets) ? p.bullets.join('\n') : (p.bullets || p.description || '')
+          }));
+        } else if (typeof pd.experience === 'string' && pd.experience) {
+          // If projects were lumped into experience, extract them intelligently
+          const expText = pd.experience;
+          const projRegex = /([A-Za-z0-9\s&/–—-]+?)\s*[-–—]\s*([^:]+?):\s*([\s\S]+?)(?=(?:[A-Za-z0-9\s&/–—-]+?\s*[-–—]\s*[^:]+?:)|$)/g;
+          let match;
+          while ((match = projRegex.exec(expText)) !== null) {
+            const rawTitle = match[1].trim().replace(/^[\s*•-]+/, '');
+            const rawSubtitle = match[2].trim();
+            const desc = match[3].trim();
+            if (rawTitle.length > 2 && rawTitle.length < 50) {
+              extractedProjects.push({
+                title: `${rawTitle} -- ${rawSubtitle}`,
+                tech: '',
+                date: '',
+                link: '',
+                bullets: desc.split(/(?<=\.)\s+/).filter(b => b.length > 15).join('\n') || desc
+              });
+            }
           }
         }
 
-        setStatusMsg('Resume parsed and form populated successfully!');
+        if (extractedProjects.length > 0) {
+          setProjectsList(extractedProjects);
+        }
+
+        // 4. Parse Experience / Training
+        if (pd.experience && Array.isArray(pd.experience) && pd.experience.length > 0) {
+          setTrainingList(pd.experience.map(exp => ({
+            title: exp.title || exp.role || 'Experience',
+            date: exp.date || exp.dates || '',
+            link: exp.link || '',
+            projectTitle: exp.company || exp.organization || '',
+            tech: exp.tech || '',
+            bullets: Array.isArray(exp.bullets) ? exp.bullets.join('\n') : (exp.bullets || exp.description || '')
+          })));
+        } else if (extractedProjects.length === 0 && typeof pd.experience === 'string' && pd.experience.trim()) {
+          setTrainingList([{
+            title: 'Professional Experience',
+            date: '',
+            link: '',
+            projectTitle: 'Key Responsibilities',
+            tech: '',
+            bullets: pd.experience
+          }]);
+        }
+
+        // 5. Parse Certifications
+        if (pd.certifications && Array.isArray(pd.certifications) && pd.certifications.length > 0) {
+          setCertificationsList(pd.certifications.map(c => {
+            if (typeof c === 'string') return { title: c, issuer: '', date: '' };
+            return {
+              title: c.title || c.name || '',
+              issuer: c.issuer || c.organization || '',
+              date: c.date || c.year || ''
+            };
+          }));
+        }
+
+        // 6. Parse Achievements
+        if (pd.achievements && Array.isArray(pd.achievements) && pd.achievements.length > 0) {
+          setAchievementsList(pd.achievements.map(a => (typeof a === 'string' ? a : a.title || '')));
+        }
+
+        setIsManualEdit(false);
+        setStatusMsg('Resume parsed and structured into LaTeX successfully!');
         setTimeout(() => setStatusMsg(''), 4000);
       } else {
         setStatusMsg(data.error || 'Failed to extract resume data.');
@@ -299,377 +995,115 @@ const ResumeBuilder = () => {
     }
   }, [template, activeTabsList, activeTab]);
 
-  // Generate Dynamic LaTeX Code
-  const latexCode = useMemo(() => {
-    const displayName = name || '[YOUR FULL NAME]';
-    const displayLocation = location || '[City, State]';
-    const displayPhone = phone || '[Phone Number]';
-    const displayEmail = email || '[Email Address]';
-    const displayLinkedin = linkedin || 'LinkedIn';
-    const displayGithub = github || 'GitHub';
+  // Dynamic LaTeX Code State (Can be generated from form OR edited manually in code box)
+  const [latexCode, setLatexCode] = useState('');
+  const [isManualEdit, setIsManualEdit] = useState(false);
 
-    const eduContent = educationList.length > 0
-      ? educationList.map(e => `    \\resumeSubheading\n      {${esc(e.school || '[School Name]')}}{${esc(e.location || '[Location]')}}\n      {${esc(e.degree || '[Degree / CGPA]')}}{${esc(e.dates || '[Dates]')}}`).join('\n')
-      : `    \\resumeSubheading\n      {[University / School Name]}{[Location]}\n      {[Degree / Major | CGPA / Marks]}{[Aug 2023 -- Present]}`;
+  // Sync LaTeX code whenever form fields or template change
+  useEffect(() => {
+    const generated = generateLatexString({
+      template,
+      name,
+      location,
+      phone,
+      email,
+      linkedin,
+      github,
+      educationList,
+      skillsList,
+      projectsList,
+      trainingList,
+      certificationsList,
+      achievementsList
+    });
+    setLatexCode(generated);
+    setIsManualEdit(false);
+  }, [
+    template,
+    name,
+    location,
+    phone,
+    email,
+    linkedin,
+    github,
+    educationList,
+    skillsList,
+    projectsList,
+    trainingList,
+    certificationsList,
+    achievementsList
+  ]);
 
-    const skillsContent = skillsList.length > 0
-      ? skillsList.map(s => `     \\textbf{\\normalsize{${esc(s.category || 'Skills')}:}}{\\normalsize{ ${esc(s.items || '[Skill Items]')}}} \\\\`).join('\n')
-      : `     \\textbf{\\normalsize{Programming \\& Tools:}}{\\normalsize{ [Python, SQL, JavaScript, Git, Linux]}} \\\\`;
-
-    const projectsContent = projectsList.length > 0
-      ? projectsList.map(p => `      \\resumeProjectHeading\n          {\\href{${esc(p.link || '#')}}{\\textbf{\\large{${esc(p.title || '[Project Title]')}}}}{${esc(p.tech ? ` $|$ \\large{${esc(p.tech)}}` : '')}}}{${esc(p.date || '[Date]')}}\n          \\resumeItemListStart\n${(p.bullets || '[Project achievement description]').split('\n').filter(Boolean).map(b => `            \\resumeItem{\\normalsize{${esc(b)}}}`).join('\n')}\n          \\resumeItemListEnd\n          \\vspace{-18pt}`).join('\n')
-      : `      \\resumeProjectHeading\n          {\\textbf{\\large{[Project Title]}} $|$ \\large{[Technologies Used]}}{[Date]}\n          \\resumeItemListStart\n            \\resumeItem{\\normalsize{[Developed key project features and optimized performance metrics.]}}\n          \\resumeItemListEnd\n          \\vspace{-18pt}`;
-
-    const trainingContent = trainingList.length > 0
-      ? trainingList.map(t => `  \\resumeSubheading\n    {${esc(t.title || '[Training Title]')}}{${esc(t.date || '[Date]')}}\n    {}{}\n  \\vspace{-25pt}\n  \\begin{itemize}[leftmargin=0.15in, label={}]\n    \\resumeProjectHeading\n        {\\href{${esc(t.link || '#')}}{\\textbf{\\large{${esc(t.projectTitle || '[Project]')}}}}{${esc(t.tech ? ` $|$ \\large{${esc(t.tech)}}` : '')}}}{}\n        \\resumeItemListStart\n${(t.bullets || '[Training description]').split('\n').filter(Boolean).map(b => `          \\resumeItem{\\normalsize{${esc(b)}}}`).join('\n')}\n        \\resumeItemListEnd\n  \\end{itemize}`).join('\n')
-      : `  \\resumeSubheading\n    {[Training Program / Experience]}{[Date]}\n    {}{}\n  \\vspace{-25pt}\n  \\begin{itemize}[leftmargin=0.15in, label={}]\n    \\resumeProjectHeading\n        {\\textbf{\\large{[Project Title]}} $|$ \\large{[Tech Stack]}}{}\n        \\resumeItemListStart\n          \\resumeItem{\\normalsize{[Completed hands-on technical modules and key assignments.]}}\n        \\resumeItemListEnd\n  \\end{itemize}`;
-
-    const certsContent = certificationsList.length > 0
-      ? certificationsList.map(c => `        \\resumeItem{\\normalsize{${esc(c.title || '[Certification]')} -- \\textbf{(${esc(c.issuer || '[Issuer]')})} \\hfill \\textbf{${esc(c.date || '[Date]')}}}}`).join('\n')
-      : `        \\resumeItem{\\normalsize{[Machine Learning \\& Data Science Certification] -- \\textbf{([Issuer])} \\hfill \\textbf{[Date]}}}`;
-
-    const achievementsContent = achievementsList.length > 0
-      ? achievementsList.map(a => `    \\item ${esc(a)}`).join('\n')
-      : `    \\item [Built end-to-end data pipelines and solved 200+ problem solving challenges.]`;
-
-    if (template === 'abey_classic') {
-      return `%-------------------------
-% Resume in Latex - Abey George Classic Style
-%------------------------
-
-\\documentclass[letterpaper,11pt]{article}
-
-\\usepackage{latexsym}
-\\usepackage[empty]{fullpage}
-\\usepackage{titlesec}
-\\usepackage{marvosym}
-\\usepackage[usenames,dvipsnames]{color}
-\\usepackage{verbatim}
-\\usepackage{enumitem}
-\\usepackage[hidelinks]{hyperref}
-\\usepackage[english]{babel}
-\\usepackage{tabularx}
-\\usepackage{multicol}
-\\usepackage{graphicx}
-\\setlength{\\multicolsep}{-3.0pt}
-\\setlength{\\columnsep}{-1pt}
-\\input{glyphtounicode}
-
-\\RequirePackage{tikz}
-\\RequirePackage{xcolor}
-\\usepackage{tikz}
-\\usetikzlibrary{svg.path}
-
-\\definecolor{cvblue}{HTML}{0E5484}
-\\definecolor{black}{HTML}{130810}
-\\definecolor{darkcolor}{HTML}{0F4539}
-\\definecolor{cvgreen}{HTML}{3BD80D}
-\\definecolor{taggreen}{HTML}{00E278}
-\\definecolor{SlateGrey}{HTML}{2E2E2E}
-\\definecolor{LightGrey}{HTML}{666666}
-\\colorlet{name}{black}
-\\colorlet{tagline}{darkcolor}
-\\colorlet{heading}{darkcolor}
-\\colorlet{headingrule}{cvblue}
-\\colorlet{accent}{darkcolor}
-\\colorlet{emphasis}{SlateGrey}
-\\colorlet{body}{LightGrey}
-
-\\addtolength{\\oddsidemargin}{-0.6in}
-\\addtolength{\\evensidemargin}{-0.5in}
-\\addtolength{\\textwidth}{1.19in}
-\\addtolength{\\topmargin}{-.7in}
-\\addtolength{\\textheight}{1.4in}
-
-\\urlstyle{same}
-\\raggedbottom
-\\raggedright
-\\setlength{\\tabcolsep}{0in}
-
-\\titleformat{\\section}{
-  \\vspace{-4pt}\\scshape\\raggedright\\large\\bfseries
-}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
-
-\\pdfgentounicode=1
-
-\\newcommand{\\resumeItem}[1]{
-  \\item\\small{{#1 \\vspace{-2pt}}}
-}
-
-\\newcommand{\\resumeSubheading}[4]{
-  \\vspace{-2pt}\\item
-    \\begin{tabular*}{1.0\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
-      \\textbf{\\large#1} & \\textbf{\\small #2} \\\\
-      \\textit{\\large#3} & \\textit{\\small #4} \\\\
-    \\end{tabular*}\\vspace{-7pt}
-}
-
-\\newcommand{\\resumeProjectHeading}[2]{
-    \\item
-    \\begin{tabular*}{1.001\\textwidth}{l@{\\extracolsep{\\fill}}r}
-      \\small#1 & \\textbf{\\small #2}\\\\
-    \\end{tabular*}\\vspace{-7pt}
-}
-
-\\newcommand{\\resumeSubItem}[1]{\\resumeItem{#1}\\vspace{-4pt}}
-
-\\renewcommand\\labelitemi{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
-\\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
-
-\\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.0in, label={}]}
-\\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
-\\newcommand{\\resumeItemListStart}{\\begin{itemize}}
-\\newcommand{\\resumeItemListEnd}{\\end{itemize}\\vspace{-5pt}}
-
-\\newcommand\\sbullet[1][.5]{\\mathbin{\\vcenter{\\hbox{\\scalebox{#1}{$\\bullet$}}}}}
-
-\\begin{document}
-
-%----------HEADING----------
-\\begin{center}
-    {\\Huge \\scshape ${esc(displayName)}} \\\\ \\vspace{2pt}
-    ${esc(displayLocation)} \\\\ \\vspace{2pt}
-    \\small
-    \\href{tel:${esc(displayPhone)}}{${esc(displayPhone)}} ~\\$|\\$~
-    \\href{mailto:${esc(displayEmail)}}{${esc(displayEmail)}} ~\\$|\\$~
-    \\href{${esc(displayLinkedin)}}{LinkedIn} ~\\$|\\$~
-    \\href{${esc(displayGithub)}}{GitHub}
-\\end{center}
-\\vspace{3mm}
-
-%-----------EDUCATION-----------
-\\section{EDUCATION}
-\\vspace{3pt}
-  \\resumeSubHeadingListStart
-${eduContent}
-  \\resumeSubHeadingListEnd
-
-%-----------TECHNICAL SKILLS-----------
-\\section{TECHNICAL SKILLS}
-\\vspace{2pt}
- \\begin{itemize}[leftmargin=0.15in, label={}]
-    \\small{\\item{
-${skillsContent}
-    }}
- \\end{itemize}
- \\vspace{-15pt}
-
-%-----------PROJECTS-----------
-\\section{PROJECTS}
-    \\vspace{-2pt}
-    \\resumeSubHeadingListStart
-
-${projectsContent}
-
-    \\resumeSubHeadingListEnd
-
-%-----------EXPERIENCE & TRAINING-----------
-\\section{EXPERIENCE \\& TRAINING}
-\\vspace{-2pt}
-\\resumeSubHeadingListStart
-${trainingContent}
-
-\\resumeSubHeadingListEnd
-\\vspace{-12pt}
-
-%-----------CERTIFICATIONS-----------
-\\section{CERTIFICATIONS}
-\\resumeSubHeadingListStart
-    \\resumeItemListStart
-${certsContent}
-    \\resumeItemListEnd
-\\resumeSubHeadingListEnd
-\\vspace{-15pt}
-
-\\end{document}`;
+  // Load Sample Resume into Form & LaTeX
+  const loadSampleResume = (templateKey = template) => {
+    const sample = SAMPLE_RESUMES[templateKey] || SAMPLE_RESUMES.mukund_ml;
+    setName(sample.name);
+    setLocation(sample.location);
+    setPhone(sample.phone);
+    setEmail(sample.email);
+    setLinkedin(sample.linkedin);
+    setGithub(sample.github);
+    setEducationList(JSON.parse(JSON.stringify(sample.educationList)));
+    setSkillsList(JSON.parse(JSON.stringify(sample.skillsList)));
+    setProjectsList(JSON.parse(JSON.stringify(sample.projectsList)));
+    setTrainingList(JSON.parse(JSON.stringify(sample.trainingList)));
+    setCertificationsList(JSON.parse(JSON.stringify(sample.certificationsList)));
+    setAchievementsList(JSON.parse(JSON.stringify(sample.achievementsList)));
+    if (sample.stream) {
+      setCustomStream(sample.stream);
+      setDynamicKeywords(getClientFallbackKeywords(sample.stream));
     }
+    setIsManualEdit(false);
+    setStatusMsg(`Loaded "${sample.name}" sample resume! Form and LaTeX updated.`);
+    setTimeout(() => setStatusMsg(''), 3500);
+  };
 
-    if (template === 'executive') {
-      return `\\documentclass[10pt,a4paper]{article}
-\\usepackage[margin=0.75in]{geometry}
-\\usepackage{titlesec}
-\\usepackage{xcolor}
-\\usepackage[hidelinks]{hyperref}
+  // Handle Manual Code Edit in Code Box
+  const handleCodeChange = (e) => {
+    setLatexCode(e.target.value);
+    setIsManualEdit(true);
+  };
 
-\\definecolor{primary}{RGB}{28, 36, 39}
-\\definecolor{accent}{RGB}{16, 185, 129}
-
-\\titleformat{\\section}{\\color{primary}\\large\\bfseries\\uppercase}{}{0em}{}[\\titlerule]
-
-\\begin{document}
-
-\\begin{center}
-{\\Huge \\bfseries \\color{primary} ${esc(displayName)}} \\\\[4pt]
-{\\color{accent} \\bfseries ${esc(displayLocation)}} \\\\[6pt]
-\\small ${esc(displayEmail)} $\\cdot$ ${esc(displayPhone)} $\\cdot$ \\href{${esc(displayLinkedin)}}{LinkedIn} $\\cdot$ \\href{${esc(displayGithub)}}{GitHub}
-\\end{center}
-
-\\vspace{8pt}
-
-\\section{Education}
-${educationList.length > 0 ? educationList.map(e => `\\textbf{${esc(e.school)}} \\hfill ${esc(e.dates)} \\\\ \\textit{${esc(e.degree)}} \\hfill ${esc(e.location)} \\\\[4pt]`).join('\n') : '\\textbf{[University]} \\hfill [Dates] \\\\ \\textit{[Degree]} \\hfill [Location]'}
-
-\\section{Key Skills \\& Competencies}
-${skillsList.length > 0 ? skillsList.map(s => `\\textbf{${esc(s.category)}}: ${esc(s.items)} \\\\[2pt]`).join('\n') : '\\textbf{[Skills]}: [Python, SQL, Machine Learning, Problem Solving]'}
-
-\\section{Projects}
-${projectsList.length > 0 ? projectsList.map(p => `\\textbf{${esc(p.title)}} (${esc(p.tech)}) \\hfill ${esc(p.date)} \\\\
-${(p.bullets || '').split('\n').filter(Boolean).map(b => `$\\bullet$ ${esc(b)}`).join(' \\\\ ')} \\\\[6pt]`).join('\n') : '\\textbf{[Project Title]} ([Tech Stack]) \\hfill [Date] \\\\ $\\bullet$ [Project description]'}
-
-\\section{Certifications}
-${certificationsList.length > 0 ? certificationsList.map(c => `$\\bullet$ \\textbf{${esc(c.title)}} -- ${esc(c.issuer)} (${esc(c.date)})`).join(' \\\\ ') : '$\\bullet$ \\textbf{[Certification]} -- [Issuer] ([Date])'}
-
-\\end{document}`;
+  // Tab key indent support inside code box
+  const handleCodeKeyDown = (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+      const val = e.target.value;
+      const newVal = val.substring(0, start) + '  ' + val.substring(end);
+      setLatexCode(newVal);
+      setIsManualEdit(true);
+      setTimeout(() => {
+        if (e.target) {
+          e.target.selectionStart = e.target.selectionEnd = start + 2;
+        }
+      }, 0);
     }
+  };
 
-    // Default: 'mukund_ml' (User's 1st LaTeX Template)
-    return `\\documentclass[letterpaper,11pt]{article}
-
-\\usepackage{latexsym}
-\\usepackage[empty]{fullpage}
-\\usepackage{titlesec}
-\\usepackage{marvosym}
-\\usepackage[usenames,dvipsnames]{color}
-\\usepackage{verbatim}
-\\usepackage{enumitem}
-\\usepackage[hidelinks]{hyperref}
-\\usepackage[english]{babel}
-\\usepackage{tabularx}
-\\usepackage{multicol}
-\\usepackage{graphicx}
-\\setlength{\\multicolsep}{-3.0pt}
-\\setlength{\\columnsep}{-1pt}
-\\input{glyphtounicode}
-
-\\RequirePackage{tikz}
-\\RequirePackage{xcolor}
-\\usepackage{tikz}
-\\usetikzlibrary{svg.path}
-
-\\definecolor{cvblue}{HTML}{0E5484}
-\\definecolor{black}{HTML}{130810}
-\\definecolor{darkcolor}{HTML}{0F4539}
-\\definecolor{SlateGrey}{HTML}{2E2E2E}
-\\definecolor{LightGrey}{HTML}{666666}
-\\colorlet{heading}{darkcolor}
-\\colorlet{headingrule}{cvblue}
-
-\\addtolength{\\oddsidemargin}{-0.6in}
-\\addtolength{\\evensidemargin}{-0.5in}
-\\addtolength{\\textwidth}{1.19in}
-\\addtolength{\\topmargin}{-.7in}
-\\addtolength{\\textheight}{1.4in}
-
-\\urlstyle{same}
-\\raggedbottom
-\\raggedright
-\\setlength{\\tabcolsep}{0in}
-
-\\titleformat{\\section}{
-  \\vspace{-4pt}\\scshape\\raggedright\\large\\bfseries
-}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]
-
-\\pdfgentounicode=1
-
-\\newcommand{\\resumeItem}[1]{
-  \\item\\small{{#1 \\vspace{-2pt}}}
-}
-
-\\newcommand{\\resumeSubheading}[4]{
-  \\vspace{-2pt}\\item
-    \\begin{tabular*}{1.0\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}
-      \\textbf{\\large#1} & \\textbf{\\small #2} \\\\
-      \\textit{\\large#3} & \\textit{\\small #4} \\\\
-    \\end{tabular*}\\vspace{-7pt}
-}
-
-\\newcommand{\\resumeProjectHeading}[2]{
-    \\item
-    \\begin{tabular*}{1.001\\textwidth}{l@{\\extracolsep{\\fill}}r}
-      \\small#1 & \\textbf{\\small #2}\\\\
-    \\end{tabular*}\\vspace{-7pt}
-}
-
-\\newcommand{\\resumeSubItem}[1]{\\resumeItem{#1}\\vspace{-4pt}}
-
-\\renewcommand\\labelitemi{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
-\\renewcommand\\labelitemii{$\\vcenter{\\hbox{\\tiny$\\bullet$}}$}
-
-\\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.0in, label={}]}
-\\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}
-\\newcommand{\\resumeItemListStart}{\\begin{itemize}}
-\\newcommand{\\resumeItemListEnd}{\\end{itemize}\\vspace{-5pt}}
-
-\\newcommand\\sbullet[1][.5]{\\mathbin{\\vcenter{\\hbox{\\scalebox{#1}{$\\bullet$}}}}}
-
-%-------------------------------------------
-\\begin{document}
-
-%----------HEADING----------
-\\begin{center}
-    {\\Huge \\scshape ${esc(displayName)}} \\\\ \\vspace{2pt}
-    ${esc(displayLocation)} \\\\ \\vspace{2pt}
-    \\small
-    \\href{tel:${esc(displayPhone)}}{${esc(displayPhone)}} ~\\$|\\$~
-    \\href{mailto:${esc(displayEmail)}}{${esc(displayEmail)}} ~\\$|\\$~
-    \\href{${esc(displayLinkedin)}}{LinkedIn} ~\\$|\\$~
-    \\href{${esc(displayGithub)}}{GitHub}
-\\end{center}
-\\vspace{-4mm}
-
-%-----------EDUCATION-----------
-\\section{EDUCATION}
-\\vspace{3pt}
-  \\resumeSubHeadingListStart
-${eduContent}
-  \\resumeSubHeadingListEnd
-
-%-----------KEY SKILLS-----------
-\\section{KEY SKILLS}
-\\vspace{2pt}
- \\begin{itemize}[leftmargin=0.15in, label={}]
-    \\small{\\item{
-${skillsContent}
-    }}
- \\end{itemize}
- \\vspace{-15pt}
-
-%-----------PROJECTS-----------
-\\section{PROJECTS}
-    \\vspace{-2pt}
-    \\resumeSubHeadingListStart
-
-${projectsContent}
-
-    \\resumeSubHeadingListEnd
-
-%-----------TRAINING-----------
-\\section{TRAINING}
-\\vspace{-2pt}
-\\resumeSubHeadingListStart
-${trainingContent}
-\\resumeSubHeadingListEnd
-\\vspace{-12pt}
-
-%-----------CERTIFICATIONS-----------
-\\section{CERTIFICATIONS}
-\\resumeSubHeadingListStart
-    \\resumeItemListStart
-${certsContent}
-    \\resumeItemListEnd
-\\resumeSubHeadingListEnd
-\\vspace{-15pt}
-
-%-----------ACHIEVEMENTS-----------
-\\section{ACHIEVEMENTS}
-\\begin{itemize}[leftmargin=0.15in, label={$\\bullet$}, itemsep=1pt]
-    \\small{
-${achievementsContent}
-    }
-\\end{itemize}
-
-\\end{document}`;
-  }, [template, name, location, phone, email, linkedin, github, educationList, skillsList, projectsList, trainingList, certificationsList, achievementsList]);
+  // Re-sync LaTeX Code from current form fields
+  const handleResetFromForm = () => {
+    const generated = generateLatexString({
+      template,
+      name,
+      location,
+      phone,
+      email,
+      linkedin,
+      github,
+      educationList,
+      skillsList,
+      projectsList,
+      trainingList,
+      certificationsList,
+      achievementsList
+    });
+    setLatexCode(generated);
+    setIsManualEdit(false);
+    setStatusMsg('Re-synced LaTeX code from form fields.');
+    setTimeout(() => setStatusMsg(''), 2500);
+  };
 
   // Copy LaTeX
   const handleCopyLatex = async () => {
@@ -743,12 +1177,36 @@ ${achievementsContent}
                 <FileCode className="size-6 text-emerald-500" /> LaTeX Resume Architect
               </h1>
               <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '0.82rem', fontWeight: 500 }}>
-                Form is blank by default -- Upload your resume to autofill, or switch templates dynamically.
+                Live two-way sync: Form edits update LaTeX, and you can edit or paste code directly in the code box.
               </p>
             </div>
 
             {/* Header Right Action Controls */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              {/* Load Sample Resume Button */}
+              <button
+                onClick={() => loadSampleResume(template)}
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '8px 16px',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 3px 12px rgba(16, 185, 129, 0.28)',
+                  transition: 'all 0.2s'
+                }}
+                title="Populate form & LaTeX with realistic sample resume data"
+              >
+                <Sparkles className="size-4" /> Load Sample Resume
+              </button>
+
               { (name || educationList.length > 0) && (
                 <button
                   onClick={clearForm}
@@ -782,7 +1240,7 @@ ${achievementsContent}
                 alignItems: 'center',
                 gap: '12px'
               }}>
-                <Sparkles className="size-4 text-amber-500" />
+                <FileText className="size-4 text-emerald-600" />
                 <div style={{ lineHeight: 1.2 }}>
                   <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1c2427', display: 'block' }}>Magic Resume Autofill</span>
                   <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Parse PDF / DOCX to Form</span>
@@ -837,9 +1295,29 @@ ${achievementsContent}
                 boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
                 border: '1px solid #e2e8f0'
               }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Select LaTeX Resume Template
-                </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Select LaTeX Resume Template
+                  </span>
+                  <button
+                    onClick={() => loadSampleResume(template)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#059669',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: 0
+                    }}
+                    title="Load complete sample data for this template"
+                  >
+                    <Sparkles className="size-3" /> Load {template === 'abey_classic' ? 'Tech' : template === 'executive' ? 'Executive' : 'ML'} Sample
+                  </button>
+                </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                   {[
                     { id: 'mukund_ml', name: 'Data & ML Specialist', tag: 'ATS Standard' },
@@ -1312,33 +1790,135 @@ ${achievementsContent}
                 flexDirection: 'column',
                 height: '100%'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f5c35c', fontFamily: 'monospace' }}>
-                    {template === 'abey_classic' ? 'classic_tech_resume.tex' : template === 'executive' ? 'executive_resume.tex' : 'data_ml_specialist_resume.tex'}
-                  </span>
-                  <span style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '6px', color: '#94a3b8' }}>
-                    LaTeX Source Code
-                  </span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f5c35c', fontFamily: 'monospace' }}>
+                      {template === 'abey_classic' ? 'classic_tech_resume.tex' : template === 'executive' ? 'executive_resume.tex' : 'data_ml_specialist_resume.tex'}
+                    </span>
+                    {isManualEdit ? (
+                      <span style={{
+                        fontSize: '0.7rem',
+                        background: 'rgba(245, 158, 11, 0.2)',
+                        border: '1px solid rgba(245, 158, 11, 0.4)',
+                        color: '#fcd34d',
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        <Edit3 className="size-3" /> Custom LaTeX Active
+                      </span>
+                    ) : (
+                      <span style={{
+                        fontSize: '0.7rem',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                        color: '#6ee7b7',
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        ⚡ Live Form Synced
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {isManualEdit && (
+                      <button
+                        onClick={handleResetFromForm}
+                        style={{
+                          background: 'rgba(56, 189, 248, 0.15)',
+                          color: '#38bdf8',
+                          border: '1px solid rgba(56, 189, 248, 0.35)',
+                          borderRadius: '8px',
+                          padding: '3px 8px',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          transition: 'all 0.2s'
+                        }}
+                        title="Revert custom code edits and re-sync from form fields"
+                      >
+                        <RefreshCw className="size-3" /> Re-sync from Form
+                      </button>
+                    )}
+                    <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontFamily: 'monospace' }}>
+                      {latexCode ? latexCode.split('\n').length : 0} lines
+                    </span>
+                    <button
+                      onClick={handleCopyLatex}
+                      style={{
+                        background: isCopied ? '#10b981' : 'rgba(255, 255, 255, 0.08)',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '4px 10px',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      {isCopied ? <Check className="size-3" /> : <Copy className="size-3" />}
+                      {isCopied ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
                 </div>
 
-                <pre style={{
-                  background: '#141a1c',
-                  borderRadius: '12px',
-                  padding: '12px',
-                  fontFamily: 'Consolas, Monaco, "Fira Code", monospace',
-                  fontSize: '0.76rem',
-                  lineHeight: 1.45,
-                  flex: 1,
-                  minHeight: '620px',
-                  maxHeight: '760px',
-                  overflow: 'auto',
-                  color: '#a7f3d0',
-                  margin: 0,
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all'
-                }}>
-                  {latexCode}
-                </pre>
+                <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <textarea
+                    value={latexCode}
+                    onChange={handleCodeChange}
+                    onKeyDown={handleCodeKeyDown}
+                    spellCheck={false}
+                    placeholder="LaTeX code will appear here. You can freely edit or paste LaTeX code manually..."
+                    style={{
+                      background: '#141a1c',
+                      borderRadius: '12px',
+                      padding: '12px',
+                      fontFamily: 'Consolas, Monaco, "Fira Code", monospace',
+                      fontSize: '0.76rem',
+                      lineHeight: 1.45,
+                      flex: 1,
+                      minHeight: '620px',
+                      maxHeight: '760px',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      color: '#a7f3d0',
+                      border: isManualEdit ? '1px solid rgba(245, 158, 11, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
+                      outline: 'none',
+                      resize: 'none',
+                      whiteSpace: 'pre',
+                      overflowWrap: 'normal',
+                      overflowX: 'auto',
+                      overflowY: 'auto'
+                    }}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '8px',
+                    right: '12px',
+                    fontSize: '0.65rem',
+                    color: '#64748b',
+                    background: 'rgba(20, 26, 28, 0.85)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    pointerEvents: 'none'
+                  }}>
+                    Editable Code Box • Tab key supported
+                  </div>
+                </div>
               </div>
             </div>
 

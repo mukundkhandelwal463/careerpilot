@@ -1,0 +1,10 @@
+# ==============================================================================
+# CareerPilot Kubernetes Namespace
+# ==============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: careerpilot
+  labels:
+    app.kubernetes.io/name: careerpilot
+    app.kubernetes.io/part-of: careerpilot-platform

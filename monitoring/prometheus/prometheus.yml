@@ -1,0 +1,39 @@
+# ==============================================================================
+# Prometheus Configuration for CareerPilot Platform
+# Reference: CareerPilot Project Synopsis Section 11 (Monitoring & Observability)
+# ==============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+# Alert rules configuration
+rule_files:
+  - "alert_rules.yml"
+
+# Alertmanager configuration (optional endpoint)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+scrape_configs:
+  # CareerPilot Django REST API Metrics Scraper
+  - job_name: "careerpilot-backend"
+    metrics_path: "/metrics"
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["backend:8000", "host.docker.internal:8000"]
+        labels:
+          app: "careerpilot"
+          env: "production"
+          service: "django-api"
+
+  # Prometheus Self-Monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+        labels:
+          app: "monitoring"
+          service: "prometheus"

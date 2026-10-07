@@ -34,7 +34,12 @@ import {
   Network,
   HelpCircle,
   Terminal,
-  ClipboardList
+  ClipboardList,
+  Volume2,
+  VolumeX,
+  RotateCcw,
+  Type,
+  Radio
 } from 'lucide-react';
 import { questionBankData } from '../data/questionBankData.js';
 import { sql50Data } from '../data/sql50Data.js';
@@ -1022,7 +1027,16 @@ const systemDesignTrackerData = [
 ];
 
 // Initialize Web Speech Recognition API
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechRecognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
+
+// Oscillating Waveform bar heights matching audio waveform visual
+const WAVEFORM_BAR_HEIGHTS = [
+  14, 20, 30, 48, 68, 88, 70, 52, 34, 20, 14,
+  18, 28, 44, 64, 82, 64, 44, 28, 18, 14,
+  22, 36, 56, 76, 96, 76, 56, 36, 22, 14,
+  18, 28, 44, 64, 82, 64, 44, 28, 18, 14,
+  20, 30, 48, 68, 88, 70, 52, 34, 20, 14
+];
 
 const Preparation = () => {
   const { user } = useAuth();
@@ -1034,7 +1048,11 @@ const Preparation = () => {
   const [interviewStarted, setInterviewStarted] = useState(false);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
+  const [interviewMode, setInterviewMode] = useState('voice'); // 'voice' (Speak Mode) or 'written' (Written Mode)
   const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [autoSpeakEnabled, setAutoSpeakEnabled] = useState(true);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [isGrading, setIsGrading] = useState(false);
   const [questionScores, setQuestionScores] = useState([]);
   const [interviewFeedback, setInterviewFeedback] = useState(null);
@@ -1042,6 +1060,8 @@ const Preparation = () => {
   const [saveStatus, setSaveStatus] = useState('');
   const [isParsing, setIsParsing] = useState(false);
   const recognitionRef = useRef(null);
+  const recordingTimerRef = useRef(null);
+  const speechUtteranceRef = useRef(null);
   const [customModal, setCustomModal] = useState({
     isOpen: false,
     title: '',
@@ -1487,6 +1507,105 @@ const Preparation = () => {
     showAlert("Success", "Roadmap steps imported successfully as study tasks!");
   };
 
+  // ── Speech Synthesis (Interviewer Voice Engine) ───────────────────
+  const stopInterviewerSpeech = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch (err) { }
+      setIsSpeaking(false);
+    }
+  };
+
+  // Preload natural browser voices
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const loadVoices = () => {
+        try { window.speechSynthesis.getVoices(); } catch (e) {}
+      };
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
+
+  const speakInterviewerQuestion = (textToSpeak) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    stopInterviewerSpeech();
+
+    const text = (textToSpeak || '').trim();
+    if (!text) return;
+
+    try {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.94; // Conversational human interviewer cadence
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      utterance.lang = 'en-US';
+
+      const voices = window.speechSynthesis.getVoices() || [];
+      // Prioritize natural/neural human voices on Windows / Edge / Chrome (Guy, Jenny, Ryan, Google, Samantha, etc.)
+      const naturalHumanVoice = voices.find(v =>
+        v.lang && v.lang.startsWith('en') &&
+        (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Guy') || v.name.includes('Jenny') || v.name.includes('Ryan') || v.name.includes('Aria') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel') || v.name.includes('David'))
+      ) || voices.find(v => v.lang && v.lang.startsWith('en-US')) || voices.find(v => v.lang && v.lang.startsWith('en'));
+
+      if (naturalHumanVoice) utterance.voice = naturalHumanVoice;
+
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+
+      speechUtteranceRef.current = utterance;
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      console.warn('Speech synthesis error:', err);
+      setIsSpeaking(false);
+    }
+  };
+
+  // Automatically speak question when changed if auto-speak is enabled
+  useEffect(() => {
+    if (interviewStarted && !interviewCompleted && questions[currentQuestionIdx]) {
+      stopInterviewerSpeech();
+      if (autoSpeakEnabled) {
+        const timer = setTimeout(() => {
+          speakInterviewerQuestion(questions[currentQuestionIdx].question);
+        }, 350);
+        return () => clearTimeout(timer);
+      }
+    }
+    return () => stopInterviewerSpeech();
+  }, [currentQuestionIdx, interviewStarted, interviewCompleted, autoSpeakEnabled]);
+
+  // Clean up speech and timer on unmount
+  useEffect(() => {
+    return () => {
+      stopInterviewerSpeech();
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    };
+  }, []);
+
+  // Recording seconds timer
+  useEffect(() => {
+    if (isListening) {
+      setRecordingSeconds(0);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingSeconds(prev => prev + 1);
+      }, 1000);
+    } else {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    }
+    return () => {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    };
+  }, [isListening]);
+
+  const formatRecordingTime = (sec) => {
+    const mins = String(Math.floor(sec / 60)).padStart(2, '0');
+    const secs = String(sec % 60).padStart(2, '0');
+    return `${mins}:${secs}`;
+  };
+
   // Speech Recognition hook setup
   useEffect(() => {
     if (SpeechRecognition) {
@@ -1497,7 +1616,7 @@ const Preparation = () => {
 
       rec.onresult = (event) => {
         let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+        for (let i = 0; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
         }
         setUserAnswer(transcript);
@@ -1517,18 +1636,27 @@ const Preparation = () => {
   }, []);
 
   const toggleListening = () => {
-    if (!recognitionRef.current) {
-      alert("Speech recognition is not supported in this browser. Please use Chrome, Edge or Safari.");
+    if (!SpeechRecognition) {
+      showAlert("Speech Recognition Not Supported", "Speech recognition is not supported in this browser. Please use Chrome, Edge, or switch to Written Mode.");
       return;
     }
 
+    // Stop interviewer speech so microphone does not pick up audio output
+    stopInterviewerSpeech();
+
     if (isListening) {
-      recognitionRef.current.stop();
+      try {
+        if (recognitionRef.current) recognitionRef.current.stop();
+      } catch (e) { }
       setIsListening(false);
     } else {
       setUserAnswer('');
       setIsListening(true);
-      recognitionRef.current.start();
+      try {
+        if (recognitionRef.current) recognitionRef.current.start();
+      } catch (err) {
+        console.warn('Recognition start error:', err);
+      }
     }
   };
 
@@ -1593,10 +1721,20 @@ const Preparation = () => {
     }
   };
 
-  const submitAnswer = async () => {
-    if (!userAnswer.trim()) return;
+  const submitAnswer = async (forcedAnswer) => {
+    const textToSubmit = (typeof forcedAnswer === 'string' ? forcedAnswer : userAnswer).trim();
+    if (!textToSubmit) {
+      if (interviewMode === 'voice') {
+        showAlert("No Speech Detected", "We didn't detect any spoken words. Please click 'Start Speaking Answer' and speak your response into your microphone.");
+      } else {
+        showAlert("Empty Response", "Please type your technical response before submitting.");
+      }
+      return;
+    }
+
+    stopInterviewerSpeech();
     if (isListening && recognitionRef.current) {
-      recognitionRef.current.stop();
+      try { recognitionRef.current.stop(); } catch (e) { }
       setIsListening(false);
     }
 
@@ -1609,7 +1747,8 @@ const Preparation = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: questionObj.question,
-          response: userAnswer.trim(),
+          response: textToSubmit,
+          mode: interviewMode, // 'voice' or 'written'
         }),
       });
       const data = await res.json();
@@ -1617,42 +1756,72 @@ const Preparation = () => {
         const evalResult = data.evaluation;
         setInterviewFeedback(evalResult);
 
-        setQuestionScores([
-          ...questionScores,
+        setQuestionScores(prev => [
+          ...prev,
           {
             id: questionObj.id,
             type: questionObj.type,
             question: questionObj.question,
             score: evalResult.score,
-            userAnswer: userAnswer.trim(),
+            technical_score: evalResult.technical_score ?? evalResult.score,
+            english_score: evalResult.english_score ?? 75,
+            fluency_score: evalResult.fluency_score ?? 70,
+            userAnswer: textToSubmit,
+            mode: interviewMode,
             feedback: evalResult
           }
         ]);
+      } else {
+        showAlert('Evaluation Notice', data.error || 'Unable to evaluate response.');
       }
     } catch (err) {
       console.error(err);
+      showAlert('Network Error', 'An error occurred while evaluating your response.');
     } finally {
       setIsGrading(false);
     }
   };
 
+  const handleVoiceFinishAndSubmit = () => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) { }
+    }
+    setIsListening(false);
+    // Short grace delay allows browser speech-to-text to flush final interim words into userAnswer
+    setTimeout(() => {
+      submitAnswer();
+    }, 250);
+  };
+
   const handleNextQuestion = () => {
+    stopInterviewerSpeech();
+    if (isListening && recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) { }
+      setIsListening(false);
+    }
     if (currentQuestionIdx < questions.length - 1) {
       setCurrentQuestionIdx(currentQuestionIdx + 1);
       setUserAnswer('');
       setInterviewFeedback(null);
+      setRecordingSeconds(0);
     } else {
       setInterviewCompleted(true);
     }
   };
 
   const handleEndInterview = () => {
+    stopInterviewerSpeech();
     showConfirm("End Interview", "Are you sure you want to end the interview now? Your final score will be calculated based on the questions answered so far.", () => {
       setInterviewCompleted(true);
     });
   };
 
   const handleRestartInterview = () => {
+    stopInterviewerSpeech();
+    if (isListening && recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) { }
+      setIsListening(false);
+    }
     setInterviewStarted(false);
     setInterviewCompleted(false);
     setQuestions([]);
@@ -1660,6 +1829,7 @@ const Preparation = () => {
     setInterviewFeedback(null);
     setUserAnswer('');
     setSaveStatus('');
+    setRecordingSeconds(0);
     if (user) {
       localStorage.removeItem(`active_interview_state_${user.email}`);
     }
@@ -2191,9 +2361,71 @@ const Preparation = () => {
             {/* 1. AI INTERVIEW TAB */}
             {activeTab === 'interview' && (
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-                  <Bot className="size-6 text-blue-600" />
-                  <h2 style={{ fontSize: '1.31rem', fontWeight: 800, margin: 0 }}>AI Voice-Based CV Interview</h2>
+                <style>{`
+                  @keyframes soundWaveBar {
+                    0%, 100% { height: 4px; }
+                    50% { height: 20px; }
+                  }
+                  @keyframes audioWaveformScale {
+                    0%, 100% { transform: scaleY(0.35); opacity: 0.7; }
+                    50% { transform: scaleY(1.15); opacity: 1; }
+                  }
+                  @keyframes audioWaveformResting {
+                    0%, 100% { transform: scaleY(0.85); opacity: 0.85; }
+                    50% { transform: scaleY(1.0); opacity: 1; }
+                  }
+                  @keyframes pulseRedDot {
+                    0%, 100% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.3; transform: scale(1.2); }
+                  }
+                  @keyframes pulseGlowRing {
+                    0%, 100% { box-shadow: 0 0 12px rgba(37, 99, 235, 0.25); }
+                    50% { box-shadow: 0 0 28px rgba(37, 99, 235, 0.65); }
+                  }
+                `}</style>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: '40px', height: '40px', borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#ffffff', boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)'
+                    }}>
+                      <Bot className="size-5" />
+                    </div>
+                    <div>
+                      <h2 style={{ fontSize: '1.31rem', fontWeight: 800, margin: 0, color: 'var(--text)' }}>
+                        AI Candidate Interview
+                      </h2>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 600 }}>
+                        {interviewStarted
+                          ? (interviewMode === 'voice' ? '🎙️ Live Voice Interview (Audio-Only Question Delivery)' : '✍️ Written Technical Assessment')
+                          : 'Human-Voice Question Delivery & Deep Technical Evaluation'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {interviewStarted && !interviewCompleted && (
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: '8px',
+                      background: interviewMode === 'voice' ? 'rgba(37, 99, 235, 0.08)' : 'rgba(15, 23, 42, 0.06)',
+                      border: interviewMode === 'voice' ? '1.5px solid #bfdbfe' : '1.5px solid #cbd5e1',
+                      padding: '8px 16px', borderRadius: '12px'
+                    }}>
+                      {interviewMode === 'voice' ? (
+                        <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1d4ed8', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Mic className="size-4 text-blue-600" />
+                          <span>Interview Format: <strong>1. Speak Mode (Live Voice)</strong></span>
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <Type className="size-4 text-slate-800" />
+                          <span>Interview Format: <strong>2. Written Mode (Text Response)</strong></span>
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {!interviewStarted && !interviewCompleted && (
@@ -2202,25 +2434,113 @@ const Preparation = () => {
                       <div style={{ textAlign: 'center', padding: '60px 20px' }}>
                         <div style={{
                           border: '4px solid #f3f3f3', borderTop: '4px solid #3b82f6',
-                          borderRadius: '50%', width: '40px', height: '40px',
+                          borderRadius: '50%', width: '42px', height: '42px',
                           animation: 'spin 1s linear infinite', margin: '0 auto 16px'
                         }}></div>
                         <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                        <h3 style={{ fontSize: '1.2rem', color: '#1e293b', marginBottom: '8px' }}>Generating Interview...</h3>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Please wait while our AI analyzes the resume and creates targeted questions.</p>
+                        <h3 style={{ fontSize: '1.2rem', color: '#1e293b', marginBottom: '8px', fontWeight: 800 }}>Generating Interview Questions...</h3>
+                        <p style={{ color: '#64748b', fontSize: '0.88rem' }}>Please wait while our AI analyzes technical requirements and formulates targeted questions.</p>
                       </div>
                     ) : (
                       <>
-                        <p style={{ color: 'var(--muted)', marginBottom: '24px', fontSize: '0.87rem' }}>
-                          Generate custom Technical, HR, and Management questions mapped specifically to your uploaded CV. Use voice recognition to answer, and see your scorecard update live.
+                        <p style={{ color: 'var(--muted)', marginBottom: '20px', fontSize: '0.88rem', lineHeight: 1.6 }}>
+                          Experience a real-time AI interview where the system speaks the questions aloud and evaluates your answers based on technical concepts and depth. You have 2 flexible options: <strong>Speak Mode (Voice)</strong> and <strong>Written Mode (Text)</strong>.
                         </p>
 
+                        {/* MODE SELECTION CARDS */}
+                        <div style={{ marginBottom: '22px' }}>
+                          <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569', marginBottom: '10px' }}>
+                            Choose Your Interview Format:
+                          </label>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                            {/* Speak Mode Card */}
+                            <div
+                              onClick={() => setInterviewMode('voice')}
+                              style={{
+                                border: interviewMode === 'voice' ? '2px solid #2563eb' : '1.5px solid #e2e8f0',
+                                background: interviewMode === 'voice' ? 'rgba(37, 99, 235, 0.05)' : '#ffffff',
+                                borderRadius: '16px', padding: '18px 20px',
+                                cursor: 'pointer', transition: 'all 0.2s ease',
+                                position: 'relative'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <div style={{
+                                    width: '32px', height: '32px', borderRadius: '10px',
+                                    background: interviewMode === 'voice' ? '#2563eb' : '#f1f5f9',
+                                    color: interviewMode === 'voice' ? '#ffffff' : '#64748b',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                  }}>
+                                    <Mic className="size-4" />
+                                  </div>
+                                  <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>1. Speak Mode (Voice)</strong>
+                                </div>
+                                <span style={{
+                                  fontSize: '0.72rem', fontWeight: 800, padding: '3px 8px', borderRadius: '6px',
+                                  background: interviewMode === 'voice' ? '#dbeafe' : '#f1f5f9',
+                                  color: interviewMode === 'voice' ? '#1d4ed8' : '#64748b'
+                                }}>
+                                  {interviewMode === 'voice' ? 'Selected' : 'Select'}
+                                </span>
+                              </div>
+                              <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>
+                                Human AI voice speaks each question aloud. The question text is hidden (voice-only) to simulate a real human technical interview. You speak your answer verbally with secure background recording.
+                              </p>
+                              <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.73rem', color: '#059669', fontWeight: 800 }}>
+                                <Award className="size-3.5" /> 70% Technical • 20% English • 10% Fluency
+                              </div>
+                            </div>
+
+                            {/* Written Mode Card */}
+                            <div
+                              onClick={() => setInterviewMode('written')}
+                              style={{
+                                border: interviewMode === 'written' ? '2px solid #0f172a' : '1.5px solid #e2e8f0',
+                                background: interviewMode === 'written' ? 'rgba(15, 23, 42, 0.04)' : '#ffffff',
+                                borderRadius: '16px', padding: '18px 20px',
+                                cursor: 'pointer', transition: 'all 0.2s ease',
+                                position: 'relative'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <div style={{
+                                    width: '32px', height: '32px', borderRadius: '10px',
+                                    background: interviewMode === 'written' ? '#0f172a' : '#f1f5f9',
+                                    color: interviewMode === 'written' ? '#ffffff' : '#64748b',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                  }}>
+                                    <Type className="size-4" />
+                                  </div>
+                                  <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>2. Written Mode (Text)</strong>
+                                </div>
+                                <span style={{
+                                  fontSize: '0.72rem', fontWeight: 800, padding: '3px 8px', borderRadius: '6px',
+                                  background: interviewMode === 'written' ? '#e2e8f0' : '#f1f5f9',
+                                  color: interviewMode === 'written' ? '#0f172a' : '#64748b'
+                                }}>
+                                  {interviewMode === 'written' ? 'Selected' : 'Select'}
+                                </span>
+                              </div>
+                              <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>
+                                Questions are displayed on screen. Type your comprehensive technical answer, problem-solving logic, architecture, and trade-offs.
+                              </p>
+                              <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.73rem', color: '#2563eb', fontWeight: 800 }}>
+                                <Award className="size-3.5" /> 70% Technical • 20% English • 10% Fluency
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* RESUME UPLOAD CONTAINER */}
                         <div style={{
                           border: '2px dashed #cbd5e1',
                           borderRadius: '16px',
-                          padding: '40px 24px',
+                          padding: '36px 24px',
                           textAlign: 'center',
-                          background: 'rgba(255, 255, 255, 0.5)',
+                          background: 'rgba(255, 255, 255, 0.65)',
                           marginBottom: '20px',
                           position: 'relative'
                         }}>
@@ -2238,12 +2558,12 @@ const Preparation = () => {
                               cursor: 'pointer'
                             }}
                           />
-                          <UploadCloud className="size-12 text-slate-400 mx-auto" style={{ marginBottom: '14px' }} />
-                          <strong style={{ display: 'block', fontSize: '0.94rem', color: 'var(--text)', marginBottom: '4px' }}>
-                            Upload your resume to start
+                          <UploadCloud className="size-12 text-blue-500 mx-auto" style={{ marginBottom: '12px' }} />
+                          <strong style={{ display: 'block', fontSize: '0.95rem', color: 'var(--text)', marginBottom: '4px' }}>
+                            Upload your CV / Resume to personalize questions
                           </strong>
                           <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
-                            Supports PDF, DOCX, and TXT files
+                            Supports PDF, DOCX, and TXT files (matches questions to your skills)
                           </span>
                         </div>
 
@@ -2252,9 +2572,12 @@ const Preparation = () => {
                           <button
                             onClick={startFallbackInterview}
                             className="btn btn-secondary"
-                            style={{ fontSize: '0.8rem', padding: '10px 20px', borderRadius: '999px' }}
+                            style={{
+                              fontSize: '0.84rem', padding: '12px 24px', borderRadius: '999px',
+                              fontWeight: 700, boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                            }}
                           >
-                            Start with General Developer CV Questions
+                            Start with General Developer CV Questions ({interviewMode === 'voice' ? '🎙️ Speak Mode' : '✍️ Written Mode'})
                           </button>
                         </div>
                       </>
@@ -2264,118 +2587,454 @@ const Preparation = () => {
 
                 {interviewStarted && !interviewCompleted && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ background: '#0f2540', borderRadius: '16px', padding: '20px 24px', color: '#ffffff' }}>
-                      <div style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#93c5fd' }}>
-                          Question {currentQuestionIdx + 1} of {questions.length}
-                        </span>
-                        <span style={{
-                          fontSize: '0.8rem',
-                          fontWeight: 800,
-                          textTransform: 'uppercase',
-                          background: 'rgba(255,255,255,0.15)',
-                          padding: '3px 10px',
-                          borderRadius: '6px'
-                        }}>
-                          {questions[currentQuestionIdx]?.type} Prompt
-                        </span>
-                      </div>
-                      <p style={{ fontSize: '1.02rem', fontWeight: 700, margin: 0, lineHeight: 1.5 }}>
-                        "{questions[currentQuestionIdx]?.question}"
-                      </p>
-                    </div>
+                    {/* QUESTION BANNER WITH AUDIO CONTROLS */}
+                    <div style={{ background: '#0f2540', borderRadius: '18px', padding: '24px 28px', color: '#ffffff', boxShadow: '0 8px 24px rgba(15, 37, 64, 0.18)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <span style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#93c5fd' }}>
+                            Question {currentQuestionIdx + 1} of {questions.length}
+                          </span>
+                          <span style={{
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
+                            background: 'rgba(255,255,255,0.15)',
+                            color: '#e2e8f0',
+                            padding: '3px 10px',
+                            borderRadius: '6px'
+                          }}>
+                            {questions[currentQuestionIdx]?.type || 'Technical'} Prompt
+                          </span>
+                        </div>
 
-                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '20px', position: 'relative' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                        <strong style={{ fontSize: '0.82rem', color: 'var(--text)' }}>Your Spoken Answer:</strong>
-
-                        <button
-                          onClick={toggleListening}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            border: 'none',
-                            padding: '8px 16px',
-                            borderRadius: '999px',
-                            fontWeight: 700,
-                            fontSize: '0.8rem',
-                            cursor: 'pointer',
-                            color: '#ffffff',
-                            background: isListening ? '#ef4444' : '#2563eb',
-                            boxShadow: isListening ? '0 0 14px rgba(239, 68, 68, 0.4)' : 'none',
-                            transition: 'all 0.25s ease'
-                          }}
-                        >
-                          {isListening ? (
-                            <>
-                              <MicOff className="size-4 animate-pulse" /> Recording (Click to stop)
-                            </>
-                          ) : (
-                            <>
-                              <Mic className="size-4" /> Start Speaking
-                            </>
+                        {/* Speech Synthesis Controls */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          {isSpeaking && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', height: '20px' }}>
+                              <span style={{ width: '3px', background: '#60a5fa', borderRadius: '2px', animation: 'soundWaveBar 0.8s ease-in-out infinite', height: '14px' }}></span>
+                              <span style={{ width: '3px', background: '#93c5fd', borderRadius: '2px', animation: 'soundWaveBar 0.8s ease-in-out 0.2s infinite', height: '22px' }}></span>
+                              <span style={{ width: '3px', background: '#60a5fa', borderRadius: '2px', animation: 'soundWaveBar 0.8s ease-in-out 0.4s infinite', height: '10px' }}></span>
+                              <span style={{ width: '3px', background: '#bfdbfe', borderRadius: '2px', animation: 'soundWaveBar 0.8s ease-in-out 0.6s infinite', height: '18px' }}></span>
+                            </div>
                           )}
-                        </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isSpeaking) {
+                                stopInterviewerSpeech();
+                              } else {
+                                speakInterviewerQuestion(questions[currentQuestionIdx]?.question);
+                              }
+                            }}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              background: isSpeaking ? '#ef4444' : 'rgba(255, 255, 255, 0.16)',
+                              border: '1px solid rgba(255, 255, 255, 0.25)',
+                              color: '#ffffff',
+                              padding: '6px 14px',
+                              borderRadius: '8px',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease'
+                            }}
+                            title={isSpeaking ? "Stop speech" : "Listen to question"}
+                          >
+                            {isSpeaking ? (
+                              <>
+                                <VolumeX className="size-3.5" /> Stop Audio
+                              </>
+                            ) : (
+                              <>
+                                <Volume2 className="size-3.5" /> Replay Question Audio
+                              </>
+                            )}
+                          </button>
+
+                          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.74rem', color: '#cbd5e1', cursor: 'pointer', userSelect: 'none' }}>
+                            <input
+                              type="checkbox"
+                              checked={autoSpeakEnabled}
+                              onChange={(e) => setAutoSpeakEnabled(e.target.checked)}
+                              style={{ cursor: 'pointer', accentColor: '#3b82f6' }}
+                            />
+                            Auto-read
+                          </label>
+                        </div>
                       </div>
 
-                      <textarea
-                        value={userAnswer}
-                        onChange={(e) => setUserAnswer(e.target.value)}
-                        placeholder="Click 'Start Speaking' and answer the question out loud. Your voice response will auto-populate here."
-                        style={{
-                          width: '100%',
-                          minHeight: '130px',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '12px',
-                          padding: '14px',
-                          fontSize: '0.87rem',
-                          lineHeight: 1.6,
-                          background: '#ffffff',
-                          outline: 'none',
-                          resize: 'vertical'
-                        }}
-                      />
+                      {/* QUESTION CONTENT: HIDDEN IN SPEAK MODE AS REQUESTED */}
+                      {interviewMode === 'voice' ? (
+                        <div style={{ textAlign: 'center', padding: '16px 12px 8px' }}>
+                          <div style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            background: isSpeaking ? 'rgba(59, 130, 246, 0.25)' : 'rgba(255, 255, 255, 0.1)',
+                            border: isSpeaking ? '1.5px solid #60a5fa' : '1px solid rgba(255, 255, 255, 0.2)',
+                            padding: '10px 24px',
+                            borderRadius: '999px',
+                            marginBottom: '12px'
+                          }}>
+                            <Volume2 className={`size-5 ${isSpeaking ? 'text-blue-300 animate-pulse' : 'text-slate-300'}`} />
+                            <span style={{ fontSize: '0.92rem', fontWeight: 800, color: isSpeaking ? '#bfdbfe' : '#e2e8f0' }}>
+                              {isSpeaking ? "Interviewer is asking the question aloud... Listen carefully" : "Question delivered via voice. Press 'Replay Question Audio' if you need to hear it again."}
+                            </span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.84rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                            🎧 Live Voice Interview Simulation: The question is delivered via voice only. Answer spontaneously using your microphone.
+                          </p>
+                        </div>
+                      ) : (
+                        <p style={{ fontSize: '1.08rem', fontWeight: 700, margin: 0, lineHeight: 1.6, color: '#f8fafc' }}>
+                          "{questions[currentQuestionIdx]?.question}"
+                        </p>
+                      )}
                     </div>
 
-                    {!interviewFeedback ? (
-                      <div style={{ display: 'flex', gap: '12px' }}>
-                        <button
-                          onClick={submitAnswer}
-                          disabled={!userAnswer.trim() || isGrading}
-                          className="btn btn-primary"
-                          style={{ minWidth: '130px' }}
-                        >
-                          {isGrading ? 'Evaluating Response...' : 'Submit Answer'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleEndInterview}
-                          className="btn btn-secondary"
-                          style={{ borderColor: '#ef4444', color: '#ef4444' }}
-                        >
-                          End Interview
-                        </button>
+                    {/* EVALUATION CRITERIA WEIGHT BANNER */}
+                    <div style={{
+                      background: 'rgba(37, 99, 235, 0.06)',
+                      border: '1px solid rgba(37, 99, 235, 0.2)',
+                      borderRadius: '14px',
+                      padding: '12px 18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '14px'
+                    }}>
+                      <Award className="size-5 text-blue-600 flex-shrink-0" />
+                      <div>
+                        <strong style={{ fontSize: '0.83rem', color: '#1e3a8a', display: 'block', marginBottom: '2px' }}>
+                          Evaluation Weight Distribution: 70% Technical Concepts • 20% English • 10% Fluency
+                        </strong>
+                        <span style={{ fontSize: '0.78rem', color: '#2563eb', lineHeight: 1.4 }}>
+                          70% for technical logic and core mechanisms • 20% for English communication & vocabulary • 10% for delivery articulation & flow.
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* ANSWER SECTION */}
+                    {interviewMode === 'voice' ? (
+                      /* SPEAK MODE: AUDIO WAVEFORM VISUALIZER (NO EDITABLE TEXTAREA) */
+                      <div style={{
+                        background: '#151c4a',
+                        border: '1.5px solid #2e3b79',
+                        borderRadius: '20px',
+                        padding: '28px 24px',
+                        textAlign: 'center',
+                        position: 'relative',
+                        boxShadow: isListening ? '0 0 28px rgba(37, 99, 235, 0.35)' : 'none',
+                        transition: 'all 0.3s ease'
+                      }}>
+                        {/* Status bar */}
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                          {isListening ? (
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              background: 'rgba(239, 68, 68, 0.2)',
+                              border: '1px solid #ef4444',
+                              color: '#fca5a5',
+                              padding: '5px 16px',
+                              borderRadius: '999px',
+                              fontSize: '0.82rem',
+                              fontWeight: 800
+                            }}>
+                              <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ef4444', animation: 'pulseRedDot 1.2s infinite' }}></span>
+                              Recording Candidate Voice... {formatRecordingTime(recordingSeconds)}
+                            </span>
+                          ) : (
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              background: 'rgba(255, 255, 255, 0.1)',
+                              border: '1px solid rgba(255, 255, 255, 0.2)',
+                              color: '#cbd5e1',
+                              padding: '5px 16px',
+                              borderRadius: '999px',
+                              fontSize: '0.8rem',
+                              fontWeight: 700
+                            }}>
+                              <Mic className="size-3.5 text-blue-400" />
+                              Microphone Ready — Press 'Start Speaking Answer' to begin
+                            </span>
+                          )}
+                        </div>
+
+                        {/* STUNNING AUDIO WAVEFORM (MATCHING UPLOADED SCREENSHOT) */}
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px',
+                          height: '110px',
+                          padding: '10px 0',
+                          overflow: 'hidden'
+                        }}>
+                          {WAVEFORM_BAR_HEIGHTS.map((height, idx) => (
+                            <div
+                              key={idx}
+                              style={{
+                                width: '4px',
+                                height: `${height}px`,
+                                background: '#ffffff',
+                                borderRadius: '999px',
+                                animation: isListening || isSpeaking
+                                  ? 'audioWaveformScale 1s ease-in-out infinite'
+                                  : 'audioWaveformResting 2.5s ease-in-out infinite',
+                                animationDelay: `${(idx % 14) * 0.07}s`,
+                                transformOrigin: 'center',
+                                transition: 'height 0.2s ease'
+                              }}
+                            />
+                          ))}
+                        </div>
+
+                        {/* RECORDING CONTROLS */}
+                        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                          {!isListening ? (
+                            <button
+                              type="button"
+                              onClick={toggleListening}
+                              className="btn btn-primary"
+                              disabled={isGrading}
+                              style={{
+                                padding: '12px 36px',
+                                borderRadius: '999px',
+                                fontSize: '0.95rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                boxShadow: '0 4px 18px rgba(37, 99, 235, 0.45)',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <Mic className="size-5" /> Start Speaking Answer
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={handleVoiceFinishAndSubmit}
+                              className="btn"
+                              disabled={isGrading}
+                              style={{
+                                background: '#ef4444',
+                                color: '#ffffff',
+                                border: 'none',
+                                padding: '12px 36px',
+                                borderRadius: '999px',
+                                fontSize: '0.95rem',
+                                fontWeight: 800,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                boxShadow: '0 0 24px rgba(239, 68, 68, 0.65)',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <CheckCircle2 className="size-5" /> Finish Speaking & Submit Answer
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={handleEndInterview}
+                            className="btn btn-secondary"
+                            style={{
+                              borderColor: 'rgba(255, 255, 255, 0.25)',
+                              color: '#cbd5e1',
+                              background: 'transparent',
+                              borderRadius: '999px',
+                              padding: '12px 22px'
+                            }}
+                          >
+                            End Interview
+                          </button>
+                        </div>
+
+                        {/* Background recording security notice */}
+                        <p style={{ margin: '14px 0 0', fontSize: '0.75rem', color: '#94a3b8' }}>
+                          🔒 Secure Background Voice Capture: Speech is recorded directly in the background. The candidate cannot edit or alter the recorded answer.
+                        </p>
                       </div>
                     ) : (
+                      /* WRITTEN MODE: TEXT INPUT */
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '22px', position: 'relative' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                          <strong style={{ fontSize: '0.85rem', color: 'var(--text)' }}>
+                            Your Written Response:
+                          </strong>
+                          <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
+                            {userAnswer.trim().split(/\s+/).filter(Boolean).length} words • {userAnswer.length} chars
+                          </span>
+                        </div>
+
+                        <textarea
+                          value={userAnswer}
+                          onChange={(e) => setUserAnswer(e.target.value)}
+                          placeholder="Type your detailed technical answer here. Discuss your methodology, technical trade-offs, algorithms, or practical implementation steps..."
+                          style={{
+                            width: '100%',
+                            minHeight: '150px',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '12px',
+                            padding: '14px 16px',
+                            fontSize: '0.9rem',
+                            lineHeight: 1.6,
+                            background: '#ffffff',
+                            outline: 'none',
+                            resize: 'vertical'
+                          }}
+                        />
+
+                        {!interviewFeedback && (
+                          <div style={{ marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <button
+                              onClick={() => submitAnswer()}
+                              disabled={!userAnswer.trim() || isGrading}
+                              className="btn btn-primary"
+                              style={{ minWidth: '150px' }}
+                            >
+                              {isGrading ? 'Evaluating Response...' : 'Submit Answer'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleEndInterview}
+                              className="btn btn-secondary"
+                              style={{ borderColor: '#ef4444', color: '#ef4444' }}
+                            >
+                              End Interview
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* EVALUATION FEEDBACK CARD */}
+                    {interviewFeedback && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '16px', padding: '20px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                            <strong style={{ fontSize: '0.94rem', color: '#166534', fontWeight: 800 }}>Evaluation feedback</strong>
-                            <span style={{ background: '#dcfce7', color: '#15803d', fontWeight: 900, padding: '4px 12px', borderRadius: '8px', fontSize: '0.87rem' }}>
-                              Score: {interviewFeedback.score}/100
+                        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '18px', padding: '24px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <strong style={{ fontSize: '1rem', color: '#166534', fontWeight: 800 }}>Evaluation Feedback</strong>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 800,
+                                background: '#dcfce7',
+                                color: '#166534',
+                                padding: '2px 8px',
+                                borderRadius: '6px'
+                              }}>
+                                {interviewFeedback.mode === 'written' ? '✍️ Written Assessment' : '🎙️ Spoken Recording Assessment'}
+                              </span>
+                            </div>
+                            <span style={{
+                              background: interviewFeedback.score >= 70 ? '#dcfce7' : interviewFeedback.score >= 50 ? '#fef3c7' : '#fee2e2',
+                              color: interviewFeedback.score >= 70 ? '#15803d' : interviewFeedback.score >= 50 ? '#b45309' : '#b91c1c',
+                              fontWeight: 900,
+                              padding: '6px 16px',
+                              borderRadius: '10px',
+                              fontSize: '1.05rem'
+                            }}>
+                              Overall Score: {interviewFeedback.score}/100
                             </span>
+                          </div>
+
+                          {/* 3-PART SCORE BREAKDOWN METERS (70% Tech, 20% English, 10% Fluency) */}
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '18px' }}>
+                            {/* Technical Score (70%) */}
+                            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '12px 14px', border: '1px solid #bbf7d0' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1e3a8a' }}>70% Technical Concept</span>
+                                <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#2563eb' }}>
+                                  {interviewFeedback.technical_score ?? interviewFeedback.score}/100
+                                </span>
+                              </div>
+                              <div style={{ height: '7px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                                <div style={{
+                                  height: '100%',
+                                  width: `${Math.min(100, Math.max(0, interviewFeedback.technical_score ?? interviewFeedback.score))}%`,
+                                  background: 'linear-gradient(90deg, #2563eb, #3b82f6)',
+                                  borderRadius: '999px'
+                                }}></div>
+                              </div>
+                              <span style={{ display: 'block', marginTop: '4px', fontSize: '0.7rem', color: '#64748b' }}>
+                                Contributes {Math.round((interviewFeedback.technical_score ?? interviewFeedback.score) * 0.7)} pts to overall
+                              </span>
+                            </div>
+
+                            {/* English Score (20%) */}
+                            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '12px 14px', border: '1px solid #bbf7d0' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#065f46' }}>20% English & Communication</span>
+                                <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#059669' }}>
+                                  {interviewFeedback.english_score ?? 75}/100
+                                </span>
+                              </div>
+                              <div style={{ height: '7px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                                <div style={{
+                                  height: '100%',
+                                  width: `${Math.min(100, Math.max(0, interviewFeedback.english_score ?? 75))}%`,
+                                  background: 'linear-gradient(90deg, #059669, #10b981)',
+                                  borderRadius: '999px'
+                                }}></div>
+                              </div>
+                              <span style={{ display: 'block', marginTop: '4px', fontSize: '0.7rem', color: '#64748b' }}>
+                                Contributes {Math.round((interviewFeedback.english_score ?? 75) * 0.2)} pts to overall
+                              </span>
+                            </div>
+
+                            {/* Fluency Score (10%) */}
+                            <div style={{ background: '#ffffff', borderRadius: '12px', padding: '12px 14px', border: '1px solid #bbf7d0' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#5b21b6' }}>10% Fluency & Articulation</span>
+                                <span style={{ fontSize: '0.82rem', fontWeight: 900, color: '#7c3aed' }}>
+                                  {interviewFeedback.fluency_score ?? 70}/100
+                                </span>
+                              </div>
+                              <div style={{ height: '7px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                                <div style={{
+                                  height: '100%',
+                                  width: `${Math.min(100, Math.max(0, interviewFeedback.fluency_score ?? 70))}%`,
+                                  background: 'linear-gradient(90deg, #7c3aed, #8b5cf6)',
+                                  borderRadius: '999px'
+                                }}></div>
+                              </div>
+                              <span style={{ display: 'block', marginTop: '4px', fontSize: '0.7rem', color: '#64748b' }}>
+                                Contributes {Math.round((interviewFeedback.fluency_score ?? 70) * 0.1)} pts to overall
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* QUESTION & RESPONSE REVIEW (reveals question if hidden during voice mode) */}
+                          <div style={{ marginBottom: '14px', padding: '12px 14px', background: '#ffffff', borderRadius: '12px', borderLeft: '4px solid #10b981', fontSize: '0.8rem', color: '#1e293b' }}>
+                            <div style={{ marginBottom: '6px' }}>
+                              <strong style={{ color: '#0f2540' }}>Question Asked: </strong>
+                              <span style={{ fontStyle: 'italic' }}>"{questions[currentQuestionIdx]?.question}"</span>
+                            </div>
+                            {userAnswer && (
+                              <div style={{ color: '#475569' }}>
+                                <strong style={{ color: '#0f2540' }}>Candidate Response Captured: </strong>
+                                <span>"{userAnswer}"</span>
+                              </div>
+                            )}
                           </div>
 
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div>
-                              <strong style={{ display: 'block', fontSize: '0.8rem', color: '#166534', marginBottom: '4px' }}>✓ Strengths</strong>
+                              <strong style={{ display: 'block', fontSize: '0.82rem', color: '#166534', marginBottom: '6px' }}>✓ Strengths & Key Concepts Covered</strong>
                               <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.82rem', color: '#14532d', lineHeight: 1.5 }}>
                                 {interviewFeedback.strengths?.map((str, idx) => <li key={idx}>{str}</li>)}
                               </ul>
                             </div>
                             <div>
-                              <strong style={{ display: 'block', fontSize: '0.8rem', color: '#9a3412', marginBottom: '4px' }}>⚠ Suggested Improvements</strong>
+                              <strong style={{ display: 'block', fontSize: '0.82rem', color: '#9a3412', marginBottom: '6px' }}>⚠ Technical Depth & Improvements</strong>
                               <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.82rem', color: '#7c2d12', lineHeight: 1.5 }}>
                                 {interviewFeedback.improvements?.map((imp, idx) => <li key={idx}>{imp}</li>)}
                               </ul>
@@ -2387,7 +3046,7 @@ const Preparation = () => {
                           <button
                             onClick={handleNextQuestion}
                             className="btn btn-primary"
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px' }}
                           >
                             {currentQuestionIdx < questions.length - 1 ? 'Next Question' : 'Finish & Show Scorecard'}
                             <ChevronRight className="size-4" />
@@ -2406,35 +3065,114 @@ const Preparation = () => {
                   </div>
                 )}
 
+                {/* COMPLETED INTERVIEW SCORECARD */}
                 {interviewCompleted && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
-                    <div style={{ textAlign: 'center', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '20px', padding: '30px' }}>
-                      <Bot className="size-12 text-blue-600 mx-auto" style={{ marginBottom: '12px' }} />
-                      <h3 style={{ fontSize: '1.23rem', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px' }}>Interview Completed!</h3>
+                    {(() => {
+                      const completedAvg = questionScores.length > 0
+                        ? Math.round(questionScores.reduce((sum, item) => sum + (item.score || 0), 0) / questionScores.length)
+                        : 0;
 
-                      <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: '6px', background: '#ffffff', border: '1px solid #bfdbfe', padding: '12px 28px', borderRadius: '16px' }}>
-                        <span style={{ fontSize: '2.13rem', fontWeight: 800, color: '#1e6fff', fontFamily: 'Sora, sans-serif' }}>
-                          {finalAverageScore}%
-                        </span>
-                        <span style={{ fontSize: '0.82rem', color: 'var(--muted)', fontWeight: 700 }}>Average Score</span>
-                      </div>
+                      return (
+                        <div style={{ textAlign: 'center', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '20px', padding: '32px 24px' }}>
+                          <div style={{
+                            width: '56px',
+                            height: '56px',
+                            borderRadius: '16px',
+                            background: '#dbeafe',
+                            color: '#2563eb',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto 14px'
+                          }}>
+                            <Trophy className="size-8" />
+                          </div>
+                          <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px' }}>Interview Completed!</h3>
+                          <p style={{ color: '#475569', fontSize: '0.85rem', margin: '0 0 16px' }}>
+                            Your responses have been evaluated (70% Technical Concepts • 20% English • 10% Fluency).
+                          </p>
 
-                      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '12px' }}>
-                        <button
-                          onClick={saveFinalScore}
-                          className="btn btn-primary"
-                          disabled={!!saveStatus.includes('Successfully')}
-                        >
-                          {saveStatus || 'Save Score to Dashboard'}
-                        </button>
-                        <button
-                          onClick={handleRestartInterview}
-                          className="btn btn-secondary"
-                        >
-                          Start New Interview
-                        </button>
-                      </div>
-                    </div>
+                          <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: '8px', background: '#ffffff', border: '1px solid #bfdbfe', padding: '14px 32px', borderRadius: '18px', boxShadow: '0 4px 12px rgba(30, 58, 138, 0.06)' }}>
+                            <span style={{ fontSize: '2.4rem', fontWeight: 800, color: '#1e6fff', fontFamily: 'Sora, sans-serif' }}>
+                              {completedAvg}%
+                            </span>
+                            <span style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 700 }}>Average Score</span>
+                          </div>
+
+                          {/* QUESTION BY QUESTION BREAKDOWN */}
+                          {questionScores.length > 0 && (
+                            <div style={{ marginTop: '24px', textAlign: 'left', background: '#ffffff', borderRadius: '16px', padding: '18px', border: '1px solid #e2e8f0' }}>
+                              <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1e293b', margin: '0 0 12px 0' }}>
+                                Question-by-Question Scorecard:
+                              </h4>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                {questionScores.map((qs, i) => (
+                                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', gap: '12px', flexWrap: 'wrap' }}>
+                                    <div style={{ minWidth: '240px', flex: 1 }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                        <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b' }}>Q{i + 1}</span>
+                                        <span style={{
+                                          fontSize: '0.68rem',
+                                          fontWeight: 800,
+                                          padding: '2px 6px',
+                                          borderRadius: '4px',
+                                          background: qs.mode === 'written' ? '#f1f5f9' : '#dbeafe',
+                                          color: qs.mode === 'written' ? '#334155' : '#1d4ed8'
+                                        }}>
+                                          {qs.mode === 'written' ? '✍️ Written' : '🎙️ Spoken'}
+                                        </span>
+                                      </div>
+                                      <p style={{ margin: '0 0 6px 0', fontSize: '0.82rem', color: '#1e293b', fontWeight: 600 }}>
+                                        {qs.question}
+                                      </p>
+                                      {/* Sub-score breakdown tags */}
+                                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.7rem' }}>
+                                        <span style={{ background: '#dbeafe', color: '#1e40af', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                          Tech: {qs.technical_score ?? qs.score}% (70%)
+                                        </span>
+                                        <span style={{ background: '#d1fae5', color: '#065f46', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                          English: {qs.english_score ?? 75}% (20%)
+                                        </span>
+                                        <span style={{ background: '#ede9fe', color: '#5b21b6', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>
+                                          Fluency: {qs.fluency_score ?? 70}% (10%)
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <span style={{
+                                      fontSize: '0.9rem',
+                                      fontWeight: 800,
+                                      padding: '5px 12px',
+                                      borderRadius: '8px',
+                                      background: qs.score >= 70 ? '#dcfce7' : qs.score >= 50 ? '#fef3c7' : '#fee2e2',
+                                      color: qs.score >= 70 ? '#15803d' : qs.score >= 50 ? '#b45309' : '#b91c1c'
+                                    }}>
+                                      {qs.score}/100
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <div style={{ marginTop: '22px', display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                            <button
+                              onClick={saveFinalScore}
+                              className="btn btn-primary"
+                              disabled={!!saveStatus.includes('Successfully')}
+                            >
+                              {saveStatus || 'Save Score to Dashboard'}
+                            </button>
+                            <button
+                              onClick={handleRestartInterview}
+                              className="btn btn-secondary"
+                            >
+                              Start New Interview
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>

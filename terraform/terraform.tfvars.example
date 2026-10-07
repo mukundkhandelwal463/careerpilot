@@ -1,0 +1,24 @@
+# ==============================================================================
+# CareerPilot Terraform Variables Configuration Example
+# Copy this file to 'terraform.tfvars' to customize your AWS environment.
+# ==============================================================================
+
+aws_region        = "ap-south-1"
+environment       = "production"
+domain_name       = "careerpilot.website"
+live_elastic_ip   = "15.252.51.16"
+
+# VPC & Subnets (Section 9)
+vpc_cidr                 = "10.0.0.0/16"
+public_subnet_cidrs      = ["10.0.1.0/24", "10.0.11.0/24"]
+private_app_subnet_cidrs = ["10.0.2.0/24", "10.0.12.0/24"]
+private_data_subnet_cidrs= ["10.0.3.0/24", "10.0.13.0/24"]
+
+# EC2 Compute (Section 9 & 10)
+instance_type     = "t3.small"
+key_name          = "careerpilot-key"
+
+# Cost-Protection Guardrails (Leave false to guarantee zero extra cloud charges)
+enable_nat_gateway= false
+enable_rds        = false
+enable_elasticache= false

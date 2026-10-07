@@ -1,0 +1,22 @@
+# ==============================================================================
+# CareerPilot Kubernetes ConfigMap
+# Non-sensitive configuration parameters for Backend & Ingress
+# ==============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: careerpilot-config
+  namespace: careerpilot
+  labels:
+    app.kubernetes.io/name: careerpilot
+data:
+  DJANGO_ENV: "production"
+  DEBUG: "False"
+  ALLOWED_HOSTS: "careerpilot.website,15.252.51.16,localhost,127.0.0.1,careerpilot-svc,careerpilot-backend-svc"
+  CORS_ALLOWED_ORIGINS: "https://careerpilot.website,http://careerpilot.website,http://localhost"
+  POSTGRES_HOST: "careerpilot-db-svc"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "careerpilot"
+  REDIS_URL: "redis://careerpilot-redis-svc:6379/0"
+  PROMETHEUS_METRICS_ENABLED: "True"
+  PORT: "8000"

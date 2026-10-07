@@ -1,0 +1,154 @@
+# ==============================================================================
+# CareerPilot Kubernetes Deployment Manifests
+# Reference: CareerPilot Project Synopsis Section 8 (Orchestration on Amazon EKS)
+# Features: Rolling Updates (Zero-Downtime), Liveness & Readiness Probes, Resource Caps
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. CareerPilot Django Backend Deployment
+# ------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: careerpilot-backend
+  namespace: careerpilot
+  labels:
+    app: careerpilot-backend
+    tier: api
+    app.kubernetes.io/name: careerpilot
+spec:
+  replicas: 3
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: careerpilot-backend
+  template:
+    metadata:
+      labels:
+        app: careerpilot-backend
+        tier: api
+    spec:
+      containers:
+        - name: backend
+          image: mukundk/careerpilot-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: careerpilot-config
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: careerpilot-secrets
+                  key: DJANGO_SECRET_KEY
+                  optional: true
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: careerpilot-secrets
+                  key: GEMINI_API_KEY
+                  optional: true
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: careerpilot-secrets
+                  key: POSTGRES_USER
+                  optional: true
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: careerpilot-secrets
+                  key: POSTGRES_PASSWORD
+                  optional: true
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1536Mi
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 25
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 2
+
+---
+# ------------------------------------------------------------------------------
+# 2. CareerPilot React 19 Frontend Deployment
+# ------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: careerpilot-frontend
+  namespace: careerpilot
+  labels:
+    app: careerpilot-frontend
+    tier: presentation
+    app.kubernetes.io/name: careerpilot
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: careerpilot-frontend
+  template:
+    metadata:
+      labels:
+        app: careerpilot-frontend
+        tier: presentation
+    spec:
+      containers:
+        - name: frontend
+          image: mukundk/careerpilot-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 2

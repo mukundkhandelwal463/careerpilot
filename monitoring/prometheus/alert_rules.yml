@@ -1,0 +1,46 @@
+# ==============================================================================
+# Prometheus Alerting Rules for CareerPilot Application
+# ==============================================================================
+
+groups:
+  - name: careerpilot_alerts
+    rules:
+      # Alert when the Django backend is unreachable
+      - alert: CareerPilotBackendDown
+        expr: up{job="careerpilot-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CareerPilot backend service is unreachable"
+          description: "The Django backend container has been down for more than 1 minute."
+
+      # Alert on high traffic load spikes
+      - alert: HighTrafficSpike
+        expr: rate(http_requests_total[1m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API traffic volume detected"
+          description: "Incoming HTTP request rate exceeds 50 requests/sec for 2 minutes."
+
+      # Alert when Gemini AI API failure rate is high
+      - alert: GeminiAPIElevatedFailures
+        expr: (gemini_errors_total / clamp_min(gemini_calls_total, 1)) > 0.15
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on Gemini AI service adapter"
+          description: "Over 15% of recent Gemini API calls have returned errors."
+
+      # Alert when average ATS score drops below quality threshold
+      - alert: LowAverageATSScore
+        expr: ats_score_avg > 0 and ats_score_avg < 35
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Abnormally low average ATS score"
+          description: "The average ATS candidate score is currently below 35%."
