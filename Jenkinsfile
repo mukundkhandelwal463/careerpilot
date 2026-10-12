@@ -141,9 +141,6 @@ pipeline {
         // STAGE 7: Zero-Downtime Deployment (Automated SSH Deploy to AWS EC2)
         // ---------------------------------------------------------------------
         stage('🚀 Zero-Downtime Deployment') {
-            when {
-                branch 'main'
-            }
             steps {
                 echo "Deploying update to AWS EC2 (${EC2_HOST}) with zero downtime..."
                 sh '''
