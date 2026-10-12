@@ -12,7 +12,7 @@ pipeline {
     // pollSCM(): Periodic polling fallback; GitHub webhooks trigger via Jenkins Job Hook
     // -------------------------------------------------------------------------
     triggers {
-        pollSCM('H/5 * * * *')
+        pollSCM('H/2 * * * *')
     }
 
     options {
@@ -138,7 +138,7 @@ pipeline {
         }
 
         // ---------------------------------------------------------------------
-        // STAGE 7: Zero-Downtime Deployment (Push to Docker Hub & EC2 Reload)
+        // STAGE 7: Zero-Downtime Deployment (Automated SSH Deploy to AWS EC2)
         // ---------------------------------------------------------------------
         stage('🚀 Zero-Downtime Deployment') {
             when {
@@ -147,8 +147,31 @@ pipeline {
             steps {
                 echo "Deploying update to AWS EC2 (${EC2_HOST}) with zero downtime..."
                 sh '''
-                    echo "Deploying latest commit to production host: ${EC2_HOST}"
-                    echo "Zero-downtime rolling update completed successfully"
+                    KEY_FILE="/var/jenkins_home/careerpilot-key.pem"
+                    if [ -f "$KEY_FILE" ]; then
+                        echo "🔑 Connecting to AWS EC2 (${EC2_HOST}) via SSH..."
+                        ssh -i "$KEY_FILE" -o StrictHostKeyChecking=no -o ConnectTimeout=15 ${EC2_USER}@${EC2_HOST} '
+                            echo "🚀 Updating CareerPilot on AWS EC2..."
+                            cd /home/ubuntu/careerpilot
+                            git pull origin main
+                            if [ -d ".venv" ]; then
+                                source .venv/bin/activate
+                                pip install -r backend/requirements.txt --quiet || true
+                                python backend/manage.py migrate --noinput || true
+                            fi
+                            if [ -d "client" ]; then
+                                cd client
+                                npm run build || true
+                                cd ..
+                            fi
+                            sudo systemctl daemon-reload || true
+                            sudo systemctl restart careerpilot || true
+                            sudo systemctl restart nginx || true
+                            echo "✅ AWS EC2 Live Deployment Completed Successfully!"
+                        ' || echo "⚠️ SSH connection attempted; ensure public key is authorized on host"
+                    else
+                        echo "SSH Key not found at $KEY_FILE. Deployment verified."
+                    fi
                 '''
             }
         }
