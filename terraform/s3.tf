@@ -46,6 +46,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "storage_lifecycle" {
     id     = "expire-temporary-reports"
     status = "Enabled"
 
+    filter {}
+
     expiration {
       days = 90
     }
