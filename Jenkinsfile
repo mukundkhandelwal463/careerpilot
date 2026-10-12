@@ -9,17 +9,14 @@ pipeline {
 
     // -------------------------------------------------------------------------
     // Automatic Trigger Configuration ("Jenkins Auto-Trigger")
-    // 1. githubPush(): Triggers immediately when GitHub sends a webhook on git push
-    // 2. pollSCM(): Periodic 5-minute fallback polling if webhook is unreachable
+    // pollSCM(): Periodic polling fallback; GitHub webhooks trigger via Jenkins Job Hook
     // -------------------------------------------------------------------------
     triggers {
-        githubPush()
         pollSCM('H/5 * * * *')
     }
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '15', artifactNumToKeepStr: '5'))
-        timestamps()
         timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
     }
