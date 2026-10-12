@@ -160,7 +160,7 @@ pipeline {
     post {
         always {
             echo "🧹 Cleaning up workspace..."
-            cleanWs deleteDirs: true, notFailBuild: true
+            deleteDir()
         }
         success {
             echo "🎉 CareerPilot Pipeline Build #${BUILD_NUMBER} Finished SUCCESSFULLY!"
