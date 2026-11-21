@@ -7,8 +7,6 @@ import {
   RotateCcw,
   Pause,
   Columns,
-  Maximize2,
-  Minimize2,
   ChevronDown,
   ChevronUp,
   ChevronLeft,
@@ -628,23 +626,6 @@ export default function LeetCodeWorkspace({
               Accepted!
             </span>
           )}
-
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#a1a1aa',
-              cursor: 'pointer',
-              padding: '6px',
-              borderRadius: '6px',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
-          </button>
 
           {onClose && (
             <button

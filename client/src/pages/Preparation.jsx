@@ -1171,11 +1171,6 @@ const Preparation = () => {
   };
 
   const openDsaCompiler = (prob, patternName = '') => {
-    try {
-      if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      }
-    } catch (e) {}
     setActiveCompilerProblem(prob);
     setCompilerPatternName(patternName);
     setCompilerEvalResult(null);
@@ -1188,11 +1183,6 @@ const Preparation = () => {
   };
 
   const closeDsaCompiler = () => {
-    try {
-      if (document.fullscreenElement && document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-      }
-    } catch (e) {}
     setActiveCompilerProblem(null);
     setCompilerEvalResult(null);
     setCompilerSolvedNotice(false);
@@ -2649,7 +2639,7 @@ const Preparation = () => {
           bottom: 0,
           width: '100vw',
           height: '100vh',
-          backgroundColor: '#0a0a0c',
+          backgroundColor: '#121214',
           zIndex: 99999999,
           display: 'flex',
           flexDirection: 'column',
