@@ -255,13 +255,11 @@ export default function LeetCodeWorkspace({
       document.documentElement.classList.add('coding-fullscreen-active');
       document.body.classList.add('coding-fullscreen-active');
       return () => {
-        if (!fullBleed) {
-          document.documentElement.classList.remove('coding-fullscreen-active');
-          document.body.classList.remove('coding-fullscreen-active');
-        }
+        document.documentElement.classList.remove('coding-fullscreen-active');
+        document.body.classList.remove('coding-fullscreen-active');
       };
     }
-  }, [isFullscreen, fullBleed]);
+  }, [isFullscreen]);
 
   return (
     <div
