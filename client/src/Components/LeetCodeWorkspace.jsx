@@ -252,9 +252,9 @@ export default function LeetCodeWorkspace({
 
   const handleTriggerRun = () => {
     if (onRun) {
-      const activeInput = customStdin || (testcases[selectedCaseIdx]?.input || '');
-      const activeExpected = testcases[selectedCaseIdx]?.expected || null;
-      onRun(activeInput, activeExpected, testcases);
+      const activeInput = customStdin || (sampleTestcases[selectedCaseIdx]?.input || '');
+      const activeExpected = sampleTestcases[selectedCaseIdx]?.expected || null;
+      onRun(activeInput, activeExpected, all13Testcases);
     }
   };
 
@@ -1158,9 +1158,9 @@ export default function LeetCodeWorkspace({
                 {/* TAB 1: TESTCASES */}
                 {consoleTab === 'testcase' && (
                   <div>
-                    {/* Case selector chips */}
+                    {/* Case selector chips for all 13 testcases */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
-                      {testcases.map((tc, idx) => (
+                      {sampleTestcases.map((tc, idx) => (
                         <button
                           key={idx}
                           onClick={() => setSelectedCaseIdx(idx)}
@@ -1169,7 +1169,7 @@ export default function LeetCodeWorkspace({
                             borderRadius: '6px',
                             border: '1px solid',
                             borderColor: selectedCaseIdx === idx ? '#10b981' : '#27272a',
-                            background: selectedCaseIdx === idx ? 'rgba(16, 185, 129, 0.1)' : '#18181b',
+                            background: selectedCaseIdx === idx ? 'rgba(16, 185, 129, 0.15)' : '#18181b',
                             color: selectedCaseIdx === idx ? '#10b981' : '#a1a1aa',
                             fontWeight: 600,
                             fontSize: '0.78rem',
@@ -1179,44 +1179,77 @@ export default function LeetCodeWorkspace({
                           {tc.label || `Case ${idx + 1}`}
                         </button>
                       ))}
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        padding: '3px 10px',
-                        borderRadius: '6px',
-                        background: 'rgba(59, 130, 246, 0.12)',
-                        color: '#60a5fa',
-                        border: '1px solid rgba(59, 130, 246, 0.3)',
-                        fontSize: '0.74rem',
-                        fontWeight: 600
-                      }}>
-                        🛡️ +10 Hidden Edge Cases (Graded on Submit)
-                      </span>
+                      {hiddenTestcases.map((htc, hidx) => {
+                        const targetIdx = sampleTestcases.length + hidx;
+                        return (
+                          <button
+                            key={`h-${hidx}`}
+                            onClick={() => setSelectedCaseIdx(targetIdx)}
+                            title={htc.label || `Hidden Edge Case ${hidx + 1}`}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid',
+                              borderColor: selectedCaseIdx === targetIdx ? '#60a5fa' : '#27272a',
+                              background: selectedCaseIdx === targetIdx ? 'rgba(59, 130, 246, 0.15)' : '#18181b',
+                              color: selectedCaseIdx === targetIdx ? '#60a5fa' : '#71717a',
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <span>🔒 Hidden {hidx + 1}</span>
+                          </button>
+                        );
+                      })}
                     </div>
 
-                    {/* Stdin input textarea */}
-                    <div style={{ color: '#71717a', fontSize: '0.78rem', marginBottom: '6px', fontWeight: 600 }}>
-                      Standard Input (stdin):
-                    </div>
-                    <textarea
-                      value={customStdin}
-                      onChange={(e) => setCustomStdin(e.target.value)}
-                      placeholder="Enter test input data here..."
-                      style={{
-                        width: '100%',
-                        height: `${Math.max(90, consoleHeight - 150)}px`,
+                    {/* Stdin input view */}
+                    {selectedCaseIdx < sampleTestcases.length ? (
+                      <>
+                        <div style={{ color: '#71717a', fontSize: '0.78rem', marginBottom: '6px', fontWeight: 600 }}>
+                          Standard Input (stdin):
+                        </div>
+                        <textarea
+                          value={customStdin}
+                          onChange={(e) => setCustomStdin(e.target.value)}
+                          placeholder="Enter test input data here..."
+                          style={{
+                            width: '100%',
+                            height: `${Math.max(90, consoleHeight - 150)}px`,
+                            background: '#18181b',
+                            color: '#f4f4f5',
+                            border: '1px solid #27272a',
+                            borderRadius: '8px',
+                            padding: '10px 12px',
+                            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                            fontSize: '0.84rem',
+                            outline: 'none',
+                            resize: 'none'
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <div style={{
                         background: '#18181b',
-                        color: '#f4f4f5',
                         border: '1px solid #27272a',
                         borderRadius: '8px',
-                        padding: '10px 12px',
-                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                        fontSize: '0.84rem',
-                        outline: 'none',
-                        resize: 'none'
-                      }}
-                    />
+                        padding: '16px 20px',
+                        color: '#a1a1aa',
+                        fontSize: '0.85rem',
+                        lineHeight: '1.6'
+                      }}>
+                        <div style={{ fontWeight: 700, color: '#60a5fa', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span>🔒 {hiddenTestcases[selectedCaseIdx - sampleTestcases.length]?.label || `Hidden Case ${selectedCaseIdx - sampleTestcases.length + 1}`}</span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#71717a' }}>
+                          Hidden edge case input is private prior to execution. Click <strong>Run</strong> or <strong>Submit</strong> to evaluate your solution against this case and all 13 testcases!
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1317,34 +1350,39 @@ export default function LeetCodeWorkspace({
                           </div>
                         )}
 
-                        {/* Testcase selector chips for test results */}
+                        {/* Testcase selector chips for all 13 test results */}
                         {evalResult.test_results && evalResult.test_results.length > 0 && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
-                            {evalResult.test_results.map((tr, idx) => (
-                              <button
-                                key={idx}
-                                onClick={() => setSelectedResultIdx(idx)}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  padding: '4px 12px',
-                                  borderRadius: '6px',
-                                  border: '1px solid',
-                                  borderColor: selectedResultIdx === idx ? (tr.passed ? '#10b981' : '#ef4444') : '#27272a',
-                                  background: selectedResultIdx === idx
-                                    ? (tr.passed ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)')
-                                    : '#18181b',
-                                  color: tr.passed ? '#10b981' : '#f87171',
-                                  fontWeight: 600,
-                                  fontSize: '0.78rem',
-                                  cursor: 'pointer'
-                                }}
-                              >
-                                {tr.passed ? <CheckCircle2 className="size-3.5 text-emerald-400" /> : <XCircle className="size-3.5 text-red-400" />}
-                                <span>{tr.label || `Case ${idx + 1}`}</span>
-                              </button>
-                            ))}
+                            {evalResult.test_results.map((tr, idx) => {
+                              const isHidden = tr.is_hidden || (tr.label && tr.label.toLowerCase().includes('hidden')) || idx >= 3;
+                              const chipText = isHidden ? `Hidden ${idx - 2}` : (tr.label || `Case ${idx + 1}`);
+                              return (
+                                <button
+                                  key={idx}
+                                  onClick={() => setSelectedResultIdx(idx)}
+                                  title={tr.label || `Test Case ${idx + 1}`}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    padding: '4px 12px',
+                                    borderRadius: '6px',
+                                    border: '1px solid',
+                                    borderColor: selectedResultIdx === idx ? (tr.passed ? '#10b981' : '#ef4444') : '#27272a',
+                                    background: selectedResultIdx === idx
+                                      ? (tr.passed ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)')
+                                      : '#18181b',
+                                    color: tr.passed ? '#10b981' : '#f87171',
+                                    fontWeight: 600,
+                                    fontSize: '0.78rem',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  {tr.passed ? <CheckCircle2 className="size-3.5 text-emerald-400" /> : <XCircle className="size-3.5 text-red-400" />}
+                                  <span>{chipText}</span>
+                                </button>
+                              );
+                            })}
                           </div>
                         )}
 

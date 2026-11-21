@@ -978,6 +978,7 @@ def run_all_testcases(code, language, testcases):
             "expected": expected_output,
             "actual": actual_output,
             "passed": tc_passed,
+            "is_hidden": bool(tc.get("is_hidden") or idx >= 3),
             "status": res.get("status", "Accepted"),
             "stderr": res.get("stderr", ""),
             "compile_output": res.get("compile_output", ""),

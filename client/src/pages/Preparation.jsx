@@ -1222,6 +1222,11 @@ const Preparation = () => {
     setCompilerEvalResult(null);
     const codeKey = `${activeCompilerProblem.id}_${compilerLanguage}`;
     const code = compilerCodes[codeKey] !== undefined ? compilerCodes[codeKey] : (formattedCompilerQuestion.templates?.[compilerLanguage] || '');
+    const q = formattedCompilerQuestion;
+    const allTestcases = [
+      ...(q.testcases || []),
+      ...(q.hiddenTestcases || [])
+    ];
     try {
       const res = await fetch('/api/compiler/run', {
         method: 'POST',
@@ -1231,7 +1236,7 @@ const Preparation = () => {
           code,
           stdin,
           expected_output: expectedOutput,
-          testcases
+          testcases: allTestcases.length > 0 ? allTestcases : (testcases || [])
         })
       });
       const data = await res.json();
