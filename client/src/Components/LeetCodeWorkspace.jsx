@@ -185,7 +185,7 @@ export default function LeetCodeWorkspace({
   }, [isDraggingH, isDraggingV, consoleOpen]);
 
   // Normalize test cases from question
-  const testcases = question?.testcases || (question?.examples || []).map((ex, i) => {
+  const sampleTestcases = question?.testcases || (question?.examples || []).map((ex, i) => {
     const isObj = typeof ex === 'object' && ex !== null;
     return {
       label: `Case ${i + 1}`,
@@ -193,11 +193,13 @@ export default function LeetCodeWorkspace({
       expected: isObj ? ex.output : (String(ex).split('\nOutput:')[1] || '').trim()
     };
   });
+  const hiddenTestcases = question?.hiddenTestcases || [];
+  const all13Testcases = [...sampleTestcases, ...hiddenTestcases];
 
   // Current active testcase input
   useEffect(() => {
-    if (testcases[selectedCaseIdx]) {
-      setCustomStdin(testcases[selectedCaseIdx].input || '');
+    if (sampleTestcases[selectedCaseIdx]) {
+      setCustomStdin(sampleTestcases[selectedCaseIdx].input || '');
     }
   }, [selectedCaseIdx, question]);
 
