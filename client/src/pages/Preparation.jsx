@@ -2693,6 +2693,9 @@ const Preparation = () => {
             evalResult={compilerEvalResult}
             sectionTitle={compilerPatternName || 'DSA Sheet'}
             fullBleed={true}
+            problemList={allDsaProblems}
+            onSelectProblem={(prob) => openDsaCompiler(prob, prob.patternName)}
+            completedProblemIds={dsaCompletedProblems}
           />
         </div>
       </div>

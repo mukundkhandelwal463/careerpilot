@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Play,
   CheckCircle2,
@@ -25,7 +25,10 @@ import {
   Cpu,
   Layers,
   Sparkles,
-  X
+  X,
+  Search,
+  Circle,
+  Filter
 } from 'lucide-react';
 
 const SUPPORTED_LANGUAGES = [
@@ -60,7 +63,10 @@ export default function LeetCodeWorkspace({
   onClose = null,
   solvedNotice = false,
   isSolved = false,
-  problemLevel = null
+  problemLevel = null,
+  problemList = [],
+  onSelectProblem = null,
+  completedProblemIds = {}
 }) {
   const [activeTab, setActiveTab] = useState('description'); // 'description', 'submissions'
   const [consoleTab, setConsoleTab] = useState('testcase'); // 'testcase', 'result'
@@ -68,6 +74,44 @@ export default function LeetCodeWorkspace({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedCaseIdx, setSelectedCaseIdx] = useState(0);
   const [selectedResultIdx, setSelectedResultIdx] = useState(0);
+  const [problemSearchQuery, setProblemSearchQuery] = useState('');
+  const [selectedDifficultyFilter, setSelectedDifficultyFilter] = useState('ALL');
+  const [selectedPatternFilter, setSelectedPatternFilter] = useState('ALL');
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState('ALL');
+
+  const patternList = useMemo(() => {
+    if (!problemList || problemList.length === 0) return [];
+    const set = new Set();
+    problemList.forEach(p => {
+      if (p.patternName) set.add(p.patternName);
+    });
+    return Array.from(set);
+  }, [problemList]);
+
+  const filteredProblems = useMemo(() => {
+    if (!problemList || problemList.length === 0) return [];
+    return problemList.filter(p => {
+      const q = problemSearchQuery.toLowerCase().trim();
+      const matchesSearch = !q ||
+        (p.name && p.name.toLowerCase().includes(q)) ||
+        (p.patternName && p.patternName.toLowerCase().includes(q)) ||
+        (p.tags && p.tags.some(t => t.toLowerCase().includes(q)));
+      
+      const matchesDifficulty = selectedDifficultyFilter === 'ALL' ||
+        (p.level && p.level.toLowerCase() === selectedDifficultyFilter.toLowerCase());
+      
+      const isProbSolved = Boolean(completedProblemIds[p.id]);
+      const matchesStatus = selectedStatusFilter === 'ALL' ||
+        (selectedStatusFilter === 'SOLVED' && isProbSolved) ||
+        (selectedStatusFilter === 'UNSOLVED' && !isProbSolved);
+      
+      const matchesPattern = selectedPatternFilter === 'ALL' ||
+        p.patternName === selectedPatternFilter;
+      
+      return matchesSearch && matchesDifficulty && matchesStatus && matchesPattern;
+    });
+  }, [problemList, problemSearchQuery, selectedDifficultyFilter, selectedPatternFilter, selectedStatusFilter, completedProblemIds]);
+
   const [solveElapsedSeconds, setSolveElapsedSeconds] = useState(() => {
     const saved = question?.id ? localStorage.getItem(`dsa_solve_time_${question.id}`) : null;
     return saved ? parseInt(saved, 10) || 0 : 0;
@@ -1587,111 +1631,447 @@ export default function LeetCodeWorkspace({
           }}
           onClick={() => setShowSectionModal(false)}
         >
-          <div
-            style={{
-              maxWidth: '560px',
-              width: '100%',
-              background: '#18181b',
-              border: '1px solid #27272a',
-              borderRadius: '16px',
-              padding: '24px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
-              color: '#f4f4f5'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Layers className="size-5 text-emerald-400" />
-                <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800 }}>Assessment Section Progress</h2>
-              </div>
-              <button
-                onClick={() => setShowSectionModal(false)}
-                style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: '4px' }}
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-
-            <p style={{ margin: '0 0 20px 0', fontSize: '0.86rem', color: '#a1a1aa', lineHeight: 1.5 }}>
-              Track your completed question attempts in previous sections, your current active section, and upcoming sections.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {(sectionsOverview || []).map((sec) => (
-                <div
-                  key={sec.id}
-                  style={{
+          {problemList && problemList.length > 0 ? (
+            <div
+              style={{
+                maxWidth: '860px',
+                width: '100%',
+                maxHeight: '85vh',
+                display: 'flex',
+                flexDirection: 'column',
+                background: '#18181b',
+                border: '1px solid #27272a',
+                borderRadius: '16px',
+                padding: '24px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+                color: '#f4f4f5',
+                overflow: 'hidden'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '10px',
+                    background: 'rgba(16, 185, 129, 0.15)',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    background: sec.isActive ? 'rgba(16, 185, 129, 0.08)' : '#141416',
-                    border: '1px solid',
-                    borderColor: sec.isActive ? '#10b981' : (sec.isCompleted ? '#27272a' : '#27272a')
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {sec.isCompleted ? (
-                      <CheckCircle2 className="size-5 text-emerald-400" />
-                    ) : sec.isActive ? (
-                      <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: '4px solid #10b981', background: '#18181b' }} />
-                    ) : (
-                      <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px dashed #52525b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#52525b' }} />
-                      </div>
-                    )}
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.92rem', color: sec.isActive ? '#ffffff' : (sec.isCompleted ? '#e4e4e7' : '#71717a') }}>
-                        {sec.step}. {sec.name}
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: '#a1a1aa', marginTop: '2px' }}>
-                        {sec.isCompleted ? (
-                          <span style={{ color: '#10b981' }}>Completed • {sec.answeredCount} / {sec.totalQuestions} questions attempted</span>
-                        ) : sec.isActive ? (
-                          <span style={{ color: '#60a5fa' }}>Currently In Progress</span>
-                        ) : (
-                          <span style={{ color: '#71717a' }}>Upcoming Section (Locked)</span>
-                        )}
-                      </div>
-                    </div>
+                    justifyContent: 'center'
+                  }}>
+                    <Layers className="size-5 text-emerald-400" />
                   </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>DSA Sheet Navigator</h2>
+                      <span style={{
+                        padding: '2px 8px',
+                        borderRadius: '6px',
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#10b981',
+                        fontSize: '0.75rem',
+                        fontWeight: 700
+                      }}>
+                        {problemList.length} Problems
+                      </span>
+                    </div>
+                    <p style={{ margin: '2px 0 0 0', fontSize: '0.82rem', color: '#a1a1aa' }}>
+                      Search and switch to any DSA challenge instantly across all patterns
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowSectionModal(false)}
+                  style={{
+                    background: '#27272a',
+                    border: '1px solid #3f3f46',
+                    borderRadius: '8px',
+                    color: '#a1a1aa',
+                    cursor: 'pointer',
+                    padding: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title="Close (Esc)"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
 
-                  <span
+              {/* Search Bar */}
+              <div style={{ position: 'relative', marginBottom: '12px' }}>
+                <Search className="size-4 text-zinc-400" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <input
+                  type="text"
+                  value={problemSearchQuery}
+                  onChange={(e) => setProblemSearchQuery(e.target.value)}
+                  placeholder="Search 260 problems by name, pattern (e.g. 'Sliding Window', 'Two Sum'), or tag..."
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px 10px 38px',
+                    background: '#121214',
+                    border: '1px solid #27272a',
+                    borderRadius: '8px',
+                    color: '#f4f4f5',
+                    fontSize: '0.88rem',
+                    outline: 'none',
+                    fontFamily: 'inherit'
+                  }}
+                  autoFocus
+                />
+                {problemSearchQuery && (
+                  <button
+                    onClick={() => setProblemSearchQuery('')}
                     style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      padding: '3px 8px',
-                      borderRadius: '6px',
-                      background: sec.isCompleted ? 'rgba(16, 185, 129, 0.15)' : (sec.isActive ? 'rgba(96, 165, 250, 0.15)' : '#27272a'),
-                      color: sec.isCompleted ? '#10b981' : (sec.isActive ? '#60a5fa' : '#71717a')
+                      position: 'absolute',
+                      right: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#71717a',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem'
                     }}
                   >
-                    {sec.isCompleted ? 'Completed' : (sec.isActive ? 'Active' : 'Locked')}
-                  </span>
-                </div>
-              ))}
-            </div>
+                    <X className="size-4" />
+                  </button>
+                )}
+              </div>
 
-            <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setShowSectionModal(false)}
-                style={{
-                  padding: '8px 18px',
-                  borderRadius: '8px',
-                  background: '#27272a',
-                  border: '1px solid #3f3f46',
-                  color: '#f4f4f5',
-                  fontWeight: 600,
-                  fontSize: '0.86rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Close
-              </button>
+              {/* Filter Controls */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                {/* Difficulty Filters */}
+                <div style={{ display: 'flex', gap: '4px', background: '#121214', padding: '3px', borderRadius: '8px', border: '1px solid #27272a' }}>
+                  {['ALL', 'Easy', 'Medium', 'Hard'].map((diff) => (
+                    <button
+                      key={diff}
+                      onClick={() => setSelectedDifficultyFilter(diff)}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: selectedDifficultyFilter === diff ? '#27272a' : 'transparent',
+                        color: selectedDifficultyFilter === diff
+                          ? (diff === 'Easy' ? '#10b981' : diff === 'Medium' ? '#f59e0b' : diff === 'Hard' ? '#ef4444' : '#f4f4f5')
+                          : '#71717a',
+                        fontWeight: 600,
+                        fontSize: '0.76rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {diff}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Status Filters */}
+                <div style={{ display: 'flex', gap: '4px', background: '#121214', padding: '3px', borderRadius: '8px', border: '1px solid #27272a' }}>
+                  {[
+                    { id: 'ALL', label: 'All Status' },
+                    { id: 'SOLVED', label: '✓ Solved' },
+                    { id: 'UNSOLVED', label: '○ Unsolved' }
+                  ].map((st) => (
+                    <button
+                      key={st.id}
+                      onClick={() => setSelectedStatusFilter(st.id)}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: selectedStatusFilter === st.id ? '#27272a' : 'transparent',
+                        color: selectedStatusFilter === st.id ? '#10b981' : '#71717a',
+                        fontWeight: 600,
+                        fontSize: '0.76rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Pattern Dropdown */}
+                {patternList.length > 0 && (
+                  <select
+                    value={selectedPatternFilter}
+                    onChange={(e) => setSelectedPatternFilter(e.target.value)}
+                    style={{
+                      background: '#121214',
+                      border: '1px solid #27272a',
+                      color: selectedPatternFilter === 'ALL' ? '#a1a1aa' : '#10b981',
+                      padding: '5px 10px',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      outline: 'none',
+                      cursor: 'pointer',
+                      maxWidth: '200px'
+                    }}
+                  >
+                    <option value="ALL">All Patterns ({patternList.length})</option>
+                    {patternList.map((pat) => (
+                      <option key={pat} value={pat}>{pat}</option>
+                    ))}
+                  </select>
+                )}
+
+                <span style={{ marginLeft: 'auto', fontSize: '0.76rem', color: '#71717a' }}>
+                  Showing <strong style={{ color: '#f4f4f5' }}>{filteredProblems.length}</strong> of {problemList.length}
+                </span>
+              </div>
+
+              {/* Scrollable Problem List */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px',
+                paddingRight: '4px',
+                minHeight: '260px'
+              }}>
+                {filteredProblems.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px 20px', color: '#71717a' }}>
+                    <p style={{ fontSize: '0.92rem', fontWeight: 600, marginBottom: '6px' }}>No problems match your search</p>
+                    <p style={{ fontSize: '0.8rem', margin: 0 }}>Try clearing the search query or changing filters.</p>
+                    <button
+                      onClick={() => {
+                        setProblemSearchQuery('');
+                        setSelectedDifficultyFilter('ALL');
+                        setSelectedPatternFilter('ALL');
+                        setSelectedStatusFilter('ALL');
+                      }}
+                      style={{
+                        marginTop: '12px',
+                        padding: '6px 14px',
+                        borderRadius: '6px',
+                        background: '#27272a',
+                        border: '1px solid #3f3f46',
+                        color: '#f4f4f5',
+                        fontSize: '0.78rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Reset All Filters
+                    </button>
+                  </div>
+                ) : (
+                  filteredProblems.map((p, idx) => {
+                    const isCurrent = p.id === question?.id;
+                    const isSolved = Boolean(completedProblemIds[p.id]);
+                    const diffColors = {
+                      Easy: { bg: 'rgba(16, 185, 129, 0.12)', text: '#10b981', border: 'rgba(16, 185, 129, 0.25)' },
+                      Medium: { bg: 'rgba(245, 158, 11, 0.12)', text: '#f59e0b', border: 'rgba(245, 158, 11, 0.25)' },
+                      Hard: { bg: 'rgba(239, 68, 68, 0.12)', text: '#ef4444', border: 'rgba(239, 68, 68, 0.25)' }
+                    };
+                    const dc = diffColors[p.level] || diffColors.Medium;
+
+                    return (
+                      <div
+                        key={p.id || idx}
+                        onClick={() => {
+                          if (onSelectProblem) onSelectProblem(p);
+                          setShowSectionModal(false);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '10px 14px',
+                          borderRadius: '10px',
+                          background: isCurrent ? 'rgba(16, 185, 129, 0.12)' : '#141416',
+                          border: '1px solid',
+                          borderColor: isCurrent ? '#10b981' : '#27272a',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isCurrent) {
+                            e.currentTarget.style.background = '#1f1f23';
+                            e.currentTarget.style.borderColor = '#3f3f46';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isCurrent) {
+                            e.currentTarget.style.background = '#141416';
+                            e.currentTarget.style.borderColor = '#27272a';
+                          }
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                          {isSolved ? (
+                            <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
+                          ) : (
+                            <div style={{
+                              width: '16px',
+                              height: '16px',
+                              borderRadius: '50%',
+                              border: '2px solid #52525b',
+                              background: 'transparent',
+                              flexShrink: 0
+                            }} />
+                          )}
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{
+                                fontWeight: 700,
+                                fontSize: '0.88rem',
+                                color: isCurrent ? '#10b981' : (isSolved ? '#e4e4e7' : '#f4f4f5')
+                              }}>
+                                {p.name}
+                              </span>
+                              {isCurrent && (
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  padding: '1px 6px',
+                                  borderRadius: '4px',
+                                  background: 'rgba(16, 185, 129, 0.2)',
+                                  color: '#10b981',
+                                  fontWeight: 700
+                                }}>
+                                  Current
+                                </span>
+                              )}
+                            </div>
+                            {p.patternName && (
+                              <div style={{ fontSize: '0.74rem', color: '#71717a', marginTop: '1px' }}>
+                                {p.patternName}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', shrink: 0 }}>
+                          <span style={{
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            background: dc.bg,
+                            color: dc.text,
+                            border: `1px solid ${dc.border}`
+                          }}>
+                            {p.level}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div
+              style={{
+                maxWidth: '560px',
+                width: '100%',
+                background: '#18181b',
+                border: '1px solid #27272a',
+                borderRadius: '16px',
+                padding: '24px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+                color: '#f4f4f5'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Layers className="size-5 text-emerald-400" />
+                  <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800 }}>Assessment Section Progress</h2>
+                </div>
+                <button
+                  onClick={() => setShowSectionModal(false)}
+                  style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', padding: '4px' }}
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
+
+              <p style={{ margin: '0 0 20px 0', fontSize: '0.86rem', color: '#a1a1aa', lineHeight: 1.5 }}>
+                Track your completed question attempts in previous sections, your current active section, and upcoming sections.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {(sectionsOverview || []).map((sec) => (
+                  <div
+                    key={sec.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px 16px',
+                      borderRadius: '12px',
+                      background: sec.isActive ? 'rgba(16, 185, 129, 0.08)' : '#141416',
+                      border: '1px solid',
+                      borderColor: sec.isActive ? '#10b981' : (sec.isCompleted ? '#27272a' : '#27272a')
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      {sec.isCompleted ? (
+                        <CheckCircle2 className="size-5 text-emerald-400" />
+                      ) : sec.isActive ? (
+                        <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: '4px solid #10b981', background: '#18181b' }} />
+                      ) : (
+                        <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px dashed #52525b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#52525b' }} />
+                        </div>
+                      )}
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.92rem', color: sec.isActive ? '#ffffff' : (sec.isCompleted ? '#e4e4e7' : '#71717a') }}>
+                          {sec.step}. {sec.name}
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#a1a1aa', marginTop: '2px' }}>
+                          {sec.isCompleted ? (
+                            <span style={{ color: '#10b981' }}>Completed • {sec.answeredCount} / {sec.totalQuestions} questions attempted</span>
+                          ) : sec.isActive ? (
+                            <span style={{ color: '#60a5fa' }}>Currently In Progress</span>
+                          ) : (
+                            <span style={{ color: '#71717a' }}>Upcoming Section (Locked)</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <span
+                      style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        background: sec.isCompleted ? 'rgba(16, 185, 129, 0.15)' : (sec.isActive ? 'rgba(96, 165, 250, 0.15)' : '#27272a'),
+                        color: sec.isCompleted ? '#10b981' : (sec.isActive ? '#60a5fa' : '#71717a')
+                      }}
+                    >
+                      {sec.isCompleted ? 'Completed' : (sec.isActive ? 'Active' : 'Locked')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={() => setShowSectionModal(false)}
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: '8px',
+                    background: '#27272a',
+                    border: '1px solid #3f3f46',
+                    color: '#f4f4f5',
+                    fontWeight: 600,
+                    fontSize: '0.86rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
