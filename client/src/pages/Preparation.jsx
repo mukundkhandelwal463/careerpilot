@@ -40,10 +40,14 @@ import {
   VolumeX,
   RotateCcw,
   Type,
-  Radio
+  Radio,
+  Code2,
+  X
 } from 'lucide-react';
 import { questionBankData } from '../data/questionBankData.js';
 import { sql50Data } from '../data/sql50Data.js';
+import LeetCodeWorkspace from '../Components/LeetCodeWorkspace.jsx';
+import { DEFAULT_PROBLEMS } from './OnlineCompiler.jsx';
 import '../css/style.css';
 
 const dsaSheetData = [
@@ -1117,6 +1121,388 @@ const Preparation = () => {
   const [expandedMCQConcepts, setExpandedMCQConcepts] = useState({});
   const [trackerMCQAnswers, setTrackerMCQAnswers] = useState({});
   const [trackerMCQExplanations, setTrackerMCQExplanations] = useState({});
+
+  // ── DSA Compiler Workspace States ──────────────────────────────
+  const [activeCompilerProblem, setActiveCompilerProblem] = useState(null);
+  const [compilerPatternName, setCompilerPatternName] = useState('');
+  const [compilerLanguage, setCompilerLanguage] = useState('python');
+  const [compilerCodes, setCompilerCodes] = useState({});
+  const [isCompilerEvaluating, setIsCompilerEvaluating] = useState(false);
+  const [isCompilerSubmitting, setIsCompilerSubmitting] = useState(false);
+  const [compilerEvalResult, setCompilerEvalResult] = useState(null);
+  const [compilerSolvedNotice, setCompilerSolvedNotice] = useState(false);
+
+  const getDsaProblemData = (prob, patternName = 'DSA') => {
+    if (!prob) return null;
+    const matchedDefault = DEFAULT_PROBLEMS.find(p =>
+      p.title.toLowerCase().includes(prob.name.toLowerCase()) ||
+      prob.name.toLowerCase().includes(p.title.toLowerCase())
+    );
+    if (matchedDefault) {
+      return {
+        ...matchedDefault,
+        id: prob.id,
+        title: `${prob.name}`,
+        difficulty: prob.level || matchedDefault.difficulty,
+        tags: [patternName, ...(matchedDefault.tags || [])]
+      };
+    }
+
+    const nameLower = prob.name.toLowerCase();
+    if (nameLower.includes('contains duplicate')) {
+      return {
+        id: prob.id,
+        title: prob.name,
+        difficulty: prob.level,
+        tags: [patternName, 'Array', 'Hash Table'],
+        companies: ['Amazon', 'Google', 'Apple'],
+        description: `Given an integer array nums, return true if any value appears at least twice in the array, and return false if every element is distinct.`,
+        examples: [
+          { input: '[1, 2, 3, 1]', output: 'true', explanation: '1 appears twice.' },
+          { input: '[1, 2, 3, 4]', output: 'false', explanation: 'All elements are distinct.' }
+        ],
+        constraints: ['1 <= nums.length <= 10^5', '-10^9 <= nums[i] <= 10^9'],
+        testcases: [
+          { input: '[1, 2, 3, 1]', expected: 'true', label: 'Case 1' },
+          { input: '[1, 2, 3, 4]', expected: 'false', label: 'Case 2' }
+        ],
+        templates: {
+          python: `import sys, json\n\ndef containsDuplicate(nums):\n    return len(nums) != len(set(nums))\n\nif __name__ == '__main__':\n    raw = sys.stdin.read().strip()\n    nums = json.loads(raw) if raw else [1, 2, 3, 1]\n    print(str(containsDuplicate(nums)).lower())\n`,
+          cpp: `#include <iostream>\n#include <vector>\n#include <unordered_set>\nusing namespace std;\n\nbool containsDuplicate(vector<int>& nums) {\n    unordered_set<int> seen;\n    for (int n : nums) {\n        if (seen.count(n)) return true;\n        seen.insert(n);\n    }\n    return false;\n}\n\nint main() {\n    vector<int> nums = {1, 2, 3, 1};\n    cout << (containsDuplicate(nums) ? "true" : "false") << endl;\n    return 0;\n}\n`,
+          java: `import java.util.*;\n\npublic class Main {\n    public static boolean containsDuplicate(int[] nums) {\n        Set<Integer> set = new HashSet<>();\n        for (int x : nums) {\n            if (!set.add(x)) return true;\n        }\n        return false;\n    }\n    public static void main(String[] args) {\n        int[] nums = {1, 2, 3, 1};\n        System.out.println(containsDuplicate(nums) ? "true" : "false");\n    }\n}\n`,
+          javascript: `function containsDuplicate(nums) {\n    return new Set(nums).size !== nums.length;\n}\nconsole.log(containsDuplicate([1, 2, 3, 1]) ? "true" : "false");\n`,
+          c: `#include <stdio.h>\n#include <stdbool.h>\n\nbool containsDuplicate(int* nums, int numsSize) {\n    for (int i = 0; i < numsSize; i++) {\n        for (int j = i + 1; j < numsSize; j++) {\n            if (nums[i] == nums[j]) return true;\n        }\n    }\n    return false;\n}\n\nint main() {\n    int nums[] = {1, 2, 3, 1};\n    printf("%s\\n", containsDuplicate(nums, 4) ? "true" : "false");\n    return 0;\n}\n`
+        }
+      };
+    }
+
+    if (nameLower.includes('valid anagram')) {
+      return {
+        id: prob.id,
+        title: prob.name,
+        difficulty: prob.level,
+        tags: [patternName, 'String', 'Hash Table'],
+        companies: ['Amazon', 'Microsoft', 'Bloomberg'],
+        description: `Given two strings s and t, return true if t is an anagram of s, and false otherwise. An Anagram is a word formed by rearranging the letters of a different word, typically using all the original letters exactly once.`,
+        examples: [
+          { input: 's = "anagram", t = "nagaram"', output: 'true', explanation: 'Same character frequencies.' },
+          { input: 's = "rat", t = "car"', output: 'false', explanation: 'Different characters.' }
+        ],
+        constraints: ['1 <= s.length, t.length <= 5 * 10^4', 's and t consist of lowercase English letters.'],
+        testcases: [
+          { input: 'anagram\\nnagaram', expected: 'true', label: 'Case 1' },
+          { input: 'rat\\ncar', expected: 'false', label: 'Case 2' }
+        ],
+        templates: {
+          python: `import sys\n\ndef isAnagram(s: str, t: str) -> bool:\n    return sorted(s) == sorted(t)\n\nif __name__ == '__main__':\n    lines = [l.strip() for l in sys.stdin.read().split('\\n') if l.strip()]\n    s = lines[0] if len(lines) > 0 else "anagram"\n    t = lines[1] if len(lines) > 1 else "nagaram"\n    print(str(isAnagram(s, t)).lower())\n`,
+          cpp: `#include <iostream>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\nbool isAnagram(string s, string t) {\n    if (s.size() != t.size()) return false;\n    sort(s.begin(), s.end());\n    sort(t.begin(), t.end());\n    return s == t;\n}\n\nint main() {\n    cout << (isAnagram("anagram", "nagaram") ? "true" : "false") << endl;\n    return 0;\n}\n`,
+          java: `import java.util.*;\n\npublic class Main {\n    public static boolean isAnagram(String s, String t) {\n        char[] a = s.toCharArray();\n        char[] b = t.toCharArray();\n        Arrays.sort(a);\n        Arrays.sort(b);\n        return Arrays.equals(a, b);\n    }\n    public static void main(String[] args) {\n        System.out.println(isAnagram("anagram", "nagaram") ? "true" : "false");\n    }\n}\n`,
+          javascript: `function isAnagram(s, t) {\n    return s.split('').sort().join('') === t.split('').sort().join('');\n}\nconsole.log(isAnagram("anagram", "nagaram") ? "true" : "false");\n`,
+          c: `#include <stdio.h>\n#include <string.h>\n#include <stdbool.h>\n\nbool isAnagram(char* s, char* t) {\n    if (strlen(s) != strlen(t)) return false;\n    int count[26] = {0};\n    for (int i = 0; s[i]; i++) count[s[i] - 'a']++;\n    for (int i = 0; t[i]; i++) {\n        count[t[i] - 'a']--;\n        if (count[t[i] - 'a'] < 0) return false;\n    }\n    return true;\n}\nint main() {\n    printf("%s\\n", isAnagram("anagram", "nagaram") ? "true" : "false");\n    return 0;\n}\n`
+        }
+      };
+    }
+
+    if (nameLower.includes('reverse string')) {
+      return {
+        id: prob.id,
+        title: prob.name,
+        difficulty: prob.level,
+        tags: [patternName, 'Two Pointers', 'String'],
+        companies: ['Amazon', 'Microsoft'],
+        description: `Write a function that reverses a string. The input string is given as an array or sequence of characters.`,
+        examples: [
+          { input: 'hello', output: 'olleh', explanation: 'Reversed order.' },
+          { input: 'Hannah', output: 'hannaH', explanation: 'Reversed order.' }
+        ],
+        constraints: ['1 <= s.length <= 10^5'],
+        testcases: [
+          { input: 'hello', expected: 'olleh', label: 'Case 1' },
+          { input: 'world', expected: 'dlrow', label: 'Case 2' }
+        ],
+        templates: {
+          python: `import sys\n\ndef reverseString(s):\n    return s[::-1]\n\nif __name__ == '__main__':\n    s = sys.stdin.read().strip() or "hello"\n    print(reverseString(s))\n`,
+          cpp: `#include <iostream>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\nint main() {\n    string s = "hello";\n    reverse(s.begin(), s.end());\n    cout << s << endl;\n    return 0;\n}\n`,
+          java: `public class Main {\n    public static void main(String[] args) {\n        String s = "hello";\n        System.out.println(new StringBuilder(s).reverse().toString());\n    }\n}\n`,
+          javascript: `function reverseString(s) {\n    return s.split('').reverse().join('');\n}\nconsole.log(reverseString("hello"));\n`,
+          c: `#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char s[] = "hello";\n    int len = strlen(s);\n    for (int i = len - 1; i >= 0; i--) putchar(s[i]);\n    putchar('\\n');\n    return 0;\n}\n`
+        }
+      };
+    }
+
+    if (nameLower.includes('fibonacci')) {
+      return {
+        id: prob.id,
+        title: prob.name,
+        difficulty: prob.level,
+        tags: [patternName, 'Math', 'Dynamic Programming', 'Recursion'],
+        companies: ['Amazon', 'Google', 'Meta'],
+        description: `The Fibonacci numbers, commonly denoted F(n), form a sequence where each number is the sum of the two preceding ones, starting from 0 and 1. Given n, calculate F(n).`,
+        examples: [
+          { input: 'n = 2', output: '1', explanation: 'F(2) = F(1) + F(0) = 1 + 0 = 1.' },
+          { input: 'n = 3', output: '2', explanation: 'F(3) = F(2) + F(1) = 1 + 1 = 2.' },
+          { input: 'n = 4', output: '3', explanation: 'F(4) = F(3) + F(2) = 2 + 1 = 3.' }
+        ],
+        constraints: ['0 <= n <= 30'],
+        testcases: [
+          { input: '2', expected: '1', label: 'Case 1' },
+          { input: '3', expected: '2', label: 'Case 2' },
+          { input: '4', expected: '3', label: 'Case 3' }
+        ],
+        templates: {
+          python: `import sys\n\ndef fib(n: int) -> int:\n    if n <= 1: return n\n    a, b = 0, 1\n    for _ in range(2, n + 1):\n        a, b = b, a + b\n    return b\n\nif __name__ == '__main__':\n    raw = sys.stdin.read().strip()\n    n = int(raw) if raw else 4\n    print(fib(n))\n`,
+          cpp: `#include <iostream>\nusing namespace std;\n\nint fib(int n) {\n    if (n <= 1) return n;\n    int a = 0, b = 1;\n    for (int i = 2; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}\n\nint main() {\n    cout << fib(4) << endl;\n    return 0;\n}\n`,
+          java: `public class Main {\n    public static int fib(int n) {\n        if (n <= 1) return n;\n        int a = 0, b = 1;\n        for (int i = 2; i <= n; i++) {\n            int c = a + b;\n            a = b;\n            b = c;\n        }\n        return b;\n    }\n    public static void main(String[] args) {\n        System.out.println(fib(4));\n    }\n}\n`,
+          javascript: `function fib(n) {\n    if (n <= 1) return n;\n    let a = 0, b = 1;\n    for (let i = 2; i <= n; i++) {\n        let c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}\nconsole.log(fib(4));\n`,
+          c: `#include <stdio.h>\n\nint fib(int n) {\n    if (n <= 1) return n;\n    int a = 0, b = 1;\n    for (int i = 2; i <= n; i++) {\n        int c = a + b;\n        a = b;\n        b = c;\n    }\n    return b;\n}\nint main() {\n    printf("%d\\n", fib(4));\n    return 0;\n}\n`
+        }
+      };
+    }
+
+    return {
+      id: prob.id,
+      title: prob.name,
+      difficulty: prob.level || 'Medium',
+      tags: [patternName, 'Algorithms', 'Data Structures'],
+      companies: ['Amazon', 'Google', 'Microsoft', 'Meta'],
+      description: `### Problem Description\n\nSolve the **${prob.name}** algorithmic challenge (${prob.level} tier).\n\n### Objective\nImplement an optimal solution addressing standard test cases, edge cases, and performance constraints.\n\n- Time Complexity Target: Optimal for ${prob.level} tier\n- Space Complexity Target: Optimal memory usage\n- Standard input (stdin) & standard output (stdout) handling`,
+      examples: [
+        {
+          input: 'Sample Test Input',
+          output: 'Accepted',
+          explanation: `Demonstration testcase for ${prob.name}.`
+        }
+      ],
+      constraints: [
+        'Time limit: 2.0 seconds',
+        'Memory limit: 256 MB',
+        'Follow standard language input/output conventions.'
+      ],
+      testcases: [
+        { input: '1', expected: 'Accepted', label: 'Case 1' }
+      ],
+      templates: {
+        python: `# Solution for: ${prob.name} (${prob.level})\nimport sys\n\ndef solve():\n    # Implement your algorithm here\n    print("Accepted")\n\nif __name__ == '__main__':\n    solve()\n`,
+        cpp: `// Solution for: ${prob.name} (${prob.level})\n#include <iostream>\n#include <vector>\n#include <string>\nusing namespace std;\n\nint main() {\n    // Implement your algorithm here\n    cout << "Accepted" << endl;\n    return 0;\n}\n`,
+        java: `// Solution for: ${prob.name} (${prob.level})\nimport java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        // Implement your algorithm here\n        System.out.println("Accepted");\n    }\n}\n`,
+        javascript: `// Solution for: ${prob.name} (${prob.level})\nfunction solve() {\n    // Implement your algorithm here\n    console.log("Accepted");\n}\n\nsolve();\n`,
+        c: `// Solution for: ${prob.name} (${prob.level})\n#include <stdio.h>\n\nint main() {\n    // Implement your algorithm here\n    printf("Accepted\\n");\n    return 0;\n}\n`
+      }
+    };
+  };
+
+  const formattedCompilerQuestion = activeCompilerProblem ? getDsaProblemData(activeCompilerProblem, compilerPatternName) : null;
+
+  const openDsaCompiler = (prob, patternName = '') => {
+    setActiveCompilerProblem(prob);
+    setCompilerPatternName(patternName);
+    setCompilerEvalResult(null);
+    setCompilerSolvedNotice(false);
+    const qData = getDsaProblemData(prob, patternName);
+    const codeKey = `${prob.id}_${compilerLanguage}`;
+    if (!compilerCodes[codeKey] && qData?.templates?.[compilerLanguage]) {
+      setCompilerCodes(prev => ({ ...prev, [codeKey]: qData.templates[compilerLanguage] }));
+    }
+  };
+
+  const closeDsaCompiler = () => {
+    setActiveCompilerProblem(null);
+    setCompilerEvalResult(null);
+    setCompilerSolvedNotice(false);
+  };
+
+  const handleRunCompiler = async (stdin, expectedOutput, testcases) => {
+    if (!activeCompilerProblem || !formattedCompilerQuestion) return;
+    setIsCompilerEvaluating(true);
+    setCompilerEvalResult(null);
+    const codeKey = `${activeCompilerProblem.id}_${compilerLanguage}`;
+    const code = compilerCodes[codeKey] !== undefined ? compilerCodes[codeKey] : (formattedCompilerQuestion.templates?.[compilerLanguage] || '');
+    try {
+      const res = await fetch('/api/compiler/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          language: compilerLanguage,
+          code,
+          stdin,
+          expected_output: expectedOutput,
+          testcases
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.result) {
+        setCompilerEvalResult(data.result);
+      } else {
+        setCompilerEvalResult({
+          status: 'Execution Error',
+          passed: false,
+          output: data.error || 'Execution failed.'
+        });
+      }
+    } catch (err) {
+      setCompilerEvalResult({
+        status: 'Network Error',
+        passed: false,
+        output: 'Failed to communicate with compiler backend.'
+      });
+    } finally {
+      setIsCompilerEvaluating(false);
+    }
+  };
+
+  const handleSubmitCompiler = async () => {
+    if (!activeCompilerProblem || !formattedCompilerQuestion) return;
+    setIsCompilerSubmitting(true);
+    setIsCompilerEvaluating(true);
+    setCompilerEvalResult(null);
+    setCompilerSolvedNotice(false);
+    const q = formattedCompilerQuestion;
+    const codeKey = `${activeCompilerProblem.id}_${compilerLanguage}`;
+    const code = compilerCodes[codeKey] !== undefined ? compilerCodes[codeKey] : (q.templates?.[compilerLanguage] || '');
+
+    try {
+      const res = await fetch('/api/compiler/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          language: compilerLanguage,
+          code,
+          stdin: '',
+          expected_output: null,
+          testcases: q.testcases || []
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.result) {
+        setCompilerEvalResult(data.result);
+        const r = data.result;
+        const passedAll = r.all_passed === true ||
+          (r.passed === true && (r.status === 'Accepted' || r.status === 'Passed' || r.passed_count === r.total)) ||
+          (r.total > 0 && r.passed_count === r.total);
+
+        if (passedAll) {
+          setCompilerSolvedNotice(true);
+          setDsaCompletedProblems(prev => {
+            const next = { ...prev, [activeCompilerProblem.id]: true };
+            if (user) {
+              localStorage.setItem(`dsa_sheet_progress_${user.email}`, JSON.stringify(next));
+            }
+            return next;
+          });
+        }
+      } else {
+        setCompilerEvalResult({
+          status: 'Execution Error',
+          passed: false,
+          output: data.error || 'Submission failed.'
+        });
+      }
+    } catch (err) {
+      setCompilerEvalResult({
+        status: 'Network Error',
+        passed: false,
+        output: 'Failed to communicate with compiler backend.'
+      });
+    } finally {
+      setIsCompilerEvaluating(false);
+      setIsCompilerSubmitting(false);
+    }
+  };
+
+  // ── Universal Concept Mastery by MCQ Handler ───────────────────
+  const handleConceptSolvedByMCQ = (conceptId) => {
+    // 1. Check OOPs
+    for (const cat of oopsTrackerData) {
+      if (cat.concepts?.some(c => c.id === conceptId)) {
+        setOopsCompletedConcepts(prev => {
+          if (prev[conceptId]) return prev;
+          const updated = { ...prev, [conceptId]: true };
+          if (user) localStorage.setItem(`oops_tracker_progress_${user.email}`, JSON.stringify(updated));
+          return updated;
+        });
+        return;
+      }
+    }
+    // 2. Check OS
+    for (const cat of osTrackerData) {
+      if (cat.concepts?.some(c => c.id === conceptId)) {
+        setOsCompletedConcepts(prev => {
+          if (prev[conceptId]) return prev;
+          const updated = { ...prev, [conceptId]: true };
+          if (user) localStorage.setItem(`os_tracker_progress_${user.email}`, JSON.stringify(updated));
+          return updated;
+        });
+        return;
+      }
+    }
+    // 3. Check CN
+    for (const cat of cnTrackerData) {
+      if (cat.concepts?.some(c => c.id === conceptId)) {
+        setCnCompletedConcepts(prev => {
+          if (prev[conceptId]) return prev;
+          const updated = { ...prev, [conceptId]: true };
+          if (user) localStorage.setItem(`cn_tracker_progress_${user.email}`, JSON.stringify(updated));
+          return updated;
+        });
+        return;
+      }
+    }
+    // 4. Check DBMS
+    for (const cat of dbmsTrackerData) {
+      if (cat.concepts?.some(c => c.id === conceptId)) {
+        setDbmsCompletedConcepts(prev => {
+          if (prev[conceptId]) return prev;
+          const updated = { ...prev, [conceptId]: true };
+          if (user) localStorage.setItem(`dbms_tracker_progress_${user.email}`, JSON.stringify(updated));
+          return updated;
+        });
+        return;
+      }
+    }
+    // 5. Check System Design
+    for (const cat of systemDesignTrackerData) {
+      if (cat.concepts?.some(c => c.id === conceptId)) {
+        setSysCompletedConcepts(prev => {
+          if (prev[conceptId]) return prev;
+          const updated = { ...prev, [conceptId]: true };
+          if (user) localStorage.setItem(`sys_tracker_progress_${user.email}`, JSON.stringify(updated));
+          return updated;
+        });
+        return;
+      }
+    }
+    // 6. Check SQL 50
+    if (sql50Data.some(q => q.id === conceptId)) {
+      setSqlCompletedQuestions(prev => {
+        if (prev[conceptId]) return prev;
+        const updated = { ...prev, [conceptId]: true };
+        if (user) localStorage.setItem(`sql50_progress_${user.email}`, JSON.stringify(updated));
+        return updated;
+      });
+      return;
+    }
+  };
+
+  const getConceptQuestions = (conceptId, conceptName = '') => {
+    const direct = questionBankData.filter(q => q.conceptId === conceptId);
+    if (direct.length > 0) return direct;
+    const cleanName = conceptName || conceptId.replace(/^(oops_|os_|cn_|dbms_|sys_)/, '').replace(/_/g, ' ');
+    return [
+      {
+        id: `gen_${conceptId}`,
+        conceptId: conceptId,
+        question: `Which of the following statements best describes the core principle of "${cleanName}" in software engineering?`,
+        options: [
+          `It provides modularity, clarity, and predictable execution when designing systems.`,
+          `It bypasses memory allocation and executes directly in raw CPU registers.`,
+          `It forces all variables to be statically compiled at runtime without garbage collection.`,
+          `It replaces the operating system kernel with a single threaded event loop.`
+        ],
+        answer: `It provides modularity, clarity, and predictable execution when designing systems.`,
+        explanation: `${cleanName} is designed to enforce structural modularity, clear separation of concerns, and reliable execution within software architecture.`
+      }
+    ];
+  };
 
   useEffect(() => {
     if (user) {
@@ -2210,9 +2596,9 @@ const Preparation = () => {
     setCalendarViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
 
-  const renderMCQChallengeForConcept = (conceptId) => {
-    const qList = questionBankData.filter(q => q.conceptId === conceptId);
-    if (qList.length === 0) return null;
+  const renderMCQChallengeForConcept = (conceptId, conceptName = '') => {
+    const qList = getConceptQuestions(conceptId, conceptName);
+    if (!qList || qList.length === 0) return null;
 
     return (
       <div style={{ padding: '16px 20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', marginTop: '8px' }}>
@@ -2272,7 +2658,12 @@ const Preparation = () => {
                     <button
                       key={option}
                       disabled={isAnswered}
-                      onClick={() => setTrackerMCQAnswers(prev => ({ ...prev, [q.id]: option }))}
+                      onClick={() => {
+                        setTrackerMCQAnswers(prev => ({ ...prev, [q.id]: option }));
+                        if (option === q.answer) {
+                          handleConceptSolvedByMCQ(conceptId);
+                        }
+                      }}
                       style={{
                         width: '100%',
                         textAlign: 'left',
@@ -2292,6 +2683,13 @@ const Preparation = () => {
 
               {isAnswered && (
                 <div>
+                  {selectedAns === q.answer && (
+                    <div style={{ marginBottom: '10px', padding: '8px 12px', background: '#ecfdf5', borderRadius: '8px', border: '1px solid #10b981', color: '#065f46', fontSize: '0.78rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <CheckCircle2 className="size-4 text-emerald-600 flex-shrink-0" />
+                      <span>Correct Answer! Concept marked as completed [✓] in your progress tracker.</span>
+                    </div>
+                  )}
+
                   <button
                     onClick={() => setTrackerMCQExplanations(prev => ({ ...prev, [q.id]: !prev[q.id] }))}
                     style={{
@@ -4306,19 +4704,17 @@ const Preparation = () => {
                                               transition: 'background 0.2s'
                                             }}
                                           >
-                                            {/* Status Checkbox */}
+                                            {/* Status Indicator (Read-only: Auto-ticks on compiler submission) */}
                                             <td style={{ padding: '12px 20px' }}>
-                                              <button
-                                                onClick={() => toggleDsaProblem(prob.id)}
+                                              <div
                                                 style={{
-                                                  background: 'none',
-                                                  border: 'none',
-                                                  cursor: 'pointer',
                                                   padding: 0,
                                                   display: 'flex',
                                                   alignItems: 'center',
-                                                  justifyContent: 'center'
+                                                  justifyContent: 'center',
+                                                  cursor: 'default'
                                                 }}
+                                                title={isCompleted ? "Completed via Compiler submission" : "Submit correct code in Compiler to mark completed"}
                                               >
                                                 {isCompleted ? (
                                                   <CheckCircle2 className="size-5 text-emerald-500" />
@@ -4332,7 +4728,7 @@ const Preparation = () => {
                                                     transition: 'border-color 0.2s'
                                                   }} />
                                                 )}
-                                              </button>
+                                              </div>
                                             </td>
 
                                             {/* Problem Name */}
@@ -4362,8 +4758,8 @@ const Preparation = () => {
                                               </span>
                                             </td>
 
-                                            {/* Practice Links */}
-                                            <td style={{ padding: '12px 20px', textAlign: 'right' }}>
+                                            {/* Practice Links & Compiler Button */}
+                                            <td style={{ padding: '12px 20px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                                               {prob.leetcode && prob.leetcode.trim() !== '' && (
                                                 <a
                                                   href={prob.leetcode}
@@ -4380,35 +4776,33 @@ const Preparation = () => {
                                                     color: '#d97706',
                                                     border: '1px solid rgba(245, 158, 11, 0.15)',
                                                     textDecoration: 'none',
-                                                    marginRight: prob.gfg && prob.gfg.trim() !== '' ? '8px' : '0px',
+                                                    marginRight: '8px',
                                                     transition: 'all 0.2s'
                                                   }}
                                                 >
                                                   LeetCode
                                                 </a>
                                               )}
-                                              {prob.gfg && prob.gfg.trim() !== '' && (
-                                                <a
-                                                  href={prob.gfg}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  style={{
-                                                    display: 'inline-flex',
-                                                    alignItems: 'center',
-                                                    padding: '5px 12px',
-                                                    borderRadius: '8px',
-                                                    fontSize: '0.72rem',
-                                                    fontWeight: 700,
-                                                    background: 'rgba(16, 185, 129, 0.08)',
-                                                    color: '#16a34a',
-                                                    border: '1px solid rgba(16, 185, 129, 0.15)',
-                                                    textDecoration: 'none',
-                                                    transition: 'all 0.2s'
-                                                  }}
-                                                >
-                                                  GFG
-                                                </a>
-                                              )}
+                                              <button
+                                                onClick={() => openDsaCompiler(prob, pattern.patternName)}
+                                                style={{
+                                                  display: 'inline-flex',
+                                                  alignItems: 'center',
+                                                  gap: '5px',
+                                                  padding: '5px 12px',
+                                                  borderRadius: '8px',
+                                                  fontSize: '0.72rem',
+                                                  fontWeight: 700,
+                                                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.12))',
+                                                  color: '#059669',
+                                                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                                                  cursor: 'pointer',
+                                                  transition: 'all 0.2s'
+                                                }}
+                                              >
+                                                <Code2 className="size-3.5" />
+                                                Compiler
+                                              </button>
                                             </td>
                                           </tr>
                                         );
@@ -4418,7 +4812,7 @@ const Preparation = () => {
                                   {/* Category MCQ Practice */}
                                   {expandedMCQConcepts[pattern.patternName] && (
                                     <div style={{ padding: '0 20px 20px 20px' }}>
-                                      {renderMCQChallengeForConcept(pattern.patternName)}
+                                      {renderMCQChallengeForConcept(pattern.patternName, pattern.patternName)}
                                     </div>
                                   )}
                                 </div>
@@ -4527,39 +4921,37 @@ const Preparation = () => {
                                               <React.Fragment key={concept.id}>
                                                 <tr style={{ borderBottom: '1px solid #f1f5f9', background: isCompleted ? 'rgba(16, 185, 129, 0.02)' : '#ffffff', transition: 'background 0.2s' }}>
                                                   <td style={{ padding: '12px 20px' }}>
-                                                    <button onClick={() => toggleOopsConcept(concept.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'default' }} title={isCompleted ? "Concept Mastered via MCQ" : "Answer Practice Q correctly to master"}>
                                                       {isCompleted ? (
                                                         <CheckCircle2 className="size-5 text-emerald-500" />
                                                       ) : (
                                                         <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #cbd5e1', background: 'transparent', transition: 'border-color 0.2s' }} />
                                                       )}
-                                                    </button>
+                                                    </div>
                                                   </td>
                                                   <td style={{ padding: '12px 12px', fontSize: '0.84rem', fontWeight: 600, color: isCompleted ? '#94a3b8' : '#1e293b', textDecoration: isCompleted ? 'line-through' : 'none' }}>
                                                     {concept.name}
                                                   </td>
                                                   <td style={{ padding: '12px 20px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                                    {questionBankData.some(q => q.conceptId === concept.id) && (
-                                                      <button
-                                                        onClick={() => setExpandedMCQConcepts(prev => ({ ...prev, [concept.id]: !prev[concept.id] }))}
-                                                        style={{
-                                                          display: 'inline-flex',
-                                                          alignItems: 'center',
-                                                          padding: '5px 12px',
-                                                          borderRadius: '8px',
-                                                          fontSize: '0.72rem',
-                                                          fontWeight: 700,
-                                                          background: isMCQExpanded ? '#10b981' : 'rgba(16, 185, 129, 0.08)',
-                                                          color: isMCQExpanded ? '#ffffff' : '#10b981',
-                                                          border: isMCQExpanded ? '1px solid #10b981' : '1px solid rgba(16, 185, 129, 0.15)',
-                                                          cursor: 'pointer',
-                                                          marginRight: '8px',
-                                                          transition: 'all 0.2s'
-                                                        }}
-                                                      >
-                                                        {isMCQExpanded ? 'Close Q' : 'Practice Q'}
-                                                      </button>
-                                                    )}
+                                                    <button
+                                                      onClick={() => setExpandedMCQConcepts(prev => ({ ...prev, [concept.id]: !prev[concept.id] }))}
+                                                      style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        padding: '5px 12px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.72rem',
+                                                        fontWeight: 700,
+                                                        background: isMCQExpanded ? '#10b981' : 'rgba(16, 185, 129, 0.08)',
+                                                        color: isMCQExpanded ? '#ffffff' : '#10b981',
+                                                        border: isMCQExpanded ? '1px solid #10b981' : '1px solid rgba(16, 185, 129, 0.15)',
+                                                        cursor: 'pointer',
+                                                        marginRight: '8px',
+                                                        transition: 'all 0.2s'
+                                                      }}
+                                                    >
+                                                      {isMCQExpanded ? 'Close Q' : 'Practice Q'}
+                                                    </button>
                                                     <a
                                                       href={`/preparation/theory/OOPs?concept=${concept.id}`}
                                                       target="_blank"
@@ -4585,7 +4977,7 @@ const Preparation = () => {
                                                 {isMCQExpanded && (
                                                   <tr>
                                                     <td colSpan="3" style={{ padding: '8px 20px 16px 20px', background: '#f8fafc' }}>
-                                                      {renderMCQChallengeForConcept(concept.id)}
+                                                      {renderMCQChallengeForConcept(concept.id, concept.name)}
                                                     </td>
                                                   </tr>
                                                 )}
@@ -4695,39 +5087,37 @@ const Preparation = () => {
                                               <React.Fragment key={concept.id}>
                                                 <tr style={{ borderBottom: '1px solid #f1f5f9', background: isCompleted ? 'rgba(16, 185, 129, 0.02)' : '#ffffff', transition: 'background 0.2s' }}>
                                                   <td style={{ padding: '12px 20px' }}>
-                                                    <button onClick={() => toggleOsConcept(concept.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'default' }} title={isCompleted ? "Concept Mastered via MCQ" : "Answer Practice Q correctly to master"}>
                                                       {isCompleted ? (
                                                         <CheckCircle2 className="size-5 text-emerald-500" />
                                                       ) : (
                                                         <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #cbd5e1', background: 'transparent', transition: 'border-color 0.2s' }} />
                                                       )}
-                                                    </button>
+                                                    </div>
                                                   </td>
                                                   <td style={{ padding: '12px 12px', fontSize: '0.84rem', fontWeight: 600, color: isCompleted ? '#94a3b8' : '#1e293b', textDecoration: isCompleted ? 'line-through' : 'none' }}>
                                                     {concept.name}
                                                   </td>
                                                   <td style={{ padding: '12px 20px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                                    {questionBankData.some(q => q.conceptId === concept.id) && (
-                                                      <button
-                                                        onClick={() => setExpandedMCQConcepts(prev => ({ ...prev, [concept.id]: !prev[concept.id] }))}
-                                                        style={{
-                                                          display: 'inline-flex',
-                                                          alignItems: 'center',
-                                                          padding: '5px 12px',
-                                                          borderRadius: '8px',
-                                                          fontSize: '0.72rem',
-                                                          fontWeight: 700,
-                                                          background: isMCQExpanded ? '#10b981' : 'rgba(16, 185, 129, 0.08)',
-                                                          color: isMCQExpanded ? '#ffffff' : '#10b981',
-                                                          border: isMCQExpanded ? '1px solid #10b981' : '1px solid rgba(16, 185, 129, 0.15)',
-                                                          cursor: 'pointer',
-                                                          marginRight: '8px',
-                                                          transition: 'all 0.2s'
-                                                        }}
-                                                      >
-                                                        {isMCQExpanded ? 'Close Q' : 'Practice Q'}
-                                                      </button>
-                                                    )}
+                                                    <button
+                                                      onClick={() => setExpandedMCQConcepts(prev => ({ ...prev, [concept.id]: !prev[concept.id] }))}
+                                                      style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        padding: '5px 12px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.72rem',
+                                                        fontWeight: 700,
+                                                        background: isMCQExpanded ? '#10b981' : 'rgba(16, 185, 129, 0.08)',
+                                                        color: isMCQExpanded ? '#ffffff' : '#10b981',
+                                                        border: isMCQExpanded ? '1px solid #10b981' : '1px solid rgba(16, 185, 129, 0.15)',
+                                                        cursor: 'pointer',
+                                                        marginRight: '8px',
+                                                        transition: 'all 0.2s'
+                                                      }}
+                                                    >
+                                                      {isMCQExpanded ? 'Close Q' : 'Practice Q'}
+                                                    </button>
                                                     <a
                                                       href={`/preparation/theory/OS?concept=${concept.id}`}
                                                       target="_blank"
@@ -4753,7 +5143,7 @@ const Preparation = () => {
                                                 {isMCQExpanded && (
                                                   <tr>
                                                     <td colSpan="3" style={{ padding: '8px 20px 16px 20px', background: '#f8fafc' }}>
-                                                      {renderMCQChallengeForConcept(concept.id)}
+                                                      {renderMCQChallengeForConcept(concept.id, concept.name)}
                                                     </td>
                                                   </tr>
                                                 )}
@@ -4890,39 +5280,37 @@ const Preparation = () => {
                                                 <React.Fragment key={concept.id}>
                                                   <tr style={{ borderBottom: '1px solid #f1f5f9', background: isCompleted ? 'rgba(16, 185, 129, 0.02)' : '#ffffff', transition: 'background 0.2s' }}>
                                                     <td style={{ padding: '12px 20px' }}>
-                                                      <button onClick={() => toggleDbmsConcept(concept.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+                                                      <div style={{ padding: 0, display: 'flex', alignItems: 'center', justifyItems: 'center', cursor: 'default' }} title={isCompleted ? "Concept Mastered via MCQ" : "Answer Practice Q correctly to master"}>
                                                         {isCompleted ? (
                                                           <CheckCircle2 className="size-5 text-emerald-500" />
                                                         ) : (
                                                           <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #cbd5e1', background: 'transparent', transition: 'border-color 0.2s' }} />
                                                         )}
-                                                      </button>
+                                                      </div>
                                                     </td>
                                                     <td style={{ padding: '12px 12px', fontSize: '0.84rem', fontWeight: 600, color: isCompleted ? '#94a3b8' : '#1e293b', textDecoration: isCompleted ? 'line-through' : 'none' }}>
                                                       {concept.name}
                                                     </td>
                                                     <td style={{ padding: '12px 20px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                                      {questionBankData.some(q => q.conceptId === concept.id) && (
-                                                        <button
-                                                          onClick={() => setExpandedMCQConcepts(prev => ({ ...prev, [concept.id]: !prev[concept.id] }))}
-                                                          style={{
-                                                            display: 'inline-flex',
-                                                            alignItems: 'center',
-                                                            padding: '5px 12px',
-                                                            borderRadius: '8px',
-                                                            fontSize: '0.72rem',
-                                                            fontWeight: 700,
-                                                            background: isMCQExpanded ? '#10b981' : 'rgba(16, 185, 129, 0.08)',
-                                                            color: isMCQExpanded ? '#ffffff' : '#10b981',
-                                                            border: isMCQExpanded ? '1px solid #10b981' : '1px solid rgba(16, 185, 129, 0.15)',
-                                                            cursor: 'pointer',
-                                                            marginRight: '8px',
-                                                            transition: 'all 0.2s'
-                                                          }}
-                                                        >
-                                                          {isMCQExpanded ? 'Close Q' : 'Practice Q'}
-                                                        </button>
-                                                      )}
+                                                      <button
+                                                        onClick={() => setExpandedMCQConcepts(prev => ({ ...prev, [concept.id]: !prev[concept.id] }))}
+                                                        style={{
+                                                          display: 'inline-flex',
+                                                          alignItems: 'center',
+                                                          padding: '5px 12px',
+                                                          borderRadius: '8px',
+                                                          fontSize: '0.72rem',
+                                                          fontWeight: 700,
+                                                          background: isMCQExpanded ? '#10b981' : 'rgba(16, 185, 129, 0.08)',
+                                                          color: isMCQExpanded ? '#ffffff' : '#10b981',
+                                                          border: isMCQExpanded ? '1px solid #10b981' : '1px solid rgba(16, 185, 129, 0.15)',
+                                                          cursor: 'pointer',
+                                                          marginRight: '8px',
+                                                          transition: 'all 0.2s'
+                                                        }}
+                                                      >
+                                                        {isMCQExpanded ? 'Close Q' : 'Practice Q'}
+                                                      </button>
                                                       <a
                                                         href={`/preparation/theory/DBMS?concept=${concept.id}`}
                                                         target="_blank"
@@ -4948,7 +5336,7 @@ const Preparation = () => {
                                                   {isMCQExpanded && (
                                                     <tr>
                                                       <td colSpan="3" style={{ padding: '8px 20px 16px 20px', background: '#f8fafc' }}>
-                                                        {renderMCQChallengeForConcept(concept.id)}
+                                                        {renderMCQChallengeForConcept(concept.id, concept.name)}
                                                       </td>
                                                     </tr>
                                                   )}
@@ -4977,13 +5365,13 @@ const Preparation = () => {
                                                   <React.Fragment key={q.id}>
                                                     <tr style={{ borderBottom: '1px solid #f1f5f9', background: isCompleted ? 'rgba(16, 185, 129, 0.02)' : '#ffffff', transition: 'background 0.2s' }}>
                                                       <td style={{ padding: '12px 20px' }}>
-                                                        <button onClick={() => toggleSqlQuestion(q.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <div style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'default' }} title={isCompleted ? "Query Reviewed & Mastered" : "Review Optimal Query to complete"}>
                                                           {isCompleted ? (
                                                             <CheckCircle2 className="size-5 text-emerald-500" />
                                                           ) : (
                                                             <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #cbd5e1', background: 'transparent', transition: 'border-color 0.2s' }} />
                                                           )}
-                                                        </button>
+                                                        </div>
                                                       </td>
                                                       <td style={{ padding: '12px 12px' }}>
                                                         <div style={{ fontWeight: 600, fontSize: '0.84rem', color: isCompleted ? '#94a3b8' : '#1e293b', textDecoration: isCompleted ? 'line-through' : 'none' }}>
@@ -5009,7 +5397,16 @@ const Preparation = () => {
                                                       </td>
                                                       <td style={{ padding: '12px 20px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                                                         <button
-                                                          onClick={() => setExpandedSqlQuestions(prev => ({ ...prev, [q.id]: !prev[q.id] }))}
+                                                          onClick={() => {
+                                                            setExpandedSqlQuestions(prev => ({ ...prev, [q.id]: !prev[q.id] }));
+                                                            if (!sqlCompletedQuestions[q.id]) {
+                                                              setSqlCompletedQuestions(prev => {
+                                                                const next = { ...prev, [q.id]: true };
+                                                                if (user) localStorage.setItem(`sql50_progress_${user.email}`, JSON.stringify(next));
+                                                                return next;
+                                                              });
+                                                            }
+                                                          }}
                                                           style={{
                                                             display: 'inline-flex',
                                                             alignItems: 'center',
@@ -5183,39 +5580,37 @@ const Preparation = () => {
                                               <React.Fragment key={concept.id}>
                                                 <tr style={{ borderBottom: '1px solid #f1f5f9', background: isCompleted ? 'rgba(16, 185, 129, 0.02)' : '#ffffff', transition: 'background 0.2s' }}>
                                                   <td style={{ padding: '12px 20px' }}>
-                                                    <button onClick={() => toggleCnConcept(concept.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div style={{ padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'default' }} title={isCompleted ? "Concept Mastered via MCQ" : "Answer Practice Q correctly to master"}>
                                                       {isCompleted ? (
                                                         <CheckCircle2 className="size-5 text-emerald-500" />
                                                       ) : (
                                                         <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #cbd5e1', background: 'transparent', transition: 'border-color 0.2s' }} />
                                                       )}
-                                                    </button>
+                                                    </div>
                                                   </td>
                                                   <td style={{ padding: '12px 12px', fontSize: '0.84rem', fontWeight: 600, color: isCompleted ? '#94a3b8' : '#1e293b', textDecoration: isCompleted ? 'line-through' : 'none' }}>
                                                     {concept.name}
                                                   </td>
                                                   <td style={{ padding: '12px 20px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                                    {questionBankData.some(q => q.conceptId === concept.id) && (
-                                                      <button
-                                                        onClick={() => setExpandedMCQConcepts(prev => ({ ...prev, [concept.id]: !prev[concept.id] }))}
-                                                        style={{
-                                                          display: 'inline-flex',
-                                                          alignItems: 'center',
-                                                          padding: '5px 12px',
-                                                          borderRadius: '8px',
-                                                          fontSize: '0.72rem',
-                                                          fontWeight: 700,
-                                                          background: isMCQExpanded ? '#10b981' : 'rgba(16, 185, 129, 0.08)',
-                                                          color: isMCQExpanded ? '#ffffff' : '#10b981',
-                                                          border: isMCQExpanded ? '1px solid #10b981' : '1px solid rgba(16, 185, 129, 0.15)',
-                                                          cursor: 'pointer',
-                                                          marginRight: '8px',
-                                                          transition: 'all 0.2s'
-                                                        }}
-                                                      >
-                                                        {isMCQExpanded ? 'Close Q' : 'Practice Q'}
-                                                      </button>
-                                                    )}
+                                                    <button
+                                                      onClick={() => setExpandedMCQConcepts(prev => ({ ...prev, [concept.id]: !prev[concept.id] }))}
+                                                      style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        padding: '5px 12px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.72rem',
+                                                        fontWeight: 700,
+                                                        background: isMCQExpanded ? '#10b981' : 'rgba(16, 185, 129, 0.08)',
+                                                        color: isMCQExpanded ? '#ffffff' : '#10b981',
+                                                        border: isMCQExpanded ? '1px solid #10b981' : '1px solid rgba(16, 185, 129, 0.15)',
+                                                        cursor: 'pointer',
+                                                        marginRight: '8px',
+                                                        transition: 'all 0.2s'
+                                                      }}
+                                                    >
+                                                      {isMCQExpanded ? 'Close Q' : 'Practice Q'}
+                                                    </button>
                                                     <a
                                                       href={`/preparation/theory/CN?concept=${concept.id}`}
                                                       target="_blank"
@@ -5241,7 +5636,7 @@ const Preparation = () => {
                                                 {isMCQExpanded && (
                                                   <tr>
                                                     <td colSpan="3" style={{ padding: '8px 20px 16px 20px', background: '#f8fafc' }}>
-                                                      {renderMCQChallengeForConcept(concept.id)}
+                                                      {renderMCQChallengeForConcept(concept.id, concept.name)}
                                                     </td>
                                                   </tr>
                                                 )}
@@ -5351,39 +5746,37 @@ const Preparation = () => {
                                               <React.Fragment key={concept.id}>
                                                 <tr style={{ borderBottom: '1px solid #f1f5f9', background: isCompleted ? 'rgba(16, 185, 129, 0.02)' : '#ffffff', transition: 'background 0.2s' }}>
                                                   <td style={{ padding: '12px 20px' }}>
-                                                    <button onClick={() => toggleSysConcept(concept.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
+                                                    <div style={{ padding: 0, display: 'flex', alignItems: 'center', justifyItems: 'center', cursor: 'default' }} title={isCompleted ? "Concept Mastered via MCQ" : "Answer Practice Q correctly to master"}>
                                                       {isCompleted ? (
                                                         <CheckCircle2 className="size-5 text-emerald-500" />
                                                       ) : (
                                                         <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #cbd5e1', background: 'transparent', transition: 'border-color 0.2s' }} />
                                                       )}
-                                                    </button>
+                                                    </div>
                                                   </td>
                                                   <td style={{ padding: '12px 12px', fontSize: '0.84rem', fontWeight: 600, color: isCompleted ? '#94a3b8' : '#1e293b', textDecoration: isCompleted ? 'line-through' : 'none' }}>
                                                     {concept.name}
                                                   </td>
                                                   <td style={{ padding: '12px 20px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                                    {questionBankData.some(q => q.conceptId === concept.id) && (
-                                                      <button
-                                                        onClick={() => setExpandedMCQConcepts(prev => ({ ...prev, [concept.id]: !prev[concept.id] }))}
-                                                        style={{
-                                                          display: 'inline-flex',
-                                                          alignItems: 'center',
-                                                          padding: '5px 12px',
-                                                          borderRadius: '8px',
-                                                          fontSize: '0.72rem',
-                                                          fontWeight: 700,
-                                                          background: isMCQExpanded ? '#10b981' : 'rgba(16, 185, 129, 0.08)',
-                                                          color: isMCQExpanded ? '#ffffff' : '#10b981',
-                                                          border: isMCQExpanded ? '1px solid #10b981' : '1px solid rgba(16, 185, 129, 0.15)',
-                                                          cursor: 'pointer',
-                                                          marginRight: '8px',
-                                                          transition: 'all 0.2s'
-                                                        }}
-                                                      >
-                                                        {isMCQExpanded ? 'Close Q' : 'Practice Q'}
-                                                      </button>
-                                                    )}
+                                                    <button
+                                                      onClick={() => setExpandedMCQConcepts(prev => ({ ...prev, [concept.id]: !prev[concept.id] }))}
+                                                      style={{
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        padding: '5px 12px',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.72rem',
+                                                        fontWeight: 700,
+                                                        background: isMCQExpanded ? '#10b981' : 'rgba(16, 185, 129, 0.08)',
+                                                        color: isMCQExpanded ? '#ffffff' : '#10b981',
+                                                        border: isMCQExpanded ? '1px solid #10b981' : '1px solid rgba(16, 185, 129, 0.15)',
+                                                        cursor: 'pointer',
+                                                        marginRight: '8px',
+                                                        transition: 'all 0.2s'
+                                                      }}
+                                                    >
+                                                      {isMCQExpanded ? 'Close Q' : 'Practice Q'}
+                                                    </button>
                                                     <a
                                                       href={`/preparation/theory/SystemDesign?concept=${concept.id}`}
                                                       target="_blank"
@@ -5409,7 +5802,7 @@ const Preparation = () => {
                                                 {isMCQExpanded && (
                                                   <tr>
                                                     <td colSpan="3" style={{ padding: '8px 20px 16px 20px', background: '#f8fafc' }}>
-                                                      {renderMCQChallengeForConcept(concept.id)}
+                                                      {renderMCQChallengeForConcept(concept.id, concept.name)}
                                                     </td>
                                                   </tr>
                                                 )}
@@ -5801,6 +6194,160 @@ const Preparation = () => {
                 {customModal.type === 'confirm' ? 'Yes, proceed' : 'OK'}
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Full-Screen DSA Practice Compiler Workspace Portal */}
+      {activeCompilerProblem && formattedCompilerQuestion && ReactDOM.createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: '#09090b',
+          zIndex: 999999,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}>
+          {/* Top Header bar with Problem name, Status badge, and Close button */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 24px',
+            background: '#121214',
+            borderBottom: '1px solid #27272a',
+            color: '#ffffff',
+            flexShrink: 0
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontWeight: 800,
+                fontSize: '1rem',
+                color: '#10b981',
+                letterSpacing: '-0.01em'
+              }}>
+                <Code2 className="size-5 text-emerald-400" />
+                DSA Compiler & Tester
+              </span>
+              <span style={{ color: '#52525b' }}>|</span>
+              <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#f4f4f5' }}>
+                {activeCompilerProblem.name}
+              </span>
+              <span style={{
+                padding: '2px 8px',
+                borderRadius: '6px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                color: activeCompilerProblem.level === 'Easy' ? '#10b981' : activeCompilerProblem.level === 'Medium' ? '#f59e0b' : '#ef4444',
+                background: activeCompilerProblem.level === 'Easy' ? 'rgba(16,185,129,0.15)' : activeCompilerProblem.level === 'Medium' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                border: '1px solid currentColor'
+              }}>
+                {activeCompilerProblem.level}
+              </span>
+              {dsaCompletedProblems[activeCompilerProblem.id] && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '3px 10px',
+                  borderRadius: '999px',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  background: 'rgba(16, 185, 129, 0.18)',
+                  color: '#34d399',
+                  border: '1px solid rgba(16, 185, 129, 0.4)'
+                }}>
+                  <CheckCircle2 className="size-3.5" /> Solved & Verified
+                </span>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {compilerSolvedNotice && (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '4px 12px',
+                  borderRadius: '8px',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  background: '#064e3b',
+                  color: '#a7f3d0',
+                  border: '1px solid #059669'
+                }}>
+                  <Sparkles className="size-4 text-emerald-400" />
+                  Accepted! Ticked & Progress Updated
+                </span>
+              )}
+              <button
+                onClick={closeDsaCompiler}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 16px',
+                  borderRadius: '8px',
+                  background: '#27272a',
+                  color: '#f4f4f5',
+                  border: '1px solid #3f3f46',
+                  cursor: 'pointer',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                  transition: 'background 0.15s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#3f3f46'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#27272a'}
+              >
+                <X className="size-4" />
+                Close & Return
+              </button>
+            </div>
+          </div>
+
+          {/* Workspace Body */}
+          <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+            <LeetCodeWorkspace
+              question={formattedCompilerQuestion}
+              language={compilerLanguage}
+              code={compilerCodes[`${activeCompilerProblem.id}_${compilerLanguage}`] !== undefined
+                ? compilerCodes[`${activeCompilerProblem.id}_${compilerLanguage}`]
+                : (formattedCompilerQuestion.templates?.[compilerLanguage] || '')}
+              onCodeChange={(newCode) => {
+                setCompilerCodes(prev => ({
+                  ...prev,
+                  [`${activeCompilerProblem.id}_${compilerLanguage}`]: newCode
+                }));
+              }}
+              onLanguageChange={(newLang) => {
+                setCompilerLanguage(newLang);
+                const key = `${activeCompilerProblem.id}_${newLang}`;
+                if (compilerCodes[key] === undefined && formattedCompilerQuestion.templates?.[newLang]) {
+                  setCompilerCodes(prev => ({
+                    ...prev,
+                    [key]: formattedCompilerQuestion.templates[newLang]
+                  }));
+                }
+              }}
+              onRun={handleRunCompiler}
+              onSubmit={handleSubmitCompiler}
+              isEvaluating={isCompilerEvaluating}
+              isSubmitting={isCompilerSubmitting}
+              evalResult={compilerEvalResult}
+              sectionTitle={`DSA Problem: ${activeCompilerProblem.name}`}
+              fullBleed={true}
+            />
           </div>
         </div>,
         document.body

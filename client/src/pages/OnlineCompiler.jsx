@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../Components/navbar.jsx';
 import LeetCodeWorkspace from '../Components/LeetCodeWorkspace.jsx';
 
-const DEFAULT_PROBLEMS = [
+export const DEFAULT_PROBLEMS = [
   {
     id: 'p1',
     number: 1,
