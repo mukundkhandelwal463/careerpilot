@@ -1140,6 +1140,11 @@ const Preparation = () => {
   const formattedCompilerQuestion = activeCompilerProblem ? getDsaProblemData(activeCompilerProblem, compilerPatternName) : null;
 
   const openDsaCompiler = (prob, patternName = '') => {
+    try {
+      if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    } catch (e) {}
     setActiveCompilerProblem(prob);
     setCompilerPatternName(patternName);
     setCompilerEvalResult(null);
@@ -1152,6 +1157,11 @@ const Preparation = () => {
   };
 
   const closeDsaCompiler = () => {
+    try {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    } catch (e) {}
     setActiveCompilerProblem(null);
     setCompilerEvalResult(null);
     setCompilerSolvedNotice(false);
@@ -1225,6 +1235,10 @@ const Preparation = () => {
     const code = compilerCodes[codeKey] !== undefined ? compilerCodes[codeKey] : (q.templates?.[compilerLanguage] || '');
 
     try {
+      const allTestcases = [
+        ...(q.testcases || []),
+        ...(q.hiddenTestcases || [])
+      ];
       const res = await fetch('/api/compiler/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1233,7 +1247,7 @@ const Preparation = () => {
           code,
           stdin: '',
           expected_output: null,
-          testcases: q.testcases || []
+          testcases: allTestcases
         })
       });
       const data = await res.json();
@@ -2603,100 +2617,12 @@ const Preparation = () => {
           zIndex: 99999999,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          margin: 0,
+          padding: 0
         }}
       >
-        {/* Top Header bar with Problem name, Status badge, and Close button */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '10px 24px',
-          background: '#121214',
-          borderBottom: '1px solid #27272a',
-          color: '#ffffff',
-          flexShrink: 0
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f4f4f5', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Code2 className="size-5 text-emerald-400" />
-              {activeCompilerProblem.name}
-            </span>
-            <span style={{
-              padding: '2px 8px',
-              borderRadius: '6px',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              color: activeCompilerProblem.level === 'Easy' ? '#10b981' : activeCompilerProblem.level === 'Medium' ? '#f59e0b' : '#ef4444',
-              background: activeCompilerProblem.level === 'Easy' ? 'rgba(16,185,129,0.15)' : activeCompilerProblem.level === 'Medium' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
-              border: '1px solid currentColor'
-            }}>
-              {activeCompilerProblem.level}
-            </span>
-            {dsaCompletedProblems[activeCompilerProblem.id] && (
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '3px 10px',
-                borderRadius: '999px',
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                background: 'rgba(16, 185, 129, 0.18)',
-                color: '#34d399',
-                border: '1px solid rgba(16, 185, 129, 0.4)'
-              }}>
-                <CheckCircle2 className="size-3.5" /> Solved & Verified
-              </span>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {compilerSolvedNotice && (
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '4px 12px',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                background: '#064e3b',
-                color: '#a7f3d0',
-                border: '1px solid #059669'
-              }}>
-                <Sparkles className="size-4 text-emerald-400" />
-                Accepted! Ticked & Progress Updated
-              </span>
-            )}
-            <button
-              onClick={closeDsaCompiler}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 16px',
-                borderRadius: '8px',
-                background: '#27272a',
-                color: '#f4f4f5',
-                border: '1px solid #3f3f46',
-                cursor: 'pointer',
-                fontSize: '0.84rem',
-                fontWeight: 600,
-                transition: 'background 0.15s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#3f3f46'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#27272a'}
-            >
-              <X className="size-4" />
-              Close & Return
-            </button>
-          </div>
-        </div>
-
-        {/* Workspace Body */}
-        <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+        <div style={{ flex: 1, minHeight: 0, position: 'relative', height: '100%' }}>
           <LeetCodeWorkspace
             question={formattedCompilerQuestion}
             language={compilerLanguage}
@@ -2721,6 +2647,10 @@ const Preparation = () => {
             }}
             onRun={handleRunCompiler}
             onSubmit={handleSubmitCompiler}
+            onClose={closeDsaCompiler}
+            solvedNotice={compilerSolvedNotice}
+            isSolved={Boolean(dsaCompletedProblems[activeCompilerProblem.id])}
+            problemLevel={activeCompilerProblem.level}
             isEvaluating={isCompilerEvaluating}
             isSubmitting={isCompilerSubmitting}
             evalResult={compilerEvalResult}

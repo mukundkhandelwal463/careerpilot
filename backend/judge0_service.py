@@ -36,7 +36,7 @@ def get_language_id(lang_str):
 def check_output_match(actual, expected):
     """
     Robust comparison between actual stdout and expected problem output:
-    Handles string quotes, JSON structures, whitespace normalization.
+    Handles string quotes, JSON structures, whitespace normalization, and unordered lists/sublists.
     """
     if expected is None:
         return True
@@ -53,7 +53,20 @@ def check_output_match(actual, expected):
     if a_norm == e_norm and e_norm != "":
         return True
     try:
-        if json.loads(a) == json.loads(e):
+        def _canon(obj):
+            if isinstance(obj, list):
+                canonical_items = [_canon(x) for x in obj]
+                try:
+                    return sorted(canonical_items)
+                except Exception:
+                    return sorted(canonical_items, key=lambda x: str(x))
+            elif isinstance(obj, dict):
+                return {k: _canon(v) for k, v in sorted(obj.items())}
+            return obj
+
+        obj_a = json.loads(a)
+        obj_e = json.loads(e)
+        if obj_a == obj_e or _canon(obj_a) == _canon(obj_e):
             return True
     except Exception:
         pass
@@ -402,16 +415,22 @@ try {
         }
 
         let fn = null;
-        if (typeof twoSum === 'function') fn = twoSum;
-        else if (typeof isAnagram === 'function') fn = isAnagram;
-        else if (typeof productExceptSelf === 'function') fn = productExceptSelf;
-        else if (typeof threeSum === 'function') fn = threeSum;
-        else if (typeof topKFrequent === 'function') fn = topKFrequent;
-        else if (typeof maxChunksToSorted === 'function') fn = maxChunksToSorted;
-        else if (typeof addTwoNumbers === 'function') fn = addTwoNumbers;
-        else if (typeof sortArray === 'function') fn = sortArray;
-        else if (typeof solve === 'function') fn = solve;
-        else if (typeof Solution === 'function') {
+        // Dynamically find any candidate function declared in code
+        const candidates = ['groupAnagrams', 'twoSum', 'isAnagram', 'productExceptSelf', 'threeSum', 'topKFrequent', 'maxChunksToSorted', 'addTwoNumbers', 'sortArray', 'solve', 'longestConsecutive', 'minWindow', 'firstMissingPositive', 'maxArea', 'trap', 'isPalindrome', 'isValid', 'climbStairs', 'canJump', 'coinChange', 'lengthOfLongestSubstring', 'search'];
+        for (const name of candidates) {
+            try {
+                if (typeof eval(name) === 'function') { fn = eval(name); break; }
+            } catch(e) {}
+        }
+        if (!fn) {
+            for (const key of Object.keys(global)) {
+                if (typeof global[key] === 'function' && !['setTimeout', 'setInterval', 'clearTimeout', 'clearInterval', 'setImmediate', 'clearImmediate'].includes(key)) {
+                    fn = global[key];
+                    break;
+                }
+            }
+        }
+        if (!fn && typeof Solution === 'function') {
             const inst = new Solution();
             const proto = Object.getPrototypeOf(inst);
             const keys = Object.getOwnPropertyNames(proto).filter(k => k !== 'constructor');

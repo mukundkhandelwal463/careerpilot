@@ -5,6 +5,7 @@ import {
   XCircle,
   AlertCircle,
   RotateCcw,
+  Columns,
   Maximize2,
   Minimize2,
   ChevronDown,
@@ -54,7 +55,11 @@ export default function LeetCodeWorkspace({
   sectionsOverview = [],
   onSectionSubmit = null,
   sectionSubmitLabel = 'Submit & Next Section',
-  fullBleed = false
+  fullBleed = false,
+  onClose = null,
+  solvedNotice = false,
+  isSolved = false,
+  problemLevel = null
 }) {
   const [activeTab, setActiveTab] = useState('description'); // 'description', 'submissions'
   const [consoleTab, setConsoleTab] = useState('testcase'); // 'testcase', 'result'
@@ -68,6 +73,7 @@ export default function LeetCodeWorkspace({
   const [submissionsHistory, setSubmissionsHistory] = useState([]);
 
   // Adjustable panel dimensions (Split Pane Resizing)
+  const [viewMode, setViewMode] = useState('split'); // 'split' | 'editor'
   const [leftWidthPercent, setLeftWidthPercent] = useState(46);
   const [isDraggingH, setIsDraggingH] = useState(false);
   const [consoleHeight, setConsoleHeight] = useState(250);
@@ -326,48 +332,83 @@ export default function LeetCodeWorkspace({
 
           <div style={{ width: '1px', height: '16px', background: '#3f3f46' }} />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <button
-              onClick={onPrevQuestion}
-              disabled={!hasPrev}
-              title="Previous Problem"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: hasPrev ? '#d4d4d8' : '#52525b',
-                cursor: hasPrev ? 'pointer' : 'not-allowed',
-                padding: '4px',
-                borderRadius: '6px',
-                display: 'flex',
-                alignItems: 'center'
-              }}
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#e4e4e7', padding: '0 4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {onPrevQuestion && (
+              <button
+                onClick={onPrevQuestion}
+                disabled={!hasPrev}
+                title="Previous Problem"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: hasPrev ? '#d4d4d8' : '#52525b',
+                  cursor: hasPrev ? 'pointer' : 'not-allowed',
+                  padding: '4px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+            )}
+            <span style={{ fontWeight: 700, fontSize: '0.94rem', color: '#f4f4f5', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Code2 className="size-4 text-emerald-400" />
               {question?.title || 'Coding Problem'}
             </span>
-            <button
-              onClick={onNextQuestion}
-              disabled={!hasNext}
-              title="Next Problem"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: hasNext ? '#d4d4d8' : '#52525b',
-                cursor: hasNext ? 'pointer' : 'not-allowed',
-                padding: '4px',
+            {(problemLevel || question?.difficulty) && (
+              <span style={{
+                padding: '2px 8px',
                 borderRadius: '6px',
-                display: 'flex',
-                alignItems: 'center'
-              }}
-            >
-              <ChevronRight className="size-4" />
-            </button>
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                color: (problemLevel || question?.difficulty) === 'Easy' ? '#10b981' : (problemLevel || question?.difficulty) === 'Medium' ? '#f59e0b' : '#ef4444',
+                background: (problemLevel || question?.difficulty) === 'Easy' ? 'rgba(16,185,129,0.15)' : (problemLevel || question?.difficulty) === 'Medium' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                border: '1px solid currentColor'
+              }}>
+                {problemLevel || question?.difficulty}
+              </span>
+            )}
+            {isSolved && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '2px 8px',
+                borderRadius: '999px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                background: 'rgba(16, 185, 129, 0.18)',
+                color: '#34d399',
+                border: '1px solid rgba(16, 185, 129, 0.4)'
+              }}>
+                <CheckCircle2 className="size-3" /> Solved
+              </span>
+            )}
+            {onNextQuestion && (
+              <button
+                onClick={onNextQuestion}
+                disabled={!hasNext}
+                title="Next Problem"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: hasNext ? '#d4d4d8' : '#52525b',
+                  cursor: hasNext ? 'pointer' : 'not-allowed',
+                  padding: '4px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Center: Run & Submit Action Controls */}
+        {/* Center: Run, Submit & View Mode Layout Switcher */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
             onClick={handleTriggerRun}
@@ -404,7 +445,7 @@ export default function LeetCodeWorkspace({
           <button
             onClick={onSubmit}
             disabled={isSubmitting}
-            title="Submit solution for grading"
+            title="Submit solution for grading against all sample & hidden edge cases"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -433,6 +474,50 @@ export default function LeetCodeWorkspace({
               </>
             )}
           </button>
+
+          {/* Full Screen Editor vs Split View Switcher */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', background: '#27272a', borderRadius: '8px', padding: '2px', border: '1px solid #3f3f46', marginLeft: '6px' }}>
+            <button
+              onClick={() => setViewMode('split')}
+              title="Split View: Side-by-side with Problem Description"
+              style={{
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                background: viewMode === 'split' ? '#3f3f46' : 'transparent',
+                color: viewMode === 'split' ? '#ffffff' : '#a1a1aa',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <Columns className="size-3.5" />
+              <span>Split</span>
+            </button>
+            <button
+              onClick={() => setViewMode('editor')}
+              title="Full Editor: Maximize code editor to 100% full screen"
+              style={{
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                background: viewMode === 'editor' ? '#10b981' : 'transparent',
+                color: viewMode === 'editor' ? '#ffffff' : '#a1a1aa',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              <Maximize2 className="size-3.5" />
+              <span>Full Editor</span>
+            </button>
+          </div>
         </div>
 
         {/* Right: Section Timer & Finish/Next Section */}
@@ -482,6 +567,24 @@ export default function LeetCodeWorkspace({
             </button>
           )}
 
+          {solvedNotice && (
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 12px',
+              borderRadius: '8px',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              background: '#064e3b',
+              color: '#a7f3d0',
+              border: '1px solid #059669'
+            }}>
+              <Sparkles className="size-3.5 text-emerald-400" />
+              Accepted!
+            </span>
+          )}
+
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
             title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
@@ -498,6 +601,32 @@ export default function LeetCodeWorkspace({
           >
             {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
           </button>
+
+          {onClose && (
+            <button
+              onClick={onClose}
+              title="Close compiler and return to DSA sheet"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                background: '#27272a',
+                color: '#f4f4f5',
+                border: '1px solid #3f3f46',
+                cursor: 'pointer',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                transition: 'background 0.15s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#3f3f46'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#27272a'}
+            >
+              <X className="size-4" />
+              <span>Close & Return</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -515,11 +644,11 @@ export default function LeetCodeWorkspace({
         {/* LEFT COLUMN: PROBLEM SPECS & TABS */}
         <div
           style={{
+            display: viewMode === 'editor' ? 'none' : 'flex',
             flex: `0 0 ${leftWidthPercent}%`,
             width: `${leftWidthPercent}%`,
             minWidth: '220px',
             maxWidth: '82%',
-            display: 'flex',
             flexDirection: 'column',
             background: '#18181b',
             overflow: 'hidden'
@@ -717,6 +846,7 @@ export default function LeetCodeWorkspace({
           onDoubleClick={handleDoubleClickH}
           className={`split-resizer-h ${isDraggingH ? 'dragging' : ''}`}
           title="Drag to resize Question and Code Editor • Double-click to reset (50/50)"
+          style={{ display: viewMode === 'editor' ? 'none' : 'flex' }}
         >
           <div
             className="resizer-grip"
@@ -737,7 +867,8 @@ export default function LeetCodeWorkspace({
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            minWidth: '280px',
+            width: viewMode === 'editor' ? '100%' : 'auto',
+            minWidth: 0,
             overflow: 'hidden'
           }}
         >
@@ -985,7 +1116,7 @@ export default function LeetCodeWorkspace({
                 {consoleTab === 'testcase' && (
                   <div>
                     {/* Case selector chips */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
                       {testcases.map((tc, idx) => (
                         <button
                           key={idx}
@@ -1005,6 +1136,20 @@ export default function LeetCodeWorkspace({
                           {tc.label || `Case ${idx + 1}`}
                         </button>
                       ))}
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '3px 10px',
+                        borderRadius: '6px',
+                        background: 'rgba(59, 130, 246, 0.12)',
+                        color: '#60a5fa',
+                        border: '1px solid rgba(59, 130, 246, 0.3)',
+                        fontSize: '0.74rem',
+                        fontWeight: 600
+                      }}>
+                        🛡️ +10 Hidden Edge Cases (Graded on Submit)
+                      </span>
                     </div>
 
                     {/* Stdin input textarea */}
