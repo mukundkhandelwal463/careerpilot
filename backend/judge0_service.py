@@ -305,6 +305,14 @@ int main() {
     std::cout << "[";
     for (size_t i = 0; i < ans.size(); ++i) std::cout << ans[i] << (i + 1 < ans.size() ? ", " : "");
     std::cout << "]" << std::endl;
+#elif defined(__HAS_LONGEST_CONSECUTIVE)
+    int ans = sol.longestConsecutive(ints);
+    std::cout << ans << std::endl;
+#elif defined(__HAS_MIN_WINDOW)
+    std::string s = words.size() > 0 ? words[0] : "";
+    std::string t = words.size() > 1 ? words[1] : "";
+    std::string ans = sol.minWindow(s, t);
+    std::cout << "\\"" << ans << "\\"" << std::endl;
 #else
     // Fallback: Check if solve method exists or print success
     std::cout << "Accepted" << std::endl;
@@ -312,15 +320,17 @@ int main() {
     return 0;
 }
 """
-            std::string defs = "";
-            if (clean_code.find("twoSum") != std::string::npos) defs += "#define __HAS_TWO_SUM 1\n";
-            else if (clean_code.find("isAnagram") != std::string::npos) defs += "#define __HAS_IS_ANAGRAM 1\n";
-            else if (clean_code.find("productExceptSelf") != std::string::npos) defs += "#define __HAS_PRODUCT_EXCEPT_SELF 1\n";
-            else if (clean_code.find("threeSum") != std::string::npos) defs += "#define __HAS_THREE_SUM 1\n";
-            else if (clean_code.find("topKFrequent") != std::string::npos) defs += "#define __HAS_TOP_K 1\n";
-            else if (clean_code.find("maxChunksToSorted") != std::string::npos) defs += "#define __HAS_MAX_CHUNKS 1\n";
-            else if (clean_code.find("sortArray") != std::string::npos) defs += "#define __HAS_SORT_ARRAY 1\n";
-            clean_code = defs + clean_code + "\n" + cpp_driver
+            defs = ""
+            if "twoSum" in clean_code: defs += "#define __HAS_TWO_SUM 1\\n"
+            elif "isAnagram" in clean_code: defs += "#define __HAS_IS_ANAGRAM 1\\n"
+            elif "productExceptSelf" in clean_code: defs += "#define __HAS_PRODUCT_EXCEPT_SELF 1\\n"
+            elif "threeSum" in clean_code: defs += "#define __HAS_THREE_SUM 1\\n"
+            elif "topKFrequent" in clean_code: defs += "#define __HAS_TOP_K 1\\n"
+            elif "maxChunksToSorted" in clean_code: defs += "#define __HAS_MAX_CHUNKS 1\\n"
+            elif "sortArray" in clean_code: defs += "#define __HAS_SORT_ARRAY 1\\n"
+            elif "longestConsecutive" in clean_code: defs += "#define __HAS_LONGEST_CONSECUTIVE 1\\n"
+            elif "minWindow" in clean_code: defs += "#define __HAS_MIN_WINDOW 1\\n"
+            clean_code = defs + clean_code + "\\n" + cpp_driver
     elif language_id == 50: # C
         if "main" not in clean_code:
             c_driver = """
