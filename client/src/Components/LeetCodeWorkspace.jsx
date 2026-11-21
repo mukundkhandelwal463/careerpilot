@@ -7,6 +7,8 @@ import {
   RotateCcw,
   Pause,
   Columns,
+  Maximize2,
+  Minimize2,
   ChevronDown,
   ChevronUp,
   ChevronLeft,
@@ -292,8 +294,34 @@ export default function LeetCodeWorkspace({
   };
   const diffStyle = difficultyColors[question?.difficulty || 'Medium'] || difficultyColors.Medium;
 
+  const handleToggleFullscreen = () => {
+    try {
+      if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+        setIsFullscreen(true);
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+        setIsFullscreen(false);
+      }
+    } catch (e) {
+      setIsFullscreen(!isFullscreen);
+    }
+  };
+
   useEffect(() => {
-    if (isFullscreen) {
+    const handleFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
+  useEffect(() => {
+    if (isFullscreen || fullBleed) {
       document.documentElement.classList.add('coding-fullscreen-active');
       document.body.classList.add('coding-fullscreen-active');
       return () => {
@@ -301,7 +329,7 @@ export default function LeetCodeWorkspace({
         document.body.classList.remove('coding-fullscreen-active');
       };
     }
-  }, [isFullscreen]);
+  }, [isFullscreen, fullBleed]);
 
   return (
     <div
@@ -626,6 +654,23 @@ export default function LeetCodeWorkspace({
               Accepted!
             </span>
           )}
+
+          <button
+            onClick={handleToggleFullscreen}
+            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#a1a1aa',
+              cursor: 'pointer',
+              padding: '6px',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+          </button>
 
           {onClose && (
             <button

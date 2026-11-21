@@ -1171,6 +1171,9 @@ const Preparation = () => {
   };
 
   const openDsaCompiler = (prob, patternName = '') => {
+    document.documentElement.classList.add('coding-fullscreen-active');
+    document.body.classList.add('coding-fullscreen-active');
+    document.body.style.overflow = 'hidden';
     setActiveCompilerProblem(prob);
     setCompilerPatternName(patternName);
     setCompilerEvalResult(null);
@@ -1193,6 +1196,8 @@ const Preparation = () => {
 
   useEffect(() => {
     if (activeCompilerProblem) {
+      document.documentElement.classList.add('coding-fullscreen-active');
+      document.body.classList.add('coding-fullscreen-active');
       document.body.style.overflow = 'hidden';
     } else {
       document.documentElement.classList.remove('coding-fullscreen-active');
@@ -2639,6 +2644,8 @@ const Preparation = () => {
           bottom: 0,
           width: '100vw',
           height: '100vh',
+          minWidth: '100vw',
+          minHeight: '100vh',
           backgroundColor: '#121214',
           zIndex: 99999999,
           display: 'flex',
