@@ -511,6 +511,10 @@ const MockTest = () => {
     const totalCorrect = techScore.correct + verbScore.correct + aptScore.correct;
     const totalMCQs = techScore.total + verbScore.total + aptScore.total;
     const percentage = totalMCQs > 0 ? Math.round((totalCorrect / totalMCQs) * 100) : 0;
+    const answeredCount = Object.keys(answers || {}).length;
+    const totalSkipped = Math.max(0, totalMCQs - answeredCount);
+    const totalWrong = Math.max(0, totalMCQs - totalCorrect - totalSkipped);
+    const accuracyOnAttempted = answeredCount > 0 ? Math.round((totalCorrect / answeredCount) * 100) : 0;
 
     const grading = submitResult?.details?.grading || {};
     const coding_easy = grading.coding_easy || {};
@@ -571,6 +575,82 @@ const MockTest = () => {
                   <strong style={{ fontSize: '1.25rem', color: '#1e293b' }}>
                     {submitResult ? `${submitResult.coding_hard_score} / 50.0` : 'N/A'}
                   </strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Diagnostic Scorecard & Metrics (Correct, Incorrect, Skipped, Accuracy) */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', marginBottom: '28px' }}>
+              <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Total Questions</div>
+                <strong style={{ fontSize: '1.25rem', color: '#0f172a' }}>{totalMCQs + 2}</strong>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>{totalMCQs} MCQ + 2 Coding</div>
+              </div>
+              <div style={{ background: '#f0fdf4', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #bbf7d0' }}>
+                <div style={{ fontSize: '0.72rem', color: '#15803d', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Correct (✓)</div>
+                <strong style={{ fontSize: '1.25rem', color: '#16a34a' }}>{totalCorrect}</strong>
+                <div style={{ fontSize: '0.7rem', color: '#15803d', marginTop: '2px' }}>Questions Passed</div>
+              </div>
+              <div style={{ background: '#fff1f2', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #fecdd3' }}>
+                <div style={{ fontSize: '0.72rem', color: '#9f1239', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Incorrect (✗)</div>
+                <strong style={{ fontSize: '1.25rem', color: '#e11d48' }}>{totalWrong}</strong>
+                <div style={{ fontSize: '0.7rem', color: '#9f1239', marginTop: '2px' }}>Wrong Answers</div>
+              </div>
+              <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Skipped (○)</div>
+                <strong style={{ fontSize: '1.25rem', color: '#64748b' }}>{totalSkipped}</strong>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>Unattempted</div>
+              </div>
+              <div style={{ background: '#eef2ff', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #c7d2fe' }}>
+                <div style={{ fontSize: '0.72rem', color: '#4338ca', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Accuracy Rate</div>
+                <strong style={{ fontSize: '1.25rem', color: '#4f46e5' }}>{accuracyOnAttempted}%</strong>
+                <div style={{ fontSize: '0.7rem', color: '#4338ca', marginTop: '2px' }}>On Attempted</div>
+              </div>
+            </div>
+
+            {/* Transparent Marking Calculation Scheme */}
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px 20px', marginBottom: '32px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <strong style={{ fontSize: '0.92rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>📊</span> How Marks Were Calculated in This Report
+                </strong>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Weightage Scale: 200 Max Marks</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+                <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Technical Core (MCQ)</div>
+                  <div style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '2px' }}>
+                    {techScore.correct} × 1.5 = {submitResult?.technical_score ?? (techScore.correct * 1.5)} / 90.0 Marks
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{techScore.correct}/{techScore.total} correct (+1.5 per question)</div>
+                </div>
+                <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Verbal Reasoning (MCQ)</div>
+                  <div style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '2px' }}>
+                    {verbScore.correct} × 1.0 = {submitResult?.verbal_score ?? verbScore.correct} / 15.0 Marks
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{verbScore.correct}/{verbScore.total} correct (+1.0 per question)</div>
+                </div>
+                <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Quantitative Aptitude</div>
+                  <div style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '2px' }}>
+                    {aptScore.correct} × 1.0 = {submitResult?.aptitude_score ?? aptScore.correct} / 15.0 Marks
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{aptScore.correct}/{aptScore.total} correct (+1.0 per question)</div>
+                </div>
+                <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Easy Coding Challenge</div>
+                  <div style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '2px' }}>
+                    {submitResult ? submitResult.coding_easy_score : 'N/A'} / 30.0 Marks
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Logic, Testcases & Complexity</div>
+                </div>
+                <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Hard Coding Challenge</div>
+                  <div style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '2px' }}>
+                    {submitResult ? submitResult.coding_hard_score : 'N/A'} / 50.0 Marks
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Edge Cases, Constraints & Big-O</div>
                 </div>
               </div>
             </div>

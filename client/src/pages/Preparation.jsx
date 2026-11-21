@@ -1090,6 +1090,24 @@ const Preparation = () => {
   const [resultsLoading, setResultsLoading] = useState(false);
   const [resultsError, setResultsError] = useState(null);
   const [resultsActiveSubTab, setResultsActiveSubTab] = useState('tests');
+  const [expandedTestId, setExpandedTestId] = useState(null);
+  const [expandedReviewSection, setExpandedReviewSection] = useState('technical');
+
+  const isMcqMatch = (userAns, correctAns, options) => {
+    if (!userAns || !correctAns) return false;
+    const u = String(userAns).trim().toLowerCase();
+    const c = String(correctAns).trim().toLowerCase();
+    if (u === c) return true;
+    const letters = ['a', 'b', 'c', 'd'];
+    if (letters.includes(c) && options && options.length) {
+      const idx = letters.indexOf(c);
+      if (idx < options.length) {
+        const opt = String(options[idx]).trim().toLowerCase();
+        if (u === opt || u.startsWith(c + ')') || u.startsWith(c + '.')) return true;
+      }
+    }
+    return false;
+  };
 
   // Fetch results when tab switches to 'results'
   useEffect(() => {
@@ -5959,72 +5977,165 @@ const Preparation = () => {
                             No mock test reports found. Start a mock test to see your score cards!
                           </div>
                         ) : (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxHeight: '440px', overflowY: 'auto', paddingRight: '8px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxHeight: '520px', overflowY: 'auto', paddingRight: '8px' }}>
                             {resultsData.tests.map(test => {
                               const grading = test.details?.grading || {};
                               const coding_easy = grading.coding_easy || {};
                               const coding_hard = grading.coding_hard || {};
+                              const testData = test.details?.test_data || {};
+                              const answers = test.details?.answers || {};
+                              const codingAnswers = test.details?.coding_answers || {};
+                              const codingLanguages = test.details?.coding_languages || {};
+
+                              const techTotal = grading.technical?.total || (testData.technical?.length || 60);
+                              const techCorrect = grading.technical?.correct || 0;
+                              const verbTotal = grading.verbal?.total || (testData.verbal?.length || 15);
+                              const verbCorrect = grading.verbal?.correct || 0;
+                              const aptTotal = grading.aptitude?.total || (testData.aptitude?.length || 15);
+                              const aptCorrect = grading.aptitude?.correct || 0;
+
+                              const totalMcq = techTotal + verbTotal + aptTotal;
+                              const totalCorrect = techCorrect + verbCorrect + aptCorrect;
+                              const totalAnswered = answers ? Object.keys(answers).length : totalCorrect;
+                              const totalSkipped = Math.max(0, totalMcq - totalAnswered);
+                              const totalWrong = Math.max(0, totalMcq - totalCorrect - totalSkipped);
+                              const accuracyPct = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+                              const isExpanded = expandedTestId === test.id;
+
                               return (
                                 <div key={test.id} style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px', marginBottom: '16px' }}>
-                                    <div>
-                                      <span style={{ fontSize: '0.78rem', fontWeight: 800, background: '#f5f7ff', color: '#4f46e5', padding: '4px 10px', borderRadius: '20px', textTransform: 'uppercase', marginRight: '8px' }}>
+                                  {/* Header */}
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px', marginBottom: '20px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                      <span style={{ fontSize: '0.78rem', fontWeight: 800, background: '#f5f7ff', color: '#4f46e5', padding: '4px 10px', borderRadius: '20px', textTransform: 'uppercase' }}>
                                         {test.difficulty} level
                                       </span>
                                       <span style={{ fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>
                                         Completed on {new Date(test.created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                                       </span>
                                     </div>
-                                    <button
-                                      onClick={() => window.open(`/api/results/download-pdf?id=${test.id}&type=test&email=${encodeURIComponent(user?.email || '')}`, '_blank')}
-                                      style={{
-                                        background: 'linear-gradient(to right, #4f46e5, #3b82f6)',
-                                        color: 'white',
-                                        padding: '8px 18px',
-                                        borderRadius: '10px',
-                                        fontWeight: 700,
-                                        fontSize: '0.85rem',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)'
-                                      }}
-                                    >
-                                      Download Report PDF
-                                    </button>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                      <button
+                                        onClick={() => setExpandedTestId(isExpanded ? null : test.id)}
+                                        style={{
+                                          background: isExpanded ? '#f1f5f9' : '#eef2ff',
+                                          color: isExpanded ? '#475569' : '#4338ca',
+                                          padding: '8px 16px',
+                                          borderRadius: '10px',
+                                          fontWeight: 700,
+                                          fontSize: '0.84rem',
+                                          border: '1px solid ' + (isExpanded ? '#cbd5e1' : '#c7d2fe'),
+                                          cursor: 'pointer',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: '6px'
+                                        }}
+                                      >
+                                        <BookOpen className="size-4" />
+                                        {isExpanded ? 'Hide Questions' : 'Inspect All Questions'}
+                                      </button>
+                                      <button
+                                        onClick={() => window.open(`/api/results/download-pdf?id=${test.id}&type=test&email=${encodeURIComponent(user?.email || '')}`, '_blank')}
+                                        style={{
+                                          background: 'linear-gradient(to right, #4f46e5, #3b82f6)',
+                                          color: 'white',
+                                          padding: '8px 18px',
+                                          borderRadius: '10px',
+                                          fontWeight: 700,
+                                          fontSize: '0.85rem',
+                                          border: 'none',
+                                          cursor: 'pointer',
+                                          boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)'
+                                        }}
+                                      >
+                                        Download Report PDF
+                                      </button>
+                                    </div>
                                   </div>
 
-                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-                                      <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Total Marks</div>
-                                      <strong style={{ fontSize: '1.25rem', color: '#16a34a' }}>{test.score} / {test.max_score}</strong>
+                                  {/* Diagnostic Scorecard & Metrics (Correct, Incorrect, Skipped, Accuracy) */}
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', marginBottom: '20px' }}>
+                                    <div style={{ background: '#f0fdf4', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #bbf7d0' }}>
+                                      <div style={{ fontSize: '0.72rem', color: '#166534', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Total Marks</div>
+                                      <strong style={{ fontSize: '1.3rem', color: '#15803d' }}>{test.score} <span style={{ fontSize: '0.8rem', color: '#166534' }}>/ {test.max_score}</span></strong>
+                                      <div style={{ fontSize: '0.72rem', color: '#166534', marginTop: '2px', fontWeight: 700 }}>{Math.round((test.score / (test.max_score || 200)) * 100)}% Total</div>
                                     </div>
-                                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-                                      <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Technical MCQs</div>
-                                      <strong style={{ fontSize: '1.2rem', color: '#334155' }}>{test.technical_score} / 90.0</strong>
-                                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>({grading.technical?.correct || 0}/{grading.technical?.total || 0} Correct)</div>
+                                    <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                                      <div style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Questions</div>
+                                      <strong style={{ fontSize: '1.25rem', color: '#0f172a' }}>{totalMcq + 2}</strong>
+                                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>{totalMcq} MCQ + 2 Coding</div>
                                     </div>
-                                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-                                      <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Verbal MCQs</div>
-                                      <strong style={{ fontSize: '1.2rem', color: '#334155' }}>{test.verbal_score} / 15.0</strong>
-                                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>({grading.verbal?.correct || 0}/{grading.verbal?.total || 0} Correct)</div>
+                                    <div style={{ background: '#f0fdf4', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #bbf7d0' }}>
+                                      <div style={{ fontSize: '0.72rem', color: '#15803d', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Correct (✓)</div>
+                                      <strong style={{ fontSize: '1.25rem', color: '#16a34a' }}>{totalCorrect}</strong>
+                                      <div style={{ fontSize: '0.7rem', color: '#15803d', marginTop: '2px' }}>MCQs Passed</div>
                                     </div>
-                                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-                                      <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Aptitude MCQs</div>
-                                      <strong style={{ fontSize: '1.2rem', color: '#334155' }}>{test.aptitude_score} / 15.0</strong>
-                                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>({grading.aptitude?.correct || 0}/{grading.aptitude?.total || 0} Correct)</div>
+                                    <div style={{ background: '#fff1f2', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #fecdd3' }}>
+                                      <div style={{ fontSize: '0.72rem', color: '#9f1239', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Incorrect (✗)</div>
+                                      <strong style={{ fontSize: '1.25rem', color: '#e11d48' }}>{totalWrong}</strong>
+                                      <div style={{ fontSize: '0.7rem', color: '#9f1239', marginTop: '2px' }}>Wrong Options</div>
                                     </div>
-                                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-                                      <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Easy Coding</div>
-                                      <strong style={{ fontSize: '1.2rem', color: '#334155' }}>{test.coding_easy_score} / 30.0</strong>
+                                    <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                                      <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Skipped (○)</div>
+                                      <strong style={{ fontSize: '1.25rem', color: '#64748b' }}>{totalSkipped}</strong>
+                                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>Unattempted</div>
                                     </div>
-                                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid #f1f5f9' }}>
-                                      <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Hard Coding</div>
-                                      <strong style={{ fontSize: '1.2rem', color: '#334155' }}>{test.coding_hard_score} / 50.0</strong>
+                                    <div style={{ background: '#eef2ff', padding: '14px', borderRadius: '12px', textAlign: 'center', border: '1px solid #c7d2fe' }}>
+                                      <div style={{ fontSize: '0.72rem', color: '#4338ca', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>Accuracy Rate</div>
+                                      <strong style={{ fontSize: '1.25rem', color: '#4f46e5' }}>{accuracyPct}%</strong>
+                                      <div style={{ fontSize: '0.7rem', color: '#4338ca', marginTop: '2px' }}>On Attempted</div>
+                                    </div>
+                                  </div>
+
+                                  {/* Transparent Marking Calculation Scheme */}
+                                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px 20px', marginBottom: '22px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                                      <strong style={{ fontSize: '0.92rem', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span>📊</span> How Marks Were Calculated in This Report
+                                      </strong>
+                                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Weightage Scale: 200 Max Marks</span>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+                                      <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Technical Core (MCQ)</div>
+                                        <div style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '2px' }}>
+                                          {techCorrect} × 1.5 = {test.technical_score} / 90.0 Marks
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{techCorrect}/{techTotal} correct (+1.5 per question)</div>
+                                      </div>
+                                      <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Verbal Reasoning (MCQ)</div>
+                                        <div style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '2px' }}>
+                                          {verbCorrect} × 1.0 = {test.verbal_score} / 15.0 Marks
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{verbCorrect}/{verbTotal} correct (+1.0 per question)</div>
+                                      </div>
+                                      <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Quantitative Aptitude</div>
+                                        <div style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '2px' }}>
+                                          {aptCorrect} × 1.0 = {test.aptitude_score} / 15.0 Marks
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{aptCorrect}/{aptTotal} correct (+1.0 per question)</div>
+                                      </div>
+                                      <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Easy Coding Challenge</div>
+                                        <div style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '2px' }}>
+                                          {test.coding_easy_score} / 30.0 Marks
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Logic, Testcases & Time Complexity</div>
+                                      </div>
+                                      <div style={{ background: 'white', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4f46e5' }}>Hard Coding Challenge</div>
+                                        <div style={{ fontSize: '0.82rem', color: '#334155', fontWeight: 800, marginTop: '2px' }}>
+                                          {test.coding_hard_score} / 50.0 Marks
+                                        </div>
+                                        <div style={{ fontSize: '0.7rem', color: '#64748b' }}>Edge Cases, Constraints & Big-O</div>
+                                      </div>
                                     </div>
                                   </div>
 
                                   {/* Coding Challenge Detailed Evaluations */}
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: isExpanded ? '24px' : '0' }}>
                                     <strong style={{ fontSize: '0.92rem', color: '#1e293b' }}>AI Coding Evaluator Feedback:</strong>
                                     {coding_easy && (
                                       <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
@@ -6049,6 +6160,187 @@ const Preparation = () => {
                                       </div>
                                     )}
                                   </div>
+
+                                  {/* Expandable Question-by-Question Review Section */}
+                                  {isExpanded && (
+                                    <div style={{ borderTop: '2px solid #f1f5f9', paddingTop: '20px', marginTop: '16px' }}>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+                                        <h4 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                                          Diagnostic Question Breakdown
+                                        </h4>
+                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                          {[
+                                            { id: 'technical', label: 'Technical Core', count: techTotal, score: `${test.technical_score}/90` },
+                                            { id: 'verbal', label: 'Verbal', count: verbTotal, score: `${test.verbal_score}/15` },
+                                            { id: 'aptitude', label: 'Aptitude', count: aptTotal, score: `${test.aptitude_score}/15` },
+                                            { id: 'coding', label: 'Coding', count: 2, score: `${(test.coding_easy_score || 0) + (test.coding_hard_score || 0)}/80` }
+                                          ].map(tab => {
+                                            const isActive = expandedReviewSection === tab.id;
+                                            return (
+                                              <button
+                                                key={tab.id}
+                                                onClick={() => setExpandedReviewSection(tab.id)}
+                                                style={{
+                                                  padding: '6px 14px',
+                                                  borderRadius: '8px',
+                                                  border: isActive ? '1px solid #4f46e5' : '1px solid #e2e8f0',
+                                                  background: isActive ? '#eef2ff' : '#ffffff',
+                                                  color: isActive ? '#4338ca' : '#64748b',
+                                                  fontWeight: 700,
+                                                  fontSize: '0.8rem',
+                                                  cursor: 'pointer',
+                                                  display: 'flex',
+                                                  alignItems: 'center',
+                                                  gap: '6px'
+                                                }}
+                                              >
+                                                <span>{tab.label}</span>
+                                                <span style={{ fontSize: '0.72rem', padding: '1px 6px', borderRadius: '999px', background: isActive ? '#4338ca' : '#f1f5f9', color: isActive ? '#ffffff' : '#64748b' }}>
+                                                  {tab.score}
+                                                </span>
+                                              </button>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+
+                                      {/* MCQ Questions Display */}
+                                      {expandedReviewSection !== 'coding' ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '500px', overflowY: 'auto', paddingRight: '6px' }}>
+                                          {((testData[expandedReviewSection]) || []).map((q, qIdx) => {
+                                            const userAns = answers[q.id];
+                                            const correctAns = q.answer;
+                                            const isCorrect = userAns && isMcqMatch(userAns, correctAns, q.options);
+                                            const isSkipped = !userAns;
+
+                                            return (
+                                              <div
+                                                key={q.id || qIdx}
+                                                style={{
+                                                  background: '#ffffff',
+                                                  border: isCorrect ? '1px solid #a7f3d0' : isSkipped ? '1px solid #e2e8f0' : '1px solid #fecdd3',
+                                                  borderRadius: '12px',
+                                                  padding: '16px 20px',
+                                                  boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+                                                }}
+                                              >
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                                  <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#334155' }}>
+                                                    Q{qIdx + 1}. {q.subject ? `[${q.subject}]` : ''}
+                                                  </span>
+                                                  <span>
+                                                    {isCorrect ? (
+                                                      <span style={{ padding: '2px 8px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, background: '#d1fae5', color: '#047857' }}>✓ Correct</span>
+                                                    ) : isSkipped ? (
+                                                      <span style={{ padding: '2px 8px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, background: '#f1f5f9', color: '#64748b' }}>○ Skipped</span>
+                                                    ) : (
+                                                      <span style={{ padding: '2px 8px', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, background: '#ffe4e6', color: '#b91c1c' }}>✗ Incorrect</span>
+                                                    )}
+                                                  </span>
+                                                </div>
+
+                                                <p style={{ margin: '0 0 10px 0', fontSize: '0.88rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.5 }}>
+                                                  {q.question}
+                                                </p>
+
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', marginBottom: '10px' }}>
+                                                  {(q.options || []).map((opt, optIdx) => {
+                                                    const isThisUserAns = userAns && isMcqMatch(userAns, opt, [opt]);
+                                                    const isThisCorrect = isMcqMatch(opt, correctAns, [opt]) || isMcqMatch(opt, correctAns, q.options);
+                                                    let bg = '#f8fafc';
+                                                    let border = '1px solid #e2e8f0';
+                                                    let textColor = '#334155';
+
+                                                    if (isThisCorrect) {
+                                                      bg = '#ecfdf5';
+                                                      border = '1px solid #10b981';
+                                                      textColor = '#065f46';
+                                                    } else if (isThisUserAns && !isCorrect) {
+                                                      bg = '#fff1f2';
+                                                      border = '1px solid #f43f5e';
+                                                      textColor = '#9f1239';
+                                                    }
+
+                                                    return (
+                                                      <div
+                                                        key={optIdx}
+                                                        style={{
+                                                          padding: '8px 12px',
+                                                          borderRadius: '8px',
+                                                          background: bg,
+                                                          border: border,
+                                                          fontSize: '0.8rem',
+                                                          color: textColor,
+                                                          fontWeight: (isThisCorrect || isThisUserAns) ? 700 : 500,
+                                                          display: 'flex',
+                                                          justifyContent: 'space-between',
+                                                          alignItems: 'center'
+                                                        }}
+                                                      >
+                                                        <span>{opt}</span>
+                                                        {isThisCorrect && <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 800 }}>✓ Key</span>}
+                                                        {isThisUserAns && !isThisCorrect && <span style={{ fontSize: '0.72rem', color: '#e11d48', fontWeight: 800 }}>You</span>}
+                                                      </div>
+                                                    );
+                                                  })}
+                                                </div>
+
+                                                {q.explanation && (
+                                                  <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '8px 12px', fontSize: '0.78rem', color: '#166534', lineHeight: 1.4 }}>
+                                                    <strong>Explanation:</strong> {q.explanation}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                          {(testData.coding || []).map((cq, cIdx) => {
+                                            const isHard = cIdx === 1;
+                                            const cScore = isHard ? test.coding_hard_score : test.coding_easy_score;
+                                            const cMax = isHard ? 50 : 30;
+                                            const cCode = codingAnswers[cq.id] || codingAnswers[cIdx] || codingAnswers[isHard ? 'code_hard' : 'code_easy'] || '';
+                                            const cLang = codingLanguages[cq.id] || codingLanguages[cIdx] || codingLanguages[isHard ? 'code_hard' : 'code_easy'] || 'python';
+                                            const cEval = isHard ? coding_hard : coding_easy;
+
+                                            return (
+                                              <div key={cq.id || cIdx} style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '18px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                                  <strong style={{ fontSize: '0.92rem', color: '#1e293b' }}>
+                                                    {cq.title} ({isHard ? 'Hard' : 'Easy'})
+                                                  </strong>
+                                                  <span style={{ fontSize: '0.88rem', fontWeight: 800, color: cScore > 0 ? '#16a34a' : '#dc2626' }}>
+                                                    {cScore} / {cMax}.0 Marks
+                                                  </span>
+                                                </div>
+                                                <p style={{ fontSize: '0.82rem', color: '#475569', margin: '0 0 10px 0' }}>
+                                                  {cq.description}
+                                                </p>
+                                                {cCode ? (
+                                                  <div style={{ background: '#0f172a', borderRadius: '8px', padding: '12px', marginBottom: '10px' }}>
+                                                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginBottom: '4px', textTransform: 'uppercase', fontWeight: 700 }}>
+                                                      Submitted Code ({cLang}):
+                                                    </div>
+                                                    <pre style={{ margin: 0, color: '#f8fafc', fontSize: '0.78rem', fontFamily: 'monospace', whiteSpace: 'pre-wrap', maxHeight: '180px', overflowY: 'auto' }}>
+                                                      {cCode}
+                                                    </pre>
+                                                  </div>
+                                                ) : (
+                                                  <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: '8px', color: '#94a3b8', fontSize: '0.8rem', marginBottom: '10px' }}>
+                                                    No solution submitted for this challenge.
+                                                  </div>
+                                                )}
+                                                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 14px', fontSize: '0.8rem', color: '#334155' }}>
+                                                  <strong>Compiler Evaluation Feedback:</strong> {cEval?.feedback || 'Evaluated against automated edge cases.'}
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })}

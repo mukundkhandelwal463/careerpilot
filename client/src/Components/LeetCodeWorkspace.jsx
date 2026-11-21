@@ -163,6 +163,7 @@ export default function LeetCodeWorkspace({
   const rightColumnRef = useRef(null);
   const editorRef = useRef(null);
   const lineNumbersRef = useRef(null);
+  const indentGuidesRef = useRef(null);
 
   // Drag handlers for split panels
   const handleMouseDownH = (e) => {
@@ -269,27 +270,134 @@ export default function LeetCodeWorkspace({
     }
   }, [evalResult]);
 
-  // Sync line numbers scrolling with editor
+  // Calculate indent level (in 4-space tab stops) for each line to render visual indent guides
+  const lineIndents = useMemo(() => {
+    const rawLines = (code || '').split('\n');
+    const counts = [];
+    let currentIndent = 0;
+    for (let i = 0; i < rawLines.length; i++) {
+      const line = rawLines[i];
+      if (line.trim().length === 0) {
+        // preserve indent on blank lines for continuous vertical guide line
+        counts.push(currentIndent);
+      } else {
+        const leading = (line.match(/^ +/) || [''])[0].length;
+        const lvl = Math.floor(leading / 4);
+        currentIndent = lvl;
+        counts.push(lvl);
+      }
+    }
+    return counts;
+  }, [code]);
+
+  // Sync line numbers and indent guides scrolling with editor
   const handleScroll = (e) => {
     if (lineNumbersRef.current) {
       lineNumbersRef.current.scrollTop = e.target.scrollTop;
     }
+    if (indentGuidesRef.current) {
+      indentGuidesRef.current.scrollTop = e.target.scrollTop;
+      indentGuidesRef.current.scrollLeft = e.target.scrollLeft;
+    }
   };
 
-  // Tab key handling and shortcuts inside textarea
+  // Smart Tab, Shift+Tab, Auto-Indent Enter, and Backspace inside textarea
   const handleKeyDown = (e) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
     if (e.key === 'Tab') {
       e.preventDefault();
-      const start = e.target.selectionStart;
-      const end = e.target.selectionEnd;
-      const val = e.target.value;
-      const newVal = val.substring(0, start) + '    ' + val.substring(end);
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const val = editor.value;
+
+      if (e.shiftKey) {
+        // Shift+Tab: un-indent current line or selected lines by up to 4 spaces
+        const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+        const lineEnd = val.indexOf('\n', end);
+        const actualEnd = lineEnd === -1 ? val.length : lineEnd;
+        const lines = val.substring(lineStart, actualEnd).split('\n');
+        let firstLineRemoved = 0;
+        const unindented = lines.map((l, i) => {
+          if (l.startsWith('    ')) {
+            if (i === 0) firstLineRemoved = 4;
+            return l.substring(4);
+          } else if (l.startsWith('  ')) {
+            if (i === 0) firstLineRemoved = 2;
+            return l.substring(2);
+          }
+          return l;
+        }).join('\n');
+
+        const newVal = val.substring(0, lineStart) + unindented + val.substring(actualEnd);
+        onCodeChange(newVal);
+        setTimeout(() => {
+          editor.selectionStart = Math.max(lineStart, start - firstLineRemoved);
+          editor.selectionEnd = Math.max(lineStart, end - firstLineRemoved);
+        }, 0);
+      } else {
+        // Tab: insert 4 spaces at cursor or indent selected lines
+        if (start === end) {
+          const newVal = val.substring(0, start) + '    ' + val.substring(end);
+          onCodeChange(newVal);
+          setTimeout(() => {
+            editor.selectionStart = editor.selectionEnd = start + 4;
+          }, 0);
+        } else {
+          // Multiline indent
+          const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+          const lineEnd = val.indexOf('\n', end);
+          const actualEnd = lineEnd === -1 ? val.length : lineEnd;
+          const lines = val.substring(lineStart, actualEnd).split('\n');
+          const indented = lines.map(l => '    ' + l).join('\n');
+          const newVal = val.substring(0, lineStart) + indented + val.substring(actualEnd);
+          onCodeChange(newVal);
+          setTimeout(() => {
+            editor.selectionStart = start + 4;
+            editor.selectionEnd = end + (lines.length * 4);
+          }, 0);
+        }
+      }
+    } else if (e.key === 'Enter') {
+      // Auto-indent on Enter to preserve indentation and add 4 spaces after block starters
+      e.preventDefault();
+      const start = editor.selectionStart;
+      const val = editor.value;
+      const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+      const currentLine = val.substring(lineStart, start);
+      const leadingSpaces = (currentLine.match(/^ +/) || [''])[0];
+      const trimmed = currentLine.trimEnd();
+
+      // If line ends with '{', ':', '(', or '[', add 4 extra spaces for nested block
+      let extra = '';
+      if (trimmed.endsWith('{') || trimmed.endsWith(':') || trimmed.endsWith('(') || trimmed.endsWith('[')) {
+        extra = '    ';
+      }
+
+      const insertText = '\n' + leadingSpaces + extra;
+      const newVal = val.substring(0, start) + insertText + val.substring(editor.selectionEnd);
       onCodeChange(newVal);
       setTimeout(() => {
-        if (editorRef.current) {
-          editorRef.current.selectionStart = editorRef.current.selectionEnd = start + 4;
-        }
+        editor.selectionStart = editor.selectionEnd = start + insertText.length;
       }, 0);
+    } else if (e.key === 'Backspace') {
+      // Smart 4-space backspace when cursor is at a 4-space tab stop
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      if (start === end && start >= 4) {
+        const val = editor.value;
+        const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+        const before = val.substring(lineStart, start);
+        if (/^ +$/.test(before) && before.length % 4 === 0) {
+          e.preventDefault();
+          const newVal = val.substring(0, start - 4) + val.substring(start);
+          onCodeChange(newVal);
+          setTimeout(() => {
+            editor.selectionStart = editor.selectionEnd = start - 4;
+          }, 0);
+        }
+      }
     } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
       handleTriggerRun();
@@ -1088,33 +1196,86 @@ export default function LeetCodeWorkspace({
               ))}
             </div>
 
-            {/* Editable Code Textarea */}
-            <textarea
-              ref={editorRef}
-              value={code}
-              onChange={(e) => onCodeChange(e.target.value)}
-              onScroll={handleScroll}
-              onKeyDown={handleKeyDown}
-              spellCheck="false"
-              placeholder={`// Write your ${language} solution here...`}
+            {/* Editable Code Textarea with Synchronized Visual Indent Guides */}
+            <div
               style={{
                 flex: 1,
-                background: 'transparent',
-                color: '#f4f4f5',
-                border: 'none',
-                outline: 'none',
-                padding: '16px',
-                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "JetBrains Mono", monospace',
-                fontSize: '0.88rem',
-                lineHeight: '22px',
-                whiteSpace: 'pre',
-                overflowWrap: 'normal',
-                overflowX: 'auto',
-                resize: 'none',
-                tabSize: 4,
-                pointerEvents: (isDraggingH || isDraggingV) ? 'none' : 'auto'
+                position: 'relative',
+                display: 'flex',
+                overflow: 'hidden',
+                minHeight: 0
               }}
-            />
+            >
+              {/* Visual Indent Guide Lines Layer (renders vertical tab-stop guides like VS Code / LeetCode) */}
+              <div
+                ref={indentGuidesRef}
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  pointerEvents: 'none',
+                  overflow: 'hidden',
+                  padding: '16px',
+                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "JetBrains Mono", monospace',
+                  fontSize: '0.88rem',
+                  lineHeight: '22px',
+                  whiteSpace: 'pre',
+                  zIndex: 1
+                }}
+              >
+                {lineIndents.map((lvlCount, idx) => (
+                  <div key={idx} style={{ height: '22px', position: 'relative' }}>
+                    {Array.from({ length: lvlCount }).map((_, lvl) => (
+                      <span
+                        key={lvl}
+                        style={{
+                          position: 'absolute',
+                          left: `${(lvl + 1) * 4}ch`,
+                          top: 0,
+                          bottom: 0,
+                          width: '1px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.16)'
+                        }}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+
+              {/* Editable Code Textarea */}
+              <textarea
+                ref={editorRef}
+                value={code}
+                onChange={(e) => onCodeChange(e.target.value)}
+                onScroll={handleScroll}
+                onKeyDown={handleKeyDown}
+                spellCheck="false"
+                placeholder={`// Write your ${language} solution here...`}
+                style={{
+                  position: 'relative',
+                  zIndex: 2,
+                  width: '100%',
+                  height: '100%',
+                  background: 'transparent',
+                  color: '#f4f4f5',
+                  border: 'none',
+                  outline: 'none',
+                  padding: '16px',
+                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "JetBrains Mono", monospace',
+                  fontSize: '0.88rem',
+                  lineHeight: '22px',
+                  whiteSpace: 'pre',
+                  overflowWrap: 'normal',
+                  overflowX: 'auto',
+                  resize: 'none',
+                  tabSize: 4,
+                  pointerEvents: (isDraggingH || isDraggingV) ? 'none' : 'auto'
+                }}
+              />
+            </div>
           </div>
 
           {/* VERTICAL RESIZE DIVIDER */}
