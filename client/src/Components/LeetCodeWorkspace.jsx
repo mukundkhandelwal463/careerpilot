@@ -5,6 +5,7 @@ import {
   XCircle,
   AlertCircle,
   RotateCcw,
+  Pause,
   Columns,
   Maximize2,
   Minimize2,
@@ -67,13 +68,48 @@ export default function LeetCodeWorkspace({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedCaseIdx, setSelectedCaseIdx] = useState(0);
   const [selectedResultIdx, setSelectedResultIdx] = useState(0);
+  const [solveElapsedSeconds, setSolveElapsedSeconds] = useState(() => {
+    const saved = question?.id ? localStorage.getItem(`dsa_solve_time_${question.id}`) : null;
+    return saved ? parseInt(saved, 10) || 0 : 0;
+  });
+  const [isTimerRunning, setIsTimerRunning] = useState(true);
+
+  // Timer reset / init when question changes
+  useEffect(() => {
+    if (question?.id) {
+      const saved = localStorage.getItem(`dsa_solve_time_${question.id}`);
+      if (saved && isSolved) {
+        setSolveElapsedSeconds(parseInt(saved, 10) || 0);
+        setIsTimerRunning(false);
+      } else {
+        setSolveElapsedSeconds(0);
+        setIsTimerRunning(!isSolved);
+      }
+    }
+  }, [question?.id, isSolved]);
+
+  // Tick timer every second while running and unsolved
+  useEffect(() => {
+    if (!isTimerRunning || isSolved) return;
+    const interval = setInterval(() => {
+      setSolveElapsedSeconds(s => s + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isTimerRunning, isSolved]);
+
+  // Freeze and persist time taken when submission succeeds
+  useEffect(() => {
+    if (evalResult && (evalResult.all_passed || evalResult.passed) && evalResult.status === 'Accepted' && question?.id) {
+      setIsTimerRunning(false);
+      localStorage.setItem(`dsa_solve_time_${question.id}`, solveElapsedSeconds.toString());
+    }
+  }, [evalResult, question?.id, solveElapsedSeconds]);
   const [showSectionModal, setShowSectionModal] = useState(false);
   const [customStdin, setCustomStdin] = useState('');
   const [copied, setCopied] = useState(false);
   const [submissionsHistory, setSubmissionsHistory] = useState([]);
 
   // Adjustable panel dimensions (Split Pane Resizing)
-  const [viewMode, setViewMode] = useState('split'); // 'split' | 'editor'
   const [leftWidthPercent, setLeftWidthPercent] = useState(46);
   const [isDraggingH, setIsDraggingH] = useState(false);
   const [consoleHeight, setConsoleHeight] = useState(250);
@@ -333,29 +369,34 @@ export default function LeetCodeWorkspace({
           <div style={{ width: '1px', height: '16px', background: '#3f3f46' }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            {onPrevQuestion && (
-              <button
-                onClick={onPrevQuestion}
-                disabled={!hasPrev}
-                title="Previous Problem"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: hasPrev ? '#d4d4d8' : '#52525b',
-                  cursor: hasPrev ? 'pointer' : 'not-allowed',
-                  padding: '4px',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                <ChevronLeft className="size-4" />
-              </button>
-            )}
-            <span style={{ fontWeight: 700, fontSize: '0.94rem', color: '#f4f4f5', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              onClick={onPrevQuestion}
+              disabled={!hasPrev}
+              title={hasPrev ? "Previous Problem" : "No previous problem"}
+              style={{
+                background: hasPrev ? '#27272a' : 'transparent',
+                border: hasPrev ? '1px solid #3f3f46' : '1px solid transparent',
+                color: hasPrev ? '#f4f4f5' : '#52525b',
+                cursor: hasPrev ? 'pointer' : 'not-allowed',
+                padding: '5px 8px',
+                borderRadius: '6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '2px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <ChevronLeft className="size-4" />
+              <span>Prev</span>
+            </button>
+
+            <span style={{ fontWeight: 700, fontSize: '0.94rem', color: '#f4f4f5', display: 'flex', alignItems: 'center', gap: '6px', padding: '0 4px' }}>
               <Code2 className="size-4 text-emerald-400" />
               {question?.title || 'Coding Problem'}
             </span>
+
             {(problemLevel || question?.difficulty) && (
               <span style={{
                 padding: '2px 8px',
@@ -370,6 +411,7 @@ export default function LeetCodeWorkspace({
                 {problemLevel || question?.difficulty}
               </span>
             )}
+
             {isSolved && (
               <span style={{
                 display: 'inline-flex',
@@ -386,29 +428,33 @@ export default function LeetCodeWorkspace({
                 <CheckCircle2 className="size-3" /> Solved
               </span>
             )}
-            {onNextQuestion && (
-              <button
-                onClick={onNextQuestion}
-                disabled={!hasNext}
-                title="Next Problem"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: hasNext ? '#d4d4d8' : '#52525b',
-                  cursor: hasNext ? 'pointer' : 'not-allowed',
-                  padding: '4px',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                <ChevronRight className="size-4" />
-              </button>
-            )}
+
+            <button
+              onClick={onNextQuestion}
+              disabled={!hasNext}
+              title={hasNext ? "Next Problem" : "No next problem"}
+              style={{
+                background: hasNext ? '#27272a' : 'transparent',
+                border: hasNext ? '1px solid #3f3f46' : '1px solid transparent',
+                color: hasNext ? '#f4f4f5' : '#52525b',
+                cursor: hasNext ? 'pointer' : 'not-allowed',
+                padding: '5px 8px',
+                borderRadius: '6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '2px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <span>Next</span>
+              <ChevronRight className="size-4" />
+            </button>
           </div>
         </div>
 
-        {/* Center: Run, Submit & View Mode Layout Switcher */}
+                {/* Center: Run & Submit Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button
             onClick={handleTriggerRun}
@@ -474,54 +520,11 @@ export default function LeetCodeWorkspace({
               </>
             )}
           </button>
-
-          {/* Full Screen Editor vs Split View Switcher */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', background: '#27272a', borderRadius: '8px', padding: '2px', border: '1px solid #3f3f46', marginLeft: '6px' }}>
-            <button
-              onClick={() => setViewMode('split')}
-              title="Split View: Side-by-side with Problem Description"
-              style={{
-                padding: '4px 10px',
-                borderRadius: '6px',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                background: viewMode === 'split' ? '#3f3f46' : 'transparent',
-                color: viewMode === 'split' ? '#ffffff' : '#a1a1aa',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <Columns className="size-3.5" />
-              <span>Split</span>
-            </button>
-            <button
-              onClick={() => setViewMode('editor')}
-              title="Full Editor: Maximize code editor to 100% full screen"
-              style={{
-                padding: '4px 10px',
-                borderRadius: '6px',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                background: viewMode === 'editor' ? '#10b981' : 'transparent',
-                color: viewMode === 'editor' ? '#ffffff' : '#a1a1aa',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <Maximize2 className="size-3.5" />
-              <span>Full Editor</span>
-            </button>
-          </div>
         </div>
 
-        {/* Right: Section Timer & Finish/Next Section */}
+        {/* Right: Live Solve Stopwatch Timer, Fullscreen, and Go Back */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Mock test countdown timer (if in mock test) */}
           {timeRemaining != null && (
             <div
               style={{
@@ -539,6 +542,45 @@ export default function LeetCodeWorkspace({
             >
               <Clock className="size-3.5" />
               <span>{formatTime(timeRemaining)}</span>
+            </div>
+          )}
+
+          {/* Practice Solve Stopwatch Timer: Shows how much time user takes to solve */}
+          {timeRemaining == null && (
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '5px 12px',
+                borderRadius: '8px',
+                background: isSolved ? 'rgba(16, 185, 129, 0.15)' : '#27272a',
+                border: `1px solid ${isSolved ? 'rgba(16, 185, 129, 0.4)' : '#3f3f46'}`,
+                color: isSolved ? '#34d399' : '#f4f4f5',
+                fontWeight: 600,
+                fontSize: '0.84rem'
+              }}
+              title={isSolved ? "Time taken to solve this problem" : "Live timer: time spent solving this problem"}
+            >
+              <Clock className="size-3.5 text-emerald-400" />
+              <span>{isSolved ? `Solved in ${formatTime(solveElapsedSeconds)}` : formatTime(solveElapsedSeconds)}</span>
+              {!isSolved && (
+                <button
+                  onClick={() => setIsTimerRunning(!isTimerRunning)}
+                  title={isTimerRunning ? "Pause Timer" : "Resume Timer"}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#a1a1aa',
+                    cursor: 'pointer',
+                    padding: '2px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                >
+                  {isTimerRunning ? <Pause className="size-3" /> : <Play className="size-3 fill-current" />}
+                </button>
+              )}
             </div>
           )}
 
@@ -605,26 +647,27 @@ export default function LeetCodeWorkspace({
           {onClose && (
             <button
               onClick={onClose}
-              title="Close compiler and return to DSA sheet"
+              title="Go back to DSA sheet"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '6px 14px',
+                padding: '6px 16px',
                 borderRadius: '8px',
-                background: '#27272a',
+                background: 'linear-gradient(135deg, #27272a 0%, #1f1f23 100%)',
                 color: '#f4f4f5',
                 border: '1px solid #3f3f46',
                 cursor: 'pointer',
-                fontSize: '0.82rem',
+                fontSize: '0.84rem',
                 fontWeight: 600,
-                transition: 'background 0.15s'
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                transition: 'all 0.15s ease'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#3f3f46'}
-              onMouseLeave={(e) => e.currentTarget.style.background = '#27272a'}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#3f3f46'; e.currentTarget.style.borderColor = '#52525b'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#27272a'; e.currentTarget.style.borderColor = '#3f3f46'; }}
             >
-              <X className="size-4" />
-              <span>Close & Return</span>
+              <ChevronLeft className="size-4 text-zinc-300" />
+              <span>Go Back</span>
             </button>
           )}
         </div>
@@ -644,7 +687,7 @@ export default function LeetCodeWorkspace({
         {/* LEFT COLUMN: PROBLEM SPECS & TABS */}
         <div
           style={{
-            display: viewMode === 'editor' ? 'none' : 'flex',
+            display: 'flex',
             flex: `0 0 ${leftWidthPercent}%`,
             width: `${leftWidthPercent}%`,
             minWidth: '220px',
@@ -846,7 +889,7 @@ export default function LeetCodeWorkspace({
           onDoubleClick={handleDoubleClickH}
           className={`split-resizer-h ${isDraggingH ? 'dragging' : ''}`}
           title="Drag to resize Question and Code Editor • Double-click to reset (50/50)"
-          style={{ display: viewMode === 'editor' ? 'none' : 'flex' }}
+          
         >
           <div
             className="resizer-grip"
@@ -867,7 +910,7 @@ export default function LeetCodeWorkspace({
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            width: viewMode === 'editor' ? '100%' : 'auto',
+            
             minWidth: 0,
             overflow: 'hidden'
           }}

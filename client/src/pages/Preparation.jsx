@@ -1139,6 +1139,37 @@ const Preparation = () => {
 
   const formattedCompilerQuestion = activeCompilerProblem ? getDsaProblemData(activeCompilerProblem, compilerPatternName) : null;
 
+  // Flat list of all DSA sheet problems across all topics for linear Prev / Next switching
+  const allDsaProblems = useMemo(() => {
+    const list = [];
+    dsaSheetData.forEach(pattern => {
+      pattern.problems.forEach(prob => {
+        list.push({ ...prob, patternName: pattern.patternName });
+      });
+    });
+    return list;
+  }, []);
+
+  const currentDsaProblemIndex = activeCompilerProblem
+    ? allDsaProblems.findIndex(p => p.id === activeCompilerProblem.id)
+    : -1;
+  const hasPrevDsaProblem = currentDsaProblemIndex > 0;
+  const hasNextDsaProblem = currentDsaProblemIndex >= 0 && currentDsaProblemIndex < allDsaProblems.length - 1;
+
+  const handlePrevDsaQuestion = () => {
+    if (currentDsaProblemIndex > 0) {
+      const prevProb = allDsaProblems[currentDsaProblemIndex - 1];
+      openDsaCompiler(prevProb, prevProb.patternName);
+    }
+  };
+
+  const handleNextDsaQuestion = () => {
+    if (currentDsaProblemIndex >= 0 && currentDsaProblemIndex < allDsaProblems.length - 1) {
+      const nextProb = allDsaProblems[currentDsaProblemIndex + 1];
+      openDsaCompiler(nextProb, nextProb.patternName);
+    }
+  };
+
   const openDsaCompiler = (prob, patternName = '') => {
     try {
       if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
@@ -2648,6 +2679,10 @@ const Preparation = () => {
             onRun={handleRunCompiler}
             onSubmit={handleSubmitCompiler}
             onClose={closeDsaCompiler}
+            onPrevQuestion={handlePrevDsaQuestion}
+            onNextQuestion={handleNextDsaQuestion}
+            hasPrev={hasPrevDsaProblem}
+            hasNext={hasNextDsaProblem}
             solvedNotice={compilerSolvedNotice}
             isSolved={Boolean(dsaCompletedProblems[activeCompilerProblem.id])}
             problemLevel={activeCompilerProblem.level}
