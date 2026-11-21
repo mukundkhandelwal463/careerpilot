@@ -12,7 +12,7 @@ metadata:
 data:
   DJANGO_ENV: "production"
   DEBUG: "False"
-  ALLOWED_HOSTS: "careerpilot.website,15.252.51.16,localhost,127.0.0.1,careerpilot-svc,careerpilot-backend-svc"
+  ALLOWED_HOSTS: "careerpilot.website,51.21.136.193,localhost,127.0.0.1,careerpilot-svc,careerpilot-backend-svc"
   CORS_ALLOWED_ORIGINS: "https://careerpilot.website,http://careerpilot.website,http://localhost"
   POSTGRES_HOST: "careerpilot-db-svc"
   POSTGRES_PORT: "5432"

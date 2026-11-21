@@ -1,5 +1,6 @@
 import { Briefcase, Plus, Trash, Sparkles } from 'lucide-react';
 import React, { useState } from 'react'
+import LoadingOverlay from './LoadingOverlay.jsx';
 
 const ExperienceForm = ({ data, onChange }) => {
     const addExperience = () => {
@@ -48,6 +49,16 @@ const ExperienceForm = ({ data, onChange }) => {
 
   return (
     <div className='space-y-4'>
+        <LoadingOverlay
+            isOpen={enhancingIdx !== null}
+            variant="ai"
+            title="Enhancing Experience with AI"
+            subtitle="Rewriting your description into high-impact ATS bullet points"
+            steps={[
+                'Analyzing action verbs & metrics...',
+                'Optimizing phrasing for recruiter impact...'
+            ]}
+        />
         <div className='flex items-center justify-between'>
             <div>
                 <h3 className='text-lg font-semibold text-gray-800'>Professional Experience</h3>

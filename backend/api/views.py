@@ -2101,16 +2101,89 @@ def run_code_api(request):
         title = data.get("title", "")
         description = data.get("description", "")
         examples = data.get("examples", [])
+        stdin = data.get("stdin", "")
+        expected_output = data.get("expected_output")
+        testcases = data.get("testcases", [])
 
         if not language or not code:
             return JsonResponse({"success": False, "error": "Language and Code are required parameters."}, status=400)
 
-        from ai_integration import evaluate_mock_test_code
-        result = evaluate_mock_test_code(language, code, title, description, examples)
-        return JsonResponse({"success": True, "result": result})
+        import judge0_service
+        if testcases and isinstance(testcases, list) and len(testcases) > 0:
+            result = judge0_service.run_all_testcases(code, language, testcases)
+            return JsonResponse({"success": True, "result": result, "mode": "testcases"})
+        else:
+            result = judge0_service.run_judge0_submission(code, language, stdin=stdin, expected_output=expected_output)
+            result["compiled"] = (result.get("status_id") != 6 and not result.get("compile_output"))
+            result["output"] = result.get("stdout") or result.get("stderr") or result.get("compile_output") or result.get("status")
+            return JsonResponse({"success": True, "result": result, "mode": "single"})
     except Exception as exc:
         traceback.print_exc()
         return JsonResponse({"success": False, "error": str(exc)}, status=500)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def compiler_run_api(request):
+    try:
+        data = request.data
+        language = data.get("language", "python").strip()
+        code = data.get("code", "")
+        stdin = data.get("stdin", "")
+        expected_output = data.get("expected_output")
+        testcases = data.get("testcases", [])
+
+        if not code:
+            return JsonResponse({"success": False, "error": "Source code cannot be empty."}, status=400)
+
+        import judge0_service
+        if testcases and isinstance(testcases, list) and len(testcases) > 0:
+            result = judge0_service.run_all_testcases(code, language, testcases)
+            return JsonResponse({"success": True, "result": result, "mode": "testcases"})
+
+        result = judge0_service.run_judge0_submission(code, language, stdin=stdin, expected_output=expected_output)
+        result["compiled"] = (result.get("status_id") != 6 and not result.get("compile_output"))
+        result["output"] = result.get("stdout") or result.get("stderr") or result.get("compile_output") or result.get("status")
+        return JsonResponse({"success": True, "result": result, "mode": "single"})
+    except Exception as exc:
+        traceback.print_exc()
+        return JsonResponse({"success": False, "error": str(exc)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def compiler_languages_api(request):
+    languages = [
+        {"id": 71, "name": "Python 3", "key": "python", "version": "3.8.1", "extension": "py"},
+        {"id": 54, "name": "C++ (GCC)", "key": "cpp", "version": "9.2.0", "extension": "cpp"},
+        {"id": 62, "name": "Java (OpenJDK)", "key": "java", "version": "13.0.1", "extension": "java"},
+        {"id": 63, "name": "JavaScript (Node.js)", "key": "javascript", "version": "12.14.0", "extension": "js"},
+        {"id": 50, "name": "C (GCC)", "key": "c", "version": "9.2.0", "extension": "c"}
+    ]
+    return JsonResponse({"success": True, "languages": languages})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def compile_latex_api(request):
+    try:
+        code = request.data.get("code", "")
+        if not code or not code.strip():
+            return JsonResponse({"success": False, "error": "No LaTeX code provided"}, status=400)
+
+        import urllib.request, urllib.parse
+        url = 'https://latexonline.cc/compile?text=' + urllib.parse.quote(code)
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            pdf_data = resp.read()
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = 'inline; filename="compiled_resume.pdf"'
+            return response
+    except urllib.error.HTTPError as e:
+        err_msg = e.read().decode('utf-8', errors='ignore')
+        return JsonResponse({"success": False, "error": err_msg or str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
 @api_view(['POST'])
@@ -2167,22 +2240,26 @@ def submit_mock_test_api(request):
 
         if len(coding_questions) > 0:
             q_easy = coding_questions[0]
-            code_easy = coding_answers.get(str(q_easy.get("id")), "")
-            lang_easy = coding_languages.get(str(q_easy.get("id")), "python")
+            qid_easy = str(q_easy.get("id", ""))
+            code_easy = coding_answers.get(qid_easy, "") or coding_answers.get("code_easy", "") or (coding_answers.get(0, "") if isinstance(coding_answers, dict) else "")
+            lang_easy = coding_languages.get(qid_easy, "") or coding_languages.get("code_easy", "") or "python"
             easy_coding_score, easy_feedback = grade_coding_question(
                 lang_easy, code_easy, q_easy.get("title", ""),
                 q_easy.get("description", ""), q_easy.get("constraints", []),
-                q_easy.get("examples", []), 30.0
+                q_easy.get("examples", []), 30.0,
+                testcases=q_easy.get("testcases", [])
             )
 
         if len(coding_questions) > 1:
             q_hard = coding_questions[1]
-            code_hard = coding_answers.get(str(q_hard.get("id")), "")
-            lang_hard = coding_languages.get(str(q_hard.get("id")), "python")
+            qid_hard = str(q_hard.get("id", ""))
+            code_hard = coding_answers.get(qid_hard, "") or coding_answers.get("code_hard", "") or (coding_answers.get(1, "") if isinstance(coding_answers, dict) else "")
+            lang_hard = coding_languages.get(qid_hard, "") or coding_languages.get("code_hard", "") or "python"
             hard_coding_score, hard_feedback = grade_coding_question(
                 lang_hard, code_hard, q_hard.get("title", ""),
                 q_hard.get("description", ""), q_hard.get("constraints", []),
-                q_hard.get("examples", []), 50.0
+                q_hard.get("examples", []), 50.0,
+                testcases=q_hard.get("testcases", [])
             )
 
         total_score = tech_score + verb_score + apt_score + easy_coding_score + hard_coding_score

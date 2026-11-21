@@ -8,21 +8,22 @@ const Footer = () => {
 
   return (
     <footer style={{
-      background: '#090d16',
-      color: '#94a3b8',
-      borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-      padding: '70px 50px 40px',
+      background: '#1F1E1D',
+      color: '#B5B0A6',
+      borderTop: '1px solid rgba(217, 119, 87, 0.22)',
+      padding: '70px clamp(24px, 4vw, 56px) 40px',
       fontSize: '0.88rem',
-      fontFamily: '"Manrope", sans-serif',
+      fontFamily: '"Outfit", "Manrope", sans-serif',
       width: '100%',
-      marginTop: '60px'
+      marginTop: 0
     }}>
       <div style={{
-        maxWidth: '1440px',
+        width: '100%',
+        maxWidth: '1640px',
         margin: '0 auto',
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '80px',
+        gap: '64px',
         marginBottom: '52px'
       }}>
         {/* Brand & Developer Column */}
@@ -137,6 +138,24 @@ const Footer = () => {
                 <Briefcase className="size-4 text-teal-400" /> Live Jobs Search
               </Link>
             </li>
+            <li>
+              <Link to="/blog" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', transition: 'color 0.2s' }}
+                    onMouseOver={(e) => e.target.style.color = '#ff6b4a'} onMouseOut={(e) => e.target.style.color = '#94a3b8'}>
+                <FileText className="size-4 text-rose-400" /> CareerPilot SEO & Career Blog
+              </Link>
+            </li>
+            <li>
+              <Link to="/guides" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', transition: 'color 0.2s' }}
+                    onMouseOver={(e) => e.target.style.color = '#ff6b4a'} onMouseOut={(e) => e.target.style.color = '#94a3b8'}>
+                <FileText className="size-4 text-amber-300" /> ATS & Interview Guides
+              </Link>
+            </li>
+            <li>
+              <Link to="/about" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', transition: 'color 0.2s' }}
+                    onMouseOver={(e) => e.target.style.color = '#ff6b4a'} onMouseOut={(e) => e.target.style.color = '#94a3b8'}>
+                <ShieldCheck className="size-4 text-emerald-400" /> About CareerPilot
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -197,13 +216,13 @@ const Footer = () => {
             <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.98rem' }}>Mukund Khandelwal</span>
             <span style={{ color: '#94a3b8' }}>Software Engineer & AI Architect</span>
             <a href="mailto:mukundkhandelwal463@gmail.com" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
-              ✉️ mukundkhandelwal463@gmail.com
+              <Mail className="size-3.5" /> mukundkhandelwal463@gmail.com
             </a>
             <a href="https://github.com/mukundkhandelwal463" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
-              🔗 github.com/mukundkhandelwal463
+              <Github className="size-3.5" /> github.com/mukundkhandelwal463
             </a>
             <a href="https://www.linkedin.com/in/mukund-khandelwal-6a8663283/" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
-              💼 linkedin.com/in/mukund-khandelwal
+              <Linkedin className="size-3.5" /> linkedin.com/in/mukund-khandelwal
             </a>
           </div>
         </div>
@@ -211,7 +230,8 @@ const Footer = () => {
 
       {/* Bottom Copyright & Policy Bar */}
       <div style={{
-        maxWidth: '1440px',
+        width: '100%',
+        maxWidth: '1640px',
         margin: '0 auto',
         paddingTop: '28px',
         borderTop: '1px solid rgba(255, 255, 255, 0.08)',

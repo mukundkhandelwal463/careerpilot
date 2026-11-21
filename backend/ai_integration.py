@@ -1691,42 +1691,91 @@ MOCK_TEST_FALLBACK_DATA = {
     "coding": [
         {
             "id": "code_easy",
+            "number": 1,
             "difficulty": "Easy",
-            "title": "Two Sum (Array Search)",
-            "description": "Given an array of integers 'nums' and an integer 'target', return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice. Return your indices list or index pairs.",
+            "title": "1. Two Sum",
+            "tags": ["Array", "Hash Table", "Two Pointers"],
+            "companies": ["Amazon", "Google", "Meta", "Microsoft"],
+            "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.",
             "examples": [
                 {
                     "input": "nums = [2,7,11,15], target = 9",
                     "output": "[0, 1]",
                     "explanation": "Because nums[0] + nums[1] == 2 + 7 == 9, we return [0, 1]."
+                },
+                {
+                    "input": "nums = [3,2,4], target = 6",
+                    "output": "[1, 2]",
+                    "explanation": "Because nums[1] + nums[2] == 2 + 4 == 6, we return [1, 2]."
+                },
+                {
+                    "input": "nums = [3,3], target = 6",
+                    "output": "[0, 1]",
+                    "explanation": "nums[0] + nums[1] == 3 + 3 == 6, return [0, 1]."
                 }
             ],
-            "constraints": ["2 <= nums.length <= 10^4", "-10^9 <= nums[i] <= 10^9", "-10^9 <= target <= 10^9"],
+            "constraints": [
+                "2 <= nums.length <= 10^4",
+                "-10^9 <= nums[i] <= 10^9",
+                "-10^9 <= target <= 10^9",
+                "Only one valid answer exists.",
+                "Follow-up: Can you come up with an algorithm that is less than O(n^2) time complexity?"
+            ],
+            "testcases": [
+                {"input": "[2,7,11,15]\n9", "expected": "[0, 1]", "label": "Case 1"},
+                {"input": "[3,2,4]\n6", "expected": "[1, 2]", "label": "Case 2"},
+                {"input": "[3,3]\n6", "expected": "[0, 1]", "label": "Case 3"}
+            ],
             "templates": {
-                "cpp": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your C++ code here\n        return {};\n    }\n};",
-                "java": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your Java code here\n        return new int[]{};\n    }\n}",
-                "python": "def twoSum(nums, target):\n    # Write your Python code here\n    return []",
-                "javascript": "function twoSum(nums, target) {\n    // Write your JavaScript code here\n    return [];\n}"
+                "python": "class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        # Write your code here\n        pass\n",
+                "cpp": "#include <iostream>\n#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your code here\n        return {};\n    }\n};\n",
+                "java": "import java.util.*;\n\nclass Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your code here\n        return new int[]{};\n    }\n}\n",
+                "javascript": "/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nvar twoSum = function(nums, target) {\n    // Write your code here\n    return [];\n};\n",
+                "c": "#include <stdio.h>\n#include <stdlib.h>\n\n/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* twoSum(int* nums, int numsSize, int target, int* returnSize) {\n    // Write your code here\n    *returnSize = 0;\n    return NULL;\n}\n"
             }
         },
         {
             "id": "code_hard",
-            "difficulty": "Hard",
-            "title": "LRU Cache Design",
-            "description": "Design a data structure that follows the constraints of a Least Recently Used (LRU) Cache. Implement an LRUCache class with capacity, get(key) which returns the value of key if it exists (otherwise -1), and put(key, value) which updates or inserts the key. When the cache runs out of space, it must invalidate and evict the least recently used item before inserting.",
+            "number": 2,
+            "difficulty": "Medium",
+            "title": "2. Add Two Numbers",
+            "tags": ["Linked List", "Math", "Recursion"],
+            "companies": ["Amazon", "Microsoft", "Apple", "Google"],
+            "has_diagram": False,
+            "description": "You are given two non-empty linked lists representing two non-negative integers. The digits are stored in reverse order, and each of their nodes contains a single digit. Add the two numbers and return the sum as a linked list.\n\nYou may assume the two numbers do not contain any leading zero, except the number 0 itself.",
             "examples": [
                 {
-                    "input": "capacity = 2, put(1, 10), put(2, 20), get(1), put(3, 30), get(2)",
-                    "output": "get(1) -> 10, get(2) -> -1",
-                    "explanation": "put(3, 30) evicts key 2 because it was the least recently used key. Thus, subsequent get(2) returns -1."
+                    "input": "l1 = [2,4,3], l2 = [5,6,4]",
+                    "output": "[7, 0, 8]",
+                    "explanation": "342 + 465 = 807. The result linked list in reverse order is 7 -> 0 -> 8."
+                },
+                {
+                    "input": "l1 = [0], l2 = [0]",
+                    "output": "[0]",
+                    "explanation": "0 + 0 = 0."
+                },
+                {
+                    "input": "l1 = [9,9,9,9,9,9,9], l2 = [9,9,9,9]",
+                    "output": "[8, 9, 9, 9, 0, 0, 0, 1]",
+                    "explanation": "9999999 + 9999 = 10009998."
                 }
             ],
-            "constraints": ["1 <= capacity <= 3000", "0 <= key <= 10^4", "0 <= value <= 10^5"],
+            "constraints": [
+                "The number of nodes in each linked list is in the range [1, 100].",
+                "0 <= Node.val <= 9",
+                "It is guaranteed that the list represents a number that does not have leading zeros."
+            ],
+            "testcases": [
+                {"input": "[2,4,3]\n[5,6,4]", "expected": "[7, 0, 8]", "label": "Case 1"},
+                {"input": "[0]\n[0]", "expected": "[0]", "label": "Case 2"},
+                {"input": "[9,9,9,9,9,9,9]\n[9,9,9,9]", "expected": "[8, 9, 9, 9, 0, 0, 0, 1]", "label": "Case 3"}
+            ],
             "templates": {
-                "cpp": "class LRUCache {\npublic:\n    LRUCache(int capacity) {\n        // Initialize cache capacity\n    }\n    \n    int get(int key) {\n        // Write your code here\n        return -1;\n    }\n    \n    void put(int key, int value) {\n        // Write your code here\n    }\n};",
-                "java": "class LRUCache {\n    public LRUCache(int capacity) {\n        // Initialize cache capacity\n    }\n    \n    public int get(int key) {\n        // Write your code here\n        return -1;\n    }\n    \n    public void put(int key, int value) {\n        // Write your code here\n    }\n}",
-                "python": "class LRUCache:\n    def __init__(self, capacity: int):\n        # Initialize cache capacity\n        pass\n\n    def get(self, key: int) -> int:\n        # Write your code here\n        return -1\n\n    def put(self, key: int, value: int) -> None:\n        # Write your code here\n        pass",
-                "javascript": "class LRUCache {\n    constructor(capacity) {\n        // Initialize cache capacity\n    }\n\n    get(key) {\n        // Write your code here\n        return -1;\n    }\n\n    put(key, value) {\n        // Write your code here\n    }\n}"
+                "cpp": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode(int x) : val(x), next(nullptr) {}\n * };\n */\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nstruct ListNode {\n    int val;\n    ListNode *next;\n    ListNode(int x) : val(x), next(nullptr) {}\n};\n\nclass Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        // Write your code here\n        return nullptr;\n    }\n};\n",
+                "python": "# Definition for singly-linked list.\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\nclass Solution:\n    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:\n        # Write your code here\n        pass\n",
+                "java": "class ListNode {\n    int val;\n    ListNode next;\n    ListNode(int val) { this.val = val; }\n}\n\nclass Solution {\n    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {\n        // Write your code here\n        return null;\n    }\n}\n",
+                "javascript": "function ListNode(val, next) {\n    this.val = (val===undefined ? 0 : val);\n    this.next = (next===undefined ? null : next);\n}\n\n/**\n * @param {ListNode} l1\n * @param {ListNode} l2\n * @return {ListNode}\n */\nvar addTwoNumbers = function(l1, l2) {\n    // Write your code here\n    return null;\n};\n",
+                "c": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct ListNode {\n    int val;\n    struct ListNode *next;\n};\n\nstruct ListNode* addTwoNumbers(struct ListNode* l1, struct ListNode* l2) {\n    // Write your code here\n    return NULL;\n}\n"
             }
         }
     ]
@@ -1777,7 +1826,7 @@ Format the response strictly as a valid JSON array. Do not add markdown backtick
 
         f_verb = executor.submit(generate_section, "Verbal Reasoning MCQs", 15, "Verbal Reasoning MCQs", '{ "id": "v1", "question": "...", "options": ["A", "B", "C", "D"], "answer": "A", "explanation": "..." }')
         f_apt = executor.submit(generate_section, "Aptitude / Quantitative MCQs", 15, "Aptitude / Quantitative MCQs", '{ "id": "a1", "question": "...", "options": ["A", "B", "C", "D"], "answer": "A", "explanation": "..." }')
-        f_code = executor.submit(generate_section, "Coding Questions", 2, "Coding Questions (1 Easy, 1 Hard)", '{ "id": "c1", "difficulty": "Easy", "title": "...", "description": "...", "examples": [{ "input": "...", "output": "...", "explanation": "..." }], "constraints": ["..."], "templates": { "cpp": "class Solution ...", "java": "class Solution ...", "python": "def ...", "javascript": "function ..." } }')
+        f_code = executor.submit(generate_section, "Coding Questions", 2, "Coding Questions (1 Easy, 1 Hard). IMPORTANT for templates: Only provide empty starter function/class skeleton with comments like '# Write your code here'. NEVER provide the solution code inside the templates", '{ "id": "c1", "difficulty": "Easy", "title": "...", "description": "...", "examples": [{ "input": "...", "output": "...", "explanation": "..." }], "constraints": ["..."], "templates": { "cpp": "class Solution {\\npublic:\\n    vector<int> solve(...) {\\n        // Write your code here\\n        return {};\\n    }\\n};\\n", "java": "class Solution {\\n    public int[] solve(...) {\\n        // Write your code here\\n        return new int[]{};\\n    }\\n}\\n", "python": "class Solution:\\n    def solve(self, ...):\\n        # Write your code here\\n        pass\\n", "javascript": "var solve = function(...) {\\n    // Write your code here\\n};\\n" } }')
 
         # Collect Technical MCQs and merge them
         tech_data = []
@@ -1956,22 +2005,58 @@ JSON Structure:
         }
 
 
-def grade_coding_question(language, code, title, description, constraints, examples, max_marks):
-    if not code.strip():
+def grade_coding_question(language, code, title, description, constraints, examples, max_marks, testcases=None):
+    if not code or not code.strip():
         return 0.0, "No solution submitted."
 
-    if not is_valid_key():
-        # Fallback evaluation
-        from ai_integration import evaluate_mock_test_code
-        res = evaluate_mock_test_code(language, code, title, description, examples)
-        if not res.get("compiled", False):
-            return 0.0, "Compilation failed."
-        elif res.get("passed", False):
-            return float(max_marks), "All testcases passed."
-        else:
-            return float(max_marks) * 0.4, "Compiles but fails test cases."
+    # 1. Normalize testcases from input or examples
+    tc_list = []
+    if testcases and isinstance(testcases, list) and len(testcases) > 0:
+        tc_list = testcases
+    elif examples and isinstance(examples, list) and len(examples) > 0:
+        for i, ex in enumerate(examples):
+            if isinstance(ex, dict):
+                tc_list.append({
+                    "input": ex.get("input", ""),
+                    "expected": ex.get("output", ""),
+                    "label": f"Case {i+1}"
+                })
 
-    prompt = f"""You are an elite software engineering interviewer and compiler grader.
+    # 2. Deterministic execution grading via judge0_service
+    if tc_list:
+        try:
+            import judge0_service
+            run_result = judge0_service.run_all_testcases(code, language, tc_list)
+            all_passed = run_result.get("all_passed", False)
+            passed_count = run_result.get("passed_count", 0)
+            total = run_result.get("total", len(tc_list))
+            has_compile_error = run_result.get("has_compile_error", False)
+
+            if has_compile_error:
+                err_detail = ""
+                for r in run_result.get("results", []):
+                    if r.get("compile_output"):
+                        err_detail = r.get("compile_output")[:200]
+                        break
+                    elif r.get("stderr"):
+                        err_detail = r.get("stderr")[:200]
+                        break
+                return 0.0, f"Compilation/Syntax error: {err_detail}" if err_detail else "Compilation failed."
+
+            if total > 0:
+                if all_passed:
+                    return float(max_marks), f"Accepted! Passed all {total}/{total} test cases. Solution is optimal and correct."
+                elif passed_count > 0:
+                    score = round(float(max_marks) * (passed_count / total), 1)
+                    return score, f"Partially Accepted: Passed {passed_count}/{total} test cases."
+                else:
+                    return 0.0, f"Wrong Answer: Passed 0/{total} test cases."
+        except Exception as judge_err:
+            print(f"Error during judge0 testcase grading: {judge_err}")
+
+    # 3. Fallback: LLM Evaluation if testcases not available or judge execution failed
+    if is_valid_key():
+        prompt = f"""You are an elite software engineering interviewer and compiler grader.
 You need to evaluate a candidate's code submission for the following coding challenge:
 Title: {title}
 Description: {description}
@@ -1996,25 +2081,25 @@ Return a JSON object with:
 
 Format response as strictly valid JSON (start with '{{' and end with '}}'). No markdown or backticks.
 """
-    try:
-        raw_response = _generate_with_model_fallback(prompt, timeout_sec=20)
-        cleaned = re.sub(r"```json\s*", "", raw_response)
-        cleaned = re.sub(r"```\s*", "", cleaned).strip()
-        data = json.loads(cleaned)
-        score = float(data.get("score", 0.0))
-        feedback = data.get("feedback", "")
-        # Clamp score between 0 and max_marks
-        score = max(0.0, min(float(max_marks), score))
-        return score, feedback
-    except Exception as e:
-        print(f"Error grading coding question: {e}")
-        # Local fallback if Gemini fails
-        from ai_integration import evaluate_mock_test_code
-        res = evaluate_mock_test_code(language, code, title, description, examples)
-        if not res.get("compiled", False):
-            return 0.0, "Compilation failed (local dry-run)."
-        else:
-            return 0.0, "Compiles successfully, but AI logic verification is unavailable. 0 marks awarded for unverified logic."
+        try:
+            raw_response = _generate_with_model_fallback(prompt, timeout_sec=20)
+            cleaned = re.sub(r"```json\s*", "", raw_response)
+            cleaned = re.sub(r"```\s*", "", cleaned).strip()
+            data = json.loads(cleaned)
+            score = float(data.get("score", 0.0))
+            feedback = data.get("feedback", "")
+            score = max(0.0, min(float(max_marks), score))
+            return score, feedback
+        except Exception as e:
+            print(f"Error grading coding question via LLM: {e}")
+
+    # 4. Safe offline fallback if LLM is unavailable:
+    from ai_integration import evaluate_mock_test_code
+    res = evaluate_mock_test_code(language, code, title, description, examples)
+    if not res.get("compiled", False):
+        return 0.0, "Compilation failed (syntax/structure error)."
+    else:
+        return round(float(max_marks) * 0.5, 1), "Code compiles cleanly. Awarded partial baseline marks."
 
 
 def get_gemini_keywords_for_stream(stream_name):

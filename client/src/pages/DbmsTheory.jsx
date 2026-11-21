@@ -354,7 +354,7 @@ const DbmsTheory = () => {
     <div className="page-shell" style={{ minHeight: '100vh', background: '#f8fafc' }}>
       <Navbar />
 
-      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '24px 40px' }}>
+      <div className="page" style={{ margin: '32px auto 48px' }}>
         
         {/* Back Link */}
         <Link 

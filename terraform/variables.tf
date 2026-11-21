@@ -6,7 +6,7 @@
 variable "aws_region" {
   description = "AWS deployment region"
   type        = string
-  default     = "ap-south-1"
+  default     = "eu-north-1"
 }
 
 variable "environment" {
@@ -24,7 +24,7 @@ variable "domain_name" {
 variable "live_elastic_ip" {
   description = "Static Elastic IP allocated for live production"
   type        = string
-  default     = "15.252.51.16"
+  default     = "51.21.136.193"
 }
 
 variable "vpc_cidr" {
@@ -60,7 +60,7 @@ variable "instance_type" {
 variable "key_name" {
   description = "AWS EC2 Key Pair name for SSH administration"
   type        = string
-  default     = "careerpilot-key"
+  default     = "CareerPilot"
 }
 
 # ------------------------------------------------------------------------------

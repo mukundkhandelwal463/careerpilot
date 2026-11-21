@@ -1,14 +1,28 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
-import { ShieldCheck, Lock, UserCheck, EyeOff, FileText, Cpu, Mail, Globe, Server, CheckCircle2 } from 'lucide-react';
+import SEOHead from '../Components/SEOHead.jsx';
+import { ShieldCheck, Lock, UserCheck, EyeOff, FileText, Cpu, Mail, Globe, Server, CheckCircle2, User, Mic, Github, Linkedin } from 'lucide-react';
 
 const TermsAndConditions = () => {
+  const location = useLocation();
+  const isPrivacy = location.pathname === '/privacy';
+
   return (
     <div className="page-shell" style={{ background: '#FAF9F4', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <SEOHead
+        title={isPrivacy ? 'Privacy Policy & Data Protection' : 'Terms of Service & Legal Policy'}
+        description="Read CareerPilot's Privacy Policy and Terms of Service explaining how uploaded resumes, ATS scans, and account information are protected."
+        path={isPrivacy ? '/privacy' : '/terms'}
+        breadcrumbs={[
+          { name: 'Home', url: '/' },
+          { name: isPrivacy ? 'Privacy Policy' : 'Terms of Service', url: isPrivacy ? '/privacy' : '/terms' }
+        ]}
+      />
       <Navbar />
 
-      <main style={{ maxWidth: '1000px', margin: '48px auto 60px', padding: '0 24px', width: '100%', flex: 1 }}>
+      <main className="page" style={{ maxWidth: '1000px', margin: '36px auto 60px', flex: 1 }}>
         {/* Page Header */}
         <div style={{
           background: 'linear-gradient(135deg, #090d16 0%, #121a2d 100%)',
@@ -90,8 +104,8 @@ const TermsAndConditions = () => {
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginTop: '16px' }}>
             <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '20px', border: '1px solid #e2e8f0' }}>
-              <strong style={{ color: '#0f172a', display: 'block', marginBottom: '6px', fontSize: '0.95rem' }}>
-                👤 Account Profile Information
+              <strong style={{ color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', fontSize: '0.95rem' }}>
+                <User size={16} color="#ff6b4a" /> Account Profile Information
               </strong>
               <p style={{ color: '#64748b', fontSize: '0.86rem', margin: 0, lineHeight: 1.6 }}>
                 Your full name and email address are used strictly to authenticate your account, secure your Candidate Dashboard, and calculate personalized assessment history.
@@ -99,8 +113,8 @@ const TermsAndConditions = () => {
             </div>
 
             <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '20px', border: '1px solid #e2e8f0' }}>
-              <strong style={{ color: '#0f172a', display: 'block', marginBottom: '6px', fontSize: '0.95rem' }}>
-                📄 Uploaded Resumes & Documents
+              <strong style={{ color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', fontSize: '0.95rem' }}>
+                <FileText size={16} color="#ff6b4a" /> Uploaded Resumes & Documents
               </strong>
               <p style={{ color: '#64748b', fontSize: '0.86rem', margin: 0, lineHeight: 1.6 }}>
                 Uploaded PDF/DOCX resumes are parsed on secure backend servers to extract skills, calculate ATS match percentages, generate LaTeX code, and offer job matches.
@@ -108,8 +122,8 @@ const TermsAndConditions = () => {
             </div>
 
             <div style={{ background: '#f8fafc', borderRadius: '14px', padding: '20px', border: '1px solid #e2e8f0' }}>
-              <strong style={{ color: '#0f172a', display: 'block', marginBottom: '6px', fontSize: '0.95rem' }}>
-                🎙️ Voice Interview Audio & Scores
+              <strong style={{ color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', fontSize: '0.95rem' }}>
+                <Mic size={16} color="#ff6b4a" /> Voice Interview Audio & Scores
               </strong>
               <p style={{ color: '#64748b', fontSize: '0.86rem', margin: 0, lineHeight: 1.6 }}>
                 Transcripts and performance metrics from voice mock interviews and mock tests are stored securely to track your progress on the Prep Hub and Candidate Dashboard.
@@ -195,14 +209,14 @@ const TermsAndConditions = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#f8fafc', padding: '20px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
             <span style={{ color: '#0f172a', fontWeight: 700 }}>Mukund Khandelwal</span>
             <span style={{ color: '#64748b', fontSize: '0.88rem' }}>Software Engineer & AI Architect</span>
-            <a href="mailto:mukundkhandelwal463@gmail.com" style={{ color: '#ff6b4a', textDecoration: 'none', fontWeight: 600, fontSize: '0.88rem' }}>
-              ✉️ mukundkhandelwal463@gmail.com
+            <a href="mailto:mukundkhandelwal463@gmail.com" style={{ color: '#ff6b4a', textDecoration: 'none', fontWeight: 600, fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Mail size={14} /> mukundkhandelwal463@gmail.com
             </a>
-            <a href="https://github.com/mukundkhandelwal463" target="_blank" rel="noopener noreferrer" style={{ color: '#64748b', textDecoration: 'none', fontSize: '0.88rem' }}>
-              🔗 github.com/mukundkhandelwal463
+            <a href="https://github.com/mukundkhandelwal463" target="_blank" rel="noopener noreferrer" style={{ color: '#64748b', textDecoration: 'none', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Github size={14} /> github.com/mukundkhandelwal463
             </a>
-            <a href="https://www.linkedin.com/in/mukund-khandelwal-6a8663283/" target="_blank" rel="noopener noreferrer" style={{ color: '#64748b', textDecoration: 'none', fontSize: '0.88rem' }}>
-              💼 linkedin.com/in/mukund-khandelwal
+            <a href="https://www.linkedin.com/in/mukund-khandelwal-6a8663283/" target="_blank" rel="noopener noreferrer" style={{ color: '#64748b', textDecoration: 'none', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Linkedin size={14} /> linkedin.com/in/mukund-khandelwal
             </a>
           </div>
         </section>

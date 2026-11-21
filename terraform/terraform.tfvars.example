@@ -6,7 +6,7 @@
 aws_region        = "ap-south-1"
 environment       = "production"
 domain_name       = "careerpilot.website"
-live_elastic_ip   = "15.252.51.16"
+live_elastic_ip   = "51.21.136.193"
 
 # VPC & Subnets (Section 9)
 vpc_cidr                 = "10.0.0.0/16"

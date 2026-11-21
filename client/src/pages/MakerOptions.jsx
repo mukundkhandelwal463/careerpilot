@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Zap, Bot } from 'lucide-react';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
 import '../css/style.css';
@@ -22,7 +23,7 @@ const MakerOptions = () => {
         <div className="maker-grid">
           {/* LaTeX Resume Architect Card */}
           <div className="maker-card maker-card--form" onClick={() => navigate('/app/builder/default')}>
-            <div className="card-icon">⚡</div>
+            <div className="card-icon" style={{ display: 'grid', placeItems: 'center' }}><Zap size={36} color="var(--accent)" /></div>
             <h2>LaTeX Resume Architect</h2>
             <p>
               Generate ATS-optimized LaTeX source code with 3 major templates (Jake's Tech, Executive, Minimalist) with instant Overleaf compile links.
@@ -32,7 +33,7 @@ const MakerOptions = () => {
           {/* Chatbot Card */}
           <div className="maker-card maker-card--chat" onClick={() => navigate('/chatbot')} style={{ opacity: 1, cursor: 'pointer' }}>
             <span className="badge-upcoming" style={{ background: 'linear-gradient(135deg, var(--accent), #ff8f57)' }}>Active</span>
-            <div className="card-icon">🤖</div>
+            <div className="card-icon" style={{ display: 'grid', placeItems: 'center' }}><Bot size={36} color="#3E8276" /></div>
             <h2>AI Chatbot Builder</h2>
             <p>
               Answer guided questions and let our AI assemble a perfectly structured resume for you — conversationally.

@@ -20,6 +20,12 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+# Key Pair for SSH Access
+resource "aws_key_pair" "careerpilot_key" {
+  key_name   = var.key_name
+  public_key = file("${path.module}/../CareerPilot.pub")
+}
+
 # 1. CareerPilot Production EC2 Instance
 resource "aws_instance" "careerpilot_server" {
   ami                         = data.aws_ami.ubuntu.id
@@ -27,7 +33,9 @@ resource "aws_instance" "careerpilot_server" {
   subnet_id                   = aws_subnet.public[0].id
   vpc_security_group_ids      = [aws_security_group.ec2.id]
   associate_public_ip_address = true
-  key_name                    = var.key_name
+  key_name                    = aws_key_pair.careerpilot_key.key_name
+  
+////
 
   root_block_device {
     volume_size           = 20 # 20GB SSD as specified in synopsis
@@ -52,7 +60,7 @@ resource "aws_instance" "careerpilot_server" {
 }
 
 # 2. Elastic IP Allocation
-# Live Elastic IP: 15.252.51.16
+# Live Elastic IP: 51.21.136.193
 resource "aws_eip" "careerpilot_eip" {
   instance = aws_instance.careerpilot_server.id
   domain   = "vpc"

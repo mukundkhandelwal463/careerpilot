@@ -7,7 +7,7 @@ This directory contains the production AWS Infrastructure as Code for **CareerPi
 ## 🛡️ Production & Cost Safety Rules (Strictly Enforced)
 
 > [!IMPORTANT]
-> The active production system is running on AWS EC2 (`15.252.51.16` / `careerpilot.website`).
+> The active production system is running on AWS EC2 (`51.21.136.193` / `careerpilot.website`).
 > To prevent accidental cloud billing and guarantee zero disruption to the live application:
 > 1. **Dry-Run Safe (`terraform plan`)**: Always test using `terraform plan`.
 > 2. **Default Cost Guardrails**: Expensive managed services such as AWS NAT Gateways (~$32/mo) and AWS RDS Multi-AZ are set to `false` by default (`enable_nat_gateway = false`, `enable_rds = false`).
@@ -23,7 +23,7 @@ This directory contains the production AWS Infrastructure as Code for **CareerPi
 | **3-Tier Subnets** | `vpc.tf` | Public (`10.0.1.0/24`), Private App (`10.0.2.0/24`), Private Data (`10.0.3.0/24`) |
 | **Security Groups** | `security_groups.tf` | Scoped firewalls for ALB (80/443), EC2 (22/80/8000/9090/3000), RDS (5432), Redis (6379) |
 | **EC2 Instance** | `ec2.tf` | `t3.small` (2GB RAM, 20GB gp3 SSD), Ubuntu 24.04 LTS, User-Data boostrap |
-| **Elastic IP** | `ec2.tf` | Static Elastic IP binding matching `15.252.51.16` |
+| **Elastic IP** | `ec2.tf` | Static Elastic IP binding matching `51.21.136.193` |
 | **S3 Storage** | `s3.tf` | Encrypted private bucket with 90-day report archival lifecycle rules |
 | **RDS PostgreSQL** | `rds.tf` | Isolated database in private data subnets with cost-guardrail toggle |
 

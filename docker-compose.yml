@@ -1,9 +1,3 @@
-# ==============================================================================
-# CareerPilot Full Stack Docker Compose Orchestration
-# Services: Frontend, Django Backend, PostgreSQL, Redis, Prometheus, Grafana
-# Reference: CareerPilot Project Synopsis Section 4, 7, 10 & 11
-# ==============================================================================
-
 services:
   # ----------------------------------------------------------------------------
   # 1. PostgreSQL Database

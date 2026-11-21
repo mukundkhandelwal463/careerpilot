@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
+import LoadingOverlay from '../Components/LoadingOverlay.jsx';
+import SEOHead from '../Components/SEOHead.jsx';
 import '../css/style.css';
 
 const Login = () => {
@@ -20,6 +22,12 @@ const Login = () => {
 
   const [status, setStatus] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
+  const [loadingConfig, setLoadingConfig] = useState({
+    variant: 'auth',
+    title: 'Signing You In',
+    subtitle: '',
+    steps: []
+  });
   const [resendCooldown, setResendCooldown] = useState(0);
 
   const { login: setAuthUser, user } = useAuth();
@@ -29,6 +37,13 @@ const Login = () => {
     if (user) {
       navigate('/dashboard');
     }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('expired') === '1') {
+      setStatus({
+        text: 'Your session has expired due to 12 hours of inactivity. Please log in again to continue.',
+        type: 'error'
+      });
+    }
     // Auto-redirect raw IP to nip.io domain so Google OAuth works seamlessly without Error 400
     if (window.location.hostname === '3.110.56.125') {
       window.location.replace(`http://3.110.56.125.nip.io${window.location.pathname}${window.location.search}`);
@@ -37,6 +52,16 @@ const Login = () => {
 
   const handleGoogleCredentialResponse = async (response) => {
     showStatus('', '');
+    setLoadingConfig({
+      variant: 'auth',
+      title: 'Signing In with Google',
+      subtitle: 'Verifying your Google identity securely...',
+      steps: [
+        'Validating Google OAuth token...',
+        'Checking account & verification status...',
+        'Preparing your CareerPilot workspace...'
+      ]
+    });
     setLoading(true);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/google`, {
@@ -178,6 +203,16 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     showStatus('', '');
+    setLoadingConfig({
+      variant: 'auth',
+      title: 'Signing You In',
+      subtitle: 'Authenticating your CareerPilot account...',
+      steps: [
+        'Verifying email & password securely...',
+        'Checking security verification status...',
+        'Opening your workspace...'
+      ]
+    });
     setLoading(true);
 
     try {
@@ -206,6 +241,16 @@ const Login = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     showStatus('', '');
+    setLoadingConfig({
+      variant: 'otp',
+      title: 'Creating Account & Sending OTP',
+      subtitle: `Delivering 6-digit verification code to ${email}`,
+      steps: [
+        'Setting up your CareerPilot profile...',
+        'Generating 6-digit security verification code...',
+        'Delivering OTP email to your inbox...'
+      ]
+    });
     setLoading(true);
 
     try {
@@ -244,6 +289,16 @@ const Login = () => {
       showStatus('Please enter all 6 digits.', 'error');
       return;
     }
+    setLoadingConfig({
+      variant: 'auth',
+      title: 'Verifying Security Code',
+      subtitle: 'Validating your 6-digit OTP code...',
+      steps: [
+        'Checking OTP code authenticity...',
+        'Activating your CareerPilot account...',
+        'Launching your personalized dashboard...'
+      ]
+    });
     setLoading(true);
 
     try {
@@ -269,6 +324,17 @@ const Login = () => {
   const handleResendOTP = async () => {
     if (resendCooldown > 0) return;
     showStatus('', '');
+    setLoadingConfig({
+      variant: 'otp',
+      title: 'Sending Fresh OTP Code',
+      subtitle: `Sending a new verification code to ${email}`,
+      steps: [
+        'Generating a new 6-digit security code...',
+        'Connecting to secure mail server...',
+        'Delivering OTP email to your inbox...'
+      ]
+    });
+    setLoading(true);
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/resend-otp`, {
@@ -285,6 +351,8 @@ const Login = () => {
       }
     } catch (err) {
       showStatus('Connection failed.', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -308,6 +376,19 @@ const Login = () => {
 
   return (
     <div className="page-shell">
+      <SEOHead
+        title="Sign In or Create Account"
+        description="Sign in to CareerPilot to save ATS resume scans, build executive LaTeX resumes, and practice AI voice mock interviews."
+        path="/login"
+        noIndex={true}
+      />
+      <LoadingOverlay
+        isOpen={loading}
+        variant={loadingConfig.variant}
+        title={loadingConfig.title}
+        subtitle={loadingConfig.subtitle}
+        steps={loadingConfig.steps}
+      />
       <Navbar />
       <main className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 16px', minHeight: 'calc(100vh - 120px)' }}>
         <div className="auth-container" style={{ width: '100%', maxWidth: '440px' }}>

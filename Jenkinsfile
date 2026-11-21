@@ -1,16 +1,8 @@
-// =============================================================================
-// CareerPilot Enterprise CI/CD Pipeline (Jenkinsfile)
-// Reference: CareerPilot Project Synopsis Section 6 & User Request (Auto-Trigger)
-// Features: GitHub Auto-Trigger, Multi-Stage Quality Gate, Docker Packaging, Zero-Downtime Deploy
-// =============================================================================
+
 
 pipeline {
     agent any
 
-    // -------------------------------------------------------------------------
-    // Automatic Trigger Configuration ("Jenkins Auto-Trigger")
-    // pollSCM(): Periodic polling fallback; GitHub webhooks trigger via Jenkins Job Hook
-    // -------------------------------------------------------------------------
     triggers {
         pollSCM('H/2 * * * *')
     }
@@ -27,7 +19,7 @@ pipeline {
         DOCKER_BACKEND_IMAGE   = 'mukundk/careerpilot-backend'
         DOCKER_FRONTEND_IMAGE  = 'mukundk/careerpilot-frontend'
         IMAGE_TAG              = "${env.BUILD_NUMBER}"
-        EC2_HOST               = '15.252.51.16'
+        EC2_HOST               = '51.21.136.193'
         EC2_USER               = 'ubuntu'
         PYTHON_VERSION         = '3.12'
         NODE_VERSION           = '20'
@@ -144,7 +136,10 @@ pipeline {
             steps {
                 echo "Deploying update to AWS EC2 (${EC2_HOST}) with zero downtime..."
                 sh '''
-                    KEY_FILE="/var/jenkins_home/careerpilot-key.pem"
+                    KEY_FILE="/var/jenkins_home/CareerPilot.pem"
+                    if [ ! -f "$KEY_FILE" ]; then
+                        KEY_FILE="/var/jenkins_home/careerpilot-key.pem"
+                    fi
                     if [ -f "$KEY_FILE" ]; then
                         echo "🔑 Connecting to AWS EC2 (${EC2_HOST}) via SSH..."
                         ssh -i "$KEY_FILE" -o StrictHostKeyChecking=no -o ConnectTimeout=15 ${EC2_USER}@${EC2_HOST} '

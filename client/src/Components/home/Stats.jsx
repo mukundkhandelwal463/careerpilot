@@ -6,7 +6,7 @@ const Stats = () => {
     { icon: <Users size={32} />, value: '500K+', label: 'Active Users' },
     { icon: <FileText size={32} />, value: '2M+', label: 'Resumes Created' },
     { icon: <TrendingUp size={32} />, value: '95%', label: 'Interview Rate' },
-    { icon: <Award size={32} />, value: '4.9★', label: 'App Rating' }
+    { icon: <Award size={32} />, value: '4.9 / 5.0', label: 'App Rating' }
   ];
 
   return (

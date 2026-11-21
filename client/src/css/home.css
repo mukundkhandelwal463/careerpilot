@@ -1,20 +1,25 @@
 :root {
-    --bg: #f4efe7;
-    --surface: rgba(255, 255, 255, 0.72);
-    --surface-strong: #fffdf9;
-    --surface-dark: #122023;
-    --text: #182326;
-    --muted: #536266;
-    --line: rgba(24, 35, 38, 0.08);
-    --accent: #ff6b4a;
-    --accent-deep: #e14b29;
-    --accent-soft: #ffe1d9;
-    --teal: #7cd6c7;
-    --shadow: 0 24px 60px rgba(38, 28, 20, 0.12);
-    --radius-xl: 32px;
-    --radius-lg: 24px;
-    --radius-md: 18px;
-    --max-width: 1480px;
+    --bg: #f5f3ec;
+    --surface: rgba(253, 252, 249, 0.84);
+    --surface-strong: #fdfcf9;
+    --surface-dark: #1f1e1d;
+    --card-dark: #2a2926;
+    --border-dark: #3d3b37;
+    --text: #1f1e1d;
+    --muted: #5c5954;
+    --line: rgba(31, 30, 29, 0.09);
+    --accent: #d97757;
+    --accent-deep: #c05d3c;
+    --accent-light: #e6997a;
+    --accent-soft: rgba(217, 119, 87, 0.14);
+    --destructive: #df5a49;
+    --teal: #5ea397;
+    --shadow: 0 24px 60px rgba(31, 30, 29, 0.1);
+    --radius-xl: 28px;
+    --radius-lg: 22px;
+    --radius-md: 1rem;
+    --max-width: 100%;
+    --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -22,15 +27,30 @@
 }
 
 html {
-    scroll-behavior: smooth;
     font-size: 135%;
+}
+
+html.lenis, html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+    overflow: hidden;
 }
 
 body {
     margin: 0;
-    font-family: "Manrope", sans-serif;
+    font-family: "Outfit", "Manrope", sans-serif;
     color: var(--text);
-    background: linear-gradient(105deg, #e1e2e6 0%, #e5e6ea 40%, #f9f5d6 75%, #f9f6d1 100%) !important;
+    background: #faf9f5 !important;
 }
 
 a {
@@ -51,8 +71,9 @@ main {
 .hero,
 .section,
 .footer {
-    width: min(var(--max-width), calc(100% - 32px));
-    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
 }
 
 /* Navbar styling is managed by inline styles in navbar.jsx */
@@ -62,20 +83,21 @@ main {
     color: var(--muted);
     padding: 12px 24px;
     border-radius: 999px;
-    transition: all 0.2s ease;
+    transition: all 0.28s var(--ease-out-expo);
     text-decoration: none;
     font-weight: 700;
     display: inline-block;
 }
 
 .nav-link-mock:hover {
-    background: rgba(24, 35, 38, 0.05);
+    background: rgba(217, 119, 87, 0.1);
     color: var(--text);
 }
 
 .nav-link-mock.active {
-    background: #1c2427 !important;
-    color: #ffffff !important;
+    background: #1f1e1d !important;
+    color: #fdfcf9 !important;
+    box-shadow: 0 6px 18px rgba(31, 30, 29, 0.22);
 }
 
 .brand {
@@ -90,12 +112,12 @@ main {
     height: 44px;
     display: grid;
     place-items: center;
-    border-radius: 14px;
-    font-family: "Sora", sans-serif;
+    border-radius: 1rem;
+    font-family: "Outfit", sans-serif;
     font-weight: 800;
     color: white;
-    background: linear-gradient(135deg, var(--accent), #ff8f57);
-    box-shadow: 0 10px 26px rgba(255, 107, 74, 0.3);
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    box-shadow: 0 10px 26px rgba(217, 119, 87, 0.32);
 }
 
 .brand strong,
@@ -553,7 +575,7 @@ main {
     .hero,
     .section,
     .footer {
-        width: min(var(--max-width), calc(100% - 20px));
+        width: 100%;
     }
 
     .hero h1 {

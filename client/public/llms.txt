@@ -1,0 +1,38 @@
+# CareerPilot
+
+> CareerPilot (https://careerpilot.website) is an AI-powered ATS Resume Screener, Executive LaTeX Resume Builder, Voice Mock Interviewer, CS Fundamentals Prep Hub, and Live Job Discovery platform designed for students, software engineers, and job seekers.
+
+## Key Capabilities
+- **AI ATS Resume Screener**: Upload PDF, DOCX, or TXT resumes against target Job Descriptions to receive a 0-100 ATS compatibility score, missing keyword diagnostics, and actionable career recommendations.
+- **Executive LaTeX & Template Resume Builder**: Auto-parse existing resumes into clean, recruiter-approved ATS templates with real-time score feedback and AI bullet-point enhancement.
+- **AI Voice & Written Mock Interviewer**: Practice resume-specific technical and behavioral interviews with real-time scoring across technical depth, clarity, and fluency.
+- **Computer Science Special Hub & Full-Length Mock Tests**: Structured study guides for Operating Systems (OS), DBMS, Computer Networks (CN), OOPs, System Design, DSA patterns, and timed 5-section assessments.
+- **Personalized Career Roadmaps & Live Job Aggregator**: Generate step-by-step skill roadmaps and search real-time listings across LinkedIn, Indeed, and Google Jobs.
+
+## Public Indexable Pages
+- Home: https://careerpilot.website/
+- Blog Hub (10 In-Depth Articles): https://careerpilot.website/blog
+  - What Is an ATS Resume Score & Free Checker Guide: https://careerpilot.website/blog/what-is-ats-resume-score-how-to-check-free
+  - 12 Proven Rules to Beat ATS Filters: https://careerpilot.website/blog/how-to-beat-applicant-tracking-systems-ats
+  - LaTeX Resume vs. Word Resume for Software Engineers: https://careerpilot.website/blog/latex-resume-vs-word-resume-for-software-engineers
+  - Top 75 ATS Keywords for SDE, Data Science & DevOps: https://careerpilot.website/blog/top-ats-keywords-for-software-engineer-data-science-devops
+  - How to Practice AI Voice Mock Interviews: https://careerpilot.website/blog/how-to-practice-ai-voice-mock-interviews
+  - 10 Fresher Resume Mistakes Causing ATS Rejection: https://careerpilot.website/blog/fresher-resume-mistakes-that-cause-instant-rejection
+  - Quantifiable Project Bullets Using Google's XYZ Formula: https://careerpilot.website/blog/how-to-write-quantifiable-project-bullet-points-xyz-formula
+  - CS Fundamentals Interview Cheat Sheet (OS, DBMS, CN, OOPs): https://careerpilot.website/blog/cs-fundamentals-interview-cheat-sheet-os-dbms-cn-oops
+  - System Design Basics for Freshers & SDE-1: https://careerpilot.website/blog/system-design-interview-basics-for-freshers-and-sde1
+  - Tailor Your Resume to Any Job Description in 5 Minutes: https://careerpilot.website/blog/how-to-tailor-resume-to-job-description-in-5-minutes
+- Career & ATS Guides Hub: https://careerpilot.website/guides
+- ATS Resume Optimization Guide: https://careerpilot.website/guides/ats-resume-optimization
+- AI Mock Interview Preparation Guide: https://careerpilot.website/guides/ai-mock-interview-prep
+- CS Fundamentals & DSA Roadmap Guide: https://careerpilot.website/guides/cs-fundamentals-roadmap
+- About CareerPilot & Author: https://careerpilot.website/about
+- Terms of Service: https://careerpilot.website/terms
+- Privacy Policy: https://careerpilot.website/privacy
+
+## Author & Organization
+- **Creator**: Mukund Khandelwal (B.Tech CSE, Lovely Professional University, India)
+- **Website**: https://careerpilot.website
+- **GitHub**: https://github.com/mukundkhandelwal463
+- **LinkedIn**: https://www.linkedin.com/in/mukund-khandelwal-6a8663283/
+- **Contact**: mukundkhandelwal463@gmail.com

@@ -141,6 +141,12 @@ SESSION_COOKIE_SECURE = secure_cookies
 SESSION_COOKIE_SAMESITE = 'Lax' if not secure_cookies else 'None'
 SESSION_COOKIE_HTTPONLY = True
 
+# 12-Hour Session Security Policy (43200 seconds)
+# Session automatically expires after 12 hours of inactivity or reopening after 12 hours
+SESSION_COOKIE_AGE = 43200
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173']

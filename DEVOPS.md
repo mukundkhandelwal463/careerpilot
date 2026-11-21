@@ -2,7 +2,7 @@
 
 > **B.Tech Project:** *CareerPilot: An AI-Powered Resume Screener System Using Machine Learning and DevOps Tools*  
 > **Student:** Mukund Khandelwal (12316528) — Lovely Professional University  
-> **Production URL:** [https://careerpilot.website](https://careerpilot.website) (Elastic IP: `15.252.51.16`)
+> **Production URL:** [http://51.21.136.193](http://51.21.136.193) (Elastic IP: `51.21.136.193`)
 
 ---
 
@@ -31,7 +31,7 @@ The platform implements the complete cloud-native DevOps lifecycle documented ac
 
 > [!IMPORTANT]
 > **Zero Live Site Disruption & Cost Increase:**
-> - The live production website is actively hosted on an AWS EC2 instance (`t3.small`, Elastic IP `15.252.51.16`, domain `careerpilot.website`).
+> - The live production website is actively hosted on an AWS EC2 instance (`t3.small`, Elastic IP `51.21.136.193`, region `eu-north-1`).
 > - The Terraform configuration includes **built-in cost guardrails** (`enable_nat_gateway = false`, `enable_rds = false`).
 > - All Docker, Kubernetes, and Jenkins configurations are fully verified and decoupled from production state, ensuring **0 unintended AWS charges** and **100% continuous uptime** on `careerpilot.website`.
 
@@ -154,4 +154,4 @@ triggers {
 4. `Build Vite Production Bundle`: Runs `npm ci && npm run build` and archives artifacts.
 5. `Build Docker Images`: Multi-stage builds for backend and frontend.
 6. `Smoke Test Container Health`: Probes containerized `/api/health`.
-7. `Zero-Downtime Deployment`: Safe deployment reload to AWS EC2 (`15.252.51.16`).
+7. `Zero-Downtime Deployment`: Safe deployment reload to AWS EC2 (`51.21.136.193`).

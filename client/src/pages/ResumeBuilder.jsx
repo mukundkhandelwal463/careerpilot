@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
+import LoadingOverlay from '../Components/LoadingOverlay.jsx';
 import { 
   FileCode, 
   Copy, 
@@ -25,7 +27,12 @@ import {
   Loader2,
   FileText,
   RefreshCw,
-  Edit3
+  Edit3,
+  Zap,
+  Play,
+  Maximize2,
+  Minimize2,
+  Terminal
 } from 'lucide-react';
 import '../css/style.css';
 
@@ -1154,52 +1161,520 @@ const ResumeBuilder = () => {
     URL.revokeObjectURL(url);
   };
 
+  // Fullscreen, Editor Refs & Line numbers calculation
+  const [isEditorFullscreen, setIsEditorFullscreen] = useState(false);
+  const [viewMode, setViewMode] = useState('split'); // 'split', 'compiler', 'form'
+  const [isCompilingPdf, setIsCompilingPdf] = useState(false);
+  const editorRef = useRef(null);
+  const editorContainerRef = useRef(null);
+  const lineNumbersRef = useRef(null);
+
+  useEffect(() => {
+    if (isEditorFullscreen) {
+      document.documentElement.classList.add('editor-fullscreen-active');
+      document.body.classList.add('editor-fullscreen-active');
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+          setIsEditorFullscreen(false);
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.documentElement.classList.remove('editor-fullscreen-active');
+        document.body.classList.remove('editor-fullscreen-active');
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    } else {
+      document.documentElement.classList.remove('editor-fullscreen-active');
+      document.body.classList.remove('editor-fullscreen-active');
+    }
+  }, [isEditorFullscreen]);
+
+  const handleOpenInOverleaf = () => {
+    if (!latexCode.trim()) {
+      alert("Please ensure there is LaTeX code before opening Overleaf.");
+      return;
+    }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://www.overleaf.com/docs';
+    form.target = '_blank';
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'snip';
+    input.value = latexCode;
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  };
+
+  const handleCompilePdf = async () => {
+    if (!latexCode.trim()) {
+      alert("Please ensure there is LaTeX code before compiling.");
+      return;
+    }
+    setIsCompilingPdf(true);
+    try {
+      const response = await fetch('/api/compile-latex', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: latexCode })
+      });
+
+      if (response.ok && response.headers.get('content-type')?.includes('application/pdf')) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      } else {
+        // Fallback to Overleaf
+        handleOpenInOverleaf();
+      }
+    } catch (err) {
+      console.warn("Direct PDF compilation encountered an issue, opening Overleaf live cloud preview:", err);
+      handleOpenInOverleaf();
+    } finally {
+      setIsCompilingPdf(false);
+    }
+  };
+
+  const handleEditorScroll = (e) => {
+    if (lineNumbersRef.current) {
+      lineNumbersRef.current.scrollTop = e.target.scrollTop;
+    }
+  };
+
+  const linesCount = Math.max(1, (latexCode || '').split('\n').length);
+  const lineNumbers = useMemo(() => Array.from({ length: linesCount }, (_, i) => i + 1), [linesCount]);
+
+  const currentFileName = template === 'abey_classic'
+    ? 'classic_tech_resume.tex'
+    : template === 'executive'
+      ? 'executive_resume.tex'
+      : 'data_ml_specialist_resume.tex';
+
   const latexOnlineUrl = `https://latexonline.cc/compile?text=${encodeURIComponent(latexCode)}`;
 
+  const renderEditorWorkspace = (isFs = false) => {
+    return (
+      <div
+        ref={isFs ? null : editorContainerRef}
+        style={{
+          background: '#131316',
+          borderRadius: isFs ? '0' : '20px',
+          color: '#F5F3EC',
+          border: isFs ? 'none' : '1px solid #27272a',
+          boxShadow: isFs ? 'none' : '0 16px 42px rgba(31, 30, 29, 0.14)',
+          display: 'flex',
+          flexDirection: 'column',
+          height: isFs ? '100vh' : '100%',
+          width: '100%',
+          overflow: 'hidden'
+        }}
+      >
+        {/* TOP WINDOW BAR & COMPILER TOOLBAR */}
+        <div style={{
+          background: '#18181c',
+          borderBottom: '1px solid #27272a',
+          padding: '10px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          flexWrap: 'wrap',
+          flexShrink: 0
+        }}>
+          {/* Left: Window Controls + File Tab + Live Status */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            {/* macOS Traffic Dots */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginRight: '4px' }}>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', opacity: 0.9 }} />
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block', opacity: 0.9 }} />
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981', display: 'inline-block', opacity: 0.9 }} />
+            </div>
+
+            {/* Active File Tab */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
+              background: '#0f0f12',
+              border: '1px solid #27272a',
+              padding: '5px 12px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.25)'
+            }}>
+              <FileCode className="size-3.5" style={{ color: '#D97757' }} />
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#f4f4f5', fontFamily: 'Consolas, Monaco, monospace' }}>
+                {currentFileName}
+              </span>
+              <span style={{
+                fontSize: '0.62rem',
+                background: 'rgba(217, 119, 87, 0.18)',
+                color: '#F0B69C',
+                padding: '1px 5px',
+                borderRadius: '4px',
+                fontWeight: 800,
+                letterSpacing: '0.04em'
+              }}>
+                TEX
+              </span>
+            </div>
+
+            {/* Sync Status Badge */}
+            {isManualEdit ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{
+                  fontSize: '0.68rem',
+                  background: 'rgba(245, 158, 11, 0.12)',
+                  border: '1px solid rgba(245, 158, 11, 0.35)',
+                  color: '#fbbf24',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <Edit3 className="size-3" /> Custom LaTeX Active
+                </span>
+                <button
+                  onClick={handleResetFromForm}
+                  style={{
+                    background: 'rgba(56, 189, 248, 0.12)',
+                    color: '#38bdf8',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                    borderRadius: '6px',
+                    padding: '3px 8px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.15s'
+                  }}
+                  title="Discard manual code edits and re-sync from form fields"
+                >
+                  <RefreshCw className="size-3" /> Re-sync from Form
+                </button>
+              </div>
+            ) : (
+              <span style={{
+                fontSize: '0.68rem',
+                background: 'rgba(16, 185, 129, 0.12)',
+                border: '1px solid rgba(16, 185, 129, 0.3)',
+                color: '#34d399',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}>
+                <Zap className="size-3" /> Live Form Synced
+              </span>
+            )}
+          </div>
+
+          {/* Right: Actions Toolbar & Compiler */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Primary Compile CTA */}
+            <button
+              onClick={handleCompilePdf}
+              disabled={isCompilingPdf}
+              style={{
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '6px 14px',
+                fontSize: '0.74rem',
+                fontWeight: 700,
+                cursor: isCompilingPdf ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                boxShadow: '0 2px 10px rgba(16, 185, 129, 0.35)',
+                transition: 'all 0.15s'
+              }}
+              title="Compile LaTeX into ready-to-print PDF"
+            >
+              {isCompilingPdf ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" /> Compiling...
+                </>
+              ) : (
+                <>
+                  <Play className="size-3 fill-current" /> Compile PDF
+                </>
+              )}
+            </button>
+
+            {/* Copy Button */}
+            <button
+              onClick={handleCopyLatex}
+              style={{
+                background: isCopied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                color: isCopied ? '#34d399' : '#e4e4e7',
+                border: isCopied ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '8px',
+                padding: '6px 11px',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s'
+              }}
+              title="Copy LaTeX source code to clipboard"
+            >
+              {isCopied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
+              {isCopied ? 'Copied' : 'Copy'}
+            </button>
+
+            {/* Download .tex */}
+            <button
+              onClick={handleDownloadTex}
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                color: '#e4e4e7',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '8px',
+                padding: '6px 10px',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                transition: 'all 0.15s'
+              }}
+              title="Download .tex source file"
+            >
+              <Download className="size-3.5" /> .tex
+            </button>
+
+            {/* Overleaf Link */}
+            <button
+              onClick={handleOpenInOverleaf}
+              style={{
+                background: 'rgba(245, 195, 92, 0.14)',
+                color: '#fbbf24',
+                border: '1px solid rgba(245, 195, 92, 0.35)',
+                borderRadius: '8px',
+                padding: '6px 11px',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                transition: 'all 0.15s'
+              }}
+              title="Open and edit full LaTeX resume in Overleaf"
+            >
+              <ExternalLink className="size-3.5" /> Overleaf
+            </button>
+
+            {/* Fullscreen / Full Page Toggle */}
+            <button
+              onClick={() => setIsEditorFullscreen(!isEditorFullscreen)}
+              style={{
+                background: isFs ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                color: isFs ? '#38bdf8' : '#e4e4e7',
+                border: isFs ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                fontSize: '0.74rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                transition: 'all 0.15s'
+              }}
+              title={isFs ? "Exit Fullscreen (Esc)" : "Expand to Cover Full Screen"}
+            >
+              {isFs ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
+              <span>{isFs ? 'Exit Full Screen' : 'Full Page'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* EDITOR WORKSPACE: LINE NUMBERS GUTTER + CODE TEXTAREA */}
+        <div style={{
+          display: 'flex',
+          flex: 1,
+          minHeight: 0,
+          background: '#111113',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Line Numbers Gutter */}
+          <div
+            ref={isFs ? null : lineNumbersRef}
+            className="latex-gutter-scroll"
+            style={{
+              width: '46px',
+              background: '#151518',
+              borderRight: '1px solid #27272a',
+              padding: '14px 8px 14px 4px',
+              boxSizing: 'border-box',
+              fontFamily: 'Consolas, "Fira Code", Monaco, monospace',
+              fontSize: '0.76rem',
+              lineHeight: '1.55',
+              color: '#52525b',
+              textAlign: 'right',
+              userSelect: 'none',
+              pointerEvents: 'none',
+              overflowY: 'hidden',
+              flexShrink: 0
+            }}
+          >
+            {lineNumbers.map((num) => (
+              <div key={num} style={{ height: '1.55em' }}>{num}</div>
+            ))}
+          </div>
+
+          {/* LaTeX Code Textarea */}
+          <textarea
+            ref={isFs ? null : editorRef}
+            value={latexCode}
+            onChange={handleCodeChange}
+            onKeyDown={handleCodeKeyDown}
+            onScroll={handleEditorScroll}
+            spellCheck={false}
+            placeholder="LaTeX code will appear here. You can freely edit or paste LaTeX code manually..."
+            className="latex-editor-scroll"
+            style={{
+              flex: 1,
+              height: '100%',
+              width: '100%',
+              background: 'transparent',
+              color: '#f4f4f5',
+              caretColor: '#38bdf8',
+              padding: '14px 16px',
+              boxSizing: 'border-box',
+              fontFamily: 'Consolas, "Fira Code", Monaco, monospace',
+              fontSize: '0.76rem',
+              lineHeight: '1.55',
+              border: 'none',
+              outline: 'none',
+              resize: 'none',
+              whiteSpace: 'pre',
+              overflowWrap: 'normal',
+              overflowX: 'auto',
+              overflowY: 'auto'
+            }}
+          />
+        </div>
+
+        {/* BOTTOM STATUS BAR (IDE FOOTER) */}
+        <div style={{
+          background: '#151518',
+          borderTop: '1px solid #27272a',
+          padding: '7px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '0.7rem',
+          color: '#71717a',
+          fontFamily: 'Consolas, Monaco, monospace',
+          flexShrink: 0
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontWeight: 600 }}>
+              <Terminal className="size-3" /> pdfLaTeX
+            </span>
+            <span style={{ color: '#3f3f46' }}>|</span>
+            <span style={{ color: '#a1a1aa' }}>UTF-8</span>
+            <span style={{ color: '#3f3f46' }}>|</span>
+            <span style={{ color: '#a1a1aa' }}>{linesCount} lines</span>
+            <span style={{ color: '#3f3f46' }}>|</span>
+            <span style={{ color: '#a1a1aa' }}>{(latexCode ? (latexCode.length / 1024).toFixed(1) : 0)} KB</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ color: '#71717a' }}>Tab: 2 spaces</span>
+            <span style={{ color: '#3f3f46' }}>•</span>
+            <span style={{ color: '#38bdf8', fontWeight: 500 }}>
+              {isFs ? 'Press Esc or click Exit Full Screen' : 'Editable Code Box'}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: '#F5F3EC', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <LoadingOverlay
+        isOpen={isAutofilling || isFetchingKeywords}
+        variant={isAutofilling ? 'scan' : 'ai'}
+        title={isAutofilling ? 'Extracting Resume Details' : 'Generating ATS Keywords'}
+        subtitle={
+          isAutofilling
+            ? 'Parsing your uploaded file into structured resume sections'
+            : `AI Engine is curating high-impact keywords for "${customStream}"`
+        }
+        steps={
+          isAutofilling
+            ? [
+                'Reading uploaded resume document...',
+                'Extracting contact, education & skills...',
+                'Structuring projects & achievements...',
+                'Auto-filling your executive resume builder...'
+              ]
+            : [
+                'Analyzing target domain & role trends...',
+                'Selecting top ATS-ranked technical keywords...',
+                'Preparing instant one-click suggestions...'
+              ]
+        }
+      />
       <Navbar />
 
-      <main style={{ marginTop: '55px', padding: '16px 20px', flex: 1 }}>
-        <div style={{ maxWidth: '1440px', margin: '0 auto' }}>
+      <main className="page" style={{ marginTop: '24px', flex: 1 }}>
+        <div style={{ width: '100%', margin: '0 auto' }}>
           
-          {/* Top Header Row - Perfectly Aligned */}
+          {/* Top Header Row - Wide Editorial Studio Header */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '16px',
-            flexWrap: 'nowrap',
+            marginBottom: '20px',
+            flexWrap: 'wrap',
             gap: '16px'
           }}>
             <div>
-              <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1c2427', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileCode className="size-6 text-emerald-500" /> LaTeX Resume Architect
+              <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#1F1E1D', margin: 0, display: 'flex', alignItems: 'center', gap: '10px', letterSpacing: '-0.02em' }}>
+                <FileCode className="size-6" style={{ color: '#D97757' }} /> LaTeX Resume Architect
               </h1>
-              <p style={{ margin: '2px 0 0', color: '#64748b', fontSize: '0.82rem', fontWeight: 500 }}>
+              <p style={{ margin: '4px 0 0', color: '#5C5954', fontSize: '0.86rem', fontWeight: 500 }}>
                 Live two-way sync: Form edits update LaTeX, and you can edit or paste code directly in the code box.
               </p>
             </div>
 
             {/* Header Right Action Controls */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              {/* Load Sample Resume Button */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              {/* Load Sample Resume Button — Claude Amber */}
               <button
                 onClick={() => loadSampleResume(template)}
                 style={{
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  color: '#ffffff',
+                  background: 'linear-gradient(135deg, #D97757 0%, #C05D3C 100%)',
+                  color: '#FDFCF9',
                   border: 'none',
-                  borderRadius: '12px',
-                  padding: '8px 16px',
-                  fontSize: '0.8rem',
+                  borderRadius: '1rem',
+                  padding: '10px 18px',
+                  fontSize: '0.82rem',
                   fontWeight: 700,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '7px',
                   whiteSpace: 'nowrap',
-                  boxShadow: '0 3px 12px rgba(16, 185, 129, 0.28)',
+                  boxShadow: '0 6px 18px rgba(217, 119, 87, 0.3)',
                   transition: 'all 0.2s'
                 }}
                 title="Populate form & LaTeX with realistic sample resume data"
@@ -1211,17 +1686,17 @@ const ResumeBuilder = () => {
                 <button
                   onClick={clearForm}
                   style={{
-                    background: '#fef2f2',
-                    color: '#ef4444',
-                    border: '1px solid #fca5a5',
-                    borderRadius: '12px',
-                    padding: '8px 14px',
-                    fontSize: '0.78rem',
+                    background: 'rgba(223, 90, 73, 0.1)',
+                    color: '#DF5A49',
+                    border: '1px solid rgba(223, 90, 73, 0.3)',
+                    borderRadius: '1rem',
+                    padding: '10px 16px',
+                    fontSize: '0.8rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '5px',
                     whiteSpace: 'nowrap'
                   }}
                 >
@@ -1231,31 +1706,31 @@ const ResumeBuilder = () => {
 
               {/* Quick Resume Upload Banner */}
               <div style={{
-                background: '#ffffff',
-                borderRadius: '14px',
-                padding: '6px 14px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-                border: '1px solid #e2e8f0',
+                background: '#FDFCF9',
+                borderRadius: '1rem',
+                padding: '7px 14px',
+                boxShadow: '0 4px 14px rgba(31, 30, 29, 0.05)',
+                border: '1px solid rgba(31, 30, 29, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px'
               }}>
-                <FileText className="size-4 text-emerald-600" />
+                <FileText className="size-4" style={{ color: '#D97757' }} />
                 <div style={{ lineHeight: 1.2 }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1c2427', display: 'block' }}>Magic Resume Autofill</span>
-                  <span style={{ fontSize: '0.7rem', color: '#64748b' }}>Parse PDF / DOCX to Form</span>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1F1E1D', display: 'block' }}>Magic Resume Autofill</span>
+                  <span style={{ fontSize: '0.7rem', color: '#5C5954' }}>Parse PDF / DOCX to Form</span>
                 </div>
                 <label style={{
-                  background: '#1c2427',
-                  color: '#ffffff',
-                  padding: '7px 14px',
-                  borderRadius: '10px',
+                  background: '#1F1E1D',
+                  color: '#FDFCF9',
+                  padding: '8px 15px',
+                  borderRadius: '12px',
                   fontSize: '0.78rem',
                   fontWeight: 700,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px',
+                  gap: '5px',
                   whiteSpace: 'nowrap'
                 }}>
                   <Upload className="size-3.5" /> Upload Resume
@@ -1268,35 +1743,104 @@ const ResumeBuilder = () => {
           {/* Status Message Notification */}
           {statusMsg && (
             <div style={{
-              background: '#ecfdf5',
-              border: '1px solid #10b981',
-              color: '#065f46',
-              padding: '8px 14px',
-              borderRadius: '10px',
-              fontSize: '0.82rem',
+              background: 'rgba(217, 119, 87, 0.12)',
+              border: '1px solid rgba(217, 119, 87, 0.35)',
+              color: '#8E3E24',
+              padding: '10px 16px',
+              borderRadius: '12px',
+              fontSize: '0.84rem',
               fontWeight: 600,
-              marginBottom: '12px'
+              marginBottom: '16px'
             }}>
               {statusMsg}
             </div>
           )}
 
-          {/* MAIN 2-COLUMN GRID (Top Aligned Flush) */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'stretch' }}>
+          {/* Layout Mode Selector (Split View | Full Page Compiler | Form Focused) */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#ece9df', padding: '4px', borderRadius: '12px', border: '1px solid rgba(31,30,29,0.08)' }}>
+              <button
+                onClick={() => setViewMode('split')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9px',
+                  border: 'none',
+                  background: viewMode === 'split' ? '#ffffff' : 'transparent',
+                  color: viewMode === 'split' ? '#1F1E1D' : '#5C5954',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  boxShadow: viewMode === 'split' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
+                  transition: 'all 0.15s'
+                }}
+              >
+                Split View
+              </button>
+              <button
+                onClick={() => setViewMode('compiler')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9px',
+                  border: 'none',
+                  background: viewMode === 'compiler' ? '#ffffff' : 'transparent',
+                  color: viewMode === 'compiler' ? '#1F1E1D' : '#5C5954',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  boxShadow: viewMode === 'compiler' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
+                  transition: 'all 0.15s'
+                }}
+              >
+                ⚡ Full Page Compiler
+              </button>
+              <button
+                onClick={() => setViewMode('form')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '9px',
+                  border: 'none',
+                  background: viewMode === 'form' ? '#ffffff' : 'transparent',
+                  color: viewMode === 'form' ? '#1F1E1D' : '#5C5954',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  boxShadow: viewMode === 'form' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
+                  transition: 'all 0.15s'
+                }}
+              >
+                Form Only
+              </button>
+            </div>
+
+            {viewMode === 'compiler' && (
+              <span style={{ fontSize: '0.78rem', color: '#10b981', fontWeight: 600 }}>
+                ✓ Compiler taking 100% full page width. Switch to Split View anytime.
+              </span>
+            )}
+          </div>
+
+          {/* MAIN 2-COLUMN WIDE STUDIO GRID */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: viewMode === 'split' ? '1.08fr 0.92fr' : '1fr',
+            gap: '22px',
+            alignItems: 'stretch'
+          }}>
 
             {/* LEFT COLUMN: CONTROLS, CAREER ROADMAP & FORM TABS */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
+            {viewMode !== 'compiler' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
               
               {/* Template Selector Card (Top of Left Column) */}
               <div style={{
-                background: '#ffffff',
-                borderRadius: '18px',
-                padding: '12px 16px',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
-                border: '1px solid #e2e8f0'
+                background: '#FDFCF9',
+                borderRadius: '20px',
+                padding: '16px 20px',
+                boxShadow: '0 8px 24px rgba(31, 30, 29, 0.04)',
+                border: '1px solid rgba(31, 30, 29, 0.09)'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#5C5954', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                     Select LaTeX Resume Template
                   </span>
                   <button
@@ -1304,8 +1848,8 @@ const ResumeBuilder = () => {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#059669',
-                      fontSize: '0.72rem',
+                      color: '#D97757',
+                      fontSize: '0.74rem',
                       fontWeight: 700,
                       cursor: 'pointer',
                       display: 'flex',
@@ -1330,18 +1874,18 @@ const ResumeBuilder = () => {
                         key={t.id}
                         onClick={() => setTemplate(t.id)}
                         style={{
-                          background: isSelected ? '#1c2427' : '#f8fafc',
-                          color: isSelected ? '#ffffff' : '#1c2427',
-                          border: isSelected ? '2px solid #10b981' : '1px solid #cbd5e1',
-                          borderRadius: '12px',
-                          padding: '8px 6px',
+                          background: isSelected ? '#1F1E1D' : '#F5F3EC',
+                          color: isSelected ? '#FDFCF9' : '#1F1E1D',
+                          border: isSelected ? '2px solid #D97757' : '1px solid rgba(31, 30, 29, 0.12)',
+                          borderRadius: '14px',
+                          padding: '10px 8px',
                           textAlign: 'center',
                           cursor: 'pointer',
                           transition: 'all 0.2s'
                         }}
                       >
-                        <strong style={{ fontSize: '0.8rem', display: 'block' }}>{t.name}</strong>
-                        <span style={{ fontSize: '0.65rem', color: isSelected ? '#10b981' : '#64748b', fontWeight: 600 }}>{t.tag}</span>
+                        <strong style={{ fontSize: '0.82rem', display: 'block' }}>{t.name}</strong>
+                        <span style={{ fontSize: '0.67rem', color: isSelected ? '#E6997A' : '#5C5954', fontWeight: 600 }}>{t.tag}</span>
                       </button>
                     );
                   })}
@@ -1350,32 +1894,32 @@ const ResumeBuilder = () => {
 
               {/* DYNAMIC GEMINI CAREER STREAM & ATS KEYWORD GENERATOR CARD */}
               <div style={{
-                background: '#ffffff',
-                borderRadius: '18px',
-                padding: '14px 16px',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
-                border: '1px solid #e2e8f0'
+                background: '#FDFCF9',
+                borderRadius: '20px',
+                padding: '16px 20px',
+                boxShadow: '0 8px 24px rgba(31, 30, 29, 0.04)',
+                border: '1px solid rgba(31, 30, 29, 0.09)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Target className="size-4 text-emerald-600" />
-                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1c2427', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <Target className="size-4" style={{ color: '#D97757' }} />
+                    <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#1F1E1D', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                       Target Career Stream / Role
                     </span>
                   </div>
 
                   {/* ATS Score Indicator Pill */}
                   <div style={{
-                    background: atsScore >= 70 ? '#ecfdf5' : '#fffbeb',
-                    border: `1px solid ${atsScore >= 70 ? '#6ee7b7' : '#fde68a'}`,
-                    padding: '4px 10px',
-                    borderRadius: '20px',
+                    background: atsScore >= 70 ? 'rgba(94, 163, 151, 0.14)' : 'rgba(217, 119, 87, 0.14)',
+                    border: `1px solid ${atsScore >= 70 ? 'rgba(94, 163, 151, 0.4)' : 'rgba(217, 119, 87, 0.35)'}`,
+                    padding: '4px 12px',
+                    borderRadius: '999px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '5px'
                   }}>
-                    <BarChart3 className={`size-3.5 ${atsScore >= 70 ? 'text-emerald-600' : 'text-amber-600'}`} />
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: atsScore >= 70 ? '#047857' : '#b45309' }}>
+                    <BarChart3 className="size-3.5" style={{ color: atsScore >= 70 ? '#3E8276' : '#C05D3C' }} />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: atsScore >= 70 ? '#2C655B' : '#C05D3C' }}>
                       ATS Match: {atsScore}%
                     </span>
                   </div>
@@ -1391,25 +1935,25 @@ const ResumeBuilder = () => {
                     onKeyDown={(e) => { if (e.key === 'Enter') handleFetchGeminiKeywords(); }}
                     style={{
                       flex: 1,
-                      padding: '8px 12px',
-                      borderRadius: '10px',
-                      border: '1px solid #cbd5e1',
-                      fontSize: '0.82rem',
+                      padding: '10px 14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(31, 30, 29, 0.14)',
+                      fontSize: '0.84rem',
                       fontWeight: 600,
-                      color: '#1c2427',
-                      background: '#f8fafc'
+                      color: '#1F1E1D',
+                      background: '#F5F3EC'
                     }}
                   />
                   <button
                     onClick={handleFetchGeminiKeywords}
                     disabled={isFetchingKeywords || !customStream.trim()}
                     style={{
-                      background: isFetchingKeywords ? '#64748b' : '#1c2427',
-                      color: '#ffffff',
+                      background: isFetchingKeywords ? '#7D7870' : '#1F1E1D',
+                      color: '#FDFCF9',
                       border: 'none',
-                      borderRadius: '10px',
-                      padding: '8px 14px',
-                      fontSize: '0.78rem',
+                      borderRadius: '12px',
+                      padding: '10px 16px',
+                      fontSize: '0.8rem',
                       fontWeight: 700,
                       cursor: isFetchingKeywords ? 'not-allowed' : 'pointer',
                       display: 'flex',
@@ -1418,15 +1962,15 @@ const ResumeBuilder = () => {
                       whiteSpace: 'nowrap'
                     }}
                   >
-                    {isFetchingKeywords ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5 text-amber-400" />}
+                    {isFetchingKeywords ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" style={{ color: '#E6997A' }} />}
                     {isFetchingKeywords ? 'Generating...' : 'AI Engine Keywords'}
                   </button>
                 </div>
 
                 {/* AI Engine Suggested Keywords Pills */}
                 <div>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
-                    <Lightbulb className="size-3 text-amber-500" /> AI Recommended Keywords for "{customStream}" (Click to add to Skills):
+                  <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#5C5954', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+                    <Lightbulb className="size-3.5" style={{ color: '#D97757' }} /> AI Recommended Keywords for "{customStream}" (Click to add to Skills):
                   </span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {dynamicKeywords.map((kw, i) => (
@@ -1720,10 +2264,8 @@ const ResumeBuilder = () => {
                   <Download className="size-3.5" /> Download .tex
                 </button>
 
-                <a
-                  href="https://www.overleaf.com/docs"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={handleOpenInOverleaf}
                   style={{
                     background: '#f5c35c',
                     color: '#1c2427',
@@ -1737,12 +2279,13 @@ const ResumeBuilder = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '4px',
-                    textDecoration: 'none',
-                    boxShadow: '0 2px 8px rgba(245,195,92,0.15)'
+                    boxShadow: '0 2px 8px rgba(245,195,92,0.15)',
+                    transition: 'all 0.15s'
                   }}
+                  title="Open live resume in Overleaf"
                 >
                   <ExternalLink className="size-3.5" /> Open Overleaf
-                </a>
+                </button>
               </div>
 
               {/* Online Preview Link Banner (Down Side) */}
@@ -1750,179 +2293,80 @@ const ResumeBuilder = () => {
                 background: '#eff6ff',
                 border: '1px solid #bfdbfe',
                 borderRadius: '12px',
-                padding: '8px 14px',
+                padding: '10px 16px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                gap: '12px'
               }}>
-                <span style={{ fontSize: '0.78rem', color: '#1e40af', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.8rem', color: '#1e40af', fontWeight: 600 }}>
                   Render & Preview Live PDF Online:
                 </span>
-                <a
-                  href={latexOnlineUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={handleCompilePdf}
+                  disabled={isCompilingPdf}
                   style={{
                     color: '#2563eb',
                     fontWeight: 700,
-                    fontSize: '0.78rem',
+                    fontSize: '0.8rem',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '5px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: isCompilingPdf ? 'not-allowed' : 'pointer',
                     textDecoration: 'underline'
                   }}
                 >
-                  Compile PDF Online <ExternalLink className="size-3" />
-                </a>
+                  {isCompilingPdf ? 'Compiling PDF...' : 'Compile PDF Online'} <ExternalLink className="size-3" />
+                </button>
               </div>
 
-            </div>
+              </div>
+            )}
 
-            {/* RIGHT COLUMN: GENERATED LATEX CODE CONTAINER (Aligned Flush to Left Column) */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
+            {/* RIGHT COLUMN: PROFESSIONAL LATEX CODE COMPILER & IDE */}
+            {viewMode !== 'form' && (
               <div style={{
-                background: '#1c2427',
-                borderRadius: '20px',
-                padding: '16px',
-                color: '#e2e8f0',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
                 display: 'flex',
                 flexDirection: 'column',
-                height: '100%'
+                gap: '12px',
+                position: viewMode === 'compiler' ? 'relative' : 'sticky',
+                top: viewMode === 'compiler' ? 'auto' : '20px',
+                height: viewMode === 'compiler' ? 'calc(100vh - 140px)' : 'calc(100vh - 40px)',
+                minHeight: '620px'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f5c35c', fontFamily: 'monospace' }}>
-                      {template === 'abey_classic' ? 'classic_tech_resume.tex' : template === 'executive' ? 'executive_resume.tex' : 'data_ml_specialist_resume.tex'}
-                    </span>
-                    {isManualEdit ? (
-                      <span style={{
-                        fontSize: '0.7rem',
-                        background: 'rgba(245, 158, 11, 0.2)',
-                        border: '1px solid rgba(245, 158, 11, 0.4)',
-                        color: '#fcd34d',
-                        padding: '2px 8px',
-                        borderRadius: '6px',
-                        fontWeight: 700,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}>
-                        <Edit3 className="size-3" /> Custom LaTeX Active
-                      </span>
-                    ) : (
-                      <span style={{
-                        fontSize: '0.7rem',
-                        background: 'rgba(16, 185, 129, 0.15)',
-                        border: '1px solid rgba(16, 185, 129, 0.3)',
-                        color: '#6ee7b7',
-                        padding: '2px 8px',
-                        borderRadius: '6px',
-                        fontWeight: 700,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}>
-                        ⚡ Live Form Synced
-                      </span>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {isManualEdit && (
-                      <button
-                        onClick={handleResetFromForm}
-                        style={{
-                          background: 'rgba(56, 189, 248, 0.15)',
-                          color: '#38bdf8',
-                          border: '1px solid rgba(56, 189, 248, 0.35)',
-                          borderRadius: '8px',
-                          padding: '3px 8px',
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          transition: 'all 0.2s'
-                        }}
-                        title="Revert custom code edits and re-sync from form fields"
-                      >
-                        <RefreshCw className="size-3" /> Re-sync from Form
-                      </button>
-                    )}
-                    <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontFamily: 'monospace' }}>
-                      {latexCode ? latexCode.split('\n').length : 0} lines
-                    </span>
-                    <button
-                      onClick={handleCopyLatex}
-                      style={{
-                        background: isCopied ? '#10b981' : 'rgba(255, 255, 255, 0.08)',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '4px 10px',
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                    >
-                      {isCopied ? <Check className="size-3" /> : <Copy className="size-3" />}
-                      {isCopied ? 'Copied' : 'Copy'}
-                    </button>
-                  </div>
-                </div>
-
-                <div style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <textarea
-                    value={latexCode}
-                    onChange={handleCodeChange}
-                    onKeyDown={handleCodeKeyDown}
-                    spellCheck={false}
-                    placeholder="LaTeX code will appear here. You can freely edit or paste LaTeX code manually..."
-                    style={{
-                      background: '#141a1c',
-                      borderRadius: '12px',
-                      padding: '12px',
-                      fontFamily: 'Consolas, Monaco, "Fira Code", monospace',
-                      fontSize: '0.76rem',
-                      lineHeight: 1.45,
-                      flex: 1,
-                      minHeight: '620px',
-                      maxHeight: '760px',
-                      width: '100%',
-                      boxSizing: 'border-box',
-                      color: '#a7f3d0',
-                      border: isManualEdit ? '1px solid rgba(245, 158, 11, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
-                      outline: 'none',
-                      resize: 'none',
-                      whiteSpace: 'pre',
-                      overflowWrap: 'normal',
-                      overflowX: 'auto',
-                      overflowY: 'auto'
-                    }}
-                  />
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '8px',
-                    right: '12px',
-                    fontSize: '0.65rem',
-                    color: '#64748b',
-                    background: 'rgba(20, 26, 28, 0.85)',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    pointerEvents: 'none'
-                  }}>
-                    Editable Code Box • Tab key supported
-                  </div>
-                </div>
+                {renderEditorWorkspace(false)}
               </div>
-            </div>
+            )}
 
           </div>
+
+          {/* Full Screen Portal when isEditorFullscreen is active: 100vw x 100vh covering entire page */}
+          {isEditorFullscreen && ReactDOM.createPortal(
+            <div
+              style={{
+                position: 'fixed',
+                inset: 0,
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100vw',
+                height: '100vh',
+                zIndex: 9999999,
+                background: '#0d0d10',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                margin: 0,
+                padding: 0
+              }}
+            >
+              {renderEditorWorkspace(true)}
+            </div>,
+            document.body
+          )}
 
         </div>
       </main>

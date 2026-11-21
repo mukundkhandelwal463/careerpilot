@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { Menu, X, Home, Award, FileCode, Briefcase, Sparkles, LayoutDashboard, LogOut } from 'lucide-react';
+import { Menu, X, Home, Award, FileCode, Briefcase, Sparkles, LayoutDashboard, LogOut, Bell, Code2 } from 'lucide-react';
 import '../css/style.css';
 
 const Navbar = () => {
@@ -13,22 +13,68 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+  const notifRef = useRef(null);
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    setUserMenuOpen(false);
+    setShowDropdown(false);
   }, [location.pathname]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("app_notifications");
-    if (saved) {
-      try {
-        setNotifications(JSON.parse(saved));
-      } catch (e) { }
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const userEmail = user?.email ? user.email.toLowerCase().trim() : null;
+  const notifStorageKey = userEmail ? `app_notifications_${userEmail}` : null;
+  const unreadStorageKey = userEmail ? `has_unread_notifications_${userEmail}` : null;
+
+  useEffect(() => {
+    // Clean up legacy global keys that previously leaked notifications across accounts
+    localStorage.removeItem("app_notifications");
+    localStorage.removeItem("has_unread_notifications");
+
+    if (!notifStorageKey || !unreadStorageKey) {
+      setNotifications([]);
+      setHasUnread(false);
+      setShowDropdown(false);
+      return;
     }
-    setHasUnread(localStorage.getItem("has_unread_notifications") === "true");
+
+    const loadUserNotifications = () => {
+      const saved = localStorage.getItem(notifStorageKey);
+      if (saved) {
+        try {
+          setNotifications(JSON.parse(saved));
+        } catch (e) {
+          setNotifications([]);
+        }
+      } else {
+        setNotifications([]);
+      }
+      setHasUnread(localStorage.getItem(unreadStorageKey) === "true");
+    };
+
+    loadUserNotifications();
 
     const handleNewNotification = (e) => {
-      const savedLatest = localStorage.getItem("app_notifications");
+      const targetEmail = e?.detail?.email ? String(e.detail.email).toLowerCase().trim() : null;
+      if (targetEmail && targetEmail !== userEmail) return;
+
+      const savedLatest = localStorage.getItem(notifStorageKey);
       if (savedLatest) {
         try {
           setNotifications(JSON.parse(savedLatest));
@@ -42,13 +88,13 @@ const Navbar = () => {
     return () => {
       window.removeEventListener("new_scan_notification", handleNewNotification);
     };
-  }, []);
+  }, [userEmail, notifStorageKey, unreadStorageKey]);
 
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown);
-    if (!showDropdown) {
+    if (!showDropdown && unreadStorageKey) {
       setHasUnread(false);
-      localStorage.setItem("has_unread_notifications", "false");
+      localStorage.setItem(unreadStorageKey, "false");
     }
   };
 
@@ -56,8 +102,8 @@ const Navbar = () => {
     e.stopPropagation();
     setNotifications([]);
     setHasUnread(false);
-    localStorage.removeItem("app_notifications");
-    localStorage.removeItem("has_unread_notifications");
+    if (notifStorageKey) localStorage.removeItem(notifStorageKey);
+    if (unreadStorageKey) localStorage.removeItem(unreadStorageKey);
   };
 
   const handleLogout = async () => {
@@ -131,16 +177,16 @@ const Navbar = () => {
           boxShadow: '0 4px 14px rgba(0, 0, 0, 0.04)',
           transition: 'all 0.2s'
         }}>
-          <img src="/logo.png" alt="Logo" style={{ height: '34px', width: 'auto', objectFit: 'contain' }} />
-          <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1c2427', fontFamily: 'Sora, sans-serif', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-            Career<span style={{ color: '#ff6b4a' }}>Pilot</span>
+          <img src="/logo.png" alt="CareerPilot AI Resume Screener Logo" style={{ height: '34px', width: 'auto', objectFit: 'contain' }} />
+          <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1F1E1D', fontFamily: '"Outfit", sans-serif', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+            Career<span style={{ color: '#D97757' }}>Pilot</span>
           </span>
         </Link>
 
         {/* Right side desktop container: Exact Original Desktop Layout */}
         <div className="nav-desktop-container" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {/* Navigation links capsule */}
-          <nav style={{
+          <nav aria-label="Primary Navigation" style={{
             background: '#ffffff',
             borderRadius: '999px',
             padding: '5px',
@@ -157,127 +203,224 @@ const Navbar = () => {
                 <Link to="/app/builder/default" className={`nav-link-mock ${location.pathname.startsWith('/app/builder/') ? 'active' : ''}`}>Resume Maker</Link>
                 <Link to="/jobs" className={`nav-link-mock ${isActive('/jobs')}`}>Jobs</Link>
                 <Link to="/preparation" className={`nav-link-mock ${isActive('/preparation')}`}>Preparation</Link>
-                <Link to="/dashboard" className={`nav-link-mock ${isActive('/dashboard')}`}>Dashboard</Link>
               </>
             )}
           </nav>
 
-          {/* User Actions */}
+          {/* User Actions - Outside Notification Bell + 3-Line Menu */}
           {user ? (
             <>
-              {/* Notification Button */}
-              <button
-                onClick={toggleDropdown}
-                style={{
-                  background: '#ffffff',
-                  width: '50px',
-                  height: '50px',
-                  borderRadius: '50%',
-                  border: '1px solid rgba(24, 35, 38, 0.08)',
-                  display: 'grid',
-                  placeItems: 'center',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.02)'
-                }}
-              >
-                <span style={{ fontSize: '1.0rem' }}>🔔</span>
-                {hasUnread && (
-                  <span style={{
-                    position: 'absolute',
-                    top: '12px',
-                    right: '12px',
-                    width: '6px',
-                    height: '6px',
-                    background: '#ff6b4a',
-                    borderRadius: '50%'
-                  }}></span>
-                )}
-
-                {showDropdown && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '46px',
-                    right: '0',
-                    width: '320px',
+              {/* Notification Bell Button (Outside, just like previous) */}
+              <div style={{ position: 'relative' }} ref={notifRef}>
+                <button
+                  onClick={toggleDropdown}
+                  aria-label="Notifications"
+                  title="Notifications"
+                  style={{
+                    position: 'relative',
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '50%',
                     background: '#ffffff',
                     border: '1px solid rgba(24, 35, 38, 0.08)',
-                    borderRadius: '16px',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-                    zIndex: 1000,
-                    padding: '16px',
-                    textAlign: 'left',
-                    cursor: 'default'
+                    display: 'grid',
+                    placeItems: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.02)',
+                    transition: 'all 0.2s ease',
+                    color: '#1F1E1D'
                   }}
+                >
+                  <Bell size={20} />
+                  {notifications.length > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      width: '9px',
+                      height: '9px',
+                      background: '#ff6b4a',
+                      borderRadius: '50%',
+                      border: '2px solid #ffffff'
+                    }} />
+                  )}
+                </button>
+
+                {/* Notifications Dropdown */}
+                {showDropdown && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '58px',
+                      right: '0',
+                      width: '320px',
+                      background: '#ffffff',
+                      border: '1px solid rgba(24, 35, 38, 0.08)',
+                      borderRadius: '20px',
+                      boxShadow: '0 16px 40px rgba(0, 0, 0, 0.12)',
+                      zIndex: 1000,
+                      padding: '18px',
+                      textAlign: 'left'
+                    }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <strong style={{ fontSize: '0.9rem', color: 'var(--text)' }}>Notifications</strong>
-                      <button
-                        onClick={handleClearNotifications}
-                        style={{ background: 'none', border: 'none', color: 'var(--accent-deep)', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer' }}
-                      >
-                        Clear all
-                      </button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
+                      <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#1e293b' }}>Notifications</span>
+                      {notifications.length > 0 && (
+                        <button
+                          onClick={handleClearNotifications}
+                          style={{ background: 'none', border: 'none', color: '#ff6b4a', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+                        >
+                          Clear all
+                        </button>
+                      )}
                     </div>
                     {notifications.length === 0 ? (
-                      <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '10px 0', textAlign: 'center' }}>No new notifications.</p>
+                      <p style={{ margin: '14px 0', fontSize: '0.85rem', color: '#64748b', textAlign: 'center' }}>No notifications yet</p>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                      <div style={{ maxHeight: '240px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {notifications.map((n) => (
-                          <div key={n.id} style={{
-                            fontSize: '0.82rem',
-                            color: 'var(--text)',
-                            padding: '8px 12px',
-                            borderRadius: '10px',
-                            background: 'rgba(24, 35, 38, 0.03)',
-                            borderLeft: '3px solid #ff6b4a'
-                          }}>
-                            <div>{n.text}</div>
-                            <span style={{ fontSize: '0.68rem', color: 'var(--muted)', marginTop: '4px', display: 'block' }}>{n.time}</span>
+                          <div key={n.id} style={{ fontSize: '0.82rem', color: '#334155', borderLeft: '3px solid #ff6b4a', paddingLeft: '10px' }}>
+                            <div style={{ fontWeight: 500 }}>{n.text}</div>
+                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{n.time}</span>
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
                 )}
-              </button>
+              </div>
 
-              {/* Profile Avatar Button */}
-              <Link to="/dashboard" style={{
-                display: 'block',
-                textDecoration: 'none',
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                border: '1px solid rgba(24, 35, 38, 0.08)',
-                background: '#ffffff',
-                overflow: 'hidden',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.02)'
-              }}>
-                <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center' }}>
-                  {renderAvatar()}
-                </div>
-              </Link>
+              {/* 3-Line Hamburger Menu Button */}
+              <div style={{ position: 'relative' }} ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  aria-label="User Options Menu"
+                  title="Account & Profile Menu"
+                  style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    border: '1px solid rgba(24, 35, 38, 0.08)',
+                    display: 'grid',
+                    placeItems: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.02)',
+                    transition: 'all 0.2s ease',
+                    color: '#1F1E1D'
+                  }}
+                >
+                  {userMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
 
-              {/* Logout button */}
-              <button
-                onClick={handleLogout}
-                style={{
-                  height: '50px',
-                  borderRadius: '999px',
-                  padding: '0 21px',
-                  fontSize: '0.88rem',
-                  fontWeight: 700,
-                  border: '1px solid rgba(24, 35, 38, 0.08)',
-                  background: '#ffffff',
-                  color: 'var(--text)',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.02)'
-                }}
-              >
-                Sign Out
-              </button>
+                {/* Dropdown Menu: Profile with photo, Dashboard & Logout options */}
+                {userMenuOpen && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '58px',
+                      right: '0',
+                      width: '300px',
+                      background: '#ffffff',
+                      border: '1px solid rgba(24, 35, 38, 0.08)',
+                      borderRadius: '20px',
+                      boxShadow: '0 16px 40px rgba(0, 0, 0, 0.12)',
+                      zIndex: 1000,
+                      padding: '18px',
+                      textAlign: 'left'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Profile info with photo */}
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        textDecoration: 'none',
+                        paddingBottom: '14px',
+                        borderBottom: '1px solid #f1f5f9'
+                      }}
+                    >
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        overflow: 'hidden',
+                        border: '2px solid rgba(217, 119, 87, 0.35)',
+                        display: 'grid',
+                        placeItems: 'center',
+                        flexShrink: 0
+                      }}>
+                        {renderAvatar('48px')}
+                      </div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.98rem', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {user?.name || user?.full_name || user?.username || 'My Profile'}
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {user?.email || 'Candidate Account'}
+                        </div>
+                      </div>
+                    </Link>
+
+                    {/* Navigation & Actions */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '12px 0' }}>
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setUserMenuOpen(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          padding: '10px 14px',
+                          borderRadius: '12px',
+                          textDecoration: 'none',
+                          color: '#1e293b',
+                          fontSize: '0.9rem',
+                          fontWeight: 600,
+                          transition: 'background 0.15s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <LayoutDashboard size={18} color="#4f46e5" />
+                        <span>Candidate Dashboard</span>
+                      </Link>
+                    </div>
+
+                    <div style={{ height: '1px', background: '#f1f5f9', margin: '4px 0 10px 0' }} />
+
+                    {/* Sign Out / Logout Option */}
+                    <button
+                      onClick={handleLogout}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 14px',
+                        borderRadius: '12px',
+                        border: 'none',
+                        background: 'rgba(239, 68, 68, 0.08)',
+                        color: '#ef4444',
+                        fontSize: '0.9rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)'}
+                    >
+                      <LogOut size={18} color="#ef4444" />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <Link className="btn btn-primary" to="/login" style={{
@@ -301,21 +444,6 @@ const Navbar = () => {
 
         {/* Mobile Toggle Button (Visible ONLY on mobile max-width: 900px) */}
         <div className="nav-mobile-toggle">
-          {user && (
-            <Link to="/dashboard" style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '50%',
-              overflow: 'hidden',
-              display: 'grid',
-              placeItems: 'center',
-              background: '#ffffff',
-              border: '1px solid rgba(24, 35, 38, 0.1)'
-            }}>
-              {renderAvatar('38px')}
-            </Link>
-          )}
-
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             style={{

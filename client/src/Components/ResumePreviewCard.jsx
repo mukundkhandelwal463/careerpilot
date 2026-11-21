@@ -1,4 +1,5 @@
 import React from 'react';
+import { Phone, Mail, MapPin, Link2, Github, Globe } from 'lucide-react';
 
 /**
  * ResumePreviewCard
@@ -87,12 +88,12 @@ const ResumePreviewCard = ({ data, onAddSkill }) => {
         borderBottom: '1px solid #111',
         marginBottom: '24px',
       }}>
-        <ContactItem icon="📞" label={phone} />
-        <ContactItem icon="✉" label={email} />
-        <ContactItem icon="📍" label={displayLocation} />
-        <ContactItem icon="🔗" label={linkedin} />
-        <ContactItem icon="🐙" label={github} />
-        <ContactItem icon="🌐" label={website} />
+        <ContactItem icon={<Phone size={12} />} label={phone} />
+        <ContactItem icon={<Mail size={12} />} label={email} />
+        <ContactItem icon={<MapPin size={12} />} label={displayLocation} />
+        <ContactItem icon={<Link2 size={12} />} label={linkedin} />
+        <ContactItem icon={<Github size={12} />} label={github} />
+        <ContactItem icon={<Globe size={12} />} label={website} />
       </div>
 
       {/* ── ABOUT ME ── */}

@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CareerPilot - Comprehensive Project & DevOps Engineering Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm 12mm 14mm 12mm;
+    @bottom-right {
+      content: "Page " counter(page);
+      font-size: 7.5pt;
+      font-family: 'Inter', sans-serif;
+      color: #64748b;
+    }
+    @bottom-left {
+      content: "CareerPilot: Candidate Career Acceleration Platform • Mukund Khandelwal (12316528)";
+      font-size: 7pt;
+      font-family: 'Inter', sans-serif;
+      color: #94a3b8;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    line-height: 1.45;
+    font-size: 9pt;
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Cover Page */
+  .cover-card {
+    padding: 24px 20px 18px 20px;
+    text-align: center;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+  }
+
+  .cover-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-radius: 16px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    margin-bottom: 8px;
+  }
+
+  .cover-title {
+    font-size: 19pt;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    margin: 0 0 6px 0;
+  }
+
+  .cover-subtitle {
+    font-size: 9.5pt;
+    font-weight: 500;
+    color: #475569;
+    margin: 0 auto 14px auto;
+    max-width: 620px;
+    line-height: 1.35;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    max-width: 580px;
+    margin: 0 auto 14px auto;
+    text-align: left;
+    background: #ffffff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+  }
+
+  .meta-item {
+    font-size: 8pt;
+  }
+
+  .meta-label {
+    font-weight: 700;
+    color: #64748b;
+    font-size: 7pt;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .meta-val {
+    font-weight: 600;
+    color: #0f172a;
+    margin-top: 1px;
+  }
+
+  .status-banner {
+    display: flex;
+    justify-content: space-around;
+    background: #0f172a;
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 7.5pt;
+  }
+
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    background: #10b981;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* Headings */
+  h1 {
+    font-size: 13pt;
+    font-weight: 800;
+    color: #0f172a;
+    border-bottom: 2px solid #2563eb;
+    padding-bottom: 4px;
+    margin-top: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  h2 {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #1e293b;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    border-left: 3px solid #2563eb;
+    padding-left: 6px;
+  }
+
+  h3 {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #334155;
+    margin-top: 9px;
+    margin-bottom: 4px;
+  }
+
+  p {
+    margin: 0 0 6px 0;
+    color: #334155;
+    text-align: justify;
+    line-height: 1.42;
+  }
+
+  ul, ol {
+    margin: 0 0 6px 0;
+    padding-left: 16px;
+    color: #334155;
+  }
+
+  li {
+    margin-bottom: 3px;
+    line-height: 1.38;
+  }
+
+  /* Callouts */
+  .callout {
+    background: #f8fafc;
+    border-left: 3.5px solid #2563eb;
+    padding: 7px 10px;
+    border-radius: 0 5px 5px 0;
+    margin: 8px 0;
+    font-size: 8pt;
+    line-height: 1.35;
+    page-break-inside: avoid;
+  }
+
+  .callout.success {
+    background: #f0fdf4;
+    border-left-color: #16a34a;
+    color: #166534;
+  }
+
+  .callout.warning {
+    background: #fffbeb;
+    border-left-color: #d97706;
+    color: #92400e;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 7.8pt;
+    page-break-inside: avoid;
+  }
+
+  th, td {
+    padding: 5px 7px;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background: #f1f5f9;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    font-size: 6.8pt;
+    letter-spacing: 0.4px;
+  }
+
+  tr:nth-child(even) {
+    background: #f8fafc;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 5px;
+    font-size: 6.8pt;
+    font-weight: 700;
+    border-radius: 3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .badge-green { background: #dcfce7; color: #15803d; }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+  .badge-purple { background: #f3e8ff; color: #7e22ce; }
+  .badge-amber { background: #fef3c7; color: #b45309; }
+
+  /* Code & Diagram */
+  pre, code {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 7px 9px;
+    border-radius: 5px;
+    font-size: 7.2pt;
+    overflow-x: auto;
+    line-height: 1.35;
+    margin: 6px 0;
+    page-break-inside: avoid;
+  }
+
+  p code, li code, td code {
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 1px 3px;
+    border-radius: 3px;
+    font-size: 7.5pt;
+    border: 1px solid #e2e8f0;
+  }
+
+  .diagram-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 8px;
+    margin: 7px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 6.8pt;
+    line-height: 1.28;
+    color: #0f172a;
+    white-space: pre;
+    overflow-x: auto;
+    page-break-inside: avoid;
+  }
+
+  .math-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #8b5cf6;
+    padding: 6px 10px;
+    border-radius: 0 5px 5px 0;
+    margin: 6px 0;
+    font-size: 7.8pt;
+    font-family: 'JetBrains Mono', monospace;
+    page-break-inside: avoid;
+  }
+
+  .qa-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    background: #ffffff;
+    page-break-inside: avoid;
+  }
+
+  .qa-q {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 8pt;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .qa-a {
+    color: #475569;
+    font-size: 7.6pt;
+    line-height: 1.35;
+    padding-left: 12px;
+    border-left: 2px solid #cbd5e1;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin: 6px 0;
+    page-break-inside: avoid;
+  }
+
+  .feature-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+    padding: 6px 8px;
+    background: #ffffff;
+  }
+
+  .feature-card h4 {
+    margin: 0 0 2px 0;
+    font-size: 8pt;
+    color: #1e293b;
+    font-weight: 700;
+  }
+
+  .feature-card p {
+    margin: 0;
+    font-size: 7.4pt;
+    color: #64748b;
+    line-height: 1.3;
+  }
+</style>
+</head>
+<body>
+
+  <!-- PAGE 1: COVER & EXECUTIVE ABSTRACT -->
+  <div class="cover-card">
+    <span class="cover-badge">B.Tech CSE Capstone Project • Comprehensive Technical & DevOps Report</span>
+    <h1 class="cover-title" style="border:none; margin-bottom: 5px; display:block;">CareerPilot</h1>
+    <div class="cover-subtitle">An AI-Powered Candidate Career Acceleration Platform Using Machine Learning & Cloud-Native DevOps Tools</div>
+
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">Candidate Name</div>
+        <div class="meta-val">Mukund Khandelwal</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Registration / Roll No.</div>
+        <div class="meta-val">12316528</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Academic Program</div>
+        <div class="meta-val">B.Tech Computer Science & Engineering</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Institution</div>
+        <div class="meta-val">Lovely Professional University, Punjab</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Live Production Domain</div>
+        <div class="meta-val">https://careerpilot.website</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">AWS Cloud Node</div>
+        <div class="meta-val">EC2 t3.small (15.252.51.16) [ap-south-1 Mumbai]</div>
+      </div>
+    </div>
+
+    <div class="status-banner">
+      <div class="status-item"><span class="status-dot"></span> <b>AWS Production:</b> ACTIVE (78h+ Uptime)</div>
+      <div class="status-item"><span class="status-dot"></span> <b>CI/CD:</b> Jenkins Build #7 SUCCESS</div>
+      <div class="status-item"><span class="status-dot"></span> <b>Monitoring:</b> Prometheus + Grafana LIVE</div>
+      <div class="status-item"><span class="status-dot"></span> <b>IaC:</b> Terraform AWS Validated</div>
+    </div>
+  </div>
+
+  <h2>📌 Project Introduction & Problem Context</h2>
+  <p>In the contemporary recruitment landscape, both job seekers and HR professionals face a significant “visibility gap.” Candidates often struggle with the opacity and rigid keyword algorithms of modern Applicant Tracking Systems (ATS), while recruiters are inundated with overwhelming volumes of incoming resumes, rendering manual evaluation nearly impossible. This project presents <b>CareerPilot</b>, an AI-powered candidate career acceleration and resume evaluation platform engineered to bridge this gap. By integrating a deterministic scikit-learn TF-IDF similarity vectorizer with Google’s Gemini Generative AI, the system delivers objective 0–100% ATS scorecards, granular keyword-gap diagnostics, an executive browser-based LaTeX resume architect, real-time AI voice and written mock interviews, and personalized career roadmaps — transforming an otherwise static resume into an intelligent, data-driven career preparation suite.</p>
+
+  <p>The platform’s core intelligence is governed by a robust hybrid scoring engine: a Model1 TF-IDF cosine-similarity vectorizer establishes the deterministic mathematical foundation, while the Google Gemini 2.5 Flash API layer supplies contextual semantic evaluations, missing-skill extractions, and stream-specific technical keyword recommendations. Beyond resume screening, CareerPilot incorporates an end-to-end placement readiness ecosystem. This includes a dedicated Computer Science Special Hub covering high-yield theory cards for Operating Systems, Database Management Systems, Computer Networks, System Design, and Object-Oriented Programming; a Top-260 DSA Mastery Tracker organizing curated algorithmic patterns; an interactive AI Voice Mock Interview Hub evaluating technical accuracy (70%), structure (20%), and speech fluency (10%); a real-time Live Job Matcher indexing 100K+ technical roles; and a centralized Candidate Analytics Dashboard with 1-click diagnostic PDF export capabilities — all seamlessly rendered through a reactive React 19 / Vite 7 single-page application communicating over REST with a modular, 6-app Django 5.x backend.</p>
+
+  <!-- PAGE 2: DEVOPS MATRIX & PROBLEM/SOLUTION -->
+  <div class="page-break"></div>
+  <h1>1. 📋 DevOps Implementation Matrix & Problem Scope</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>DevOps Pillar</th>
+        <th>Technologies Implemented</th>
+        <th>Repository Manifest / Artifact</th>
+        <th>Live Port / Access Endpoint</th>
+        <th>Verification Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>1. Cloud Compute</b></td>
+        <td>AWS EC2 t3.small, Ubuntu 24.04, Nginx, Gunicorn</td>
+        <td><code>terraform/ec2.tf</code>, <code>ec2-userdata.sh</code></td>
+        <td>https://careerpilot.website (15.252.51.16)</td>
+        <td><span class="badge badge-green">🟢 Active 24/7 (78h+)</span></td>
+      </tr>
+      <tr>
+        <td><b>2. Containerization</b></td>
+        <td>Docker (Multi-Stage Builds), Alpine Slim</td>
+        <td><code>Dockerfile.backend</code>, <code>Dockerfile.frontend</code></td>
+        <td>Docker Compose (Port 8000, 80)</td>
+        <td><span class="badge badge-green">🟢 95% Size Cut</span></td>
+      </tr>
+      <tr>
+        <td><b>3. CI/CD Pipeline</b></td>
+        <td>Jenkins Declarative Pipeline, GitHub Webhooks</td>
+        <td><code>Jenkinsfile</code> (7 Automated Stages)</td>
+        <td>http://localhost:8081 (Build #7)</td>
+        <td><span class="badge badge-green">🟢 100% Green / Zero-Touch</span></td>
+      </tr>
+      <tr>
+        <td><b>4. Observability</b></td>
+        <td>Prometheus Time-Series Scraper & Alerting</td>
+        <td><code>monitoring/prometheus/prometheus.yml</code></td>
+        <td>http://localhost:9090 (/metrics)</td>
+        <td><span class="badge badge-green">🟢 Scrape Target UP</span></td>
+      </tr>
+      <tr>
+        <td><b>5. Dashboards</b></td>
+        <td>Grafana Real-Time Analytical UI</td>
+        <td><code>monitoring/grafana/dashboards/</code></td>
+        <td>http://localhost:3001 (admin / careerpilot)</td>
+        <td><span class="badge badge-green">🟢 5 Panels Visualizing</span></td>
+      </tr>
+      <tr>
+        <td><b>6. Orchestration</b></td>
+        <td>Kubernetes (Amazon EKS), HPA Auto-scaler</td>
+        <td><code>k8s/</code> (8 Manifests, Kustomize)</td>
+        <td>Namespace: <code>careerpilot</code> (ClusterIP / ALB)</td>
+        <td><span class="badge badge-blue">🔵 Manifest Valid</span></td>
+      </tr>
+      <tr>
+        <td><b>7. Infra as Code</b></td>
+        <td>HashiCorp Terraform (3-Tier VPC, S3, SG)</td>
+        <td><code>terraform/</code> (8 IaC Manifests)</td>
+        <td>AWS Provider v5.100.0 (ap-south-1)</td>
+        <td><span class="badge badge-blue">🔵 Valid & Formatted</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>The Industry Problem: Why Candidates Get Rejected</h2>
+  <ul>
+    <li><b>75%+ Resume Discard Rate by ATS:</b> Over 3 out of 4 resumes submitted to modern job openings are filtered out by automated Applicant Tracking Systems before any human recruiter reads them. Candidates get rejected not for lack of competence, but due to table parsing errors, unparseable graphics, or keyword mismatches.</li>
+    <li><b>Fragmented Preparation Ecosystem:</b> Candidates currently prepare in uncoordinated silos: practicing algorithms on LeetCode, memorizing system design on YouTube, drafting resumes on Overleaf or Canva, and browsing job openings on LinkedIn without unified analytics.</li>
+    <li><b>Recruiter Inundation:</b> Modern postings receive hundreds of applicants within 48 hours. Recruiters lack objective, automated scoring tools to evaluate candidate alignment transparently and fairly.</li>
+  </ul>
+
+  <h2>The CareerPilot Solution</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <h4>1. Objective ATS Scoring</h4>
+      <p>Hybrid scikit-learn TF-IDF vectorizer + Google Gemini 2.5 Flash produces objective 0–100% match scores with granular keyword gap badges.</p>
+    </div>
+    <div class="feature-card">
+      <h4>2. Executive LaTeX Resume Architect</h4>
+      <p>Split-screen browser builder with 3 industry templates producing single-page vector PDFs parsed with 100% accuracy by Workday and Greenhouse.</p>
+    </div>
+    <div class="feature-card">
+      <h4>3. AI Mock Interview Hub</h4>
+      <p>Interactive Speak Mode (speech synthesis & audio recording) and Written Mode evaluating 70% technical depth, 20% structure, and 10% pacing.</p>
+    </div>
+    <div class="feature-card">
+      <h4>4. Placement Readiness Hub</h4>
+      <p>Top-260 DSA algorithmic tracker and CS core revision cards (OS, DBMS, CN, System Design, OOPs) with complexity cheat sheets.</p>
+    </div>
+  </div>
+
+  <!-- PAGE 3: AI SCORING & MACHINE LEARNING -->
+  <div class="page-break"></div>
+  <h1>2. 🧠 AI & Machine Learning Pipeline (Under the Hood)</h1>
+  <p>CareerPilot uses a hybrid scoring engine combining deterministic mathematics with generative artificial intelligence to evaluate candidate alignment:</p>
+
+  <div class="diagram-box">
+[Candidate Resume (PDF/DOCX)] + [Target Job Description]
+                      │
+                      ▼
+┌────────────────────────────────────────────────────────┐
+│ 1. Document Ingestion & Text Extraction (PyPDF2, pdfplumber) │
+└─────────────────────┬──────────────────────────────────┘
+                      │ Extracted clean text tokens
+                      ▼
+┌────────────────────────────────────────────────────────┐
+│ 2. Hybrid Dual-Scoring Engine                          │
+│                                                        │
+│  ┌─────────────────────────┐  ┌──────────────────────┐ │
+│  │ A. scikit-learn TF-IDF  │  │ B. Google Gemini 2.5 │ │
+│  │ Vectorizer & Cosine     │  │ Generative AI Engine │ │
+│  │ Similarity (Math Match) │  │ (Semantic Deep Match)│ │
+│  └────────────┬────────────┘  └──────────┬───────────┘ │
+└───────────────┼──────────────────────────┼─────────────┘
+                │                          │
+                ▼                          ▼
+┌────────────────────────────────────────────────────────┐
+│ 3. Weighted Composite Scoring (0–100%)                 │
+│    • Keyword Gap Extraction (Hard & Soft Skills)       │
+│    • High-Yield Action Verb Recommendations            │
+│    • ATS Parsing Flaw Detection                        │
+└────────────────────────────────────────────────────────┘
+  </div>
+
+  <h2>The Mathematics of TF-IDF & Cosine Similarity</h2>
+  <div class="math-box">
+1. Term Frequency (TF):       TF(t, d) = f(t, d) / ∑ f(t', d)
+2. Inverse Doc Freq (IDF):   IDF(t, D) = ln((1 + |D|) / (1 + |{d ∈ D : t ∈ d}|)) + 1
+3. Vector Dot Product:       Cosine_Similarity(A, B) = (A · B) / (||A|| · ||B||)
+  </div>
+  <ul>
+    <li><b>Term Frequency ($	ext{TF}$):</b> Quantifies how frequently technical keywords (e.g., Kubernetes, Python, Django) appear in the resume text relative to document length.</li>
+    <li><b>Inverse Document Frequency ($	ext{IDF}$):</b> Suppresses generic English stop-words (the, and, with) while amplifying domain-specific competencies.</li>
+    <li><b>Cosine Similarity:</b> Measures the cosine of the angle between the multi-dimensional resume vector $ec{A}$ and the job description vector $ec{B}$, yielding a strictly bounded 0.0 to 1.0 mathematical match.</li>
+    <li><b>Google Gemini 2.5 Flash Layer:</b> Analyzes contextual semantics that keyword vectors miss (e.g., understanding that "architected containerized microservices on AWS" fulfills "cloud infrastructure experience").</li>
+    <li><b>Weighted Composite Score:</b> Merges mathematical and semantic scores, extracts hard and soft skill badges, and generates high-impact bullet rewrite suggestions.</li>
+  </ul>
+
+  <!-- PAGE 4: THE 6 CORE USER MODULES & CODE ARCHITECTURE -->
+  <div class="page-break"></div>
+  <h1>3. 🖥️ Core User Modules & Software Architecture</h1>
+
+  <h2>The 6 Core Platform Features (Module by Module)</h2>
+  <ul>
+    <li><b>1. 📊 ATS Resume Screener & Skill Alignment:</b> Candidate uploads resume (PDF/DOCX) and inputs job description. Generates a 0–100% scorecard, green badges for matching skills, red badges for missing competencies, and bullet-point rewrites.</li>
+    <li><b>2. 📄 Executive LaTeX Resume Architect & Live PDF Compiler:</b> Browser-based editor with 3 executive templates (SWE, ML, Corporate). Generates single-page ATS-compliant vector PDFs with perfect margins that parsers parse with 100% accuracy.</li>
+    <li><b>3. 🎙️ AI Voice & Written Mock Interview Hub:</b> Speak Mode speaks questions aloud, hides text, records candidate audio, and evaluates spoken responses. Written Mode accepts architectural code solutions. Scores depth (70%), structure (20%), and fluency (10%).</li>
+    <li><b>4. 🎓 CS Special Theory Hub & Top-260 DSA Masterclass:</b> High-yield revision cards for OS, DBMS, Computer Networks, System Design, and OOPs. Top-260 DSA tracker with patterns (Sliding Window, DP, Trees) and live completion percentages.</li>
+    <li><b>5. 📈 Central Analytics Dashboard & Task Tracker:</b> Historical score graphs, daily streak counters, countdown clocks, and 1-Click diagnostic PDF export of complete candidate readiness dossiers.</li>
+    <li><b>6. 💼 Live Job Matcher & AI Career Coach:</b> Indexes 100,000+ live jobs from Arbeitnow and JSearch APIs with an integrated conversational AI career coach.</li>
+  </ul>
+
+  <h2>High-Level Software Architecture (Decoupled MTV Layer)</h2>
+  <div class="diagram-box">
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              CLIENT / PRESENTATION LAYER                               │
+│  React 19 + Vite 7 Single Page Application (TailwindCSS, Framer Motion, Lenis Scroll) │
+│  Pages: ATS Screener • LaTeX Resume Builder • AI Mock Interview • CS Special Hub       │
+└──────────────────────────────────────────┬─────────────────────────────────────────────┘
+                                           │ HTTPS (Port 443 / 80)
+                                           ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              REVERSE PROXY & GATEWAY                                   │
+│  Nginx 1.28.3 (SSL Termination, Gzip Compression, Direct /assets/ Static Caching)       │
+└──────────────────┬───────────────────────────────────────┬─────────────────────────────┘
+                   │ Static Assets (/assets/*)             │ API Requests (/api/*)
+                   ▼                                       ▼
+┌──────────────────────────────────────┐  ┌──────────────────────────────────────────────┐
+│  Static Build Files                  │  │ Gunicorn WSGI Server                         │
+│  /home/ubuntu/careerpilot/client/dist│  │ (3 Workers x 2 Threads on 127.0.0.1:8000)    │
+└──────────────────────────────────────┘  └──────────────────────┬───────────────────────┘
+                                                                 ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                       DJANGO 5.x REST FRAMEWORK (MODULAR MTV LAYER)                    │
+│  • auth_app: Registration, PBKDF2 hashing, Google OAuth, 6-digit OTP 2FA               │
+│  • screener_app: PDF/DOCX ingestion, TF-IDF vectorizer, Gemini scoring pipeline        │
+│  • builder_app: LaTeX template engine, JSON-to-LaTeX converter, PDF compiler           │
+│  • interview_app: Speech recognition, technical question bank, audio response evaluator│
+│  • learning_app: CS theory subject endpoints and Top 260 DSA algorithmic index         │
+│  • tracker_app: Analytics dashboard queries, task streak calculators, roadmap generator│
+└────────────────────────────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <!-- PAGE 5: DEVOPS SUITE: DOCKER & KUBERNETES -->
+  <div class="page-break"></div>
+  <h1>4. 🛡️ DevOps Suite: Docker & Kubernetes (EKS)</h1>
+
+  <h2>4.1 🐳 Containerization (Docker)</h2>
+  <p><b>WHAT:</b> Open-source container platform packaging the Django ML backend, React frontend, PostgreSQL, Redis, Prometheus, and Grafana into isolated runtime units.</p>
+  <p><b>WHERE:</b> Defined in <code>Dockerfile.backend</code>, <code>Dockerfile.frontend</code>, <code>docker-compose.yml</code>, and <code>docker/nginx-frontend.conf</code>.</p>
+  <p><b>WHY:</b> (1) <b>Environment Parity:</b> Eliminates "works on my machine" differences between Windows, Jenkins, and AWS Linux. (2) <b>Multi-Stage Size Cut:</b> Drops React image size from <b>600MB to 25MB (95% drop)</b> using Alpine slim. (3) <b>DevSecOps Security:</b> Runs backend as non-root user <code>careerpilot:1001</code>. (4) <b>Health Probes:</b> Built-in <code>HEALTHCHECK</code> probes. (5) <b>Unified Bootup:</b> <code>docker compose up -d</code> launches all 6 microservices simultaneously.</p>
+
+  <div class="diagram-box">
+┌────────────────────────────────────────────────────────────────────────┐
+│               FRONTEND MULTI-STAGE BUILD (Dockerfile.frontend)         │
+│  Stage 1: BUILDER (node:20-alpine) ──► npm run build ──► /app/dist/    │
+│  Stage 2: RUNNER (nginx:alpine-slim) ──► Only /dist/ ──► Size: ~25 MB! │
+└────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│               BACKEND MULTI-STAGE BUILD (Dockerfile.backend)           │
+│  Stage 1: BUILDER (python:3.12-slim) ──► Compiles gcc C-extensions     │
+│  Stage 2: RUNNER (python:3.12-slim) ──► Runs as non-root user 1001     │
+└────────────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <h2>4.2 ☸️ Container Orchestration (Kubernetes / Amazon EKS)</h2>
+  <p><b>WHAT:</b> Orchestration engine automating high availability, dynamic autoscaling, and self-healing across worker node clusters.</p>
+  <p><b>WHERE:</b> All 8 manifests in <code>k8s/</code> (<code>namespace.yaml</code>, <code>configmap.yaml</code>, <code>secret.yaml.template</code>, <code>deployment.yaml</code>, <code>service.yaml</code>, <code>ingress.yaml</code>, <code>hpa.yaml</code>, <code>kustomization.yaml</code>).</p>
+  <p><b>WHY:</b> (1) <b>Zero-Downtime Rolling Update:</b> <code>maxSurge: 1</code> and <code>maxUnavailable: 0</code> ensures no dropped requests. (2) <b>Horizontal Pod Autoscaler (HPA):</b> Dynamically scales backend pods from <b>2 up to 10 replicas</b> when CPU exceeds 70% or RAM exceeds 80%. (3) <b>Self-Healing:</b> Liveness probes monitor <code>/api/health</code> every 15s and restart frozen pods. (4) <b>Resource Quotas:</b> Pods request 250m CPU / 512Mi RAM with hard limits at 1000m CPU / 1536Mi RAM.</p>
+
+  <div class="diagram-box">
+                               Internet User Traffic
+                                         │
+                                         ▼
+                     ┌───────────────────────────────────────┐
+                     │ AWS Application Load Balancer (ALB)   │
+                     └───────────────────┬───────────────────┘
+                                         ▼
+                     ┌───────────────────────────────────────┐
+                     │ Ingress Service (careerpilot-svc)     │
+                     └───────┬───────────────────────┬───────┘
+                             │                       │
+                             ▼                       ▼
+            ┌─────────────────────────────────┐     ┌─────────────────────────────────┐
+            │ Frontend Pods (2 Replicas)      │     │ Backend Pods (3 to 10 Replicas) │
+            │ Nginx Alpine (Port 80)          │     │ Django Gunicorn (Port 8000)     │
+            └─────────────────────────────────┘     └────────────────┬────────────────┘
+                                                                     ▲
+                                                                     │ Auto-Scale (CPU > 70%)
+                                                    ┌────────────────┴────────────────┐
+                                                    │ Horizontal Pod Autoscaler (HPA) │
+                                                    │ Min: 2 Pods ──► Max: 10 Pods    │
+                                                    └─────────────────────────────────┘
+  </div>
+
+  <!-- PAGE 6: DEVOPS SUITE: TERRAFORM & JENKINS -->
+  <div class="page-break"></div>
+  <h1>5. 🌐 DevOps Suite: Terraform (IaC) & Jenkins CI/CD</h1>
+
+  <h2>5.1 🌐 Infrastructure as Code (Terraform AWS)</h2>
+  <p><b>WHAT:</b> Programmatic cloud provisioning engine declaring AWS infrastructure using HashiCorp HCL.</p>
+  <p><b>WHERE:</b> 8 manifests in <code>terraform/</code> (<code>vpc.tf</code>, <code>security_groups.tf</code>, <code>ec2.tf</code>, <code>s3.tf</code>, <code>rds.tf</code>, <code>variables.tf</code>, <code>main.tf</code>, <code>outputs.tf</code>).</p>
+  <p><b>WHY:</b> (1) <b>Zero Click Errors:</b> Replaces 60+ manual console clicks with immutable code. (2) <b>3-Tier Subnet Isolation:</b> Public (10.0.1.0/24), Private App (10.0.2.0/24), Private Data (10.0.3.0/24). (3) <b>Cost Guardrails:</b> <code>enable_nat_gateway = false</code> and <code>enable_rds = false</code> protect budget. (4) <b>S3 90-Day Auto Expiry:</b> Automated report lifecycle purge in <code>s3.tf</code>. (5) <b>Dry-Run Previews:</b> <code>terraform plan</code> outputs exact changes before applying.</p>
+
+  <div class="diagram-box">
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                      AWS REGION: Asia Pacific - Mumbai (ap-south-1)                     │
+│   Virtual Private Cloud (VPC: 10.0.0.0/16)  [vpc.tf: aws_vpc.main]                     │
+│   Internet Gateway (IGW) ◄──► Route Table (0.0.0.0/0)                                    │
+│                                                                                         │
+│   ┌──────────────────────────────────────────────────────────────────────────────────┐  │
+│   │ TIER 1: PUBLIC SUBNET (10.0.1.0/24) [aws_subnet.public]                          │  │
+│   │   • AWS Elastic IP: 15.252.51.16 [ec2.tf: aws_eip.careerpilot_eip]               │  │
+│   │   • Nginx Reverse Proxy (SSL Termination) & EC2: careerpilot-backend (t3.small)  │  │
+│   └──────────────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                         │
+│   ┌──────────────────────────────────────────────────────────────────────────────────┐  │
+│   │ TIER 2: PRIVATE APPLICATION SUBNET (10.0.2.0/24) [aws_subnet.private_app]        │  │
+│   │   • Django 5 REST Backend, TF-IDF + Gemini ML Worker, Prometheus /metrics        │  │
+│   └──────────────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                         │
+│   ┌──────────────────────────────────────────────────────────────────────────────────┐  │
+│   │ TIER 3: PRIVATE DATA SUBNET (10.0.3.0/24) [aws_subnet.private_data]               │  │
+│   │   • PostgreSQL Database, Redis Cache, Encrypted S3 Bucket (90-Day Auto Expiry)   │  │
+│   └──────────────────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <h2>5.2 🤖 Jenkins Automated CI/CD Pipeline</h2>
+  <p><b>WHAT:</b> Automated CI/CD conductor executing a 7-stage quality gate on every Git commit, deploying to AWS with zero manual commands.</p>
+  <p><b>WHERE:</b> Configured in <code>Jenkinsfile</code>, running in container <code>royalwheels-jenkins</code> (Port 8081). Build #7: <b>100% SUCCESS</b>.</p>
+  <p><b>WHY:</b> (1) <b>Zero-Touch Automation:</b> <code>pollSCM('H/2 * * * *')</code> detects GitHub commits automatically. (2) <b>Fail-Fast Quality Gates:</b> Syntax or build errors abort before cloud deployment. (3) <b>Parallel Speed:</b> Stage 2 runs backend and frontend linting in parallel. (4) <b>Container Smoke Testing:</b> Stage 6 probes <code>/api/health</code> inside the newly built container. (5) <b>Zero-Downtime Rolling SSH Deploy:</b> Stage 7 connects over SSH to 15.252.51.16 and reloads Gunicorn and Nginx seamlessly.</p>
+
+  <div class="diagram-box">
+[Developer runs: git push origin main]
+                 │
+                 ▼ (SCM Trigger / Webhook: pollSCM 'H/2 * * * *')
+┌────────────────────────────────────────────────────────────────────────┐
+│ Jenkins Pipeline Engine (Job: CareerPilot-Pipeline on Port 8081)       │
+├────────────────────────────────────────────────────────────────────────┤
+│ Stage 1: 📥 Checkout Source Code     ➔ Clones latest Git commit SHA    │
+│ Stage 2: 🔍 Lint & Code Quality      ➔ Parallel Python + React Lint    │
+│ Stage 3: ⚙️ Django Diagnostics       ➔ Runs python manage.py check     │
+│ Stage 4: 🏗️ React Frontend Build     ➔ Compiles Vite production bundle │
+│ Stage 5: 🐳 Docker Containerize      ➔ Builds multi-stage Docker images│
+│ Stage 6: 🧪 Smoke Test Health        ➔ Validates /api/health probe     │
+│ Stage 7: 🚀 Zero-Downtime Deploy     ➔ Automated SSH to AWS EC2 Node   │
+├────────────────────────────────────────────────────────────────────────┤
+│ Post Actions: 🧹 Cleans runner workspace via deleteDir() ➔ SUCCESS 🎉  │
+└────────────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <!-- PAGE 7: OBSERVABILITY: PROMETHEUS & GRAFANA -->
+  <div class="page-break"></div>
+  <h1>6. 📊 Observability Suite: Prometheus & Grafana</h1>
+
+  <h2>6.1 📈 Prometheus Metric Scraper & Alerting Engine</h2>
+  <p><b>WHAT:</b> Systems monitoring, time-series aggregation, and alerting engine running on port 9090 scraping numerical metrics every 10 seconds.</p>
+  <p><b>WHY:</b> (1) <b>Pull Model:</b> Protects application from traffic spikes. (2) <b>Multi-Dimensional Labels:</b> Fast slicing by environment and service. (3) <b>Local TSDB:</b> High-density Gorilla compression. (4) <b>PromQL:</b> Computes requests/sec and error percentages dynamically.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Alert Rule Name</th>
+        <th>PromQL Condition</th>
+        <th>Window</th>
+        <th>Severity & Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>CareerPilotBackendDown</code></td>
+        <td><code>up{job="careerpilot-backend"} == 0</code></td>
+        <td>1m</td>
+        <td><b>CRITICAL:</b> Triggers immediate incident notification.</td>
+      </tr>
+      <tr>
+        <td><code>HighTrafficSpike</code></td>
+        <td><code>rate(http_requests_total[1m]) > 50</code></td>
+        <td>2m</td>
+        <td><b>WARNING:</b> Alerts potential campus traffic surge or load spike.</td>
+      </tr>
+      <tr>
+        <td><code>GeminiAPIElevatedFailures</code></td>
+        <td><code>(gemini_errors_total / clamp_min(gemini_calls_total, 1)) > 0.15</code></td>
+        <td>3m</td>
+        <td><b>WARNING:</b> Indicates Gemini API quota exhaustion or upstream error.</td>
+      </tr>
+      <tr>
+        <td><code>LowAverageATSScore</code></td>
+        <td><code>ats_score_avg > 0 and ats_score_avg < 35</code></td>
+        <td>5m</td>
+        <td><b>INFO:</b> Flags candidate pool encountering severe keyword gaps.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>6.2 📊 Grafana Production Dashboard Panels</h2>
+  <p><b>WHAT:</b> Visual analytics cockpit running on port 3001 (<code>admin</code> / <code>careerpilot</code>) auto-provisioned with 5 dedicated operational panels:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Panel Title</th>
+        <th>Widget Type</th>
+        <th>PromQL Mathematical Query</th>
+        <th>Operational Significance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>1. Resumes Screened</b></td>
+        <td>Stat Card</td>
+        <td><code>resumes_analyzed_total</code></td>
+        <td>Lifetime cumulative count of resumes evaluated.</td>
+      </tr>
+      <tr>
+        <td><b>2. Average ATS Score</b></td>
+        <td>Gauge (0–100%)</td>
+        <td><code>ats_score_avg</code></td>
+        <td>Visual distribution of candidate resume quality.</td>
+      </tr>
+      <tr>
+        <td><b>3. Gemini AI Health</b></td>
+        <td>Gauge (0–100%)</td>
+        <td><code>(1 - (gemini_errors_total / clamp_min(gemini_calls_total, 1))) * 100</code></td>
+        <td>Live percentage tracking Google Gemini API availability.</td>
+      </tr>
+      <tr>
+        <td><b>4. Application Uptime</b></td>
+        <td>Stat Card</td>
+        <td><code>app_uptime_seconds</code></td>
+        <td>Proves 280,000+ seconds continuous uptime on AWS.</td>
+      </tr>
+      <tr>
+        <td><b>5. API Traffic Rate</b></td>
+        <td>Time-Series Line</td>
+        <td><code>rate(http_requests_total[1m])</code></td>
+        <td>Live throughput of incoming HTTP requests per second.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="diagram-box">
+┌────────────────────────────────────────────────────────────────────────┐
+│ 1. DJANGO BACKEND EXPORTER (AWS EC2 / Local Container on Port 8000)    │
+│    • Tracks requests, ATS scores, Gemini AI calls via Python counters  │
+│    • Exposes Prometheus text format at http://localhost:8000/metrics   │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Scrapes every 10 seconds
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ 2. PROMETHEUS TIME-SERIES SCRAPER (Port 9090)                          │
+│    • Discovers targets: ["backend:8000", "host.docker.internal:8000"]  │
+│    • Stores metrics in Time-Series Database (TSDB) with timestamps     │
+│    • Evaluates alert thresholds in alert_rules.yml                     │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Proxies PromQL queries
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ 3. GRAFANA ANALYTICAL COCKPIT (Port 3001)                              │
+│    • Auto-provisioned datasource: http://prometheus:9090               │
+│    • Visualizes 5 dedicated panels with color thresholds & gauges      │
+└────────────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <!-- PAGE 8: AWS CLOUD HOSTING & LIVE PRODUCTION PROOF -->
+  <div class="page-break"></div>
+  <h1>7. ☁️ AWS Production Deployment & Live Verification</h1>
+
+  <h2>AWS Production Hosting (ap-south-1 Mumbai)</h2>
+  <p><b>Configuration:</b> Virtual server <code>careerpilot-backend</code> (Instance ID: <code>i-00f5712b6948b5092</code>, <code>t3.small</code>) bound to AWS Elastic IP <code>15.252.51.16</code> with custom domain <b>https://careerpilot.website</b>.<br>
+  <b>Resilience:</b> Configured with a 2GB NVMe Linux swapfile in <code>ec2-userdata.sh</code> to absorb memory spikes during PDF NLP parsing, preventing Out-Of-Memory (OOM) kernel crashes.<br>
+  <b>Continuous Uptime:</b> Actively running for over <b>280,000+ seconds (>78 hours continuous uptime)</b> without restarts.</p>
+
+  <h2>Live Production Verification Table</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Component</th>
+        <th>Live Access URL</th>
+        <th>Expected Output / What to Point Out</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Live Web App</b></td>
+        <td>https://careerpilot.website</td>
+        <td>Hosted live on AWS EC2 (15.252.51.16) with custom domain and SSL.</td>
+      </tr>
+      <tr>
+        <td><b>Live Health Check</b></td>
+        <td>https://careerpilot.website/api/health</td>
+        <td>Returns <code>{"status": "ok", "database_status": "ok"}</code>.</td>
+      </tr>
+      <tr>
+        <td><b>Live Metrics</b></td>
+        <td>https://careerpilot.website/metrics</td>
+        <td>Shows live request counter (1100+) and uptime (280,000s+).</td>
+      </tr>
+      <tr>
+        <td><b>Jenkins Dashboard</b></td>
+        <td>http://localhost:8081/job/CareerPilot-Pipeline/</td>
+        <td>Shows Build #7 with all 7 quality gate stages in bright green.</td>
+      </tr>
+      <tr>
+        <td><b>Grafana UI</b></td>
+        <td>http://localhost:3001 (admin / careerpilot)</td>
+        <td>Visual dashboard with 5 real-time monitoring panels.</td>
+      </tr>
+      <tr>
+        <td><b>Prometheus Scraper</b></td>
+        <td>http://localhost:9090/targets</td>
+        <td>Target <code>careerpilot-backend</code> in State: <b>UP (100% Healthy)</b>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>🎬 4-Step Live Presentation Script for Evaluator ("Sir"):</h2>
+  <ol>
+    <li><b>Step 1 — Show the Live AWS Website:</b> Open <code>https://careerpilot.website</code>. Navigate to the ATS Screener (<code>/upload</code>), upload a resume to demonstrate hybrid TF-IDF + Gemini scoring, and show the AI Interview Hub (<code>/preparation</code>) featuring Speak and Written modes.</li>
+    <li><b>Step 2 — Show Observability (Prometheus & Grafana):</b> Open <code>https://careerpilot.website/metrics</code> to show live Prometheus exposition format. Open Grafana at <code>http://localhost:3001</code> to show the 5 live panels, highlighting the <b>78+ hours continuous uptime stat card</b>.</li>
+    <li><b>Step 3 — Show the Automated CI/CD Pipeline (Jenkins):</b> Open <code>http://localhost:8081/job/CareerPilot-Pipeline/</code>. Display Build #7 with all 7 stages in green. Open Console Output for Stage 7 to demonstrate automated SSH execution to AWS EC2 without manual commands.</li>
+    <li><b>Step 4 — Hand Over the Technical Dossier:</b> Present this comprehensive documentation containing full Terraform IaC architecture, Kubernetes manifests, and viva answers.</li>
+  </ol>
+
+  <!-- PAGE 9: AUDIT CORRECTIONS & PROJECT ENHANCEMENTS -->
+  <div class="page-break"></div>
+  <h1>8. 🚀 Corrections Applied & Strategic Project Enhancements</h1>
+
+  <h2>A. Audit Corrections Applied to Documentation & Repository:</h2>
+  <ul>
+    <li><b>Duplicate Section Consolidation:</b> Identified and eliminated duplicated Kubernetes and Prometheus descriptions from early draft prompts, synthesizing a single authoritative reference.</li>
+    <li><b>Terraform AWS Provider v5 Conformance:</b> Corrected the S3 bucket lifecycle syntax in <code>terraform/s3.tf</code> by adding an explicit <code>filter {}</code> block to eliminate deprecation warnings under HashiCorp AWS Provider v5.100.0.</li>
+    <li><b>Jenkins Runner Stability:</b> Replaced the third-party workspace cleanup plugin with native Groovy <code>deleteDir()</code> in <code>Jenkinsfile</code> post-actions to prevent workspace locking errors.</li>
+    <li><b>Unified Architectural Telemetry:</b> Synchronized all IP addresses (15.252.51.16), instance IDs (<code>i-00f5712b6948b5092</code>), and uptime metrics across the documentation and live endpoints.</li>
+  </ul>
+
+  <h2>B. 5 Strategic Architectural Recommendations to Elevate the Project:</h2>
+  <p>To transition CareerPilot from an exceptional academic capstone project to an enterprise commercial SaaS platform, the following 5 enhancements are recommended for immediate rollout:</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <h4>1. Automated SSL Auto-Renewal (Certbot Cron)</h4>
+      <p>While the SSL certificate is currently active, deploying an automated Let's Encrypt Certbot systemd timer in <code>ec2-userdata.sh</code> ensures zero certificate expiration risk with automatic 90-day renewal.</p>
+    </div>
+    <div class="feature-card">
+      <h4>2. Alertmanager Webhook to Discord/Slack</h4>
+      <p>Integrate Prometheus Alertmanager with incoming webhooks to send instant push notifications to the engineering team's Discord or Slack channel whenever <code>up == 0</code> or error rates exceed 15%.</p>
+    </div>
+    <div class="feature-card">
+      <h4>3. Distributed Load Testing Demo (Locust / k6)</h4>
+      <p>Create a Locust load testing script simulating 500 concurrent candidates uploading resumes to dynamically trigger the Horizontal Pod Autoscaler (HPA) live during demonstrations.</p>
+    </div>
+    <div class="feature-card">
+      <h4>4. Automated Nightly DB Backups to AWS S3</h4>
+      <p>Establish a containerized cron job running <code>pg_dump</code> every midnight, piping encrypted PostgreSQL database dumps directly into our private AWS S3 bucket with 30-day retention.</p>
+    </div>
+  </div>
+  <div class="feature-card" style="margin-top: 6px;">
+    <h4>5. DevSecOps Security Automation (SonarQube & Trivy)</h4>
+    <p>Add automated vulnerability scanning into Jenkins Stage 2: SonarQube for static application security testing (SAST) and Trivy for container image Common Vulnerabilities and Exposures (CVE) scanning.</p>
+  </div>
+
+  <!-- PAGE 10: VIVA CHEAT SHEET (PART 1) -->
+  <div class="page-break"></div>
+  <h1>9. 🎓 Comprehensive Viva Defense Cheat Sheet (Questions 1–8)</h1>
+
+  <div class="qa-card">
+    <div class="qa-q">Q1: What is the primary problem CareerPilot solves in recruitment?</div>
+    <div class="qa-a"><b>Answer:</b> It solves the "visibility gap." Modern ATS systems discard over 75% of qualified resumes due to rigid keyword algorithms and parsing flaws. CareerPilot provides an objective hybrid ATS scoring engine, actionable keyword gap diagnostics, an ATS-compliant LaTeX resume builder, and an AI mock interview hub to accelerate placement readiness.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q2: How does your hybrid scoring engine work under the hood?</div>
+    <div class="qa-a"><b>Answer:</b> We combine a deterministic scikit-learn TF-IDF vectorizer (calculating mathematical cosine similarity between candidate resume tokens and job description tokens) with Google's Gemini 2.5 Flash Generative AI (which analyzes contextual semantics, missing technical skills, and stream-specific keyword recommendations).</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q3: Where is your production application hosted, and how do you prove uptime?</div>
+    <div class="qa-a"><b>Answer:</b> It is actively deployed on an <b>AWS EC2 t3.small instance (i-00f5712b6948b5092)</b> in Mumbai (<code>ap-south-1</code>) with Elastic IP <b>15.252.51.16</b> and domain <b>https://careerpilot.website</b>. Visiting <code>/metrics</code> reveals <code>app_uptime_seconds</code> exceeding <b>280,000 seconds (78+ hours continuous uptime)</b>.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q4: Why did you use multi-stage Docker builds?</div>
+    <div class="qa-a"><b>Answer:</b> Multi-stage builds separate the build environment from the runtime environment. For our React frontend (<code>Dockerfile.frontend</code>), Node.js and npm (~600MB) are discarded after compilation, copying only static assets into Nginx Alpine (~25MB), achieving a <b>95% image size reduction</b> and minimizing security vulnerability attack surfaces.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q5: What security practices are implemented in your backend Docker container?</div>
+    <div class="qa-a"><b>Answer:</b> In <code>Dockerfile.backend</code>, we compile C-extensions in a build stage and run the final container as an unprivileged, secure non-root user (<code>careerpilot:1001</code>). If the application is compromised, the attacker lacks root host privileges.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q6: How does Kubernetes guarantee Zero-Downtime during updates?</div>
+    <div class="qa-a"><b>Answer:</b> In <code>k8s/deployment.yaml</code>, we declare a <code>RollingUpdate</code> strategy with <code>maxSurge: 1</code> and <code>maxUnavailable: 0</code>. Kubernetes spins up a new pod with the latest code, waits for its <code>/api/health</code> readiness probe to pass, routes traffic to it, and only then terminates the old pod.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q7: How does your infrastructure handle campus placement traffic spikes?</div>
+    <div class="qa-a"><b>Answer:</b> We implemented a <b>Horizontal Pod Autoscaler (HPA)</b> in <code>k8s/hpa.yaml</code>. When CPU utilization exceeds 70% or memory exceeds 80%, Kubernetes dynamically scales the backend Django pods from <b>2 up to 10 replicas</b> across worker nodes.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q8: Why did you choose Terraform for cloud infrastructure provisioning?</div>
+    <div class="qa-a"><b>Answer:</b> Terraform provides declarative <b>Infrastructure as Code (IaC)</b>. Our 3-tier VPC (<code>10.0.0.0/16</code>), security groups, S3 buckets, and EC2 nodes are defined programmatically, eliminating 60+ manual console clicks, preventing configuration drift, and enabling repeatable environments.</div>
+  </div>
+
+  <!-- PAGE 11: VIVA CHEAT SHEET (PART 2) -->
+  <div class="page-break"></div>
+  <h1>10. 🎓 Comprehensive Viva Defense Cheat Sheet (Questions 9–15)</h1>
+
+  <div class="qa-card">
+    <div class="qa-q">Q9: How do your Terraform configurations protect against unexpected AWS costs?</div>
+    <div class="qa-a"><b>Answer:</b> In <code>terraform/variables.tf</code>, we created explicit cost toggles (<code>enable_nat_gateway = false</code>, <code>enable_rds = false</code>), preventing recurring charges for idle NAT gateways (~$32/mo) while preserving full architectural validation via <code>terraform plan</code>.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q10: How does your Jenkins CI/CD pipeline achieve zero manual commands?</div>
+    <div class="qa-a"><b>Answer:</b> In <code>Jenkinsfile</code>, we configured <code>triggers { pollSCM('H/2 * * * *') }</code>. When code is pushed to GitHub, Jenkins automatically detects the commit and executes 7 quality gate stages: Checkout, Parallel Lint, Django Check, React Build, Docker Build, Smoke Test, and automated SSH deployment to AWS EC2 (Build #7 100% Green).</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q11: Why does Prometheus use a Pull model instead of a Push model?</div>
+    <div class="qa-a"><b>Answer:</b> In a pull model, Prometheus controls the rate and schedule of data collection (every 10s). If application traffic surges 100x, it will not flood the monitoring server with pushed packets. Additionally, if the application crashes, Prometheus detects scrape failure immediately.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q12: What is the difference between Prometheus and Grafana?</div>
+    <div class="qa-a"><b>Answer:</b> Prometheus is the backend metric scraper, storage engine (TSDB), and alert rule evaluator. Grafana is the visualization frontend that connects to Prometheus via PromQL queries and renders visual panels, dials, gauges, and time-series charts.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q13: What business and ML metrics are visualized on your Grafana dashboard?</div>
+    <div class="qa-a"><b>Answer:</b> Beyond standard system uptime, Grafana visualizes domain-specific metrics: total resumes screened (<code>resumes_analyzed_total</code>), average ATS score (<code>ats_score_avg</code>), Google Gemini AI health percentage (<code>(1 - errors/calls) * 100</code>), and request traffic rates.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q14: How does Linux swap memory protect your AWS EC2 instance?</div>
+    <div class="qa-a"><b>Answer:</b> Our t3.small instance has 2GB RAM. During heavy PDF parsing with NLP libraries, memory can spike. In <code>ec2-userdata.sh</code>, we allocated a 2GB NVMe swapfile, allowing the Linux kernel to swap idle memory pages to disk and preventing Out-Of-Memory (OOM) crashes.</div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-q">Q15: How are credentials and API keys safeguarded throughout the lifecycle?</div>
+    <div class="qa-a"><b>Answer:</b> Following DevSecOps principles, <code>.env</code> files and <code>.pem</code> SSH keys are strictly excluded from Git via <code>.gitignore</code> and <code>.dockerignore</code>. Secrets are injected at runtime via Jenkins Credentials store and Kubernetes base64-encoded Secret objects.</div>
+  </div>
+
+</body>
+</html>

@@ -19,15 +19,29 @@ alerting:
         - targets: []
 
 scrape_configs:
-  # CareerPilot Django REST API Metrics Scraper
+  # CareerPilot Live AWS Production Django REST API Metrics Scraper
   - job_name: "careerpilot-backend"
+    scheme: "https"
     metrics_path: "/metrics"
-    scrape_interval: 10s
+    scrape_interval: 5s
+    scrape_timeout: 5s
+    static_configs:
+      - targets: ["careerpilot.website"]
+        labels:
+          app: "careerpilot"
+          env: "production"
+          service: "django-api"
+          host: "51.21.136.193"
+
+  # Local Backend Fallback (if running locally via docker compose / manage.py)
+  - job_name: "careerpilot-backend-local"
+    metrics_path: "/metrics"
+    scrape_interval: 15s
     static_configs:
       - targets: ["backend:8000", "host.docker.internal:8000"]
         labels:
           app: "careerpilot"
-          env: "production"
+          env: "local"
           service: "django-api"
 
   # Prometheus Self-Monitoring

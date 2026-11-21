@@ -15,15 +15,15 @@ CareerPilot is fully containerized, orchestrated, automated, and observable. The
 
 | Component | Status | Live Link / Access Point | Verification Command |
 | :--- | :---: | :--- | :--- |
-| **Production Web Application** | 🟢 **ACTIVE** | [https://careerpilot.website](https://careerpilot.website) | Browser / `curl -I https://careerpilot.website` |
-| **AWS Backend Health Probe** | 🟢 **ACTIVE** | [https://careerpilot.website/api/health](https://careerpilot.website/api/health) | `curl https://careerpilot.website/api/health` |
-| **AWS Prometheus Metrics** | 🟢 **ACTIVE** | [https://careerpilot.website/metrics](https://careerpilot.website/metrics) | `curl https://careerpilot.website/metrics` |
+| **Production Web Application** | 🟢 **ACTIVE** | [http://51.21.136.193](http://51.21.136.193) | Browser / `curl -I http://51.21.136.193` |
+| **AWS Backend Health Probe** | 🟢 **ACTIVE** | [http://51.21.136.193/api/health](http://51.21.136.193/api/health) | `curl http://51.21.136.193/api/health` |
+| **AWS Prometheus Metrics** | 🟢 **ACTIVE** | [http://51.21.136.193/metrics](http://51.21.136.193/metrics) | `curl http://51.21.136.193/metrics` |
 | **Local Metrics Endpoint** | 🟢 **ACTIVE** | `http://127.0.0.1:8000/metrics` | `curl http://127.0.0.1:8000/metrics` |
 | **Grafana Monitoring UI** | 🟢 **READY** | `http://localhost:3001` (admin / careerpilot) | `docker compose up -d grafana` |
 | **Prometheus Scraper UI** | 🟢 **READY** | `http://localhost:9090` | `docker compose up -d prometheus` |
 | **Jenkins CI/CD Pipeline** | 🟢 **CONFIGURED** | [Jenkinsfile](file:///c:/Users/Mukund/Documents/Resume_Screener/Resume_Screener/Jenkinsfile) (`githubPush()` Webhook) | Jenkins Dashboard |
 | **Kubernetes (AWS EKS)** | 🟢 **VALIDATED** | [k8s/](file:///c:/Users/Mukund/Documents/Resume_Screener/Resume_Screener/k8s/) (8 manifests) | `kubectl kustomize k8s/` |
-| **Terraform AWS IaC** | 🟢 **FORMATTED** | [terraform/](file:///c:/Users/Mukund/Documents/Resume_Screener/Resume_Screener/terraform/) (Figure 9 topology) | `terraform fmt -check` |
+| **Terraform AWS IaC** | 🟢 **ACTIVE** | [terraform/](file:///c:/Users/Mukund/Documents/Resume_Screener/Resume_Screener/terraform/) (23 AWS resources) | `terraform output` |
 
 ---
 
@@ -31,12 +31,12 @@ CareerPilot is fully containerized, orchestrated, automated, and observable. The
 *Reference: Synopsis Section 11 (Page 21) & Sequence Diagram (Figure 2)*
 
 ### A. Live AWS Production Prometheus Output
-Open **[https://careerpilot.website/metrics](https://careerpilot.website/metrics)** directly in any browser or run:
+Open **[http://51.21.136.193/metrics](http://51.21.136.193/metrics)** directly in any browser or run:
 ```bash
-curl -s https://careerpilot.website/metrics
+curl -s http://51.21.136.193/metrics
 ```
 
-**Real Live Output Captured from Production AWS Server (`15.252.51.16`):**
+**Real Live Output Captured from Production AWS Server (`51.21.136.193`):**
 ```text
 # HELP http_requests_total Total number of HTTP requests received
 # TYPE http_requests_total counter
@@ -160,7 +160,7 @@ When a developer runs `git push origin main`:
 └──────────────────┬─────────────────────┘
                    ▼
 ┌────────────────────────────────────────┐
-│ Stage 7: Zero-Downtime Deployment      │  Deploys to AWS EC2 (15.252.51.16)
+│ Stage 7: Zero-Downtime Deployment      │  Deploys to AWS EC2 (51.21.136.193)
 └──────────────────┬─────────────────────┘
                    ▼
 [Live at https://careerpilot.website]
@@ -228,7 +228,7 @@ Directory: [terraform/](file:///c:/Users/Mukund/Documents/Resume_Screener/Resume
   - **Private Application Subnet (`10.0.2.0/24`):** EC2/Kubernetes nodes running Django & AI workers.
   - **Private Data Subnet (`10.0.3.0/24`):** RDS PostgreSQL & ElastiCache Redis.
 - **Security Groups (`security_groups.tf`):** Stateful firewalls with least-privilege scoping.
-- **Compute (`ec2.tf`):** `t3.small` (2GB RAM, 20GB gp3 SSD), Ubuntu 24.04 LTS, Elastic IP `15.252.51.16`.
+- **Compute (`ec2.tf`):** `t3.small` (2GB RAM, 20GB gp3 SSD), Ubuntu 24.04 LTS, Elastic IP `51.21.136.193`.
 - **Storage (`s3.tf`):** Encrypted private S3 bucket with 90-day report archival lifecycle rules.
 - **Database (`rds.tf`):** PostgreSQL `db.t4g.micro` with cost-guardrail toggle.
 
@@ -270,7 +270,7 @@ Files: [Dockerfile.backend](file:///c:/Users/Mukund/Documents/Resume_Screener/Re
 
 ### Q1: "Where is your live application deployed right now?"
 > **Answer:**  
-> *"CareerPilot is live at **https://careerpilot.website** on an **AWS EC2 t3.small instance** (2GB RAM, 20GB SSD) fronted by an AWS Elastic IP (**15.252.51.16**) and managed with Nginx reverse proxy and Gunicorn WSGI."*
+> *"CareerPilot is live at **http://51.21.136.193** on an **AWS EC2 t3.small instance** (2GB RAM, 20GB SSD) fronted by an AWS Elastic IP (**51.21.136.193**) and managed with Nginx reverse proxy and Gunicorn WSGI."*
 
 ### Q2: "How do you monitor your live system in production?"
 > **Answer:**  

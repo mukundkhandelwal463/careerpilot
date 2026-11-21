@@ -76,13 +76,14 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         continue-on-error: true
         with:
-          host: ${{ secrets.EC2_HOST || '15.252.51.16' }}
+          host: ${{ secrets.EC2_HOST || '51.21.136.193' }}
           username: ${{ secrets.EC2_USER || 'ubuntu' }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             echo "🚀 Starting Deployment to AWS EC2..."
             cd /home/ubuntu/careerpilot
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             
             # Backend updates
             source .venv/bin/activate

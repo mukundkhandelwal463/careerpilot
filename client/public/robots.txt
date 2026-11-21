@@ -1,0 +1,83 @@
+# CareerPilot Robots.txt — SEO, AEO & GEO Crawler Directives
+# Public marketing pages, guides, and documentation are open to search & AI engines.
+# Authenticated user dashboards, APIs, and private resumes are protected.
+
+User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/
+Allow: /guides
+Allow: /guides/
+Allow: /about
+Allow: /terms
+Allow: /privacy
+Allow: /llms.txt
+Disallow: /dashboard
+Disallow: /result
+Disallow: /view/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /metrics
+
+# OpenAI Search & ChatGPT Crawlers
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /dashboard
+Disallow: /result
+Disallow: /view/
+Disallow: /api/
+Disallow: /admin/
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /dashboard
+Disallow: /result
+Disallow: /view/
+Disallow: /api/
+Disallow: /admin/
+
+User-agent: GPTBot
+Allow: /
+Disallow: /dashboard
+Disallow: /result
+Disallow: /view/
+Disallow: /api/
+Disallow: /admin/
+
+# Google Gemini / Search Extended
+User-agent: Google-Extended
+Allow: /
+Disallow: /dashboard
+Disallow: /result
+Disallow: /view/
+Disallow: /api/
+Disallow: /admin/
+
+# Perplexity AI Crawler
+User-agent: PerplexityBot
+Allow: /
+Disallow: /dashboard
+Disallow: /result
+Disallow: /view/
+Disallow: /api/
+Disallow: /admin/
+
+# Anthropic Claude Crawler
+User-agent: ClaudeBot
+Allow: /
+Disallow: /dashboard
+Disallow: /result
+Disallow: /view/
+Disallow: /api/
+Disallow: /admin/
+
+# Bing / Microsoft Copilot
+User-agent: Bingbot
+Allow: /
+Disallow: /dashboard
+Disallow: /result
+Disallow: /view/
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: https://careerpilot.website/sitemap.xml

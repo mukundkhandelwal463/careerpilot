@@ -4,6 +4,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
+import LoadingOverlay from '../Components/LoadingOverlay.jsx';
+import { BarChart3, FileText, CheckCircle2, Lock, FileUp, Sparkles, Check, Download, Lightbulb } from 'lucide-react';
 import '../css/style.css';
 
 const Upload = () => {
@@ -213,35 +215,52 @@ const Upload = () => {
         });
       } catch (err) {}
 
-      const newNotif = {
-        id: Date.now(),
-        text: `Scanning complete! Calculated ATS Score: ${data.analysis?.ats_score ?? 'N/A'}%`,
-        time: new Date().toLocaleTimeString(),
-        read: false
-      };
-      const currentNotifs = JSON.parse(localStorage.getItem("app_notifications") || "[]");
-      const updatedNotifs = [newNotif, ...currentNotifs].slice(0, 10);
-      localStorage.setItem("app_notifications", JSON.stringify(updatedNotifs));
-      localStorage.setItem("has_unread_notifications", "true");
-      
-      window.dispatchEvent(new CustomEvent("new_scan_notification", {
-        detail: { message: newNotif.text }
-      }));
+      const currentEmail = user?.email ? user.email.toLowerCase().trim() : null;
+      if (currentEmail) {
+        const notifKey = `app_notifications_${currentEmail}`;
+        const unreadKey = `has_unread_notifications_${currentEmail}`;
+        const newNotif = {
+          id: Date.now(),
+          text: `Scanning complete! Calculated ATS Score: ${data.analysis?.ats_score ?? 'N/A'}%`,
+          time: new Date().toLocaleTimeString(),
+          read: false
+        };
+        const currentNotifs = JSON.parse(localStorage.getItem(notifKey) || "[]");
+        const updatedNotifs = [newNotif, ...currentNotifs].slice(0, 10);
+        localStorage.setItem(notifKey, JSON.stringify(updatedNotifs));
+        localStorage.setItem(unreadKey, "true");
+        
+        window.dispatchEvent(new CustomEvent("new_scan_notification", {
+          detail: { message: newNotif.text, email: currentEmail }
+        }));
+      }
 
       setStatus({ text: "Analysis complete. Redirecting...", type: "success" });
       setTimeout(() => {
+        setLoading(false);
         navigate('/result');
-      }, 500);
+      }, 450);
 
     } catch (err) {
       setStatus({ text: err.message, type: "error" });
-    } finally {
       setLoading(false);
     }
   };
 
   return (
     <div className="page-shell">
+      <LoadingOverlay
+        isOpen={loading}
+        variant="scan"
+        title="Scanning & Analyzing Resume"
+        subtitle={file ? `Evaluating ${file.name} against ATS criteria` : 'Running AI career alignment analysis'}
+        steps={[
+          'Extracting document structure & text...',
+          'Matching skills & ATS keyword density...',
+          'Running AI career alignment diagnostics...',
+          'Preparing your detailed ATS score report...'
+        ]}
+      />
       <Navbar />
       <main className="page" style={{ marginTop: '24px', display: 'flex', gap: '28px', alignItems: 'flex-start' }}>
         
@@ -286,7 +305,7 @@ const Upload = () => {
               transition: 'all 0.2s'
             }}
           >
-            <span style={{ fontSize: '1.1rem' }}>📈</span> Analyze Resume
+            <BarChart3 size={18} /> Analyze Resume
           </button>
 
           <button 
@@ -308,7 +327,7 @@ const Upload = () => {
               transition: 'all 0.2s'
             }}
           >
-            <span style={{ fontSize: '1.1rem' }}>📄</span> Previous Records
+            <FileText size={18} /> Previous Records
           </button>
         </aside>
 
@@ -330,13 +349,17 @@ const Upload = () => {
                     onDrop={handleDrop}
                     onClick={() => document.getElementById('resumeFile').click()}
                   >
-                    <div className="icon">📄</div>
+                    <div className="icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+                      <FileUp size={36} color="var(--accent)" />
+                    </div>
                     <div className="label">
                       Drag & drop your resume here, or <strong>click to browse</strong>
                     </div>
                     {file && (
                       <div className="file-name" id="fileName" style={{ display: 'block' }}>
-                        ✅ {file.name}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                          <Check size={14} /> {file.name}
+                        </span>
                       </div>
                     )}
                     <input 
@@ -392,8 +415,8 @@ const Upload = () => {
                       onChange={handleJdFileChange}
                     />
                     {jdFile && (
-                      <span style={{ fontSize: '0.84rem', color: 'var(--teal)', fontWeight: 700 }}>
-                        ✅ {jdFile.name}
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.84rem', color: 'var(--teal)', fontWeight: 700 }}>
+                        <Check size={14} /> {jdFile.name}
                       </span>
                     )}
                   </div>
@@ -419,7 +442,9 @@ const Upload = () => {
               <article className="card" style={{ padding: '32px', minHeight: '380px', display: 'flex', flexDirection: 'column' }}>
                 {!user ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '40px 20px', textAlign: 'center' }}>
-                    <span style={{ fontSize: '2.5rem', marginBottom: '12px' }}>🔒</span>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(217, 119, 87, 0.12)', display: 'grid', placeItems: 'center', color: '#C05D3C', marginBottom: '12px' }}>
+                      <Lock size={22} />
+                    </div>
                     <h4 style={{ margin: '0 0 6px', fontSize: '1.1rem', fontWeight: 700 }}>Authentication Required</h4>
                     <p style={{ margin: '0 18px 20px', fontSize: '0.86rem', color: 'var(--muted)', maxWidth: '340px' }}>
                       Sign in to your account to save your resume scans and review historically computed scores.
@@ -434,7 +459,9 @@ const Upload = () => {
                   </div>
                 ) : resumes.length === 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '40px 20px', textAlign: 'center' }}>
-                    <span style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📄</span>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(31, 30, 29, 0.06)', display: 'grid', placeItems: 'center', color: '#5C5954', marginBottom: '12px' }}>
+                      <FileText size={22} />
+                    </div>
                     <h4 style={{ margin: '0 0 6px', fontSize: '1rem', fontWeight: 700 }}>No Resumes Screened Yet</h4>
                     <p style={{ margin: '0 18px 20px', fontSize: '0.84rem', color: 'var(--muted)', maxWidth: '340px' }}>
                       Once you analyze your compatibility score against a JD, your analysis records will show up here.
@@ -507,10 +534,13 @@ const Upload = () => {
                                 fontWeight: 700,
                                 cursor: 'pointer',
                                 padding: '6px 10px',
-                                borderRadius: '10px'
+                                borderRadius: '10px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px'
                               }}
                             >
-                              📥 Resume
+                              <Download size={13} /> Resume
                             </button>
                             <button
                               onClick={(e) => handleShowReport(resume, e)}
@@ -522,10 +552,13 @@ const Upload = () => {
                                 fontWeight: 700,
                                 cursor: 'pointer',
                                 padding: '6px 10px',
-                                borderRadius: '10px'
+                                borderRadius: '10px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px'
                               }}
                             >
-                              💡 Report
+                              <Lightbulb size={13} /> Report
                             </button>
                             <button
                               onClick={(e) => {
@@ -640,7 +673,9 @@ const Upload = () => {
             <div style={{ marginBottom: '24px' }}>
               <h4 style={{ margin: '0 0 10px', fontSize: '0.94rem', fontWeight: 700, color: 'var(--text)' }}>Missing Keywords</h4>
               {activeReport.missing_keywords.length === 0 ? (
-                <p style={{ fontSize: '0.86rem', color: 'var(--teal)', margin: 0, fontWeight: 600 }}>✓ No critical keywords missing!</p>
+                <p style={{ fontSize: '0.86rem', color: 'var(--teal)', margin: 0, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Check size={14} /> No critical keywords missing!
+                </p>
               ) : (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {activeReport.missing_keywords.map((kw, idx) => (

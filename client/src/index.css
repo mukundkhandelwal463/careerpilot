@@ -1,8 +1,103 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+/* ============================================================================
+   Official 21st.dev Theme: Claude Amber by serafimcloud
+   https://21st.dev/community/themes/claude-amber
+   ============================================================================ */
+:root {
+  --background: #faf9f5;
+  --foreground: #3d3929;
+  --card: #f5f4ef;
+  --card-foreground: #141413;
+  --popover: #ffffff;
+  --popover-foreground: #28261b;
+  --primary: #c96442;
+  --primary-foreground: #ffffff;
+  --secondary: #e9e6dc;
+  --secondary-foreground: #535146;
+  --muted: #ede9de;
+  --muted-foreground: #6e6d68;
+  --accent: #c96442;
+  --accent-deep: #b05730;
+  --accent-soft: #e9e6dc;
+  --accent-foreground: #28261b;
+  --destructive: #141413;
+  --destructive-foreground: #ffffff;
+  --border: #dad9d4;
+  --input: #b4b2a7;
+  --ring: #c96442;
+  --chart-1: #b05730;
+  --chart-2: #9c87f5;
+  --chart-3: #ded8c4;
+  --chart-4: #dbd3f0;
+  --chart-5: #b4552d;
+  --sidebar: #f5f4ee;
+  --sidebar-foreground: #3d3d3a;
+  --sidebar-primary: #c96442;
+  --sidebar-primary-foreground: #fbfbfb;
+  --sidebar-accent: #e9e6dc;
+  --sidebar-accent-foreground: #343434;
+  --sidebar-border: #dad9d4;
+  --sidebar-ring: #c96442;
+  --font-sans: "Outfit", sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --radius: 1rem;
+}
+
+.dark {
+  --background: #262624;
+  --foreground: #f1f1ef;
+  --card: #2c2c2b;
+  --card-foreground: #faf9f5;
+  --popover: #30302e;
+  --popover-foreground: #e5e5e2;
+  --primary: #d97757;
+  --primary-foreground: #141413;
+  --secondary: #faf9f5;
+  --secondary-foreground: #30302e;
+  --muted: #1b1b19;
+  --muted-foreground: #b7b5a9;
+  --accent: #d97757;
+  --accent-foreground: #f5f4ee;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #3e3e38;
+  --input: #52514a;
+  --ring: #d97757;
+  --sidebar: #1f1e1d;
+  --sidebar-foreground: #c3c0b6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+  --radius-md: var(--radius);
+}
+
 * {
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-sans);
 }
 
 html {
@@ -10,19 +105,41 @@ html {
 }
 
 h1, h2, h3, .font-heading {
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-sans);
+  letter-spacing: -0.02em;
 }
 
 @layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
   button {
-    @apply cursor-pointer transition-all duration-200 ease-in-out;
+    @apply cursor-pointer transition-all duration-200 ease-out;
   }
 
   input:not([type="checkbox"]) {
-    @apply outline-none border border-stone-200 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 shadow-sm hover:border-stone-300;
+    @apply outline-none rounded-2xl px-3.5 py-2.5 transition-all duration-200 ease-out shadow-sm;
+    border: 1px solid var(--border);
+    background-color: #ffffff;
+    color: var(--card-foreground);
+  }
+
+  input:not([type="checkbox"]):focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.18);
   }
 
   textarea {
-    @apply outline-none border border-stone-200 rounded-xl px-3 py-2 resize-none transition-all duration-200 ease-in-out focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 shadow-sm hover:border-stone-300;
+    @apply outline-none rounded-2xl px-3.5 py-2.5 resize-none transition-all duration-200 ease-out shadow-sm;
+    border: 1px solid var(--border);
+    background-color: #ffffff;
+    color: var(--card-foreground);
+  }
+
+  textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(201, 100, 66, 0.18);
   }
 }

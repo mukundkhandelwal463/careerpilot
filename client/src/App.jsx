@@ -19,20 +19,23 @@ import CnTheory from './pages/CnTheory.jsx'
 import DbmsTheory from './pages/DbmsTheory.jsx'
 import SystemDesignTheory from './pages/SystemDesignTheory.jsx'
 import MockTest from './pages/MockTest.jsx'
+import OnlineCompiler from './pages/OnlineCompiler.jsx'
 import TermsAndConditions from './pages/TermsAndConditions.jsx'
+import Guides from './pages/Guides.jsx'
+import Blog from './pages/Blog.jsx'
+import About from './pages/About.jsx'
+import NotFound from './pages/NotFound.jsx'
 
 import MobileBottomDock from './Components/MobileBottomDock.jsx'
+import Loader from './Components/Loader.jsx'
+import ErrorBoundary from './Components/ErrorBoundary.jsx'
 
 // Protected Route Wrapper Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#FAF9F4' }}>
-        <div style={{ fontSize: '1.1rem', color: '#1c2427', fontFamily: 'sans-serif' }}>Loading...</div>
-      </div>
-    );
+    return <Loader title="Checking Session" subtitle="Securing your CareerPilot workspace..." variant="auth" />;
   }
   
   if (!user) {
@@ -46,33 +49,43 @@ const App = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Routes>
-          {/* Public Routes */}
-          <Route path='/' element={<Home />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/view/:resumeId' element={<Preview />} />
-          <Route path='/terms' element={<TermsAndConditions />} />
-          <Route path='/privacy' element={<TermsAndConditions />} />
+        <ErrorBoundary>
+          <Routes>
+            {/* Public Indexable Routes (SEO, AEO & GEO) */}
+            <Route path='/' element={<Home />} />
+            <Route path='/blog' element={<Blog />} />
+            <Route path='/blog/:slug' element={<Blog />} />
+            <Route path='/guides' element={<Guides />} />
+            <Route path='/guides/:slug' element={<Guides />} />
+            <Route path='/about' element={<About />} />
+            <Route path='/login' element={<Login />} />
+            <Route path='/view/:resumeId' element={<Preview />} />
+            <Route path='/terms' element={<TermsAndConditions />} />
+            <Route path='/privacy' element={<TermsAndConditions />} />
 
-          {/* Protected Routes */}
-          <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path='/upload' element={<ProtectedRoute><Upload /></ProtectedRoute>} />
-          <Route path='/result' element={<ProtectedRoute><Result /></ProtectedRoute>} />
-          <Route path='/maker_options' element={<Navigate to="/app/builder/default" replace />} />
-          <Route path='/jobs' element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
-          <Route path='/preparation' element={<ProtectedRoute><Preparation /></ProtectedRoute>} />
-          <Route path='/preparation/theory/OOPs' element={<ProtectedRoute><OopsTheory /></ProtectedRoute>} />
-          <Route path='/preparation/theory/OS' element={<ProtectedRoute><OsTheory /></ProtectedRoute>} />
-          <Route path='/preparation/theory/CN' element={<ProtectedRoute><CnTheory /></ProtectedRoute>} />
-          <Route path='/preparation/theory/DBMS' element={<ProtectedRoute><DbmsTheory /></ProtectedRoute>} />
-          <Route path='/preparation/theory/SystemDesign' element={<ProtectedRoute><SystemDesignTheory /></ProtectedRoute>} />
-          <Route path='/preparation/mock-test' element={<ProtectedRoute><MockTest /></ProtectedRoute>} />
-          <Route path='/preparation/theory/:patternName' element={<ProtectedRoute><DetailedTheory /></ProtectedRoute>} />
-          <Route path='/app/builder/:resumeId' element={<ProtectedRoute><ResumeBuilder /></ProtectedRoute>} />
-          
-          <Route path='*' element={<Navigate to="/" replace />} />
-        </Routes>
-        <MobileBottomDock />
+            {/* Protected Authenticated Routes */}
+            <Route path='/dashboard' element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path='/upload' element={<ProtectedRoute><Upload /></ProtectedRoute>} />
+            <Route path='/result' element={<ProtectedRoute><Result /></ProtectedRoute>} />
+            <Route path='/maker_options' element={<Navigate to="/app/builder/default" replace />} />
+            <Route path='/jobs' element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
+            <Route path='/preparation' element={<ProtectedRoute><Preparation /></ProtectedRoute>} />
+            <Route path='/preparation/theory/OOPs' element={<ProtectedRoute><OopsTheory /></ProtectedRoute>} />
+            <Route path='/preparation/theory/OS' element={<ProtectedRoute><OsTheory /></ProtectedRoute>} />
+            <Route path='/preparation/theory/CN' element={<ProtectedRoute><CnTheory /></ProtectedRoute>} />
+            <Route path='/preparation/theory/DBMS' element={<ProtectedRoute><DbmsTheory /></ProtectedRoute>} />
+            <Route path='/preparation/theory/SystemDesign' element={<ProtectedRoute><SystemDesignTheory /></ProtectedRoute>} />
+            <Route path='/preparation/mock-test' element={<ProtectedRoute><MockTest /></ProtectedRoute>} />
+            <Route path='/preparation/compiler' element={<ProtectedRoute><OnlineCompiler /></ProtectedRoute>} />
+            <Route path='/compiler' element={<ProtectedRoute><OnlineCompiler /></ProtectedRoute>} />
+            <Route path='/preparation/theory/:patternName' element={<ProtectedRoute><DetailedTheory /></ProtectedRoute>} />
+            <Route path='/app/builder/:resumeId' element={<ProtectedRoute><ResumeBuilder /></ProtectedRoute>} />
+            
+            {/* Custom 404 Page (No Soft-404 Redirect) */}
+            <Route path='*' element={<NotFound />} />
+          </Routes>
+          <MobileBottomDock />
+        </ErrorBoundary>
       </AuthProvider>
     </ThemeProvider>
   )

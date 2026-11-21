@@ -1,5 +1,6 @@
 import { Folder, Plus, Trash, Sparkles } from 'lucide-react';
 import React, { useState } from 'react'
+import LoadingOverlay from './LoadingOverlay.jsx';
 
 const ProjectForm = ({ data, onChange }) => {
     const addProject = () => {
@@ -47,6 +48,16 @@ const ProjectForm = ({ data, onChange }) => {
 
   return (
     <div className='space-y-4'>
+        <LoadingOverlay
+            isOpen={enhancingIdx !== null}
+            variant="ai"
+            title="Enhancing Project with AI"
+            subtitle="Crafting clear, measurable technical project bullet points"
+            steps={[
+                'Highlighting architecture & tech stack...',
+                'Polishing wording for ATS readability...'
+            ]}
+        />
         <div className='flex items-center justify-between'>
             <div>
                 <h3 className='text-lg font-semibold text-gray-800'>Projects</h3>

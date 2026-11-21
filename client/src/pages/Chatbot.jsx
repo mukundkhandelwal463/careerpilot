@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
+import LoadingOverlay from '../Components/LoadingOverlay.jsx';
 import '../css/style.css';
 
 const Chatbot = () => {
@@ -114,6 +115,18 @@ const Chatbot = () => {
 
   return (
     <div className="page-shell">
+      <LoadingOverlay
+        isOpen={generating}
+        variant="ai"
+        title="Generating Your AI Resume"
+        subtitle="CareerPilot AI Engine is crafting your tailored PDF & DOCX files"
+        steps={[
+          'Synthesizing your profile & interview answers...',
+          'Writing ATS-optimized bullet points...',
+          'Formatting PDF & DOCX resume documents...',
+          'Matching recommended job opportunities...'
+        ]}
+      />
       <Navbar />
       <main className="page" id="chatbotPage">
         <h1>AI Resume Builder</h1>

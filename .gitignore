@@ -53,6 +53,8 @@ downloads/
 *.tfstate.backup
 .terraform.lock.hcl
 *.pem
+*.pub
+CareerPilot.pub
 
 # Node & Frontend Build
 node_modules/

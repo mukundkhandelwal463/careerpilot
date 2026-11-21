@@ -413,7 +413,7 @@ const CnTheory = () => {
     <div className="page-shell" style={{ minHeight: '100vh', background: '#f8fafc' }}>
       <Navbar />
       
-      <div style={{ maxWidth: '1450px', margin: '40px auto', padding: '0 24px' }}>
+      <div className="page" style={{ margin: '32px auto 48px' }}>
         <Link 
           to="/preparation" 
           style={{ 

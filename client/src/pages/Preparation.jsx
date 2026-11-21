@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Link } from 'react-router-dom';
 import Footer from '../Components/footer.jsx';
 import Navbar from '../Components/navbar.jsx';
+import LoadingOverlay from '../Components/LoadingOverlay.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import {
   Bot,
@@ -1298,13 +1299,18 @@ const Preparation = () => {
     }));
   };
 
+  const userScope = user?.email ? user.email.toLowerCase().trim() : null;
+  const tasksKey = userScope ? `scheduled_tasks_${userScope}` : null;
+  const roadmapKey = userScope ? `active_career_roadmap_${userScope}` : null;
+  const roleKey = userScope ? `active_target_role_${userScope}` : null;
+
   // ── Career Roadmap State ────────────────────────────────────────
   const [roadmapResumeFile, setRoadmapResumeFile] = useState(null);
-  const [targetRole, setTargetRole] = useState(() => localStorage.getItem("active_target_role") || '');
+  const [targetRole, setTargetRole] = useState(() => (roleKey ? localStorage.getItem(roleKey) || '' : ''));
   const [targetJd, setTargetJd] = useState('');
   const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
   const [careerRoadmap, setCareerRoadmap] = useState(() => {
-    const saved = localStorage.getItem("active_career_roadmap");
+    const saved = roadmapKey ? localStorage.getItem(roadmapKey) : null;
     if (saved) {
       try { return JSON.parse(saved); } catch (e) {}
     }
@@ -1329,7 +1335,7 @@ const Preparation = () => {
   const [overdueReminder, setOverdueReminder] = useState('');
 
   const [scheduledTasks, setScheduledTasks] = useState(() => {
-    const saved = localStorage.getItem("scheduled_tasks");
+    const saved = tasksKey ? localStorage.getItem(tasksKey) : null;
     if (saved) {
       try { return JSON.parse(saved); } catch (e) {}
     }
@@ -1343,20 +1349,44 @@ const Preparation = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState(null);
 
   useEffect(() => {
-    localStorage.setItem("scheduled_tasks", JSON.stringify(scheduledTasks));
-  }, [scheduledTasks]);
+    if (!userScope) {
+      setScheduledTasks({});
+      setCareerRoadmap(null);
+      setTargetRole('');
+      return;
+    }
+    try {
+      setScheduledTasks(JSON.parse(localStorage.getItem(tasksKey) || '{}'));
+    } catch {
+      setScheduledTasks({});
+    }
+    try {
+      const savedMap = localStorage.getItem(roadmapKey);
+      setCareerRoadmap(savedMap ? JSON.parse(savedMap) : null);
+    } catch {
+      setCareerRoadmap(null);
+    }
+    setTargetRole(localStorage.getItem(roleKey) || '');
+  }, [userScope, tasksKey, roadmapKey, roleKey]);
 
   useEffect(() => {
+    if (tasksKey) {
+      localStorage.setItem(tasksKey, JSON.stringify(scheduledTasks));
+    }
+  }, [scheduledTasks, tasksKey]);
+
+  useEffect(() => {
+    if (!roadmapKey || !roleKey) return;
     if (careerRoadmap) {
-      localStorage.setItem("active_career_roadmap", JSON.stringify(careerRoadmap));
+      localStorage.setItem(roadmapKey, JSON.stringify(careerRoadmap));
       if (targetRole) {
-        localStorage.setItem("active_target_role", targetRole);
+        localStorage.setItem(roleKey, targetRole);
       }
     } else {
-      localStorage.removeItem("active_career_roadmap");
-      localStorage.removeItem("active_target_role");
+      localStorage.removeItem(roadmapKey);
+      localStorage.removeItem(roleKey);
     }
-  }, [careerRoadmap, targetRole]);
+  }, [careerRoadmap, targetRole, roadmapKey, roleKey]);
 
   // Countdown timer to midnight
   useEffect(() => {
@@ -1391,12 +1421,15 @@ const Preparation = () => {
       return false;
     });
 
-    if (pastMissed.length > 0) {
+    const currentEmail = user?.email ? user.email.toLowerCase().trim() : null;
+    if (pastMissed.length > 0 && currentEmail) {
       const missedDates = pastMissed.map(d => new Date(d).getDate()).sort((a, b) => a - b);
       const missedDatesStr = missedDates.join(', ');
-      setOverdueReminder(`⚠ Reminder: You missed tasks scheduled for July ${missedDatesStr}! Keep your streak alive.`);
+      setOverdueReminder(`⚠ Reminder: You missed tasks scheduled for ${missedDatesStr}! Keep your streak alive.`);
 
-      const savedNotifs = localStorage.getItem("app_notifications");
+      const notifKey = `app_notifications_${currentEmail}`;
+      const unreadKey = `has_unread_notifications_${currentEmail}`;
+      const savedNotifs = localStorage.getItem(notifKey);
       let notifsList = [];
       if (savedNotifs) {
         try { notifsList = JSON.parse(savedNotifs); } catch (e) { }
@@ -1409,17 +1442,18 @@ const Preparation = () => {
           text: notifText,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         });
-        localStorage.setItem("app_notifications", JSON.stringify(notifsList));
-        localStorage.setItem("has_unread_notifications", "true");
-        window.dispatchEvent(new Event("new_scan_notification"));
+        localStorage.setItem(notifKey, JSON.stringify(notifsList));
+        localStorage.setItem(unreadKey, "true");
+        window.dispatchEvent(new CustomEvent("new_scan_notification", { detail: { email: currentEmail } }));
       }
     }
 
     const now = new Date();
-    const lastEmailDate = localStorage.getItem("last_email_reminder_date");
+    const emailReminderKey = currentEmail ? `last_email_reminder_date_${currentEmail}` : "last_email_reminder_date";
+    const lastEmailDate = localStorage.getItem(emailReminderKey);
 
-    if ((hasUncompletedToday || pastMissed.length > 0) && now.getHours() >= 17 && lastEmailDate !== todayStr) {
-      localStorage.setItem("last_email_reminder_date", todayStr);
+    if (currentEmail && (hasUncompletedToday || pastMissed.length > 0) && now.getHours() >= 17 && lastEmailDate !== todayStr) {
+      localStorage.setItem(emailReminderKey, todayStr);
 
       const pendingTaskList = todayTasks.filter(t => !t.completed).map(t => t.text);
       if (pendingTaskList.length === 0 && pastMissed.length > 0) {
@@ -2293,6 +2327,43 @@ const Preparation = () => {
 
   return (
     <div className="page-shell">
+      <LoadingOverlay
+        isOpen={isParsing || isGrading || isGeneratingRoadmap}
+        variant={isGeneratingRoadmap ? 'roadmap' : isParsing ? 'scan' : 'ai'}
+        title={
+          isGeneratingRoadmap
+            ? 'Building Your Career Roadmap'
+            : isParsing
+              ? 'Preparing AI Mock Interview'
+              : 'Evaluating Your Response'
+        }
+        subtitle={
+          isGeneratingRoadmap
+            ? `Designing a personalized learning path for ${targetRole || 'your target role'}`
+            : isParsing
+              ? 'Reading resume & generating tailored technical interview questions'
+              : 'Analyzing technical accuracy, communication clarity & fluency'
+        }
+        steps={
+          isGeneratingRoadmap
+            ? [
+                'Analyzing target role & job requirements...',
+                'Mapping core skills & project milestones...',
+                'Structuring week-by-week preparation plan...'
+              ]
+            : isParsing
+              ? [
+                  'Extracting technical skills from your resume...',
+                  'Crafting role-specific interview questions...',
+                  'Initializing AI Interviewer session...'
+                ]
+              : [
+                  'Reviewing technical depth & accuracy...',
+                  'Evaluating communication & structure...',
+                  'Generating actionable AI feedback...'
+                ]
+        }
+      />
       <Navbar />
       <main className="page" style={{ marginTop: '24px' }}>
         <h1 style={{ marginBottom: '24px', fontSize: '1.89rem', fontWeight: 800, color: 'var(--text)' }}>

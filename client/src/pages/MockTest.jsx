@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import { Loader2, Clock, CheckCircle2, AlertCircle, Play, ChevronRight, Lock } from 'lucide-react';
 import Navbar from '../Components/navbar.jsx';
+import LoadingOverlay from '../Components/LoadingOverlay.jsx';
+import LeetCodeWorkspace from '../Components/LeetCodeWorkspace.jsx';
 
 const MockTest = () => {
   const [searchParams] = useSearchParams();
@@ -74,8 +76,13 @@ const MockTest = () => {
       const q = isHard ? questions[1] : questions[0];
       if (q) {
         const lang = codingLanguages[q.id] || 'python';
-        if (!codingAnswers[q.id] && q.templates && q.templates[lang]) {
-          setCodingAnswers(prev => ({ ...prev, [q.id]: q.templates[lang] }));
+        const key = `${q.id}_${lang}`;
+        if (codingAnswers[key] === undefined && q.templates && q.templates[lang]) {
+          setCodingAnswers(prev => ({
+            ...prev,
+            [key]: q.templates[lang],
+            [q.id]: prev[q.id] || q.templates[lang]
+          }));
         }
       }
     }
@@ -101,22 +108,120 @@ const MockTest = () => {
     return () => clearInterval(timer);
   }, [testState, activeSection, completedSections]);
 
+  const isCodingSection = activeSection === 'coding_easy' || activeSection === 'coding_hard';
+
+  // Toggle isolation class on html & body to eliminate any zoom scaling and prevent scrollbars/white bottom bars
+  useEffect(() => {
+    if (isCodingSection) {
+      document.documentElement.classList.add('coding-fullscreen-active');
+      document.body.classList.add('coding-fullscreen-active');
+      return () => {
+        document.documentElement.classList.remove('coding-fullscreen-active');
+        document.body.classList.remove('coding-fullscreen-active');
+      };
+    } else {
+      document.documentElement.classList.remove('coding-fullscreen-active');
+      document.body.classList.remove('coding-fullscreen-active');
+    }
+  }, [isCodingSection]);
+
+  const getSectionsOverview = () => {
+    const techTotal = testData?.technical?.length || 60;
+    const techAnswered = (testData?.technical || []).filter(q => answers[q.id] !== undefined).length;
+
+    const verbalTotal = testData?.verbal?.length || 15;
+    const verbalAnswered = (testData?.verbal || []).filter(q => answers[q.id] !== undefined).length;
+
+    const aptTotal = testData?.aptitude?.length || 15;
+    const aptAnswered = (testData?.aptitude || []).filter(q => answers[q.id] !== undefined).length;
+
+    const easyQ = testData?.coding?.[0];
+    const hardQ = testData?.coding?.[1];
+
+    const easyLang = codingLanguages[easyQ?.id] || 'python';
+    const easyCode = codingAnswers[`${easyQ?.id}_${easyLang}`] || codingAnswers[easyQ?.id] || '';
+    const easyAnswered = easyCode.trim().length > 0 && easyCode.trim() !== (easyQ?.templates?.[easyLang] || '').trim() ? 1 : 0;
+
+    const hardLang = codingLanguages[hardQ?.id] || 'python';
+    const hardCode = codingAnswers[`${hardQ?.id}_${hardLang}`] || codingAnswers[hardQ?.id] || '';
+    const hardAnswered = hardCode.trim().length > 0 && hardCode.trim() !== (hardQ?.templates?.[hardLang] || '').trim() ? 1 : 0;
+
+    return [
+      {
+        id: 'technical',
+        name: 'Technical MCQs',
+        step: '1/5',
+        totalQuestions: techTotal,
+        answeredCount: techAnswered,
+        isCompleted: !!completedSections['technical'],
+        isActive: activeSection === 'technical'
+      },
+      {
+        id: 'verbal',
+        name: 'Verbal Reasoning',
+        step: '2/5',
+        totalQuestions: verbalTotal,
+        answeredCount: verbalAnswered,
+        isCompleted: !!completedSections['verbal'],
+        isActive: activeSection === 'verbal'
+      },
+      {
+        id: 'aptitude',
+        name: 'Aptitude / Quantitative',
+        step: '3/5',
+        totalQuestions: aptTotal,
+        answeredCount: aptAnswered,
+        isCompleted: !!completedSections['aptitude'],
+        isActive: activeSection === 'aptitude'
+      },
+      {
+        id: 'coding_easy',
+        name: 'Easy Coding',
+        step: '4/5',
+        totalQuestions: 1,
+        answeredCount: easyAnswered,
+        isCompleted: !!completedSections['coding_easy'],
+        isActive: activeSection === 'coding_easy'
+      },
+      {
+        id: 'coding_hard',
+        name: 'Hard Coding',
+        step: '5/5',
+        totalQuestions: 1,
+        answeredCount: hardAnswered,
+        isCompleted: !!completedSections['coding_hard'],
+        isActive: activeSection === 'coding_hard'
+      }
+    ];
+  };
+
   const handleAnswerSelect = (questionId, option) => {
     setAnswers(prev => ({ ...prev, [questionId]: option }));
   };
 
-  const handleCodingChange = (questionId, code) => {
-    setCodingAnswers(prev => ({ ...prev, [questionId]: code }));
+  const handleCodingChange = (questionId, lang, code) => {
+    setCodingAnswers(prev => ({
+      ...prev,
+      [`${questionId}_${lang}`]: code,
+      [questionId]: code
+    }));
   };
 
   const handleLanguageChange = (qId, newLang, q) => {
     setCodingLanguages(prev => ({ ...prev, [qId]: newLang }));
-    const currentCode = codingAnswers[qId] || '';
-    const otherTemplates = Object.values(q?.templates || {});
-    const isDefaultOrEmpty = !currentCode.trim() || otherTemplates.some(t => currentCode.trim() === t.trim());
-    
-    if (isDefaultOrEmpty && q?.templates && q.templates[newLang]) {
-      setCodingAnswers(prev => ({ ...prev, [qId]: q.templates[newLang] }));
+    const key = `${qId}_${newLang}`;
+    if (codingAnswers[key] === undefined) {
+      const template = q?.templates?.[newLang] || '';
+      setCodingAnswers(prev => ({
+        ...prev,
+        [key]: template,
+        [qId]: template
+      }));
+    } else {
+      setCodingAnswers(prev => ({
+        ...prev,
+        [qId]: codingAnswers[key]
+      }));
     }
   };
 
@@ -124,6 +229,15 @@ const MockTest = () => {
     setIsSubmitting(true);
     setSubmitError(null);
     setTestState('submitting');
+
+    const resolvedCodingAnswers = {};
+    (testData?.coding || []).forEach(q => {
+      const lang = codingLanguages[q.id] || 'python';
+      const key = `${q.id}_${lang}`;
+      resolvedCodingAnswers[q.id] = codingAnswers[key] !== undefined
+        ? codingAnswers[key]
+        : (codingAnswers[q.id] || q.templates?.[lang] || '');
+    });
 
     try {
       const res = await fetch('/api/mock-test/submit', {
@@ -133,7 +247,7 @@ const MockTest = () => {
           difficulty,
           test_data: testData,
           answers,
-          coding_answers: codingAnswers,
+          coding_answers: resolvedCodingAnswers,
           coding_languages: codingLanguages
         })
       });
@@ -180,16 +294,19 @@ const MockTest = () => {
     }
   };
 
-  const handleRunCode = async (qId) => {
-    const code = codingAnswers[qId] || '';
+  const handleRunCode = async (qId, stdin = '', expectedOutput = null, testcases = null) => {
+    const questions = testData?.coding || [];
+    const q = questions.find(item => item.id === qId) || {};
+    const language = codingLanguages[qId] || 'python';
+    const key = `${qId}_${language}`;
+    const code = codingAnswers[key] !== undefined
+      ? codingAnswers[key]
+      : (codingAnswers[qId] !== undefined ? codingAnswers[qId] : (q.templates?.[language] || ''));
+
     if (!code.trim()) {
       alert("Please write some code first before running it.");
       return;
     }
-
-    const language = codingLanguages[qId] || 'python';
-    const questions = testData.coding || [];
-    const q = questions.find(item => item.id === qId) || {};
 
     setEvaluating(prev => ({ ...prev, [qId]: true }));
     setEvalResults(prev => ({ ...prev, [qId]: null }));
@@ -201,6 +318,9 @@ const MockTest = () => {
         body: JSON.stringify({
           language,
           code,
+          stdin,
+          expected_output: expectedOutput,
+          testcases: testcases || q.testcases || [],
           title: q.title || '',
           description: q.description || '',
           examples: q.examples || []
@@ -210,10 +330,26 @@ const MockTest = () => {
       if (data.success && data.result) {
         setEvalResults(prev => ({ ...prev, [qId]: data.result }));
       } else {
-        setEvalResults(prev => ({ ...prev, [qId]: { compiled: false, passed: false, output: data.error || 'Execution failed.' } }));
+        setEvalResults(prev => ({
+          ...prev,
+          [qId]: {
+            compiled: false,
+            passed: false,
+            status: 'Execution Failed',
+            output: data.error || 'Execution failed.'
+          }
+        }));
       }
     } catch (err) {
-      setEvalResults(prev => ({ ...prev, [qId]: { compiled: false, passed: false, output: 'Connection failed to execution API.' } }));
+      setEvalResults(prev => ({
+        ...prev,
+        [qId]: {
+          compiled: false,
+          passed: false,
+          status: 'Network Error',
+          output: 'Connection failed to compiler execution API.'
+        }
+      }));
     } finally {
       setEvaluating(prev => ({ ...prev, [qId]: false }));
     }
@@ -250,11 +386,17 @@ const MockTest = () => {
     return (
       <div className="page-shell" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f8fafc' }}>
         <Navbar />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <Loader2 className="size-12 text-indigo-600" style={{ animation: 'spin 1s linear infinite' }} />
-          <h2 style={{ marginTop: '20px', fontSize: '1.4rem', color: '#1e293b', fontWeight: 800 }}>Assembling custom AI Mock Test...</h2>
-          <p style={{ color: '#64748b', marginTop: '8px' }}>This takes about 20-30 seconds. Generating fresh, targeted questions.</p>
-        </div>
+        <LoadingOverlay
+          isOpen={true}
+          variant="test"
+          title="Assembling Custom AI Mock Test"
+          subtitle={`Generating fresh ${difficulty} difficulty questions across 5 sections`}
+          steps={[
+            'Curating Technical, Verbal & Aptitude MCQs...',
+            'Generating Easy & Hard Coding challenges...',
+            'Setting up timed assessment environment...'
+          ]}
+        />
       </div>
     );
   }
@@ -328,13 +470,17 @@ const MockTest = () => {
     return (
       <div className="page-shell" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f8fafc' }}>
         <Navbar />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <Loader2 className="size-12 text-indigo-600" style={{ animation: 'spin 1.5s linear infinite' }} />
-          <h2 style={{ marginTop: '20px', fontSize: '1.4rem', color: '#1e293b', fontWeight: 800 }}>Analyzing & Grading Assessment...</h2>
-          <p style={{ color: '#64748b', marginTop: '8px', textAlign: 'center', maxWidth: '440px', padding: '0 20px' }}>
-            CareerPilot AI Engine is grading your programming solutions and checking MCQs. This will take about 20-30 seconds.
-          </p>
-        </div>
+        <LoadingOverlay
+          isOpen={true}
+          variant="test"
+          title="Grading Your Assessment"
+          subtitle="CareerPilot AI Engine is evaluating your MCQs and coding solutions"
+          steps={[
+            'Scoring Technical, Verbal & Aptitude responses...',
+            'Running AI evaluation on programming solutions...',
+            'Generating detailed scorecard & feedback...'
+          ]}
+        />
       </div>
     );
   }
@@ -480,11 +626,18 @@ const MockTest = () => {
 
   // MCQs rendering
   const renderMCQSection = (sectionName) => {
-    const questions = testData[sectionName] || [];
+    const questions = testData?.[sectionName] || [];
+    if (questions.length === 0) {
+      return (
+        <div style={{ background: 'white', padding: '40px', borderRadius: '20px', textAlign: 'center', color: '#64748b', border: '1px solid #e2e8f0' }}>
+          No questions available for this section.
+        </div>
+      );
+    }
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {questions.map((q, idx) => (
-          <div key={q.id} style={{ background: 'white', padding: '28px', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
+          <div key={q.id || `mcq_${idx}`} style={{ background: 'white', padding: '28px', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '18px', alignItems: 'center' }}>
               <span style={{ fontWeight: 800, color: '#4f46e5', fontSize: '0.95rem' }}>Question {idx + 1}</span>
               {q.subject && <span style={{ background: 'rgba(79, 70, 229, 0.08)', color: '#4f46e5', padding: '6px 14px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 700 }}>{q.subject}</span>}
@@ -492,7 +645,7 @@ const MockTest = () => {
             <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1e293b', marginBottom: '20px', lineHeight: 1.5 }}>{q.question}</h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {q.options.map((opt, oIdx) => {
+              {(q.options || []).map((opt, oIdx) => {
                 const isSelected = answers[q.id] === opt;
                 return (
                   <label key={oIdx} style={{
@@ -503,7 +656,7 @@ const MockTest = () => {
                   }}>
                     <input
                       type="radio"
-                      name={q.id}
+                      name={q.id || `q_${idx}`}
                       value={opt}
                       checked={isSelected}
                       onChange={() => handleAnswerSelect(q.id, opt)}
@@ -520,253 +673,182 @@ const MockTest = () => {
     );
   };
 
-  // Coding rendering
+  // Confirm Modal Renderer
+  const renderConfirmModal = () => (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(15, 23, 42, 0.6)',
+      backdropFilter: 'blur(8px)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 99999
+    }}>
+      <div style={{
+        background: '#ffffff',
+        borderRadius: '20px',
+        padding: '32px',
+        width: '90%',
+        maxWidth: '440px',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '18px'
+      }}>
+        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#1e293b' }}>
+          {confirmModalData.title}
+        </h3>
+        <p style={{ margin: 0, color: '#64748b', fontSize: '0.96rem', lineHeight: 1.5 }}>
+          {confirmModalData.message}
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '8px' }}>
+          <button
+            onClick={() => setShowConfirmModal(false)}
+            style={{
+              flex: 1,
+              padding: '12px 20px',
+              borderRadius: '12px',
+              background: '#f1f5f9',
+              color: '#64748b',
+              fontWeight: 600,
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              transition: 'all 0.2s'
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              if (confirmModalData.onConfirm) confirmModalData.onConfirm();
+              setShowConfirmModal(false);
+            }}
+            style={{
+              flex: 1,
+              padding: '12px 20px',
+              borderRadius: '12px',
+              fontWeight: 600,
+              background: 'linear-gradient(to right, #4f46e5, #3b82f6)',
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)',
+              transition: 'all 0.2s'
+            }}
+          >
+            Yes, Submit
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Coding rendering using LeetCode Workspace
   const renderCodingSection = (isHard = false) => {
-    const questions = testData.coding || [];
+    const questions = testData?.coding || [];
     const q = isHard ? questions[1] : questions[0];
     
-    if (!q) return <p>No coding question generated.</p>;
+    if (!q) {
+      return (
+        <div style={{ background: '#18181b', color: '#94a3b8', padding: '60px', borderRadius: '16px', textAlign: 'center' }}>
+          No coding question available for this section.
+        </div>
+      );
+    }
+
+    const currentLang = codingLanguages[q.id] || 'python';
+    const currentCode = codingAnswers[`${q.id}_${currentLang}`] !== undefined
+      ? codingAnswers[`${q.id}_${currentLang}`]
+      : (codingAnswers[q.id] !== undefined ? codingAnswers[q.id] : (q.templates?.[currentLang] || ''));
 
     return (
-      <div style={{ background: 'white', padding: '32px', borderRadius: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1e293b', margin: 0 }}>{q.title}</h2>
-          <span style={{ background: q.difficulty === 'Hard' ? '#fef2f2' : '#ecfdf5', color: q.difficulty === 'Hard' ? '#dc2626' : '#059669', padding: '6px 16px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 800 }}>
-            {q.difficulty}
-          </span>
-        </div>
-
-        <p style={{ color: '#475569', fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '24px' }}>
-          {q.description}
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
-          <strong style={{ color: '#1e293b', fontSize: '1.05rem', fontWeight: 700 }}>Examples:</strong>
-          {q.examples && q.examples.map((ex, exIdx) => {
-            const isObj = typeof ex === 'object' && ex !== null;
-            const inputVal = isObj ? ex.input : (ex.split('\nOutput:')[0] || '').replace('Input:', '').replace('Input :', '').trim();
-            const outputVal = isObj ? ex.output : (ex.split('\nOutput:')[1] || '').split('(since')[0].replace('Output:', '').replace('Output :', '').trim();
-            const explVal = isObj ? ex.explanation : ((ex.split('(since')[1] || '').replace(')', '').trim());
-
-            return (
-              <div key={exIdx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '20px' }}>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', fontSize: '0.9rem' }}>
-                  <span style={{ color: '#64748b', fontWeight: 700 }}>Example {exIdx + 1}:</span>
-                </div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.92rem', color: '#334155', background: '#f1f5f9', padding: '12px 16px', borderRadius: '10px', display: 'inline-block', width: '100%', marginBottom: '10px' }}>
-                  <div><strong style={{ color: '#4f46e5' }}>Input:</strong> {inputVal}</div>
-                  <div style={{ marginTop: '4px' }}><strong style={{ color: '#059669' }}>Output:</strong> {outputVal}</div>
-                </div>
-                {explVal && (
-                  <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', lineHeight: 1.5 }}>
-                    <strong>Explanation:</strong> {explVal}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        <div style={{ marginBottom: '28px' }}>
-          <strong style={{ color: '#1e293b' }}>Constraints:</strong>
-          <ul style={{ color: '#475569', marginTop: '8px', paddingLeft: '20px', lineHeight: 1.6 }}>
-            {q.constraints.map((c, i) => <li key={i}>{c}</li>)}
-          </ul>
-        </div>
-
-        <div style={{ marginTop: '16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <label style={{ fontWeight: 700, color: '#1e293b', margin: 0 }}>Your Solution (Editor):</label>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <select
-                value={codingLanguages[q.id] || 'python'}
-                onChange={(e) => handleLanguageChange(q.id, e.target.value, q)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#334155',
-                  fontWeight: 600,
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="cpp">C++</option>
-                <option value="java">Java</option>
-                <option value="python">Python</option>
-                <option value="javascript">JavaScript (JS)</option>
-              </select>
-
-              <button
-                onClick={() => handleRunCode(q.id)}
-                disabled={evaluating[q.id]}
-                style={{
-                  background: 'linear-gradient(to right, #4f46e5, #3b82f6)',
-                  color: 'white',
-                  padding: '8px 20px',
-                  borderRadius: '8px',
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  border: 'none',
-                  cursor: evaluating[q.id] ? 'not-allowed' : 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 4px 10px rgba(79, 70, 229, 0.15)',
-                  opacity: evaluating[q.id] ? 0.7 : 1
-                }}
-              >
-                {evaluating[q.id] ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" />
-                    Running...
-                  </>
-                ) : (
-                  'Run Code'
-                )}
-              </button>
-            </div>
-          </div>
-
-          <textarea
-            value={codingAnswers[q.id] || ''}
-            onChange={(e) => handleCodingChange(q.id, e.target.value)}
-            placeholder={`// Write your ${codingLanguages[q.id] || 'python'} solution here...`}
-            style={{
-              width: '100%', height: '350px', background: '#090d16', color: '#38bdf8',
-              padding: '24px', borderRadius: '16px', fontFamily: 'monospace', fontSize: '1rem',
-              border: '1px solid #1e293b', resize: 'vertical', outline: 'none'
-            }}
-          />
-        </div>
-
-        {evalResults[q.id] && (
-          <div style={{ marginTop: '24px', background: '#f8fafc', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
-            <h4 style={{ margin: '0 0 16px 0', fontSize: '1.1rem', fontWeight: 800, color: '#1e293b' }}>
-              Execution Results
-            </h4>
-            
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
-              <span style={{
-                background: evalResults[q.id].compiled ? '#ecfdf5' : '#fef2f2',
-                color: evalResults[q.id].compiled ? '#059669' : '#dc2626',
-                padding: '6px 12px',
-                borderRadius: '20px',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                border: evalResults[q.id].compiled ? '1px solid #a7f3d0' : '1px solid #fecaca'
-              }}>
-                {evalResults[q.id].compiled ? '✓ Compiled Successfully' : '✗ Compilation Error'}
-              </span>
-              {evalResults[q.id].compiled && (
-                <span style={{
-                  background: evalResults[q.id].passed ? '#ecfdf5' : '#fff7ed',
-                  color: evalResults[q.id].passed ? '#059669' : '#ea580c',
-                  padding: '6px 12px',
-                  borderRadius: '20px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  border: evalResults[q.id].passed ? '1px solid #a7f3d0' : '1px solid #ffedd5'
-                }}>
-                  {evalResults[q.id].passed ? '✓ Sample Testcases Passed' : '⚠ Sample Testcases Failed'}
-                </span>
-              )}
-            </div>
-
-            {evalResults[q.id].output && (
-              <div style={{ marginBottom: '20px' }}>
-                <strong style={{ display: 'block', fontSize: '0.85rem', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Stdout / Compiler Output:
-                </strong>
-                <pre style={{
-                  margin: 0,
-                  background: '#0f172a',
-                  color: evalResults[q.id].compiled ? '#e2e8f0' : '#f87171',
-                  padding: '16px',
-                  borderRadius: '12px',
-                  fontFamily: 'monospace',
-                  fontSize: '0.9rem',
-                  whiteSpace: 'pre-wrap',
-                  maxHeight: '200px',
-                  overflowY: 'auto'
-                }}>
-                  {evalResults[q.id].output}
-                </pre>
-              </div>
-            )}
-
-            {evalResults[q.id].test_results && evalResults[q.id].test_results.length > 0 && (
-              <div>
-                <strong style={{ display: 'block', fontSize: '0.85rem', color: '#64748b', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Sample Test Cases:
-                </strong>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {evalResults[q.id].test_results.map((tr, idx) => (
-                    <div key={idx} style={{
-                      background: 'white',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      padding: '16px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px'
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 700, color: '#475569', fontSize: '0.9rem' }}>Case {idx + 1}</span>
-                        <span style={{
-                          color: tr.passed ? '#10b981' : '#f59e0b',
-                          fontWeight: 700,
-                          fontSize: '0.85rem'
-                        }}>
-                          {tr.passed ? 'Passed' : 'Failed'}
-                        </span>
-                      </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '0.85rem', fontFamily: 'monospace', color: '#334155' }}>
-                        <div>
-                          <span style={{ color: '#94a3b8' }}>Expected:</span> {tr.expected}
-                        </div>
-                        <div>
-                          <span style={{ color: '#94a3b8' }}>Actual:</span> {tr.actual}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <LeetCodeWorkspace
+        question={q}
+        language={currentLang}
+        code={currentCode}
+        onCodeChange={(newCode) => handleCodingChange(q.id, currentLang, newCode)}
+        onLanguageChange={(newLang) => handleLanguageChange(q.id, newLang, q)}
+        onRun={(stdin, expected, tcs) => handleRunCode(q.id, stdin, expected, tcs)}
+        onSubmit={() => handleSectionSubmit(false)}
+        isEvaluating={evaluating[q.id]}
+        isSubmitting={isSubmitting}
+        evalResult={evalResults[q.id]}
+        timeRemaining={sectionTimes[activeSection]}
+        onPrevQuestion={() => setActiveSection('coding_easy')}
+        onNextQuestion={() => setActiveSection('coding_hard')}
+        hasPrev={activeSection === 'coding_hard'}
+        hasNext={activeSection === 'coding_easy'}
+        sectionTitle={`Assessment Section: ${activeSection === 'coding_easy' ? '4/5 (Easy Coding)' : '5/5 (Hard Coding)'}`}
+        sectionsOverview={getSectionsOverview()}
+        onSectionSubmit={() => handleSectionSubmit(false)}
+        sectionSubmitLabel={activeSection === 'coding_hard' ? 'Finish Assessment' : 'Submit & Next Section'}
+        fullBleed={true}
+      />
     );
   };
 
+  // Coding sections take over full screen with 0 white gaps and unified header
+  if (isCodingSection) {
+    return (
+      <div
+        id="coding-assessment-container"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          height: '100%',
+          background: '#121214',
+          zIndex: 99999,
+          overflow: 'hidden',
+          margin: 0,
+          padding: 0
+        }}
+      >
+        {renderCodingSection(activeSection === 'coding_hard')}
+        {showConfirmModal && ReactDOM.createPortal(
+          renderConfirmModal(),
+          document.body
+        )}
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '60px' }}>
-      {/* Top Fixed Navigation Bar */}
+      {/* Top Fixed Navigation Bar for MCQ sections */}
       <div style={{
-        position: 'sticky', top: 0, zIndex: 100, background: 'white', padding: '16px 32px',
+        position: 'sticky', top: 0, zIndex: 100, background: 'white', padding: '14px 28px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)', borderBottom: '1px solid #f1f5f9'
       }}>
-        <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#1e293b', letterSpacing: '-0.02em' }}>
-          AI Assessment Panel
+        <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#1e293b', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ color: '#10b981' }}>⚡</span>
+          <span>AI Assessment Panel</span>
         </div>
         
         {/* Section Timer Display */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fef2f2', color: '#dc2626', padding: '8px 20px', borderRadius: '999px', fontWeight: 800, border: '1px solid #fee2e2' }}>
-          <Clock className="size-5" />
-          <span>{getSectionLabel(activeSection)} Time: {formatTime(sectionTimes[activeSection])}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fef2f2', color: '#dc2626', padding: '6px 18px', borderRadius: '999px', fontWeight: 800, border: '1px solid #fee2e2' }}>
+          <Clock className="size-4" />
+          <span>{getSectionLabel(activeSection)}: {formatTime(sectionTimes[activeSection])}</span>
         </div>
 
-        <button onClick={() => handleSectionSubmit(false)} style={{ background: '#10b981', color: 'white', padding: '10px 24px', borderRadius: '12px', fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)' }}>
-          {activeSection === 'coding_hard' ? 'Finish Assessment' : 'Submit & Next Section'}
+        <button onClick={() => handleSectionSubmit(false)} style={{ background: '#10b981', color: 'white', padding: '8px 22px', borderRadius: '10px', fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)' }}>
+          Submit & Next Section
         </button>
       </div>
 
       <div style={{ display: 'flex', maxWidth: '1400px', margin: '0 auto', padding: '40px 30px', gap: '30px' }}>
-        
         {/* Sidebar - Shows sections progress */}
         <div style={{ width: '280px', flexShrink: 0 }}>
           <div style={{ position: 'sticky', top: '100px', background: 'white', borderRadius: '24px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', border: '1px solid #f1f5f9' }}>
@@ -815,96 +897,19 @@ const MockTest = () => {
               {activeSection === 'technical' && '60 Questions'}
               {activeSection === 'verbal' && '15 Questions'}
               {activeSection === 'aptitude' && '15 Questions'}
-              {activeSection === 'coding_easy' && '1 Coding Challenge'}
-              {activeSection === 'coding_hard' && '1 Coding Challenge'}
             </div>
           </div>
 
           {/* Render the active section question interface */}
-          {activeSection === 'coding_easy' && renderCodingSection(false)}
-          {activeSection === 'coding_hard' && renderCodingSection(true)}
           {activeSection === 'technical' && renderMCQSection('technical')}
           {activeSection === 'verbal' && renderMCQSection('verbal')}
           {activeSection === 'aptitude' && renderMCQSection('aptitude')}
-          
         </div>
       </div>
 
       {/* Section submit confirmation modal */}
       {showConfirmModal && ReactDOM.createPortal(
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 99999
-        }}>
-          <div style={{
-            background: '#ffffff',
-            borderRadius: '20px',
-            padding: '32px',
-            width: '90%',
-            maxWidth: '440px',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '18px'
-          }}>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#1e293b' }}>
-              {confirmModalData.title}
-            </h3>
-            <p style={{ margin: 0, color: '#64748b', fontSize: '0.96rem', lineHeight: 1.5 }}>
-              {confirmModalData.message}
-            </p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '8px' }}>
-              <button
-                onClick={() => setShowConfirmModal(false)}
-                style={{
-                  flex: 1,
-                  padding: '12px 20px',
-                  borderRadius: '12px',
-                  background: '#f1f5f9',
-                  color: '#64748b',
-                  fontWeight: 600,
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '0.95rem',
-                  transition: 'all 0.2s'
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (confirmModalData.onConfirm) confirmModalData.onConfirm();
-                  setShowConfirmModal(false);
-                }}
-                style={{
-                  flex: 1,
-                  padding: '12px 20px',
-                  borderRadius: '12px',
-                  fontWeight: 600,
-                  background: 'linear-gradient(to right, #4f46e5, #3b82f6)',
-                  color: '#fff',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '0.95rem',
-                  boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)',
-                  transition: 'all 0.2s'
-                }}
-              >
-                Yes, Submit
-              </button>
-            </div>
-          </div>
-        </div>,
+        renderConfirmModal(),
         document.body
       )}
     </div>

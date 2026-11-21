@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../Components/navbar.jsx';
 import Footer from '../Components/footer.jsx';
-import { Search, MapPin, Briefcase, Calendar, Upload } from 'lucide-react';
+import LoadingOverlay from '../Components/LoadingOverlay.jsx';
+import { Search, MapPin, Briefcase, Calendar, Upload, FileText, Sparkles, X, Home, Clock, DollarSign } from 'lucide-react';
 import '../css/style.css';
 
 const EMPLOYMENT_TYPES = [
@@ -235,6 +236,17 @@ const Jobs = () => {
 
   return (
     <div className="page-shell">
+      <LoadingOverlay
+        isOpen={loading}
+        variant="jobs"
+        title="Finding Best Job Matches"
+        subtitle={status.text || 'Scanning live listings across LinkedIn, Indeed & Google Jobs'}
+        steps={[
+          'Querying live job boards & recruiter feeds...',
+          'Matching roles to your skills & preferences...',
+          'Sorting & ranking top opportunities...'
+        ]}
+      />
       <Navbar />
       <main className="page" id="liveJobsPage">
 
@@ -369,9 +381,10 @@ const Jobs = () => {
                     padding: '10px 0', width: '100%', borderRadius: '10px', border: '1px dashed rgba(255,107,74,0.4)',
                     background: 'rgba(255,107,74,0.04)', fontWeight: 600, fontSize: '0.84rem', cursor: 'pointer',
                     color: '#d45a36', transition: 'all 0.2s', marginBottom: '10px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
                   }}
                 >
-                  📄 {file ? file.name : 'Upload Resume'}
+                  <FileText size={14} /> {file ? file.name : 'Upload Resume'}
                 </button>
                 {file && (
                   <button
@@ -383,9 +396,10 @@ const Jobs = () => {
                       background: 'rgba(124,214,199,0.15)', color: '#2a7a6f',
                       border: '1px solid rgba(124,214,199,0.3)', fontWeight: 700, fontSize: '0.84rem', cursor: 'pointer',
                       opacity: loading ? 0.7 : 1, marginBottom: '10px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
                     }}
                   >
-                    ✨ Extract & Search
+                    <Sparkles size={14} /> Extract & Search
                   </button>
                 )}
                 
@@ -395,7 +409,7 @@ const Jobs = () => {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
                       {skillTags.map((skill, idx) => (
                         <span key={idx} style={pillStyle} onClick={() => removeSkill(skill)} title="Click to remove">
-                          {skill} <span style={{ opacity: 0.5, fontSize: '0.7rem' }}>✕</span>
+                          {skill} <X size={11} style={{ opacity: 0.6 }} />
                         </span>
                       ))}
                     </div>
@@ -475,7 +489,9 @@ const Jobs = () => {
             {/* Empty State */}
             {!searched && !loading && (
               <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)', background: 'rgba(255,255,255,0.4)', borderRadius: '20px', border: '1px dashed rgba(24,35,38,0.1)' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '14px', opacity: 0.5 }}>💼</div>
+                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(217, 119, 87, 0.12)', display: 'grid', placeItems: 'center', margin: '0 auto 14px', color: '#C05D3C' }}>
+                  <Briefcase size={28} />
+                </div>
                 <h3 style={{ fontSize: '1.2rem', color: 'var(--text)', margin: '0 0 8px' }}>Ready to find your next role?</h3>
                 <p style={{ margin: 0 }}>Use the filters on the left to start searching.</p>
               </div>
@@ -519,8 +535,8 @@ const Jobs = () => {
                       {/* Meta tags */}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                         {job.location && (
-                          <span style={{ padding: '4px 10px', borderRadius: '8px', background: 'rgba(24,35,38,0.04)', fontSize: '0.76rem', fontWeight: 600, color: 'var(--muted)' }}>
-                            📍 {job.location}
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '8px', background: 'rgba(24,35,38,0.04)', fontSize: '0.76rem', fontWeight: 600, color: 'var(--muted)' }}>
+                            <MapPin size={11} /> {job.location}
                           </span>
                         )}
                         {job.employment_type && (
@@ -529,21 +545,21 @@ const Jobs = () => {
                           </span>
                         )}
                         {job.is_remote && (
-                          <span style={{ padding: '4px 10px', borderRadius: '8px', background: 'rgba(59,130,246,0.08)', fontSize: '0.76rem', fontWeight: 600, color: '#2563eb' }}>
-                            🏠 Remote
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '8px', background: 'rgba(59,130,246,0.08)', fontSize: '0.76rem', fontWeight: 600, color: '#2563eb' }}>
+                            <Home size={11} /> Remote
                           </span>
                         )}
                         {job.date_posted && formatDate(job.date_posted) !== '' && (
-                          <span style={{ padding: '4px 10px', borderRadius: '8px', background: 'rgba(24,35,38,0.04)', fontSize: '0.76rem', fontWeight: 600, color: 'var(--muted)' }}>
-                            🕐 {formatDate(job.date_posted)}
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '8px', background: 'rgba(24,35,38,0.04)', fontSize: '0.76rem', fontWeight: 600, color: 'var(--muted)' }}>
+                            <Clock size={11} /> {formatDate(job.date_posted)}
                           </span>
                         )}
                       </div>
 
                       {/* Salary */}
                       {formatSalary(job) && (
-                        <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 700, color: '#16a34a' }}>
-                          💰 {formatSalary(job)}
+                        <p style={{ margin: 0, fontSize: '0.88rem', fontWeight: 700, color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <DollarSign size={14} /> {formatSalary(job)}
                         </p>
                       )}
 

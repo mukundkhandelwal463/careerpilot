@@ -51,7 +51,7 @@ Powered by Google's **Gemini AI**, **scikit-learn TF-IDF similarity vectorizers*
 > CareerPilot is deployed 24/7 on AWS EC2 (`t3.small`) backed by a static AWS Elastic IP.
 
 - **Main Domain**: [https://careerpilot.website](https://careerpilot.website)
-- **Direct Static IP Access**: [http://15.252.51.16](http://15.252.51.16)
+- **Direct Static IP Access**: [http://51.21.136.193](http://51.21.136.193)
 
 ### 📍 Web Application Page Directory
 
@@ -246,7 +246,7 @@ flowchart TD
 | **AI & Machine Learning** | Google Gemini 2.5 Flash API, `scikit-learn` (TF-IDF vectorizer), `pandas`, `numpy` |
 | **Parsing & Compilers** | `pdfplumber`, `PyPDF2`, `python-docx`, `fpdf2`, LaTeX engine |
 | **Database** | SQLite (Development) / PostgreSQL (Production) |
-| **Cloud & Infrastructure** | AWS EC2 (`t3.small`, 2GB RAM, 20GB SSD), Nginx Reverse Proxy, Static Elastic IP `15.252.51.16` |
+| **Cloud & Infrastructure** | AWS EC2 (`t3.small`, 2GB RAM, 20GB SSD), Nginx Reverse Proxy, Static Elastic IP `51.21.136.193` |
 
 ---
 
@@ -293,7 +293,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 CareerPilot is deployed on **AWS Cloud** using an optimized, high-availability architecture:
 
 - **Server Instance**: AWS EC2 `t3.small` (2 GB RAM, 20 GB SSD)
-- **Static IP**: AWS Elastic IP `15.252.51.16` permanently bound
+- **Static IP**: AWS Elastic IP `51.21.136.193` permanently bound
 - **WSGI Server**: Gunicorn 3 workers × 2 threads (`--workers 3 --threads 2 --timeout 120`)
 - **Reverse Proxy**: Nginx 1.28.3 with direct static asset caching for `/assets/`
 - **Deployment Script**: [ec2-userdata.sh](file:///c:/Users/Mukund/PycharmProjects/Resume_Screener/ec2-userdata.sh)
@@ -312,7 +312,7 @@ CareerPilot uses an automated **GitHub Actions CI/CD pipeline** ([deploy.yml](fi
 ```
 
 1. **Automated Testing & Build**: Runs Django system diagnostics (`manage.py check`) and compiles the Vite React production bundle.
-2. **Zero-Downtime Deployment**: Connects via SSH to your AWS EC2 instance (`15.252.51.16`), pulls the latest code, runs database migrations, builds frontend assets, and smoothly reloads Gunicorn and Nginx.
+2. **Zero-Downtime Deployment**: Connects via SSH to your AWS EC2 instance (`51.21.136.193`), pulls the latest code, runs database migrations, builds frontend assets, and smoothly reloads Gunicorn and Nginx.
 
 ---
 

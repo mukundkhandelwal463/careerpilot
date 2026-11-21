@@ -46,7 +46,7 @@ const Result = () => {
     return (
       <div className="page-shell" style={{ background: '#f8fafc', minHeight: '100vh' }}>
         <Navbar />
-        <main className="page" id="resultPage" style={{ maxWidth: '1400px', width: '95%', margin: '0 auto', padding: '40px 20px' }}>
+        <main className="page" id="resultPage" style={{ margin: '32px auto 48px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', borderRadius: '50px', background: '#eff6ff', color: '#2563eb', fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '12px' }}>
             <Sparkles size={14} /> Analysis Complete
           </div>
@@ -88,7 +88,7 @@ const Result = () => {
   return (
     <div className="page-shell" style={{ background: '#f8fafc', minHeight: '100vh' }}>
       <Navbar />
-      <main className="page" id="resultPage" style={{ maxWidth: '1400px', width: '95%', margin: '0 auto', padding: '40px 20px' }}>
+      <main className="page" id="resultPage" style={{ margin: '32px auto 48px' }}>
         
         {/* Top Header Badge & Title */}
         <div style={{ marginBottom: '32px' }}>
