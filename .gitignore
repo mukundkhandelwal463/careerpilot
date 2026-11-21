@@ -15,8 +15,9 @@ __pycache__/
 .DS_Store
 
 # Data & Large Index files
-data/
+/data/
 *.data
+!client/src/data/
 
 # Environment & Secret files (CRITICAL SECURITY)
 .env
