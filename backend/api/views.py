@@ -2201,12 +2201,36 @@ def submit_mock_test_api(request):
         if not user:
             return JsonResponse({"success": False, "error": "User required to submit test."}, status=400)
 
+        def _check_mcq_answer(user_ans, correct_ans, options=None):
+            if not user_ans or not correct_ans:
+                return False
+            u = str(user_ans).strip().lower()
+            c = str(correct_ans).strip().lower()
+            if u == c:
+                return True
+            letters = ['a', 'b', 'c', 'd']
+            if c in letters and options and isinstance(options, list):
+                idx = letters.index(c)
+                if idx < len(options):
+                    opt_str = str(options[idx]).strip().lower()
+                    if u == opt_str or u.startswith(c + ')') or u.startswith(c + '.'):
+                        return True
+            if u in letters and options and isinstance(options, list):
+                idx = letters.index(u)
+                if idx < len(options):
+                    opt_str = str(options[idx]).strip().lower()
+                    if c == opt_str or c.startswith(u + ')') or c.startswith(u + '.'):
+                        return True
+            u_clean = re.sub(r'^[a-d][\).\s]+', '', u).strip()
+            c_clean = re.sub(r'^[a-d][\).\s]+', '', c).strip()
+            return u_clean == c_clean
+
         # 1. Technical MCQs Score (60 questions * 1.5 marks = 90 marks)
         tech_correct = 0
         tech_questions = test_data.get("technical", [])
         for q in tech_questions:
             ans = answers.get(str(q.get("id")), "")
-            if ans == q.get("answer"):
+            if _check_mcq_answer(ans, q.get("answer"), q.get("options")):
                 tech_correct += 1
         tech_score = tech_correct * 1.5
 
@@ -2215,7 +2239,7 @@ def submit_mock_test_api(request):
         verb_questions = test_data.get("verbal", [])
         for q in verb_questions:
             ans = answers.get(str(q.get("id")), "")
-            if ans == q.get("answer"):
+            if _check_mcq_answer(ans, q.get("answer"), q.get("options")):
                 verb_correct += 1
         verb_score = verb_correct * 1.0
 
@@ -2224,7 +2248,7 @@ def submit_mock_test_api(request):
         apt_questions = test_data.get("aptitude", [])
         for q in apt_questions:
             ans = answers.get(str(q.get("id")), "")
-            if ans == q.get("answer"):
+            if _check_mcq_answer(ans, q.get("answer"), q.get("options")):
                 apt_correct += 1
         apt_score = apt_correct * 1.0
 

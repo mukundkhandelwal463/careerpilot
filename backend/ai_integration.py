@@ -1782,9 +1782,11 @@ MOCK_TEST_FALLBACK_DATA = {
 }
 
 
-def generate_mock_test(difficulty):
+def generate_mock_test(difficulty="medium"):
+    import mock_test_banks
+    bank_data = mock_test_banks.get_bank_test_data(difficulty)
     if not is_valid_key():
-        return MOCK_TEST_FALLBACK_DATA
+        return bank_data
 
     def generate_section(section_name, count, req_desc, format_desc):
         prompt = f"""Generate a mock assessment section for a software engineering candidate.
@@ -1858,12 +1860,12 @@ Format the response strictly as a valid JSON array. Do not add markdown backtick
         except Exception:
             code_data = []
 
-    # Validation and merger with FALLBACK data to ensure complete test
+    # Validation and merger with difficulty bank data to ensure complete test
     # 1. Technical MCQs (verify we have 10 per subject)
     for sub in subjects:
         sub_qs = [q for q in tech_data if q.get("subject") == sub]
         if len(sub_qs) < 10:
-            fallback_qs = [q for q in MOCK_TEST_FALLBACK_DATA["technical"] if q.get("subject") == sub]
+            fallback_qs = [q for q in bank_data["technical"] if q.get("subject") == sub]
             needed = 10 - len(sub_qs)
             for i in range(needed):
                 if i < len(fallback_qs):
@@ -1876,7 +1878,7 @@ Format the response strictly as a valid JSON array. Do not add markdown backtick
         if not isinstance(verb_data, list):
             verb_data = []
         needed = 15 - len(verb_data)
-        fallback_qs = MOCK_TEST_FALLBACK_DATA["verbal"]
+        fallback_qs = bank_data["verbal"]
         for i in range(needed):
             if i < len(fallback_qs):
                 fq = fallback_qs[i].copy()
@@ -1888,16 +1890,15 @@ Format the response strictly as a valid JSON array. Do not add markdown backtick
         if not isinstance(apt_data, list):
             apt_data = []
         needed = 15 - len(apt_data)
-        fallback_qs = MOCK_TEST_FALLBACK_DATA["aptitude"]
+        fallback_qs = bank_data["aptitude"]
         for i in range(needed):
             if i < len(fallback_qs):
                 fq = fallback_qs[i].copy()
                 fq["id"] = f"apt_fallback_{i}"
                 apt_data.append(fq)
 
-    # 4. Coding Questions (verify we have 2)
-    if not isinstance(code_data, list) or len(code_data) < 2:
-        code_data = MOCK_TEST_FALLBACK_DATA["coding"]
+    # 4. Coding Questions: Always use verified, difficulty-specific curated coding challenges with Judge0 runners
+    code_data = bank_data["coding"]
 
     return {
         "technical": tech_data,
