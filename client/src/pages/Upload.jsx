@@ -12,7 +12,6 @@ import {
   Lock,
   Check,
   Download,
-  UploadCloud,
   Clock,
   Trash2,
   X,
@@ -23,10 +22,11 @@ import {
   Tag,
   Plus,
   Target,
-  Sparkles,
   Layers,
-  Search,
-  CheckCheck
+  CheckCheck,
+  ShieldCheck,
+  Briefcase,
+  Award
 } from 'lucide-react';
 import '../css/style.css';
 
@@ -53,6 +53,13 @@ const DOMAIN_PRESETS = [
   }
 ];
 
+const SENIORITY_LEVELS = [
+  { label: 'Entry Level', range: '0-2 yrs' },
+  { label: 'Mid-Level', range: '3-5 yrs' },
+  { label: 'Senior', range: '5-8 yrs' },
+  { label: 'Lead / Staff', range: '8+ yrs' }
+];
+
 const SAMPLE_TECH_JD = `Role: Senior Software Engineer (Full Stack / Backend)
 
 Responsibilities:
@@ -75,6 +82,7 @@ const Upload = () => {
   const [jdFile, setJdFile] = useState(null);
   const [jdMode, setJdMode] = useState('paste'); // 'paste' or 'file'
   const [streamCategory, setStreamCategory] = useState('');
+  const [seniority, setSeniority] = useState('Mid-Level');
   const [jobDescription, setJobDescription] = useState('');
   
   // Custom Keywords testing state
@@ -286,8 +294,11 @@ const Upload = () => {
       formData.append("resume", file);
     }
     
-    // Append custom keywords to job description text for direct ATS keyword matching
+    // Append seniority level and custom keywords to job description text for direct ATS keyword matching
     let fullJdPayload = jobDescription.trim();
+    if (seniority) {
+      fullJdPayload = `Target Seniority Level: ${seniority}\n` + fullJdPayload;
+    }
     if (customKeywords.length > 0) {
       const keywordBlock = `\n\nTarget Skills & Core Keywords:\n${customKeywords.join(', ')}`;
       fullJdPayload = fullJdPayload ? `${fullJdPayload}\n${keywordBlock}` : keywordBlock;
@@ -571,237 +582,362 @@ const Upload = () => {
                 background: 'var(--surface)',
                 border: '1px solid rgba(24, 35, 38, 0.08)',
                 borderRadius: '24px',
-                padding: '32px 36px',
+                padding: '28px 32px',
                 boxShadow: 'var(--shadow)'
               }}>
                 <form id="analyzeForm" onSubmit={handleSubmit}>
                   
-                  {/* Step 1: Upload Resume Box */}
-                  <div style={{ marginBottom: '26px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <label style={{ fontSize: '0.94rem', fontWeight: 700, color: 'var(--text)' }}>
-                        Resume Document
-                      </label>
-                      <span style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
-                        PDF, DOCX, TXT (Max 10 MB)
-                      </span>
-                    </div>
-
-                    {!file ? (
-                      <div 
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        onClick={() => document.getElementById('resumeFile').click()}
-                        style={{
-                          border: dragover ? '2px dashed var(--accent)' : '2px dashed rgba(201, 100, 66, 0.4)',
-                          borderRadius: '18px',
-                          padding: '38px 24px',
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                          background: dragover ? 'rgba(201, 100, 66, 0.04)' : '#faf9f5',
-                          transition: 'all 0.15s ease',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <div style={{
-                          marginBottom: '10px',
-                          color: 'var(--accent)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <FileUp size={38} />
+                  {/* Step 1: Upload Resume Box + Companion ATS Standards Card (Side by Side) */}
+                  <div style={{ marginBottom: '22px' }}>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                      gap: '16px',
+                      alignItems: 'stretch'
+                    }}>
+                      
+                      {/* Left: Compact CV Upload Zone */}
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <label style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text)' }}>
+                            Resume Document
+                          </label>
+                          <span style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>
+                            PDF, DOCX, TXT
+                          </span>
                         </div>
 
-                        <div style={{ fontSize: '0.98rem', color: 'var(--text)', marginBottom: '4px' }}>
-                          Drag & drop your resume file here, or <strong style={{ color: 'var(--accent)' }}>click to browse</strong>
-                        </div>
-
-                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--muted)' }}>
-                          Single or multi-page documents supported
-                        </p>
-                      </div>
-                    ) : (
-                      /* Attached File Banner */
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '16px 20px',
-                        background: '#faf9f5',
-                        border: '1.5px solid rgba(201, 100, 66, 0.3)',
-                        borderRadius: '16px'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                          <div style={{
-                            width: '44px',
-                            height: '44px',
-                            borderRadius: '12px',
-                            background: 'rgba(201, 100, 66, 0.12)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'var(--accent)'
-                          }}>
-                            <FileCheck2 size={24} />
-                          </div>
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <strong style={{ fontSize: '0.96rem', color: 'var(--text)' }}>{file.name}</strong>
-                              <span style={{
-                                padding: '2px 8px',
-                                borderRadius: '999px',
-                                background: 'rgba(94, 163, 151, 0.15)',
-                                color: 'var(--teal)',
-                                fontSize: '0.72rem',
-                                fontWeight: 700
-                              }}>
-                                Ready for ATS Scan
-                              </span>
-                            </div>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
-                              {formatFileSize(file.size)}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <button
-                            type="button"
+                        {!file ? (
+                          <div 
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
                             onClick={() => document.getElementById('resumeFile').click()}
                             style={{
-                              padding: '7px 14px',
-                              background: '#ffffff',
-                              border: '1px solid rgba(24, 35, 38, 0.15)',
-                              borderRadius: '10px',
-                              fontSize: '0.82rem',
-                              fontWeight: 600,
-                              color: 'var(--text)',
-                              cursor: 'pointer'
+                              border: dragover ? '2px dashed var(--accent)' : '2px dashed rgba(201, 100, 66, 0.4)',
+                              borderRadius: '16px',
+                              padding: '24px 18px',
+                              textAlign: 'center',
+                              cursor: 'pointer',
+                              background: dragover ? 'rgba(201, 100, 66, 0.04)' : '#faf9f5',
+                              transition: 'all 0.15s ease',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flex: 1,
+                              minHeight: '145px',
+                              boxSizing: 'border-box'
                             }}
                           >
-                            Replace File
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setFile(null)}
-                            title="Remove resume"
-                            style={{
-                              padding: '7px',
-                              background: '#fee2e2',
-                              border: 'none',
-                              borderRadius: '10px',
-                              color: '#dc2626',
-                              cursor: 'pointer',
+                            <div style={{
+                              marginBottom: '8px',
+                              color: 'var(--accent)',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center'
-                            }}
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                            }}>
+                              <FileUp size={30} />
+                            </div>
+
+                            <div style={{ fontSize: '0.92rem', color: 'var(--text)', marginBottom: '3px' }}>
+                              Drop resume file here, or <strong style={{ color: 'var(--accent)' }}>click to browse</strong>
+                            </div>
+
+                            <p style={{ margin: 0, fontSize: '0.76rem', color: 'var(--muted)' }}>
+                              Max 10 MB · Multi-page supported
+                            </p>
+                          </div>
+                        ) : (
+                          /* Attached File Banner */
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '16px 18px',
+                            background: '#faf9f5',
+                            border: '1.5px solid rgba(201, 100, 66, 0.3)',
+                            borderRadius: '16px',
+                            flex: 1,
+                            minHeight: '145px',
+                            boxSizing: 'border-box'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '10px',
+                                background: 'rgba(201, 100, 66, 0.12)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'var(--accent)'
+                              }}>
+                                <FileCheck2 size={22} />
+                              </div>
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <strong style={{ fontSize: '0.92rem', color: 'var(--text)' }}>{file.name}</strong>
+                                  <span style={{
+                                    padding: '2px 7px',
+                                    borderRadius: '999px',
+                                    background: 'rgba(94, 163, 151, 0.15)',
+                                    color: 'var(--teal)',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 700
+                                  }}>
+                                    Ready
+                                  </span>
+                                </div>
+                                <span style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
+                                  {formatFileSize(file.size)}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <button
+                                type="button"
+                                onClick={() => document.getElementById('resumeFile').click()}
+                                style={{
+                                  padding: '6px 12px',
+                                  background: '#ffffff',
+                                  border: '1px solid rgba(24, 35, 38, 0.15)',
+                                  borderRadius: '8px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 600,
+                                  color: 'var(--text)',
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Replace
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setFile(null)}
+                                title="Remove resume"
+                                style={{
+                                  padding: '6px',
+                                  background: '#fee2e2',
+                                  border: 'none',
+                                  borderRadius: '8px',
+                                  color: '#dc2626',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        <input 
+                          type="file" 
+                          id="resumeFile" 
+                          accept=".pdf,.docx,.txt" 
+                          style={{ display: 'none' }}
+                          onChange={handleFileChange}
+                        />
+                      </div>
+
+                      {/* Right: Companion ATS Pre-Flight Standards Card */}
+                      <div style={{
+                        background: '#faf9f5',
+                        border: '1px solid rgba(24, 35, 38, 0.08)',
+                        borderRadius: '16px',
+                        padding: '16px 18px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        minHeight: '145px',
+                        boxSizing: 'border-box'
+                      }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                            <ShieldCheck size={16} color="var(--accent)" />
+                            <strong style={{ fontSize: '0.86rem', color: 'var(--text)' }}>ATS Compatibility Checklist</strong>
+                          </div>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: 'var(--muted)' }}>
+                              <Check size={13} color="var(--teal)" />
+                              <span><strong>Selectable Text:</strong> Clean text layers (no flat scans)</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: 'var(--muted)' }}>
+                              <Check size={13} color="var(--teal)" />
+                              <span><strong>Standard Headings:</strong> Experience, Skills, Education</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: 'var(--muted)' }}>
+                              <Check size={13} color="var(--teal)" />
+                              <span><strong>Single-Column Flow:</strong> Compatible with Workday & Taleo</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '6px', borderTop: '1px solid rgba(24, 35, 38, 0.06)', paddingTop: '6px' }}>
+                          Verified parser: Greenhouse, Lever, iCIMS, SmartRecruiters compatible.
                         </div>
                       </div>
-                    )}
 
-                    <input 
-                      type="file" 
-                      id="resumeFile" 
-                      accept=".pdf,.docx,.txt" 
-                      style={{ display: 'none' }}
-                      onChange={handleFileChange}
-                    />
-                  </div>
-
-                  {/* Step 2: Category / Target Role + Preset Chips */}
-                  <div style={{ marginBottom: '22px' }}>
-                    <label 
-                      htmlFor="streamCategory" 
-                      style={{ 
-                        display: 'block', 
-                        fontSize: '0.92rem', 
-                        fontWeight: 600, 
-                        color: 'var(--text)', 
-                        marginBottom: '8px' 
-                      }}
-                    >
-                      Target Role / Job Category
-                    </label>
-                    <input 
-                      id="streamCategory" 
-                      type="text" 
-                      value={streamCategory}
-                      onChange={(e) => setStreamCategory(e.target.value)}
-                      placeholder="e.g. Software Engineering, Data Science, Product Management, DevOps" 
-                      style={{
-                        width: '100%',
-                        padding: '11px 16px',
-                        background: '#ffffff',
-                        border: '1px solid rgba(24, 35, 38, 0.14)',
-                        borderRadius: '12px',
-                        fontSize: '0.9rem',
-                        color: 'var(--text)',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-
-                    {/* Quick Domain Presets */}
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.74rem', color: 'var(--muted)', fontWeight: 600 }}>Quick presets:</span>
-                      {DOMAIN_PRESETS.map((preset, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => handleSelectDomain(preset)}
-                          style={{
-                            padding: '3px 10px',
-                            borderRadius: '999px',
-                            border: '1px solid',
-                            borderColor: streamCategory === preset.name ? 'var(--accent)' : 'rgba(24, 35, 38, 0.12)',
-                            background: streamCategory === preset.name ? 'rgba(201, 100, 66, 0.08)' : '#ffffff',
-                            color: streamCategory === preset.name ? 'var(--accent)' : 'var(--text)',
-                            fontSize: '0.74rem',
-                            fontWeight: 600,
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {preset.name}
-                        </button>
-                      ))}
                     </div>
                   </div>
 
-                  {/* Step 3: Interactive Keyword Tester (Requested by user) */}
+                  {/* Step 2: Target Role + Target Seniority Level (Side by Side) */}
+                  <div style={{ marginBottom: '22px' }}>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                      gap: '16px',
+                      alignItems: 'flex-start'
+                    }}>
+                      
+                      {/* Left: Target Role / Job Category */}
+                      <div>
+                        <label 
+                          htmlFor="streamCategory" 
+                          style={{ 
+                            display: 'block', 
+                            fontSize: '0.9rem', 
+                            fontWeight: 600, 
+                            color: 'var(--text)', 
+                            marginBottom: '6px' 
+                          }}
+                        >
+                          Target Role / Job Category
+                        </label>
+                        <input 
+                          id="streamCategory" 
+                          type="text" 
+                          value={streamCategory}
+                          onChange={(e) => setStreamCategory(e.target.value)}
+                          placeholder="e.g. Software Engineer, Full Stack, Data Scientist" 
+                          style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            background: '#ffffff',
+                            border: '1px solid rgba(24, 35, 38, 0.14)',
+                            borderRadius: '10px',
+                            fontSize: '0.88rem',
+                            color: 'var(--text)',
+                            outline: 'none',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+
+                        {/* Quick Domain Presets */}
+                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '7px', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--muted)', fontWeight: 600 }}>Presets:</span>
+                          {DOMAIN_PRESETS.map((preset, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => handleSelectDomain(preset)}
+                              style={{
+                                padding: '2px 8px',
+                                borderRadius: '999px',
+                                border: '1px solid',
+                                borderColor: streamCategory === preset.name ? 'var(--accent)' : 'rgba(24, 35, 38, 0.12)',
+                                background: streamCategory === preset.name ? 'rgba(201, 100, 66, 0.08)' : '#ffffff',
+                                color: streamCategory === preset.name ? 'var(--accent)' : 'var(--text)',
+                                fontSize: '0.72rem',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {preset.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Right: Target Seniority / Experience Level */}
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <label style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)' }}>
+                            Target Seniority / Experience Level
+                          </label>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>
+                            Calibrates ATS depth
+                          </span>
+                        </div>
+
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(4, 1fr)',
+                          gap: '6px'
+                        }}>
+                          {SENIORITY_LEVELS.map((level, idx) => {
+                            const isSelected = seniority === level.label;
+                            return (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => setSeniority(level.label)}
+                                style={{
+                                  padding: '8px 4px',
+                                  borderRadius: '10px',
+                                  border: '1px solid',
+                                  borderColor: isSelected ? 'var(--surface-dark)' : 'rgba(24, 35, 38, 0.12)',
+                                  background: isSelected ? 'var(--surface-dark)' : '#ffffff',
+                                  color: isSelected ? '#ffffff' : 'var(--text)',
+                                  textAlign: 'center',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <strong style={{ display: 'block', fontSize: '0.76rem', lineHeight: 1.2 }}>
+                                  {level.label}
+                                </strong>
+                                <span style={{
+                                  fontSize: '0.68rem',
+                                  color: isSelected ? '#d1d5db' : 'var(--muted)',
+                                  display: 'block',
+                                  marginTop: '2px'
+                                }}>
+                                  {level.range}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '7px' }}>
+                          Tunes ATS scoring expectations for impact verbs, leadership scope, and project scale.
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Step 3: Interactive Keyword Tester */}
                   <div style={{
-                    marginBottom: '24px',
-                    padding: '18px 20px',
+                    marginBottom: '22px',
+                    padding: '16px 18px',
                     background: '#faf9f5',
-                    borderRadius: '16px',
+                    borderRadius: '14px',
                     border: '1px solid rgba(24, 35, 38, 0.08)'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-                        <Tag size={16} color="var(--accent)" />
-                        <label style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)' }}>
+                        <Tag size={15} color="var(--accent)" />
+                        <label style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text)' }}>
                           Target Keywords & Core Skills to Test
                         </label>
                       </div>
-                      <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>
                         Optional · Press Enter or click + to add
                       </span>
                     </div>
 
-                    <p style={{ margin: '0 0 12px', fontSize: '0.78rem', color: 'var(--muted)', lineHeight: 1.4 }}>
+                    <p style={{ margin: '0 0 10px', fontSize: '0.76rem', color: 'var(--muted)', lineHeight: 1.4 }}>
                       Specify the core competencies, technologies, or domain terms you want your resume explicitly benchmarked against.
                     </p>
 
                     {/* Keyword Input Box */}
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                       <input 
                         type="text"
                         value={keywordInput}
@@ -810,11 +946,11 @@ const Upload = () => {
                         placeholder="Add a target skill (e.g. React, Python, AWS, System Design, SQL)..."
                         style={{
                           flex: 1,
-                          padding: '9px 14px',
+                          padding: '8px 12px',
                           background: '#ffffff',
                           border: '1px solid rgba(24, 35, 38, 0.14)',
-                          borderRadius: '10px',
-                          fontSize: '0.86rem',
+                          borderRadius: '8px',
+                          fontSize: '0.84rem',
                           color: 'var(--text)',
                           outline: 'none',
                           boxSizing: 'border-box'
@@ -825,12 +961,12 @@ const Upload = () => {
                         onClick={handleAddKeyword}
                         disabled={!keywordInput.trim()}
                         style={{
-                          padding: '9px 16px',
-                          borderRadius: '10px',
+                          padding: '8px 14px',
+                          borderRadius: '8px',
                           border: 'none',
                           background: keywordInput.trim() ? 'var(--surface-dark)' : 'rgba(24, 35, 38, 0.12)',
                           color: '#ffffff',
-                          fontSize: '0.82rem',
+                          fontSize: '0.8rem',
                           fontWeight: 700,
                           cursor: keywordInput.trim() ? 'pointer' : 'default',
                           display: 'flex',
@@ -838,25 +974,25 @@ const Upload = () => {
                           gap: '4px'
                         }}
                       >
-                        <Plus size={15} /> Add
+                        <Plus size={14} /> Add
                       </button>
                     </div>
 
                     {/* Active Selected Keywords */}
                     {customKeywords.length > 0 && (
-                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '8px' }}>
                         {customKeywords.map((kw, i) => (
                           <span
                             key={i}
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '6px',
-                              padding: '4px 10px',
+                              gap: '5px',
+                              padding: '3px 9px',
                               background: '#ffffff',
                               border: '1px solid rgba(201, 100, 66, 0.35)',
                               borderRadius: '999px',
-                              fontSize: '0.78rem',
+                              fontSize: '0.76rem',
                               fontWeight: 700,
                               color: 'var(--accent)'
                             }}
@@ -883,9 +1019,9 @@ const Upload = () => {
                     )}
 
                     {/* Suggested Keywords to add */}
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.74rem', color: 'var(--muted)', fontWeight: 600 }}>Suggested:</span>
-                      {suggestedKeywords.slice(0, 6).map((sk, i) => {
+                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--muted)', fontWeight: 600 }}>Suggested:</span>
+                      {suggestedKeywords.slice(0, 7).map((sk, i) => {
                         const isAdded = customKeywords.includes(sk);
                         return (
                           <button
@@ -896,12 +1032,12 @@ const Upload = () => {
                             }}
                             disabled={isAdded}
                             style={{
-                              padding: '2px 8px',
+                              padding: '2px 7px',
                               borderRadius: '6px',
                               border: '1px solid rgba(24, 35, 38, 0.1)',
                               background: isAdded ? 'rgba(24, 35, 38, 0.04)' : '#ffffff',
                               color: isAdded ? 'var(--muted)' : 'var(--text)',
-                              fontSize: '0.72rem',
+                              fontSize: '0.7rem',
                               fontWeight: 600,
                               cursor: isAdded ? 'default' : 'pointer'
                             }}
@@ -914,12 +1050,12 @@ const Upload = () => {
                   </div>
 
                   {/* Step 4: Target Job Description */}
-                  <div style={{ marginBottom: '28px' }}>
+                  <div style={{ marginBottom: '26px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                       <label 
                         htmlFor="jobDescription" 
                         style={{ 
-                          fontSize: '0.92rem', 
+                          fontSize: '0.9rem', 
                           fontWeight: 600, 
                           color: 'var(--text)' 
                         }}
@@ -938,7 +1074,7 @@ const Upload = () => {
                             border: 'none',
                             background: jdMode === 'paste' ? '#ffffff' : 'transparent',
                             color: jdMode === 'paste' ? 'var(--text)' : 'var(--muted)',
-                            fontSize: '0.78rem',
+                            fontSize: '0.76rem',
                             fontWeight: 600,
                             cursor: 'pointer',
                             boxShadow: jdMode === 'paste' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
@@ -955,7 +1091,7 @@ const Upload = () => {
                             border: 'none',
                             background: jdMode === 'file' ? '#ffffff' : 'transparent',
                             color: jdMode === 'file' ? 'var(--text)' : 'var(--muted)',
-                            fontSize: '0.78rem',
+                            fontSize: '0.76rem',
                             fontWeight: 600,
                             cursor: 'pointer',
                             boxShadow: jdMode === 'file' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
@@ -975,12 +1111,12 @@ const Upload = () => {
                           placeholder="Paste the full job description here (responsibilities, required skills, tools, qualifications) for a detailed ATS keyword match..." 
                           style={{
                             width: '100%',
-                            minHeight: '140px',
-                            padding: '12px 16px',
+                            minHeight: '130px',
+                            padding: '12px 14px',
                             background: '#ffffff',
                             border: '1px solid rgba(24, 35, 38, 0.14)',
                             borderRadius: '12px',
-                            fontSize: '0.88rem',
+                            fontSize: '0.86rem',
                             color: 'var(--text)',
                             outline: 'none',
                             boxSizing: 'border-box',
@@ -990,9 +1126,9 @@ const Upload = () => {
                           }}
                         />
 
-                        {/* Textarea Bottom Tools: Word Count & Sample Auto-fill */}
+                        {/* Textarea Bottom Tools */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-                          <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>
                             {jobDescription.trim() ? `${jobDescription.trim().split(/\s+/).length} words entered` : 'Include required skills and qualifications for highest accuracy.'}
                           </span>
                           <button
@@ -1000,6 +1136,7 @@ const Upload = () => {
                             onClick={() => {
                               setJobDescription(SAMPLE_TECH_JD);
                               setStreamCategory('Software Engineering');
+                              setSeniority('Senior');
                               if (!customKeywords.includes('Python')) setCustomKeywords(['Python', 'AWS', 'Docker', 'React', 'PostgreSQL']);
                             }}
                             style={{
@@ -1011,7 +1148,7 @@ const Upload = () => {
                               background: '#ffffff',
                               border: '1px solid rgba(201, 100, 66, 0.3)',
                               color: 'var(--accent)',
-                              fontSize: '0.74rem',
+                              fontSize: '0.72rem',
                               fontWeight: 700,
                               cursor: 'pointer'
                             }}
@@ -1037,8 +1174,8 @@ const Upload = () => {
                             onClick={() => document.getElementById('jdFile').click()}
                             style={{
                               border: jdDragover ? '2px dashed var(--accent)' : '2px dashed rgba(24, 35, 38, 0.18)',
-                              borderRadius: '14px',
-                              padding: '28px 20px',
+                              borderRadius: '12px',
+                              padding: '24px 18px',
                               textAlign: 'center',
                               cursor: 'pointer',
                               background: '#faf9f5',
@@ -1048,39 +1185,39 @@ const Upload = () => {
                               justifyContent: 'center'
                             }}
                           >
-                            <FileText size={26} style={{ color: 'var(--accent)', marginBottom: '6px' }} />
-                            <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)', marginBottom: '4px' }}>
+                            <FileText size={24} style={{ color: 'var(--accent)', marginBottom: '5px' }} />
+                            <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text)', marginBottom: '3px' }}>
                               Drop JD document here, or <span style={{ color: 'var(--accent)', textDecoration: 'underline' }}>click to select</span>
                             </div>
-                            <span style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>Supports .pdf, .docx, .txt</span>
+                            <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>Supports .pdf, .docx, .txt</span>
                           </div>
                         ) : (
                           <div style={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            padding: '14px 18px',
+                            padding: '12px 16px',
                             background: '#faf9f5',
                             border: '1.5px solid rgba(201, 100, 66, 0.3)',
-                            borderRadius: '14px'
+                            borderRadius: '12px'
                           }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <FileCheck2 size={20} style={{ color: 'var(--accent)' }} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <FileCheck2 size={18} style={{ color: 'var(--accent)' }} />
                               <div>
-                                <strong style={{ fontSize: '0.9rem', color: 'var(--text)', display: 'block' }}>{jdFile.name}</strong>
-                                <span style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>{formatFileSize(jdFile.size)} · Job description attached</span>
+                                <strong style={{ fontSize: '0.86rem', color: 'var(--text)', display: 'block' }}>{jdFile.name}</strong>
+                                <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>{formatFileSize(jdFile.size)} · Job description attached</span>
                               </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '8px' }}>
+                            <div style={{ display: 'flex', gap: '6px' }}>
                               <button
                                 type="button"
                                 onClick={() => document.getElementById('jdFile').click()}
                                 style={{
-                                  padding: '5px 12px',
+                                  padding: '5px 10px',
                                   background: '#ffffff',
                                   border: '1px solid rgba(24, 35, 38, 0.15)',
-                                  borderRadius: '8px',
-                                  fontSize: '0.78rem',
+                                  borderRadius: '6px',
+                                  fontSize: '0.76rem',
                                   fontWeight: 600,
                                   cursor: 'pointer'
                                 }}
@@ -1094,12 +1231,12 @@ const Upload = () => {
                                   padding: '5px',
                                   background: '#fee2e2',
                                   border: 'none',
-                                  borderRadius: '8px',
+                                  borderRadius: '6px',
                                   color: '#dc2626',
                                   cursor: 'pointer'
                                 }}
                               >
-                                <Trash2 size={15} />
+                                <Trash2 size={14} />
                               </button>
                             </div>
                           </div>
@@ -1121,12 +1258,12 @@ const Upload = () => {
                     disabled={loading}
                     style={{
                       width: '100%',
-                      padding: '15px 28px',
-                      borderRadius: '14px',
+                      padding: '14px 28px',
+                      borderRadius: '12px',
                       background: 'var(--accent)',
                       border: 'none',
                       color: '#ffffff',
-                      fontSize: '1rem',
+                      fontSize: '0.98rem',
                       fontWeight: 700,
                       cursor: loading ? 'not-allowed' : 'pointer',
                       display: 'flex',
@@ -1144,19 +1281,19 @@ const Upload = () => {
 
                 {status.text && (
                   <div style={{
-                    marginTop: '20px',
-                    padding: '12px 18px',
-                    borderRadius: '12px',
+                    marginTop: '18px',
+                    padding: '12px 16px',
+                    borderRadius: '10px',
                     background: status.type === 'error' ? '#fef2f2' : '#f0fdf4',
                     border: status.type === 'error' ? '1px solid #fecaca' : '1px solid #bbf7d0',
                     color: status.type === 'error' ? '#991b1b' : '#166534',
-                    fontSize: '0.88rem',
+                    fontSize: '0.86rem',
                     fontWeight: 600,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px'
                   }}>
-                    {status.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+                    {status.type === 'error' ? <AlertCircle size={17} /> : <CheckCircle2 size={17} />}
                     <span>{status.text}</span>
                   </div>
                 )}
@@ -1167,63 +1304,63 @@ const Upload = () => {
                 background: 'var(--surface)',
                 border: '1px solid rgba(24, 35, 38, 0.08)',
                 borderRadius: '24px',
-                padding: '32px 36px',
+                padding: '28px 32px',
                 boxShadow: 'var(--shadow)',
                 minHeight: '380px'
               }}>
-                <div style={{ marginBottom: '24px' }}>
-                  <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text)', margin: '0 0 6px' }}>
+                <div style={{ marginBottom: '22px' }}>
+                  <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--text)', margin: '0 0 6px' }}>
                     Previous Records
                   </h2>
-                  <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--muted)' }}>
+                  <p style={{ margin: 0, fontSize: '0.86rem', color: 'var(--muted)' }}>
                     Review past resume evaluations and computed ATS match scores.
                   </p>
                 </div>
 
                 {!user ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '50px 20px', textAlign: 'center' }}>
-                    <div style={{ width: '52px', height: '52px', borderRadius: '16px', background: 'rgba(201, 100, 66, 0.12)', display: 'grid', placeItems: 'center', color: 'var(--accent)', marginBottom: '14px' }}>
-                      <Lock size={24} />
+                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(201, 100, 66, 0.12)', display: 'grid', placeItems: 'center', color: 'var(--accent)', marginBottom: '12px' }}>
+                      <Lock size={22} />
                     </div>
-                    <h3 style={{ margin: '0 0 6px', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text)' }}>Authentication Required</h3>
-                    <p style={{ margin: '0 0 20px', fontSize: '0.88rem', color: 'var(--muted)', maxWidth: '360px' }}>
+                    <h3 style={{ margin: '0 0 6px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text)' }}>Authentication Required</h3>
+                    <p style={{ margin: '0 0 18px', fontSize: '0.86rem', color: 'var(--muted)', maxWidth: '360px' }}>
                       Sign in to your account to securely store and view historical ATS resume scans.
                     </p>
                     <Link to="/login" style={{
-                      padding: '11px 26px',
-                      borderRadius: '12px',
+                      padding: '10px 24px',
+                      borderRadius: '10px',
                       background: 'var(--accent)',
                       color: 'white',
                       fontWeight: 700,
-                      fontSize: '0.88rem',
+                      fontSize: '0.86rem',
                       textDecoration: 'none'
                     }}>
                       Sign In / Create Account
                     </Link>
                   </div>
                 ) : resumesLoading ? (
-                  <div style={{ display: 'grid', placeItems: 'center', padding: '50px 0' }}>
-                    <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Loading records...</p>
+                  <div style={{ display: 'grid', placeItems: 'center', padding: '48px 0' }}>
+                    <p style={{ color: 'var(--muted)', fontSize: '0.88rem' }}>Loading records...</p>
                   </div>
                 ) : resumes.length === 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '50px 20px', textAlign: 'center' }}>
-                    <div style={{ width: '52px', height: '52px', borderRadius: '16px', background: 'rgba(24, 35, 38, 0.05)', display: 'grid', placeItems: 'center', color: 'var(--muted)', marginBottom: '14px' }}>
-                      <FileText size={24} />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 20px', textAlign: 'center' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(24, 35, 38, 0.05)', display: 'grid', placeItems: 'center', color: 'var(--muted)', marginBottom: '12px' }}>
+                      <FileText size={22} />
                     </div>
-                    <h3 style={{ margin: '0 0 6px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--text)' }}>No Resumes Screened Yet</h3>
-                    <p style={{ margin: '0 0 20px', fontSize: '0.86rem', color: 'var(--muted)', maxWidth: '360px' }}>
+                    <h3 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)' }}>No Resumes Screened Yet</h3>
+                    <p style={{ margin: '0 0 18px', fontSize: '0.84rem', color: 'var(--muted)', maxWidth: '360px' }}>
                       Once you analyze your resume against a target job description, your detailed records will appear here.
                     </p>
                     <button
                       onClick={() => setActiveTab('analyze')}
                       style={{
-                        padding: '11px 24px',
-                        borderRadius: '12px',
+                        padding: '10px 22px',
+                        borderRadius: '10px',
                         background: 'var(--surface-dark)',
                         color: 'white',
                         border: 'none',
                         fontWeight: 700,
-                        fontSize: '0.86rem',
+                        fontSize: '0.84rem',
                         cursor: 'pointer'
                       }}
                     >
@@ -1231,7 +1368,7 @@ const Upload = () => {
                     </button>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {resumes.map((resume) => {
                       const hasAts = resume.ats_score !== null && resume.ats_score !== undefined;
                       const rScore = hasAts ? Math.round(resume.ats_score) : 0;
@@ -1244,26 +1381,26 @@ const Upload = () => {
                           gridTemplateColumns: '1.8fr 1fr 1fr 2.2fr',
                           alignItems: 'center',
                           background: '#faf9f5',
-                          padding: '16px 20px',
-                          borderRadius: '16px',
+                          padding: '14px 18px',
+                          borderRadius: '14px',
                           border: '1px solid rgba(24, 35, 38, 0.06)',
-                          gap: '14px'
+                          gap: '12px'
                         }}>
                           <div>
-                            <strong style={{ display: 'block', fontSize: '0.94rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <strong style={{ display: 'block', fontSize: '0.92rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {resume.title}
                             </strong>
-                            <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>
                               Scanned on {resume.created_at ? new Date(resume.created_at).toLocaleDateString() : 'Recent'}
                             </span>
                           </div>
 
                           <div>
                             <span style={{ 
-                              fontSize: '0.78rem', 
+                              fontSize: '0.76rem', 
                               background: '#ffffff', 
-                              padding: '4px 10px', 
-                              borderRadius: '8px', 
+                              padding: '3px 9px', 
+                              borderRadius: '7px', 
                               fontWeight: 600, 
                               color: 'var(--text)',
                               border: '1px solid rgba(24, 35, 38, 0.08)',
@@ -1278,9 +1415,9 @@ const Upload = () => {
                           </div>
 
                           <div>
-                            <span style={{ fontSize: '0.72rem', color: 'var(--muted)', display: 'block', fontWeight: 600 }}>ATS Score</span>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--muted)', display: 'block', fontWeight: 600 }}>ATS Score</span>
                             <strong style={{
-                              fontSize: '1.1rem',
+                              fontSize: '1.05rem',
                               fontWeight: 800,
                               color: isGood ? '#16a34a' : isMedium ? '#d97706' : '#dc2626'
                             }}>
@@ -1288,24 +1425,24 @@ const Upload = () => {
                             </strong>
                           </div>
 
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                             <button
                               onClick={(e) => handleDownloadResume(resume, e)}
                               style={{
                                 border: '1px solid rgba(24, 35, 38, 0.15)',
                                 background: '#ffffff',
                                 color: 'var(--text)',
-                                fontSize: '0.8rem',
+                                fontSize: '0.78rem',
                                 fontWeight: 600,
                                 cursor: 'pointer',
-                                padding: '7px 12px',
-                                borderRadius: '10px',
+                                padding: '6px 10px',
+                                borderRadius: '8px',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '5px'
+                                gap: '4px'
                               }}
                             >
-                              <Download size={14} /> Resume
+                              <Download size={13} /> Resume
                             </button>
                             <button
                               onClick={(e) => handleShowReport(resume, e)}
@@ -1313,14 +1450,14 @@ const Upload = () => {
                                 border: '1px solid rgba(201, 100, 66, 0.3)',
                                 background: 'rgba(201, 100, 66, 0.08)',
                                 color: 'var(--accent)',
-                                fontSize: '0.8rem',
+                                fontSize: '0.78rem',
                                 fontWeight: 700,
                                 cursor: 'pointer',
-                                padding: '7px 14px',
-                                borderRadius: '10px',
+                                padding: '6px 12px',
+                                borderRadius: '8px',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '5px'
+                                gap: '4px'
                               }}
                             >
                               Report
@@ -1335,14 +1472,14 @@ const Upload = () => {
                                 border: 'none',
                                 background: '#fee2e2',
                                 color: '#dc2626',
-                                fontSize: '0.8rem',
+                                fontSize: '0.78rem',
                                 fontWeight: 600,
                                 cursor: 'pointer',
-                                padding: '7px 12px',
-                                borderRadius: '10px'
+                                padding: '6px 10px',
+                                borderRadius: '8px'
                               }}
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={13} />
                             </button>
                           </div>
                         </div>
@@ -1374,7 +1511,7 @@ const Upload = () => {
           <div style={{
             background: '#ffffff',
             borderRadius: '24px',
-            padding: '32px',
+            padding: '30px',
             maxWidth: '560px',
             width: '100%',
             position: 'relative',
@@ -1386,15 +1523,15 @@ const Upload = () => {
               onClick={() => setActiveReport(null)}
               style={{
                 position: 'absolute',
-                top: '20px',
-                right: '20px',
+                top: '18px',
+                right: '18px',
                 border: 'none',
                 background: 'rgba(24, 35, 38, 0.06)',
-                width: '32px',
-                height: '32px',
+                width: '30px',
+                height: '30px',
                 borderRadius: '50%',
                 cursor: 'pointer',
-                fontSize: '1.1rem',
+                fontSize: '1.05rem',
                 fontWeight: 700,
                 display: 'grid',
                 placeItems: 'center',
@@ -1404,51 +1541,51 @@ const Upload = () => {
               ×
             </button>
 
-            <h3 style={{ margin: '0 0 6px', fontSize: '1.35rem', fontWeight: 700, color: 'var(--text)' }}>Optimization Report</h3>
-            <p style={{ color: 'var(--muted)', fontSize: '0.86rem', margin: '0 0 20px' }}>
+            <h3 style={{ margin: '0 0 6px', fontSize: '1.3rem', fontWeight: 700, color: 'var(--text)' }}>Optimization Report</h3>
+            <p style={{ color: 'var(--muted)', fontSize: '0.84rem', margin: '0 0 18px' }}>
               Detailed alignment report for <strong>{activeReport.title}</strong>
             </p>
 
-            <div style={{ display: 'flex', gap: '14px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '18px' }}>
               <div style={{
                 background: '#faf9f5',
                 border: '1px solid rgba(24, 35, 38, 0.08)',
-                padding: '12px 16px',
-                borderRadius: '14px',
+                padding: '12px 14px',
+                borderRadius: '12px',
                 flex: 1
               }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>Category</span>
-                <strong style={{ fontSize: '1rem', color: 'var(--text)' }}>{activeReport.category}</strong>
+                <span style={{ fontSize: '0.7rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>Category</span>
+                <strong style={{ fontSize: '0.96rem', color: 'var(--text)' }}>{activeReport.category}</strong>
               </div>
               <div style={{
                 background: '#faf9f5',
                 border: '1px solid rgba(24, 35, 38, 0.08)',
-                padding: '12px 16px',
-                borderRadius: '14px',
+                padding: '12px 14px',
+                borderRadius: '12px',
                 flex: 1
               }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>Computed ATS Match</span>
-                <strong style={{ fontSize: '1.1rem', color: activeReport.ats_score >= 70 ? '#16a34a' : '#d97706', fontWeight: 800 }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--muted)', display: 'block', textTransform: 'uppercase', fontWeight: 700 }}>Computed ATS Match</span>
+                <strong style={{ fontSize: '1.05rem', color: activeReport.ats_score >= 70 ? '#16a34a' : '#d97706', fontWeight: 800 }}>
                   {activeReport.ats_score}%
                 </strong>
               </div>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <h4 style={{ margin: '0 0 10px', fontSize: '0.92rem', fontWeight: 700, color: 'var(--text)' }}>Missing Keywords</h4>
+            <div style={{ marginBottom: '18px' }}>
+              <h4 style={{ margin: '0 0 8px', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)' }}>Missing Keywords</h4>
               {activeReport.missing_keywords.length === 0 ? (
-                <p style={{ fontSize: '0.86rem', color: '#16a34a', margin: 0, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <Check size={16} /> No critical keywords missing.
+                <p style={{ fontSize: '0.84rem', color: '#16a34a', margin: 0, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Check size={15} /> No critical keywords missing.
                 </p>
               ) : (
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {activeReport.missing_keywords.map((kw, idx) => (
                     <span key={idx} style={{
-                      fontSize: '0.78rem',
+                      fontSize: '0.76rem',
                       background: '#fee2e2',
                       color: '#991b1b',
-                      padding: '4px 10px',
-                      borderRadius: '8px',
+                      padding: '3px 9px',
+                      borderRadius: '7px',
                       fontWeight: 600
                     }}>
                       + {kw}
@@ -1458,14 +1595,14 @@ const Upload = () => {
               )}
             </div>
 
-            <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ margin: '0 0 10px', fontSize: '0.92rem', fontWeight: 700, color: 'var(--text)' }}>Improvement Suggestions</h4>
+            <div style={{ marginBottom: '22px' }}>
+              <h4 style={{ margin: '0 0 8px', fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)' }}>Improvement Suggestions</h4>
               {activeReport.suggestions.length === 0 ? (
-                <p style={{ fontSize: '0.84rem', color: 'var(--muted)', margin: 0 }}>No critical suggestions recorded.</p>
+                <p style={{ fontSize: '0.82rem', color: 'var(--muted)', margin: 0 }}>No critical suggestions recorded.</p>
               ) : (
-                <ul style={{ paddingLeft: '18px', margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <ul style={{ paddingLeft: '16px', margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {activeReport.suggestions.map((s, idx) => (
-                    <li key={idx} style={{ fontSize: '0.84rem', color: 'var(--text)', lineHeight: 1.5 }}>
+                    <li key={idx} style={{ fontSize: '0.82rem', color: 'var(--text)', lineHeight: 1.5 }}>
                       {s}
                     </li>
                   ))}
@@ -1481,9 +1618,9 @@ const Upload = () => {
                 background: 'var(--surface-dark)',
                 color: 'white',
                 fontWeight: 700,
-                fontSize: '0.9rem',
-                padding: '12px',
-                borderRadius: '12px',
+                fontSize: '0.88rem',
+                padding: '11px',
+                borderRadius: '10px',
                 cursor: 'pointer'
               }}
             >
