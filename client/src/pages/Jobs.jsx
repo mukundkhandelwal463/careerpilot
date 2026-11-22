@@ -21,7 +21,9 @@ import {
   Filter,
   Building2,
   Zap,
-  Tag
+  Tag,
+  Award,
+  GraduationCap
 } from 'lucide-react';
 import '../css/style.css';
 
@@ -31,6 +33,14 @@ const EMPLOYMENT_TYPES = [
   { value: 'PARTTIME', label: 'Part-time' },
   { value: 'CONTRACTOR', label: 'Contract' },
   { value: 'INTERN', label: 'Internship' },
+];
+
+const EXPERIENCE_OPTIONS = [
+  { value: '', label: 'All Experience Levels' },
+  { value: 'fresher', label: 'Fresher / Entry Level (0-1 yr)' },
+  { value: '1-3', label: 'Junior (1-3 yrs)' },
+  { value: '3-5', label: 'Mid-Level (3-5 yrs)' },
+  { value: '5+', label: 'Senior (5+ yrs)' },
 ];
 
 const DATE_POSTED_OPTIONS = [
@@ -147,6 +157,7 @@ const Jobs = () => {
   const [query, setQuery] = useState('');
   const [location, setLocation] = useState('');
   const [employmentType, setEmploymentType] = useState('');
+  const [experienceLevel, setExperienceLevel] = useState('');
   const [datePosted, setDatePosted] = useState('all');
   const [jobSource, setJobSource] = useState('all');
   const [remoteOnly, setRemoteOnly] = useState(false);
@@ -240,7 +251,7 @@ const Jobs = () => {
     }
   };
 
-  const executeSearch = async (searchQueryText, pageOverride = 1) => {
+  const executeSearch = async (searchQueryText, pageOverride = 1, expOverride = experienceLevel) => {
     const q = searchQueryText || query.trim() || (skillTags.length > 0 ? skillTags.slice(0, 8).join(", ") : '');
 
     if (!q) {
@@ -265,6 +276,7 @@ const Jobs = () => {
     formData.append("query", q);
     formData.append("location", location);
     formData.append("employment_type", employmentType);
+    formData.append("experience_level", expOverride);
     formData.append("date_posted", datePosted);
     formData.append("source", jobSource);
     formData.append("remote_only", remoteOnly ? "true" : "false");
@@ -296,20 +308,20 @@ const Jobs = () => {
 
   const handleSearch = (e, pageOverride) => {
     if (e) e.preventDefault();
-    executeSearch(query, pageOverride);
+    executeSearch(query, pageOverride, experienceLevel);
   };
 
   const handleTrackClick = (trackName) => {
-    executeSearch(trackName, 1);
+    executeSearch(trackName, 1, experienceLevel);
   };
 
   const handlePopularSkillClick = (skill) => {
     if (!skillTags.includes(skill)) {
       const updated = [...skillTags, skill];
       setSkillTags(updated);
-      executeSearch(updated.join(", "), 1);
+      executeSearch(updated.join(", "), 1, experienceLevel);
     } else {
-      executeSearch(skill, 1);
+      executeSearch(skill, 1, experienceLevel);
     }
   };
 
@@ -407,7 +419,7 @@ const Jobs = () => {
               Find Jobs by Skills & Filters
             </h1>
             <p style={{ margin: 0, color: 'var(--muted)', lineHeight: 1.5, maxWidth: '65ch', fontSize: '0.96rem' }}>
-              Search for your dream job. Upload your resume to auto-extract skills, browse trending career tracks, or explore live verified tech opportunities.
+              Search for your dream job. Filter by experience (Fresher to Senior), upload your resume to auto-extract skills, or explore live verified postings.
             </p>
           </div>
 
@@ -486,13 +498,15 @@ const Jobs = () => {
                 {/* Filters */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <h3 style={{ fontSize: '0.94rem', fontWeight: 700, margin: 0, color: 'var(--text)' }}>Filters</h3>
-                  {searched && (
+                  {(searched || location || employmentType || experienceLevel || remoteOnly) && (
                     <button
                       type="button"
                       onClick={() => {
                         setQuery('');
                         setLocation('');
                         setEmploymentType('');
+                        setExperienceLevel('');
+                        setDatePosted('all');
                         setRemoteOnly(false);
                         setSearched(false);
                         setJobsList([]);
@@ -515,18 +529,37 @@ const Jobs = () => {
                       style={selectStyle}
                     />
                   </div>
+
+                  {/* Experience Level Filter (Requested by user) */}
+                  <div>
+                    <label style={{ fontSize: '0.76rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', marginBottom: '5px', display: 'block' }}>
+                      Experience Level
+                    </label>
+                    <select 
+                      value={experienceLevel} 
+                      onChange={(e) => setExperienceLevel(e.target.value)} 
+                      style={selectStyle}
+                    >
+                      {EXPERIENCE_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div>
                     <label style={{ fontSize: '0.76rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', marginBottom: '5px', display: 'block' }}>Employment Type</label>
                     <select value={employmentType} onChange={(e) => setEmploymentType(e.target.value)} style={selectStyle}>
                       {EMPLOYMENT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
                   </div>
+
                   <div>
                     <label style={{ fontSize: '0.76rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--muted)', marginBottom: '5px', display: 'block' }}>Date Posted</label>
                     <select value={datePosted} onChange={(e) => setDatePosted(e.target.value)} style={selectStyle}>
                       {DATE_POSTED_OPTIONS.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
                     </select>
                   </div>
+
                   <label style={{
                     display: 'flex', alignItems: 'center', gap: '10px', marginTop: '2px',
                     padding: '9px 12px', borderRadius: '10px', border: '1px solid rgba(24,35,38,0.1)',
@@ -639,6 +672,7 @@ const Jobs = () => {
                 <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--muted)' }}>
                   <strong style={{ color: 'var(--text)' }}>{jobsList.length}</strong> jobs found
                   {queryUsed && <> for "<strong style={{ color: 'var(--accent)' }}>{queryUsed}</strong>"</>}
+                  {experienceLevel && <> • Level: <strong style={{ color: 'var(--text)' }}>{EXPERIENCE_OPTIONS.find(o => o.value === experienceLevel)?.label}</strong></>}
                   {' '} • Page {page}
                 </p>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -671,7 +705,7 @@ const Jobs = () => {
 
             {/* ── RICH DISCOVERY STATE (When Not Searched & Not Loading) ── */}
             {!searched && !loading && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 
                 {/* 1. Trending Career Tracks (1-Click Instant Search) */}
                 <div style={{
@@ -742,16 +776,64 @@ const Jobs = () => {
                   </div>
                 </div>
 
-                {/* 2. Popular Tech Skills Filter Cloud */}
+                {/* 2. Interactive Experience Level Quick Filter (Requested by user) */}
+                <div style={{
+                  background: cardBg,
+                  borderRadius: '16px',
+                  border: cardBorder,
+                  padding: '14px 20px',
+                  boxShadow: 'var(--shadow)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text)', flexShrink: 0 }}>
+                    <GraduationCap size={16} color="var(--accent)" />
+                    <strong style={{ fontSize: '0.84rem' }}>Filter by Experience:</strong>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {EXPERIENCE_OPTIONS.map((opt, i) => {
+                      const isSelected = experienceLevel === opt.value;
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            const nextExp = isSelected && opt.value !== '' ? '' : opt.value;
+                            setExperienceLevel(nextExp);
+                            executeSearch(query || 'Software Developer', 1, nextExp);
+                          }}
+                          style={{
+                            padding: '5px 12px',
+                            borderRadius: '999px',
+                            border: '1px solid',
+                            borderColor: isSelected ? 'var(--accent)' : 'rgba(24,35,38,0.12)',
+                            background: isSelected ? 'var(--accent)' : '#ffffff',
+                            color: isSelected ? '#ffffff' : 'var(--text)',
+                            fontSize: '0.76rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 3. Popular Tech Skills Filter Cloud */}
                 <div style={{
                   background: cardBg,
                   borderRadius: '18px',
                   border: cardBorder,
-                  padding: '18px 22px',
+                  padding: '16px 20px',
                   boxShadow: 'var(--shadow)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '14px',
+                  gap: '12px',
                   flexWrap: 'wrap'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text)', flexShrink: 0 }}>
@@ -790,7 +872,7 @@ const Jobs = () => {
                   </div>
                 </div>
 
-                {/* 3. Featured Verified Opportunities Grid */}
+                {/* 4. Featured Verified Opportunities Grid */}
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', padding: '0 4px' }}>
                     <div>
@@ -894,7 +976,7 @@ const Jobs = () => {
                         <div style={{ paddingTop: '8px', borderTop: '1px solid rgba(24,35,38,0.06)' }}>
                           <button
                             type="button"
-                            onClick={() => executeSearch(job.query_target)}
+                            onClick={() => executeSearch(job.query_target, 1, experienceLevel)}
                             style={{
                               width: '100%',
                               padding: '8px 14px',
@@ -1042,7 +1124,7 @@ const Jobs = () => {
                 ) : (
                   <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '48px 20px', color: 'var(--muted)', background: cardBg, borderRadius: '18px', border: cardBorder }}>
                     <p style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)', marginBottom: '6px' }}>No direct listings found for this query.</p>
-                    <p style={{ margin: '0 0 16px', fontSize: '0.86rem' }}>Try broadening your search terms, removing location filters, or exploring a trending career track.</p>
+                    <p style={{ margin: '0 0 16px', fontSize: '0.86rem' }}>Try broadening your search terms, adjusting experience level, or exploring a trending career track.</p>
                     <button
                       type="button"
                       onClick={() => {

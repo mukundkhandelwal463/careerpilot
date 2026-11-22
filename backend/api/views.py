@@ -1554,6 +1554,7 @@ def search_jobs_jsearch(request):
         query = request.data.get("query", "").strip()
         location = request.data.get("location", "").strip()
         employment_type = request.data.get("employment_type", "").strip()
+        experience_level = request.data.get("experience_level", "").strip()
         date_posted = request.data.get("date_posted", "all").strip()
         requested_source = request.data.get("source", "all").strip().lower()
         if requested_source not in {"all", "jsearch", "linkedin", "indeed"}:
@@ -1684,9 +1685,20 @@ def search_jobs_jsearch(request):
                     return value
             return []
 
+        effective_query = query
+        if experience_level:
+            if experience_level in ("fresher", "entry_level", "0-1"):
+                effective_query = f"{effective_query} fresher entry level"
+            elif experience_level in ("1-3", "junior"):
+                effective_query = f"{effective_query} 1-3 years experience"
+            elif experience_level in ("3-5", "mid"):
+                effective_query = f"{effective_query} 3-5 years experience"
+            elif experience_level in ("5+", "senior"):
+                effective_query = f"{effective_query} senior 5+ years experience"
+
         if serpapi_key and not provider_success:
             try:
-                search_query = query
+                search_query = effective_query
                 if location:
                     search_query = f"{search_query} in {location}"
                 
@@ -1761,7 +1773,7 @@ def search_jobs_jsearch(request):
 
         if rapidapi_key and requested_source in {"all", "jsearch", "linkedin"} and not provider_success:
             try:
-                search_query = query
+                search_query = effective_query
                 if requested_source == "linkedin" and "linkedin" not in search_query.lower():
                     search_query = f"{search_query} LinkedIn"
                 if location:
@@ -1777,6 +1789,13 @@ def search_jobs_jsearch(request):
                     params["employment_types"] = employment_type
                 if remote_only:
                     params["remote_jobs_only"] = "true"
+                if experience_level:
+                    if experience_level in ("fresher", "entry_level", "0-1"):
+                        params["job_requirements"] = "no_experience"
+                    elif experience_level in ("1-3", "junior"):
+                        params["job_requirements"] = "under_3_years_experience"
+                    elif experience_level in ("3-5", "5+", "mid", "senior"):
+                        params["job_requirements"] = "more_than_3_years_experience"
 
                 url = "https://jsearch.p.rapidapi.com/search?" + urllib.parse.urlencode(params)
                 headers = {
