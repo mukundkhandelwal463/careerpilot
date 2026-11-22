@@ -1954,11 +1954,15 @@ def start_interview(request):
         else:
             resume_text = request.data.get("resume_text", "").strip()
 
+        interview_type = request.data.get("interview_type", "technical").strip().lower()
+        if interview_type not in ["technical", "hr"]:
+            interview_type = "technical"
+
         if not resume_text:
             return JsonResponse({"success": False, "error": "Please upload a resume file or provide resume text."}, status=400)
 
-        questions = generate_interview_questions(resume_text)
-        return JsonResponse({"success": True, "questions": questions})
+        questions = generate_interview_questions(resume_text, interview_type=interview_type)
+        return JsonResponse({"success": True, "questions": questions, "interview_type": interview_type})
     except Exception as exc:
         traceback.print_exc()
         return JsonResponse({"success": False, "error": str(exc)}, status=500)
@@ -1971,11 +1975,19 @@ def grade_response(request):
         question = request.data.get("question", "").strip()
         response = request.data.get("response", "").strip()
         mode = request.data.get("mode", "voice").strip()
+        question_idx = int(request.data.get("question_idx", 0))
+        interview_type = request.data.get("interview_type", "technical").strip().lower()
 
         if not question or not response:
             return JsonResponse({"success": False, "error": "Question and response are required."}, status=400)
 
-        evaluation = grade_interview_response(question, response, mode=mode)
+        evaluation = grade_interview_response(
+            question,
+            response,
+            mode=mode,
+            question_idx=question_idx,
+            interview_type=interview_type
+        )
         return JsonResponse({"success": True, "evaluation": evaluation})
     except Exception as exc:
         traceback.print_exc()

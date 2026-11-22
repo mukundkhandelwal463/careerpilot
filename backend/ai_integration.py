@@ -1206,30 +1206,81 @@ Resume Text:
         return {}
 
 
-def generate_interview_questions(resume_text=""):
+TECHNICAL_INTRO_QUESTIONS = [
+    "To kick off our conversation, could you introduce yourself and give a brief overview of your background, experience, and core technical expertise?",
+    "Let's start with a quick introduction: walk me through your engineering journey, your current technical focus, and what drives you as a developer.",
+    "Could you please introduce yourself, highlighting the core technologies and frameworks you work with and how you got started in software engineering?",
+    "Let's begin by introducing yourself: summarize your technical background, your key strengths, and the tech stack you are most comfortable with.",
+    "To get started, please introduce yourself and tell me what areas of software engineering and system development you are most passionate about.",
+    "Welcome to the technical interview! Could you please introduce yourself and give me an elevator pitch of your engineering experience and skill set?"
+]
+
+HR_INTRO_QUESTIONS = [
+    "Welcome to the interview! Could you start by introducing yourself, your background, and what led you to pursue this career path?",
+    "To begin, please introduce yourself and share a bit about your professional journey, your personal values, and what motivates you at work.",
+    "Could you introduce yourself and tell me about your career journey so far, what you are looking for next, and what you enjoy most outside of work?",
+    "Let's start with a brief introduction: tell me about yourself, your proudest professional achievements, and what kind of work environment you thrive in.",
+    "To kick things off, please introduce yourself and tell me what inspired you to enter this industry and where you see yourself growing in the coming years.",
+    "Welcome! Could you give me a brief introduction of who you are, your core strengths, and what sparked your interest in joining our organization?"
+]
+
+TECHNICAL_BASE_FLOW = [
+    {"type": "Technical", "question": "Could you walk me through your best or flagship project listed on your CV? What was the overall architecture, your individual contributions, and the core technologies used?"},
+    {"type": "Technical", "question": "In that flagship project, in which specific part or module did you encounter the biggest technical problem or hurdle, and what steps did you take to resolve it?"},
+    {"type": "Technical", "question": "Let's dive deeper into the technical stack: How did you optimize database queries or API latency in that system, and how did you prevent bottlenecks?"},
+    {"type": "Technical", "question": "Describe a major system architecture trade-off you made in one of your projects. What alternatives did you consider and why did you choose that design?"},
+    {"type": "Technical", "question": "How do you handle authentication, session management, secure data storage, and protection against vulnerabilities like SQL injection or CSRF in your applications?"},
+    {"type": "Technical", "question": "Explain your experience with CI/CD automation, Docker containerization, and cloud deployment. How would you scale this application to handle high concurrency?"},
+    {"type": "Technical", "question": "Describe an incident where a critical bug or production outage occurred. How did you diagnose the root cause, mitigate immediate impact, and implement safeguards?"}
+]
+
+HR_BASE_FLOW = [
+    {"type": "HR", "question": "Looking back at your resume and experience, what is a specific project or achievement you are most proud of, and what was your role in bringing it to success?"},
+    {"type": "HR", "question": "In that project or during your past experience, describe a situation where you had a disagreement with a team member, manager, or stakeholder. How did you handle it, and what was the outcome?"},
+    {"type": "HR", "question": "Describe a time when project requirements changed abruptly or you were faced with multiple urgent deadlines. How did you prioritize your tasks and communicate with stakeholders?"},
+    {"type": "HR", "question": "Tell me about a time you received difficult constructive feedback or criticism on your work. How did you react, and what actions did you take to improve?"},
+    {"type": "HR", "question": "How do you ensure effective communication and collaboration when working with non-technical team members, such as designers, product managers, or business clients?"},
+    {"type": "HR", "question": "Tell me about a time when a project or initiative didn't go as planned or failed completely. What happened, how did you handle the situation, and what key lesson did you learn?"},
+    {"type": "HR", "question": "What values are most important to you in a team culture, and where do you envision yourself growing professionally over the next two to three years?"}
+]
+
+
+def generate_interview_questions(resume_text="", interview_type="technical"):
     import random
+    is_tech = str(interview_type).lower() != "hr"
+    intro_pool = TECHNICAL_INTRO_QUESTIONS if is_tech else HR_INTRO_QUESTIONS
+    base_flow = TECHNICAL_BASE_FLOW if is_tech else HR_BASE_FLOW
+    intro_q = random.choice(intro_pool)
 
-    question_pool = [
-        {"type": "Technical", "question": "Explain your experience with Python, JavaScript, and backend frameworks listed in your CV."},
-        {"type": "Technical", "question": "What is the most complex database query or API performance issue you resolved?"},
-        {"type": "Technical", "question": "How do you handle authentication, session management, and security in web applications?"},
-        {"type": "Technical", "question": "Describe a system architecture trade-off you made in one of your recent projects."},
-        {"type": "Technical", "question": "Explain your understanding of CI/CD pipelines, Docker containerization, and cloud deployment."},
-        {"type": "HR", "question": "Why are you interested in this role, and how does your background align with our technology stack?"},
-        {"type": "HR", "question": "Describe a situation where you had to work under tight project constraints or sudden requirement changes."},
-        {"type": "HR", "question": "How do you handle constructive criticism or disagreement with a senior engineer or product manager?"},
-        {"type": "HR", "question": "What is a project you built that you are most proud of, and what key lesson did you learn?"},
-        {"type": "Management", "question": "How do you prioritize competing tasks and manage project deadlines effectively?"},
-        {"type": "Management", "question": "Explain a situation where you led or coordinated work across multiple team members."},
-        {"type": "Management", "question": "How do you handle scope creep or shifting priorities mid-sprint?"}
-    ]
+    if resume_text and len(resume_text.strip()) > 30:
+        if is_tech:
+            prompt = f"""You are formulating a strict 8-question structured Technical Candidate Interview based on the resume below.
+Follow this mandatory chronological progression:
+Question 1: MUST be an Introduction question asking the candidate to introduce themselves, their engineering journey, and core technical skills.
+Question 2: MUST ask to explain their flagship / best project found on their CV, its architecture, their personal contributions, and core tech stack.
+Question 3: MUST ask about the biggest technical problem, hurdle, or bottleneck they encountered in that specific project, in which part of the system it happened, and how they solved it.
+Question 4: MUST ask deep technical questions on core frameworks, database queries, API performance, or concurrency related to their CV.
+Question 5: MUST ask about system design trade-offs, scalability, or caching mechanisms.
+Question 6: MUST ask about security, authentication, and handling edge cases.
+Question 7: MUST ask about CI/CD pipelines, containerization (Docker/Kubernetes), or cloud deployment.
+Question 8: MUST ask about production debugging, root-cause analysis, and incident response.
 
-    if resume_text:
-        prompt = f"""Based on the candidate's resume/CV text below, generate 10 customized interview questions.
-Ensure a mix of Technical, HR, and Management questions focused on their listed skills.
+Return a JSON array of 8 objects with keys: 'id' (1-8), 'type' ('Technical'), and 'question' (string).
+Resume Text:
+{_clip_text(resume_text, max_chars=4000)}"""
+        else:
+            prompt = f"""You are formulating a strict 8-question structured HR & Behavioral Candidate Interview based on the resume below.
+Follow this mandatory chronological progression:
+Question 1: MUST be an Introduction question asking the candidate to introduce themselves, their journey, and professional motivations.
+Question 2: MUST ask about their proudest project or milestone from their CV and why it stands out.
+Question 3: MUST ask about a major hurdle, team disagreement, or interpersonal challenge they faced in that project and how they resolved it.
+Question 4: MUST ask about handling high pressure, tight deadlines, and shifting priorities.
+Question 5: MUST ask how they receive and act upon constructive feedback and criticism.
+Question 6: MUST ask about cross-functional collaboration with non-technical stakeholders or teammates.
+Question 7: MUST ask about a time they made a mistake or faced a failure and what they learned.
+Question 8: MUST ask about long-term career aspirations, professional values, and team culture fit.
 
-Return a JSON array of objects with keys: 'id' (1-10), 'type' ('Technical', 'HR', or 'Management'), and 'question' (string).
-
+Return a JSON array of 8 objects with keys: 'id' (1-8), 'type' ('HR'), and 'question' (string).
 Resume Text:
 {_clip_text(resume_text, max_chars=4000)}"""
 
@@ -1238,19 +1289,34 @@ Resume Text:
             cleaned = re.sub(r"```json\s*", "", raw_response)
             cleaned = re.sub(r"```\s*", "", cleaned).strip()
             parsed = json.loads(cleaned)
-            if isinstance(parsed, list) and len(parsed) >= 5:
-                random.shuffle(parsed)
-                for idx, q in enumerate(parsed):
-                    q["id"] = idx + 1
-                return parsed[:10]
+            if isinstance(parsed, list) and len(parsed) >= 4:
+                # Ensure Question 1 starts with an introduction theme and fresh diverse phrasing
+                q1_text = (parsed[0].get("question") or "").lower()
+                if "introduce" not in q1_text and "introduction" not in q1_text and "tell me about yourself" not in q1_text and "walk me through" not in q1_text:
+                    parsed.insert(0, {"id": 1, "type": "Technical" if is_tech else "HR", "question": intro_q})
+                else:
+                    parsed[0]["question"] = intro_q
+
+                formatted = []
+                for idx, q in enumerate(parsed[:8]):
+                    formatted.append({
+                        "id": idx + 1,
+                        "type": "Technical" if is_tech else "HR",
+                        "question": q.get("question", "").strip()
+                    })
+                return formatted
         except Exception as e:
             print(f"Error generating questions via Gemini: {e}")
 
-    # Fallback: Shuffle pool and return 10 questions
-    selected = random.sample(question_pool, min(10, len(question_pool)))
-    for idx, q in enumerate(selected):
-        q["id"] = idx + 1
-    return selected
+    # Fallback: Curated structured progression
+    questions = [{"id": 1, "type": "Technical" if is_tech else "HR", "question": intro_q}]
+    for idx, item in enumerate(base_flow):
+        questions.append({
+            "id": idx + 2,
+            "type": item["type"],
+            "question": item["question"]
+        })
+    return questions[:8]
 
 
 def is_invalid_or_gibberish_response(text):
@@ -1300,7 +1366,61 @@ def is_invalid_or_gibberish_response(text):
     return False
 
 
-def grade_interview_response(question, response, mode="voice"):
+def generate_adaptive_follow_up(question_idx, interview_type, response_text):
+    """Generates an intelligent contextual follow-up question for the next step."""
+    is_tech = str(interview_type).lower() != "hr"
+    text = (response_text or "").strip()
+
+    # Extract potential project names or tech keywords from candidate's answer
+    extracted_terms = []
+    for pattern in [
+        r'(?:project|application|platform|system|app|service|tool)\s+(?:called|named|is|was)?\s*([A-Za-z0-9_-]+)',
+        r'built\s+(?:a|an)\s+([A-Za-z0-9\s_-]{3,25}?)(?:using|with|in|for|\.|\,)',
+        r'worked\s+on\s+(?:a|an)\s+([A-Za-z0-9\s_-]{3,25}?)(?:using|with|in|for|\.|\,)'
+    ]:
+        m = re.search(pattern, text, re.IGNORECASE)
+        if m:
+            val = m.group(1).strip()
+            if len(val) >= 3 and val.lower() not in ['the', 'this', 'that', 'our']:
+                extracted_terms.append(val)
+
+    found_tech = []
+    known_tech = ['react', 'node', 'django', 'python', 'javascript', 'typescript', 'java', 'spring', 'fastapi',
+                  'postgresql', 'mongodb', 'mysql', 'docker', 'kubernetes', 'aws', 'redis', 'graphql', 'rest api', 'nextjs']
+    for t in known_tech:
+        if re.search(rf'\b{re.escape(t)}\b', text, re.IGNORECASE):
+            found_tech.append(t.title())
+
+    project_ref = extracted_terms[0] if extracted_terms else ("the project" if not found_tech else f"your {found_tech[0]} project")
+
+    if is_tech:
+        if question_idx == 0:
+            if found_tech or extracted_terms:
+                tech_str = ", ".join(found_tech[:2]) if found_tech else "the technologies you highlighted"
+                return f"You mentioned your experience with {tech_str}. Could you walk me through your best or flagship project? What was the overall architecture, your personal contributions, and the core technologies you used?"
+            return "Thank you for that introduction. Could you now walk me through the best or flagship project listed on your CV? Explain the overall system architecture, your individual role, and the core technologies you chose."
+        elif question_idx == 1:
+            if extracted_terms or found_tech:
+                return f"In that {project_ref} you just described, in which specific part or module did you encounter your biggest technical problem or bottleneck, and what concrete steps did you take to resolve it?"
+            return "In that flagship project, in which specific part or component of the system did you encounter the biggest technical problem or hurdle, and how did you diagnose and solve it?"
+        elif question_idx == 2:
+            return "Regarding the technical problem and solution you just outlined, let's explore deeper: how did you optimize database queries or API latency in that system, and how did you verify data consistency under heavy traffic?"
+        elif question_idx == 3:
+            return "Thinking about scalability for that application: what architectural trade-offs did you make, and how would you redesign the caching or async queuing layer if traffic multiplied 10x?"
+    else:
+        if question_idx == 0:
+            return "Thank you for sharing your background. Looking at your journey, what is the single project or initiative from your experience that you are most proud of, and why does it mean so much to you?"
+        elif question_idx == 1:
+            return "In that project you're most proud of, what was the most difficult interpersonal hurdle or team conflict you encountered, and how did you work to resolve it?"
+        elif question_idx == 2:
+            return "When challenges like that arise under tight deadlines, how do you manage stress and prioritize competing demands while keeping stakeholders informed?"
+        elif question_idx == 3:
+            return "Tell me about a time you received constructive criticism from a lead or manager on your deliverables. How did you react and put it into practice?"
+
+    return None
+
+
+def grade_interview_response(question, response, mode="voice", question_idx=0, interview_type="technical"):
     text = (response or "").strip()
 
     # Detect gibberish, keyboard mashing, or non-answer (e.g. 'serdctfvgybhunjim', 'zsdrfgthyjk')
@@ -1311,7 +1431,9 @@ def grade_interview_response(question, response, mode="voice"):
             "english_score": 0,
             "fluency_score": 0,
             "strengths": ["None (Unrecognized / Invalid Input)"],
-            "improvements": ["Answer contained keyboard mashing or unrecognized text. Please answer using clear, meaningful concepts."]
+            "improvements": ["Answer contained keyboard mashing or unrecognized text. Please answer using clear, meaningful concepts."],
+            "adaptive_next_question": None,
+            "interview_type": interview_type
         }
 
     is_voice = str(mode).lower() == "voice"
@@ -1330,7 +1452,7 @@ def grade_interview_response(question, response, mode="voice"):
         "- 10% Fluency & Structure: Evaluate organization, bulleting, and structured articulation."
     )
 
-    prompt = f"""You are a professional human technical interviewer evaluating a candidate's response.
+    prompt = f"""You are a professional human technical interviewer evaluating a candidate's response in a {interview_type.upper()} round.
 The candidate was asked the following question:
 '{question}'
 
@@ -1340,7 +1462,7 @@ Their response ({'Spoken Voice Recording Transcript' if is_voice else 'Written A
 {mode_guidance}
 
 Evaluate this response objectively into 3 distinct components (each on a 0-100 scale):
-1. 'technical_score' (0-100): 70% weight. How accurate, deep, and correct are their technical concepts and problem-solving logic?
+1. 'technical_score' (0-100): 70% weight. How accurate, deep, and correct are their concepts, logic, and problem-solving?
 2. 'english_score' (0-100): 20% weight. How clear, understandable, and coherent is their English communication and technical vocabulary?
 3. 'fluency_score' (0-100): 10% weight. How smooth, structured, and confident is their articulation and flow?
 
@@ -1348,8 +1470,13 @@ Calculate the final weighted score as:
 overall_score = round(technical_score * 0.70 + english_score * 0.20 + fluency_score * 0.10)
 
 Also provide:
-- A short list of strengths (1-2 bullet points highlighting strong technical concepts or clear communication).
-- A short list of suggested improvements (1-2 bullet points offering actionable technical advice).
+- A short list of strengths (1-2 bullet points highlighting strong concepts or clear communication).
+- A short list of suggested improvements (1-2 bullet points offering actionable advice).
+- An 'adaptive_next_question' (string): A natural, intelligent follow-up question for step {question_idx + 1} that builds directly on what they just said:
+  * If this was step 0 (intro): Ask to explain their best / flagship project from their CV, referencing any projects/tech they mentioned.
+  * If this was step 1 (project): Ask in which specific part of that project they encountered the biggest technical problem/hurdle and how they solved it.
+  * If this was step 2 (problem/hurdle): Ask a deeper technical question about their stack, DB queries, API latency, or concurrency regarding that problem.
+  * For other steps: A natural technical depth follow-up.
 
 Return a valid JSON object with keys:
 - 'score' (integer 0-100, weighted overall)
@@ -1358,8 +1485,11 @@ Return a valid JSON object with keys:
 - 'fluency_score' (integer 0-100)
 - 'strengths' (array of strings)
 - 'improvements' (array of strings)
+- 'adaptive_next_question' (string)
 
 Do not use markdown backticks."""
+
+    adaptive_fallback = generate_adaptive_follow_up(question_idx, interview_type, text)
 
     try:
         raw_response = _generate_with_model_fallback(prompt, timeout_sec=12)
@@ -1382,6 +1512,9 @@ Do not use markdown backticks."""
                     result["strengths"] = ["Demonstrated clear communication addressing the core prompt"]
                 if "improvements" not in result or not result["improvements"]:
                     result["improvements"] = ["Consider detailing architectural trade-offs and edge-case handling"]
+                if "adaptive_next_question" not in result or not result["adaptive_next_question"]:
+                    result["adaptive_next_question"] = adaptive_fallback
+                result["interview_type"] = interview_type
                 return result
     except Exception as e:
         print(f"Error grading response via AI models: {e}")
@@ -1472,7 +1605,9 @@ Do not use markdown backticks."""
         "english_score": eng_score,
         "fluency_score": fluency_score,
         "strengths": strengths,
-        "improvements": improvements
+        "improvements": improvements,
+        "adaptive_next_question": adaptive_fallback,
+        "interview_type": interview_type
     }
 
 

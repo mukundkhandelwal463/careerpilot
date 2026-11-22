@@ -42,6 +42,7 @@ import {
   Type,
   Radio,
   Code2,
+  Users,
   X
 } from 'lucide-react';
 import { questionBankData } from '../data/questionBankData.js';
@@ -1054,7 +1055,8 @@ const Preparation = () => {
   const [interviewStarted, setInterviewStarted] = useState(false);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
-  const [interviewMode, setInterviewMode] = useState('voice'); // 'voice' (Speak Mode) or 'written' (Written Mode)
+  const [interviewType, setInterviewType] = useState('technical'); // 'technical' or 'hr'
+  const [interviewMode, setInterviewMode] = useState('voice'); // 100% Voice Interview
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [autoSpeakEnabled, setAutoSpeakEnabled] = useState(true);
@@ -1984,7 +1986,7 @@ const Preparation = () => {
 
   const toggleListening = () => {
     if (!SpeechRecognition) {
-      showAlert("Speech Recognition Not Supported", "Speech recognition is not supported in this browser. Please use Chrome, Edge, or switch to Written Mode.");
+      showAlert("Speech Recognition Not Supported", "Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge for live microphone voice capture.");
       return;
     }
 
@@ -2016,6 +2018,7 @@ const Preparation = () => {
 
     const formData = new FormData();
     formData.append('resume', file);
+    formData.append('interview_type', interviewType);
 
     try {
       const res = await fetch('/api/interview/start', {
@@ -2047,7 +2050,12 @@ const Preparation = () => {
       const res = await fetch('/api/interview/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resume_text: "General Software Developer Resume with Javascript, SQL, Python" }),
+        body: JSON.stringify({
+          resume_text: interviewType === 'technical'
+            ? "Full Stack Software Developer with experience in React, Python, Django, SQL databases, REST APIs, Docker, and Cloud Deployment"
+            : "Software Professional with experience in agile cross-functional teams, project management, client communication, and leadership",
+          interview_type: interviewType
+        }),
       });
       const data = await res.json();
       if (data.success && data.questions) {
@@ -2071,11 +2079,7 @@ const Preparation = () => {
   const submitAnswer = async (forcedAnswer) => {
     const textToSubmit = (typeof forcedAnswer === 'string' ? forcedAnswer : userAnswer).trim();
     if (!textToSubmit) {
-      if (interviewMode === 'voice') {
-        showAlert("No Speech Detected", "We didn't detect any spoken words. Please click 'Start Speaking Answer' and speak your response into your microphone.");
-      } else {
-        showAlert("Empty Response", "Please type your technical response before submitting.");
-      }
+      showAlert("No Speech Detected", "We didn't detect any spoken words. Please click 'Start Speaking Answer' and speak your response into your microphone.");
       return;
     }
 
@@ -2095,13 +2099,27 @@ const Preparation = () => {
         body: JSON.stringify({
           question: questionObj.question,
           response: textToSubmit,
-          mode: interviewMode, // 'voice' or 'written'
+          mode: 'voice',
+          question_idx: currentQuestionIdx,
+          interview_type: interviewType
         }),
       });
       const data = await res.json();
       if (data.success && data.evaluation) {
         const evalResult = data.evaluation;
         setInterviewFeedback(evalResult);
+
+        // Dynamically update the next question if an adaptive question was formulated
+        if (evalResult.adaptive_next_question && currentQuestionIdx + 1 < questions.length) {
+          setQuestions(prev => {
+            const updated = [...prev];
+            updated[currentQuestionIdx + 1] = {
+              ...updated[currentQuestionIdx + 1],
+              question: evalResult.adaptive_next_question
+            };
+            return updated;
+          });
+        }
 
         setQuestionScores(prev => [
           ...prev,
@@ -2114,7 +2132,8 @@ const Preparation = () => {
             english_score: evalResult.english_score ?? 75,
             fluency_score: evalResult.fluency_score ?? 70,
             userAnswer: textToSubmit,
-            mode: interviewMode,
+            mode: 'voice',
+            interview_type: interviewType,
             feedback: evalResult
           }
         ]);
@@ -2866,7 +2885,7 @@ const Preparation = () => {
                       </h2>
                       <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 600 }}>
                         {interviewStarted
-                          ? (interviewMode === 'voice' ? '🎙️ Live Voice Interview (Audio-Only Question Delivery)' : '✍️ Written Technical Assessment')
+                          ? (interviewType === 'technical' ? '💻 Technical Interview Round • 🎙️ Live Voice Simulation' : '👥 HR & Behavioral Round • 🎙️ Live Voice Simulation')
                           : 'Human-Voice Question Delivery & Deep Technical Evaluation'}
                       </span>
                     </div>
@@ -2875,21 +2894,14 @@ const Preparation = () => {
                   {interviewStarted && !interviewCompleted && (
                     <div style={{
                       display: 'flex', alignItems: 'center', gap: '8px',
-                      background: interviewMode === 'voice' ? 'rgba(37, 99, 235, 0.08)' : 'rgba(15, 23, 42, 0.06)',
-                      border: interviewMode === 'voice' ? '1.5px solid #bfdbfe' : '1.5px solid #cbd5e1',
+                      background: interviewType === 'technical' ? 'rgba(37, 99, 235, 0.08)' : 'rgba(15, 23, 42, 0.06)',
+                      border: interviewType === 'technical' ? '1.5px solid #bfdbfe' : '1.5px solid #cbd5e1',
                       padding: '8px 16px', borderRadius: '12px'
                     }}>
-                      {interviewMode === 'voice' ? (
-                        <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1d4ed8', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Mic className="size-4 text-blue-600" />
-                          <span>Interview Format: <strong>1. Speak Mode (Live Voice)</strong></span>
-                        </span>
-                      ) : (
-                        <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <Type className="size-4 text-slate-800" />
-                          <span>Interview Format: <strong>2. Written Mode (Text Response)</strong></span>
-                        </span>
-                      )}
+                      <span style={{ fontSize: '0.8rem', fontWeight: 800, color: interviewType === 'technical' ? '#1d4ed8' : '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Mic className="size-4 text-blue-600" />
+                        <span>Round: <strong>{interviewType === 'technical' ? '1. Technical Interview' : '2. HR & Behavioral'}</strong> (Live Voice)</span>
+                      </span>
                     </div>
                   )}
                 </div>
@@ -2910,22 +2922,22 @@ const Preparation = () => {
                     ) : (
                       <>
                         <p style={{ color: 'var(--muted)', marginBottom: '20px', fontSize: '0.88rem', lineHeight: 1.6 }}>
-                          Experience a real-time AI interview where the system speaks the questions aloud and evaluates your answers based on technical concepts and depth. You have 2 flexible options: <strong>Speak Mode (Voice)</strong> and <strong>Written Mode (Text)</strong>.
+                          Experience a real-time AI voice interview where the system speaks the questions aloud and evaluates your answers based on technical concepts, depth, and communication. Choose your interview round below: <strong>Technical Interview Round</strong> or <strong>HR & Behavioral Round</strong>.
                         </p>
 
-                        {/* MODE SELECTION CARDS */}
+                        {/* INTERVIEW TRACK SELECTION CARDS */}
                         <div style={{ marginBottom: '22px' }}>
                           <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569', marginBottom: '10px' }}>
-                            Choose Your Interview Format:
+                            Choose Your Interview Round:
                           </label>
 
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                            {/* Speak Mode Card */}
+                            {/* Technical Round Card */}
                             <div
-                              onClick={() => setInterviewMode('voice')}
+                              onClick={() => setInterviewType('technical')}
                               style={{
-                                border: interviewMode === 'voice' ? '2px solid #2563eb' : '1.5px solid #e2e8f0',
-                                background: interviewMode === 'voice' ? 'rgba(37, 99, 235, 0.05)' : '#ffffff',
+                                border: interviewType === 'technical' ? '2px solid #2563eb' : '1.5px solid #e2e8f0',
+                                background: interviewType === 'technical' ? 'rgba(37, 99, 235, 0.05)' : '#ffffff',
                                 borderRadius: '16px', padding: '18px 20px',
                                 cursor: 'pointer', transition: 'all 0.2s ease',
                                 position: 'relative'
@@ -2935,36 +2947,36 @@ const Preparation = () => {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                   <div style={{
                                     width: '32px', height: '32px', borderRadius: '10px',
-                                    background: interviewMode === 'voice' ? '#2563eb' : '#f1f5f9',
-                                    color: interviewMode === 'voice' ? '#ffffff' : '#64748b',
+                                    background: interviewType === 'technical' ? '#2563eb' : '#f1f5f9',
+                                    color: interviewType === 'technical' ? '#ffffff' : '#64748b',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                                   }}>
-                                    <Mic className="size-4" />
+                                    <Code className="size-4" />
                                   </div>
-                                  <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>1. Speak Mode (Voice)</strong>
+                                  <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>1. Technical Interview Round</strong>
                                 </div>
                                 <span style={{
                                   fontSize: '0.72rem', fontWeight: 800, padding: '3px 8px', borderRadius: '6px',
-                                  background: interviewMode === 'voice' ? '#dbeafe' : '#f1f5f9',
-                                  color: interviewMode === 'voice' ? '#1d4ed8' : '#64748b'
+                                  background: interviewType === 'technical' ? '#dbeafe' : '#f1f5f9',
+                                  color: interviewType === 'technical' ? '#1d4ed8' : '#64748b'
                                 }}>
-                                  {interviewMode === 'voice' ? 'Selected' : 'Select'}
+                                  {interviewType === 'technical' ? 'Selected' : 'Select'}
                                 </span>
                               </div>
                               <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>
-                                Human AI voice speaks each question aloud. The question text is hidden (voice-only) to simulate a real human technical interview. You speak your answer verbally with secure background recording.
+                                Self-introduction, flagship CV project architecture, deep problem debugging & hurdles, database & API performance, system trade-offs, and live voice evaluation.
                               </p>
                               <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.73rem', color: '#059669', fontWeight: 800 }}>
                                 <Award className="size-3.5" /> 70% Technical • 20% English • 10% Fluency
                               </div>
                             </div>
 
-                            {/* Written Mode Card */}
+                            {/* HR & Behavioral Round Card */}
                             <div
-                              onClick={() => setInterviewMode('written')}
+                              onClick={() => setInterviewType('hr')}
                               style={{
-                                border: interviewMode === 'written' ? '2px solid #0f172a' : '1.5px solid #e2e8f0',
-                                background: interviewMode === 'written' ? 'rgba(15, 23, 42, 0.04)' : '#ffffff',
+                                border: interviewType === 'hr' ? '2px solid #0f172a' : '1.5px solid #e2e8f0',
+                                background: interviewType === 'hr' ? 'rgba(15, 23, 42, 0.04)' : '#ffffff',
                                 borderRadius: '16px', padding: '18px 20px',
                                 cursor: 'pointer', transition: 'all 0.2s ease',
                                 position: 'relative'
@@ -2974,27 +2986,27 @@ const Preparation = () => {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                   <div style={{
                                     width: '32px', height: '32px', borderRadius: '10px',
-                                    background: interviewMode === 'written' ? '#0f172a' : '#f1f5f9',
-                                    color: interviewMode === 'written' ? '#ffffff' : '#64748b',
+                                    background: interviewType === 'hr' ? '#0f172a' : '#f1f5f9',
+                                    color: interviewType === 'hr' ? '#ffffff' : '#64748b',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                                   }}>
-                                    <Type className="size-4" />
+                                    <Users className="size-4" />
                                   </div>
-                                  <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>2. Written Mode (Text)</strong>
+                                  <strong style={{ fontSize: '0.94rem', color: '#0f172a' }}>2. HR & Behavioral Round</strong>
                                 </div>
                                 <span style={{
                                   fontSize: '0.72rem', fontWeight: 800, padding: '3px 8px', borderRadius: '6px',
-                                  background: interviewMode === 'written' ? '#e2e8f0' : '#f1f5f9',
-                                  color: interviewMode === 'written' ? '#0f172a' : '#64748b'
+                                  background: interviewType === 'hr' ? '#e2e8f0' : '#f1f5f9',
+                                  color: interviewType === 'hr' ? '#0f172a' : '#64748b'
                                 }}>
-                                  {interviewMode === 'written' ? 'Selected' : 'Select'}
+                                  {interviewType === 'hr' ? 'Selected' : 'Select'}
                                 </span>
                               </div>
                               <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>
-                                Questions are displayed on screen. Type your comprehensive technical answer, problem-solving logic, architecture, and trade-offs.
+                                Personal journey, proudest achievements, interpersonal team conflict resolution, tight deadline pressure, constructive criticism, and cultural fit.
                               </p>
                               <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.73rem', color: '#2563eb', fontWeight: 800 }}>
-                                <Award className="size-3.5" /> 70% Technical • 20% English • 10% Fluency
+                                <Award className="size-3.5" /> 50% Behavioral • 30% Communication • 20% Leadership
                               </div>
                             </div>
                           </div>
@@ -3043,7 +3055,7 @@ const Preparation = () => {
                               fontWeight: 700, boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
                             }}
                           >
-                            Start with General Developer CV Questions ({interviewMode === 'voice' ? '🎙️ Speak Mode' : '✍️ Written Mode'})
+                            Start with General Developer CV Questions (🎙️ {interviewType === 'technical' ? 'Technical Round' : 'HR Round'})
                           </button>
                         </div>
                       </>
@@ -3174,27 +3186,29 @@ const Preparation = () => {
                       <Award className="size-5 text-blue-600 flex-shrink-0" />
                       <div>
                         <strong style={{ fontSize: '0.83rem', color: '#1e3a8a', display: 'block', marginBottom: '2px' }}>
-                          Evaluation Weight Distribution: 70% Technical Concepts • 20% English • 10% Fluency
+                          {interviewType === 'technical'
+                            ? 'Technical Round Criteria: 70% Technical Concepts • 20% English • 10% Fluency'
+                            : 'HR & Behavioral Criteria: 50% Behavioral Competence • 30% Communication • 20% Leadership'}
                         </strong>
                         <span style={{ fontSize: '0.78rem', color: '#2563eb', lineHeight: 1.4 }}>
-                          70% for technical logic and core mechanisms • 20% for English communication & vocabulary • 10% for delivery articulation & flow.
+                          {interviewType === 'technical'
+                            ? '70% for technical logic and core mechanisms • 20% for English communication & vocabulary • 10% for delivery articulation & flow.'
+                            : '50% for situation analysis, STAR approach & team impact • 30% for communication clarity • 20% for leadership & empathy.'}
                         </span>
                       </div>
                     </div>
 
-                    {/* ANSWER SECTION */}
-                    {interviewMode === 'voice' ? (
-                      /* SPEAK MODE: AUDIO WAVEFORM VISUALIZER (NO EDITABLE TEXTAREA) */
-                      <div style={{
-                        background: '#151c4a',
-                        border: '1.5px solid #2e3b79',
-                        borderRadius: '20px',
-                        padding: '28px 24px',
-                        textAlign: 'center',
-                        position: 'relative',
-                        boxShadow: isListening ? '0 0 28px rgba(37, 99, 235, 0.35)' : 'none',
-                        transition: 'all 0.3s ease'
-                      }}>
+                    {/* LIVE VOICE ANSWER SECTION (AUDIO WAVEFORM VISUALIZER & RECORDING) */}
+                    <div style={{
+                      background: '#151c4a',
+                      border: '1.5px solid #2e3b79',
+                      borderRadius: '20px',
+                      padding: '28px 24px',
+                      textAlign: 'center',
+                      position: 'relative',
+                      boxShadow: isListening ? '0 0 28px rgba(37, 99, 235, 0.35)' : 'none',
+                      transition: 'all 0.3s ease'
+                    }}>
                         {/* Status bar */}
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
                           {isListening ? (
@@ -3329,58 +3343,6 @@ const Preparation = () => {
                           🔒 Secure Background Voice Capture: Speech is recorded directly in the background. The candidate cannot edit or alter the recorded answer.
                         </p>
                       </div>
-                    ) : (
-                      /* WRITTEN MODE: TEXT INPUT */
-                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '22px', position: 'relative' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                          <strong style={{ fontSize: '0.85rem', color: 'var(--text)' }}>
-                            Your Written Response:
-                          </strong>
-                          <span style={{ fontSize: '0.74rem', color: '#64748b', fontWeight: 600 }}>
-                            {userAnswer.trim().split(/\s+/).filter(Boolean).length} words • {userAnswer.length} chars
-                          </span>
-                        </div>
-
-                        <textarea
-                          value={userAnswer}
-                          onChange={(e) => setUserAnswer(e.target.value)}
-                          placeholder="Type your detailed technical answer here. Discuss your methodology, technical trade-offs, algorithms, or practical implementation steps..."
-                          style={{
-                            width: '100%',
-                            minHeight: '150px',
-                            border: '1px solid #cbd5e1',
-                            borderRadius: '12px',
-                            padding: '14px 16px',
-                            fontSize: '0.9rem',
-                            lineHeight: 1.6,
-                            background: '#ffffff',
-                            outline: 'none',
-                            resize: 'vertical'
-                          }}
-                        />
-
-                        {!interviewFeedback && (
-                          <div style={{ marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'center' }}>
-                            <button
-                              onClick={() => submitAnswer()}
-                              disabled={!userAnswer.trim() || isGrading}
-                              className="btn btn-primary"
-                              style={{ minWidth: '150px' }}
-                            >
-                              {isGrading ? 'Evaluating Response...' : 'Submit Answer'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleEndInterview}
-                              className="btn btn-secondary"
-                              style={{ borderColor: '#ef4444', color: '#ef4444' }}
-                            >
-                              End Interview
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
 
                     {/* EVALUATION FEEDBACK CARD */}
                     {interviewFeedback && (
@@ -3397,7 +3359,7 @@ const Preparation = () => {
                                 padding: '2px 8px',
                                 borderRadius: '6px'
                               }}>
-                                {interviewFeedback.mode === 'written' ? '✍️ Written Assessment' : '🎙️ Spoken Recording Assessment'}
+                                {interviewType === 'hr' ? '👥 HR & Behavioral Evaluation' : '💻 Technical Evaluation'}
                               </span>
                             </div>
                             <span style={{
@@ -3556,7 +3518,9 @@ const Preparation = () => {
                           </div>
                           <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#1e3a8a', margin: '0 0 6px' }}>Interview Completed!</h3>
                           <p style={{ color: '#475569', fontSize: '0.85rem', margin: '0 0 16px' }}>
-                            Your responses have been evaluated (70% Technical Concepts • 20% English • 10% Fluency).
+                            {interviewType === 'technical'
+                              ? 'Your responses have been evaluated (70% Technical Concepts • 20% English • 10% Fluency).'
+                              : 'Your responses have been evaluated (50% Behavioral Competence • 30% Communication • 20% Leadership).'}
                           </p>
 
                           <div style={{ display: 'inline-flex', alignItems: 'baseline', gap: '8px', background: '#ffffff', border: '1px solid #bfdbfe', padding: '14px 32px', borderRadius: '18px', boxShadow: '0 4px 12px rgba(30, 58, 138, 0.06)' }}>
@@ -3570,7 +3534,7 @@ const Preparation = () => {
                           {questionScores.length > 0 && (
                             <div style={{ marginTop: '24px', textAlign: 'left', background: '#ffffff', borderRadius: '16px', padding: '18px', border: '1px solid #e2e8f0' }}>
                               <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#1e293b', margin: '0 0 12px 0' }}>
-                                Question-by-Question Scorecard:
+                                Question-by-Question Scorecard ({interviewType === 'technical' ? 'Technical Round' : 'HR & Behavioral Round'}):
                               </h4>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {questionScores.map((qs, i) => (
@@ -3583,10 +3547,10 @@ const Preparation = () => {
                                           fontWeight: 800,
                                           padding: '2px 6px',
                                           borderRadius: '4px',
-                                          background: qs.mode === 'written' ? '#f1f5f9' : '#dbeafe',
-                                          color: qs.mode === 'written' ? '#334155' : '#1d4ed8'
+                                          background: qs.interview_type === 'hr' ? '#f1f5f9' : '#dbeafe',
+                                          color: qs.interview_type === 'hr' ? '#334155' : '#1d4ed8'
                                         }}>
-                                          {qs.mode === 'written' ? '✍️ Written' : '🎙️ Spoken'}
+                                          {qs.interview_type === 'hr' ? '👥 HR Round' : '💻 Technical Round'} • 🎙️ Voice
                                         </span>
                                       </div>
                                       <p style={{ margin: '0 0 6px 0', fontSize: '0.82rem', color: '#1e293b', fontWeight: 600 }}>
