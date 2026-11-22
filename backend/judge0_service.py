@@ -240,7 +240,7 @@ public class Main {
         } else if (result instanceof Boolean) {
             System.out.println(((Boolean) result) ? "true" : "false");
         } else if (result instanceof String) {
-            System.out.println("\"" + result + "\"");
+            System.out.println((char)34 + (String) result + (char)34);
         } else {
             System.out.println(result);
         }
