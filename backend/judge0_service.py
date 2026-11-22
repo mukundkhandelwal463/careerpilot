@@ -226,12 +226,21 @@ public class Main {
             System.out.println(Arrays.toString((String[]) result));
         } else if (result instanceof boolean[]) {
             System.out.println(Arrays.toString((boolean[]) result));
+        } else if (result instanceof Object[]) {
+            System.out.println(Arrays.deepToString((Object[]) result));
+        } else if (result.getClass().isArray()) {
+            try {
+                java.lang.reflect.Method m = Arrays.class.getMethod("deepToString", Object[].class);
+                System.out.println((String) m.invoke(null, (Object) result));
+            } catch(Exception e) {
+                System.out.println(result);
+            }
         } else if (result instanceof ListNode) {
             System.out.println(listNodeToString((ListNode) result));
         } else if (result instanceof Boolean) {
             System.out.println(((Boolean) result) ? "true" : "false");
         } else if (result instanceof String) {
-            System.out.println("\\"" + result + "\\"");
+            System.out.println("\"" + result + "\"");
         } else {
             System.out.println(result);
         }
@@ -342,184 +351,241 @@ struct TreeNode {
 };
 #endif
 """
-            cpp_driver = """
-static std::vector<int> _extractInts(const std::string& s) {
-    std::vector<int> res;
-    std::string clean = s;
-    for (char &c : clean) {
-        if (c == '[' || c == ']' || c == ',' || c == '=' || c == '{' || c == '}') c = ' ';
-    }
-    std::stringstream ss(clean);
-    std::string token;
-    while (ss >> token) {
-        if (token == "nums" || token == "target" || token == "k" || token == "arr") continue;
-        try {
-            res.push_back(std::stoi(token));
-        } catch(...) {}
-    }
-    return res;
-}
+            # Extract candidate method from Solution class
+            sol_idx = clean_code.find('class Solution')
+            sol_snippet = clean_code[sol_idx:] if sol_idx != -1 else clean_code
+            m = re.search(r'(?:public:\s*)?([A-Za-z0-9_<>\s*&]+?)\s+([A-Za-z0-9_]+)\s*\(([^)]*)\)\s*(?:const)?\s*\{', sol_snippet)
 
-static std::vector<std::string> _extractWords(const std::string& s) {
-    std::vector<std::string> res;
-    std::string cur;
-    bool in_str = false;
-    for (char c : s) {
-        if (c == 34 || c == 39) {
-            if (in_str) { res.push_back(cur); cur.clear(); in_str = false; }
-            else { in_str = true; }
-        } else if (in_str) {
-            cur += c;
-        } else if (std::isalpha((unsigned char)c)) {
-            cur += c;
-        } else if (!cur.empty()) {
-            if (cur != "s" && cur != "t") res.push_back(cur);
-            cur.clear();
-        }
-    }
-    if (!cur.empty() && cur != "s" && cur != "t") res.push_back(cur);
-    return res;
-}
+            ret_type = "int"
+            method_name = "solve"
+            params_str = ""
+            if m:
+                ret_type = m.group(1).replace('public:', '').strip()
+                method_name = m.group(2).strip()
+                params_str = m.group(3).strip()
 
-int main() {
-    Solution sol;
-    std::string all_input, line;
-    while (std::getline(std::cin, line)) {
-        all_input += line;
-        all_input.push_back((char)10);
-    }
-    if (all_input.empty()) return 0;
-
-    std::vector<int> ints = _extractInts(all_input);
-    std::vector<std::string> words = _extractWords(all_input);
-
-#if defined(__HAS_TWO_SUM)
-    int target = ints.empty() ? 0 : ints.back();
-    std::vector<int> nums = ints;
-    if (nums.size() > 1) nums.pop_back();
-    std::vector<int> ans = sol.twoSum(nums, target);
-    std::cout << "[";
-    for (size_t i = 0; i < ans.size(); ++i) std::cout << ans[i] << (i + 1 < ans.size() ? ", " : "");
-    std::cout << "]" << std::endl;
-#elif defined(__HAS_IS_ANAGRAM)
-    std::string s = words.size() > 0 ? words[0] : "";
-    std::string t = words.size() > 1 ? words[1] : "";
-    bool ans = sol.isAnagram(s, t);
-    std::cout << (ans ? "true" : "false") << std::endl;
-#elif defined(__HAS_PRODUCT_EXCEPT_SELF)
-    std::vector<int> ans = sol.productExceptSelf(ints);
-    std::cout << "[";
-    for (size_t i = 0; i < ans.size(); ++i) std::cout << ans[i] << (i + 1 < ans.size() ? ", " : "");
-    std::cout << "]" << std::endl;
-#elif defined(__HAS_THREE_SUM)
-    std::vector<std::vector<int>> ans = sol.threeSum(ints);
-    std::cout << "[";
-    for (size_t i = 0; i < ans.size(); ++i) {
-        std::cout << "[";
-        for (size_t j = 0; j < ans[i].size(); ++j) std::cout << ans[i][j] << (j + 1 < ans[i].size() ? ", " : "");
-        std::cout << "]" << (i + 1 < ans.size() ? ", " : "");
-    }
-    std::cout << "]" << std::endl;
-#elif defined(__HAS_TOP_K)
-    int k = ints.empty() ? 1 : ints.back();
+            m_lower = method_name.lower()
+            if 'topkfrequent' in m_lower or 'top_k_frequent' in m_lower:
+                exec_block = """    int k = ints.empty() ? 0 : ints.back();
     std::vector<int> nums = ints;
     if (nums.size() > 1) nums.pop_back();
     if (k <= 0) {
         std::cout << "[]" << std::endl;
-    } else {
-        std::vector<int> ans = sol.topKFrequent(nums, k);
-        std::cout << "[";
-        for (size_t i = 0; i < ans.size(); ++i) std::cout << ans[i] << (i + 1 < ans.size() ? ", " : "");
-        std::cout << "]" << std::endl;
+        return 0;
     }
-#elif defined(__HAS_MAX_CHUNKS)
-    int ans = sol.maxChunksToSorted(ints);
-    std::cout << ans << std::endl;
-#elif defined(__HAS_SORT_ARRAY)
-    std::vector<int> ans = sol.sortArray(ints);
+    std::vector<int> ans = sol.""" + method_name + """(nums, k);
     std::cout << "[";
     for (size_t i = 0; i < ans.size(); ++i) std::cout << ans[i] << (i + 1 < ans.size() ? ", " : "");
-    std::cout << "]" << std::endl;
-#elif defined(__HAS_LONGEST_CONSECUTIVE)
-    int ans = sol.longestConsecutive(ints);
-    std::cout << ans << std::endl;
-#elif defined(__HAS_MIN_WINDOW)
-    std::string s = words.size() > 0 ? words[0] : "";
-    std::string t = words.size() > 1 ? words[1] : "";
-    std::string ans = sol.minWindow(s, t);
-    std::cout << (char)34 << ans << (char)34 << std::endl;
-#elif defined(__HAS_GROUP_ANAGRAMS)
-    std::vector<std::vector<std::string>> ans = sol.groupAnagrams(words);
+    std::cout << "]" << std::endl;"""
+            elif 'twosum' in m_lower or 'two_sum' in m_lower:
+                exec_block = """    int target = ints.empty() ? 0 : ints.back();
+    std::vector<int> nums = ints;
+    if (nums.size() > 1) nums.pop_back();
+    std::vector<int> ans = sol.""" + method_name + """(nums, target);
     std::cout << "[";
-    for (size_t i = 0; i < ans.size(); ++i) {
+    for (size_t i = 0; i < ans.size(); ++i) std::cout << ans[i] << (i + 1 < ans.size() ? ", " : "");
+    std::cout << "]" << std::endl;"""
+            elif 'isanagram' in m_lower or 'is_anagram' in m_lower:
+                exec_block = """    std::string s = words.size() > 0 ? words[0] : "";
+    std::string t = words.size() > 1 ? words[1] : "";
+    bool ans = sol.""" + method_name + """(s, t);
+    std::cout << (ans ? "true" : "false") << std::endl;"""
+            elif 'addtwonumbers' in m_lower or 'add_two_numbers' in m_lower:
+                exec_block = """    ListNode* l1 = lines.size() > 0 ? _buildList(lines[0]) : nullptr;
+    ListNode* l2 = lines.size() > 1 ? _buildList(lines[1]) : nullptr;
+    ListNode* ans = sol.""" + method_name + """(l1, l2);
+    std::cout << "[";
+    while (ans) {
+        std::cout << ans->val << (ans->next ? ", " : "");
+        ans = ans->next;
+    }
+    std::cout << "]" << std::endl;"""
+            else:
+                raw_params = [p.strip() for p in params_str.split(',') if p.strip()]
+                ptypes = []
+                for p in raw_params:
+                    parts = p.split()
+                    if len(parts) > 1:
+                        ptypes.append(' '.join(parts[:-1]).replace('const ', '').strip())
+                    else:
+                        ptypes.append(parts[0].replace('const ', '').strip())
+
+                call_args = []
+                if len(ptypes) == 2 and 'vector<int>' in ptypes[0] and ptypes[1] == 'int':
+                    call_args = ["_safeSubVector(ints, 0, ints.size() > 1 ? ints.size() - 1 : 1)", "ints.empty() ? 0 : ints.back()"]
+                elif len(ptypes) == 1 and 'vector<int>' in ptypes[0]:
+                    call_args = ["ints"]
+                elif len(ptypes) == 2 and ptypes[0] == 'string' and ptypes[1] == 'string':
+                    call_args = ["words.size() > 0 ? words[0] : \"\"", "words.size() > 1 ? words[1] : \"\""]
+                elif len(ptypes) == 1 and ptypes[0] == 'string':
+                    call_args = ["words.size() > 0 ? words[0] : \"\""]
+                elif len(ptypes) == 1 and 'vector<string>' in ptypes[0]:
+                    call_args = ["words"]
+                elif len(ptypes) == 1 and 'vector<vector<int>>' in ptypes[0]:
+                    call_args = ["matrix"]
+                elif len(ptypes) == 1 and ptypes[0] == 'int':
+                    call_args = ["ints.empty() ? 0 : ints[0]"]
+                elif len(ptypes) == 2 and ptypes[0] == 'int' and ptypes[1] == 'int':
+                    call_args = ["ints.size() > 0 ? ints[0] : 0", "ints.size() > 1 ? ints[1] : 0"]
+                elif len(ptypes) == 2 and 'ListNode' in ptypes[0] and 'ListNode' in ptypes[1]:
+                    call_args = ["l1", "l2"]
+                elif len(ptypes) == 1 and 'ListNode' in ptypes[0]:
+                    call_args = ["l1"]
+                elif len(ptypes) == 1 and 'TreeNode' in ptypes[0]:
+                    call_args = ["root"]
+                elif len(ptypes) == 1 and 'vector<char>' in ptypes[0]:
+                    call_args = ["s_chars"]
+                elif len(ptypes) == 1 and 'vector<vector<char>>' in ptypes[0]:
+                    call_args = ["char_matrix"]
+                else:
+                    for pt in ptypes:
+                        if 'vector<vector<int>>' in pt: call_args.append("matrix")
+                        elif 'vector<int>' in pt: call_args.append("ints")
+                        elif 'vector<string>' in pt: call_args.append("words")
+                        elif 'string' in pt: call_args.append("words.empty() ? \"\" : words[0]")
+                        elif 'ListNode' in pt: call_args.append("l1")
+                        elif 'TreeNode' in pt: call_args.append("root")
+                        elif 'int' in pt: call_args.append("ints.empty() ? 0 : ints[0]")
+                        else: call_args.append("0")
+
+                call_expr = f"sol.{method_name}({', '.join(call_args)})"
+
+                if ret_type == 'void':
+                    exec_block = f"""    {call_expr};
+    std::cout << "[";
+    for (size_t i = 0; i < ints.size(); ++i) std::cout << ints[i] << (i + 1 < ints.size() ? ", " : "");
+    std::cout << "]" << std::endl;"""
+                elif 'vector<vector<string>>' in ret_type:
+                    exec_block = f"""    auto ans = {call_expr};
+    std::cout << "[";
+    for (size_t i = 0; i < ans.size(); ++i) {{
         std::cout << "[";
         for (size_t j = 0; j < ans[i].size(); ++j) std::cout << (char)34 << ans[i][j] << (char)34 << (j + 1 < ans[i].size() ? ", " : "");
         std::cout << "]" << (i + 1 < ans.size() ? ", " : "");
-    }
-    std::cout << "]" << std::endl;
-#elif defined(__HAS_FIRST_MISSING_POSITIVE)
-    int ans = sol.firstMissingPositive(ints);
-    std::cout << ans << std::endl;
-#elif defined(__HAS_CONTAINS_DUPLICATE)
-    bool ans = sol.containsDuplicate(ints);
-    std::cout << (ans ? "true" : "false") << std::endl;
-#elif defined(__HAS_REVERSE_STRING)
-    std::vector<char> s_chars;
-    for (char c : (words.empty() ? "" : words[0])) s_chars.push_back(c);
-    sol.reverseString(s_chars);
+    }}
+    std::cout << "]" << std::endl;"""
+                elif 'vector<vector<int>>' in ret_type:
+                    exec_block = f"""    auto ans = {call_expr};
     std::cout << "[";
-    for (size_t i = 0; i < s_chars.size(); ++i) std::cout << (char)34 << s_chars[i] << (char)34 << (i + 1 < s_chars.size() ? ", " : "");
-    std::cout << "]" << std::endl;
-#elif defined(__HAS_FIRST_UNIQ_CHAR)
-    std::string s = words.empty() ? "" : words[0];
-    int ans = sol.firstUniqChar(s);
-    std::cout << ans << std::endl;
-#elif defined(__HAS_FIZZ_BUZZ)
-    int n = ints.empty() ? 15 : ints[0];
-    std::vector<std::string> ans = sol.fizzBuzz(n);
+    for (size_t i = 0; i < ans.size(); ++i) {{
+        std::cout << "[";
+        for (size_t j = 0; j < ans[i].size(); ++j) std::cout << ans[i][j] << (j + 1 < ans[i].size() ? ", " : "");
+        std::cout << "]" << (i + 1 < ans.size() ? ", " : "");
+    }}
+    std::cout << "]" << std::endl;"""
+                elif 'vector<string>' in ret_type:
+                    exec_block = f"""    auto ans = {call_expr};
     std::cout << "[";
     for (size_t i = 0; i < ans.size(); ++i) std::cout << (char)34 << ans[i] << (char)34 << (i + 1 < ans.size() ? ", " : "");
-    std::cout << "]" << std::endl;
-#elif defined(__HAS_LONGEST_COMMON_PREFIX)
-    std::string ans = sol.longestCommonPrefix(words);
-    std::cout << (char)34 << ans << (char)34 << std::endl;
-#elif defined(__HAS_REVERSE_WORDS)
-    std::string s = all_input;
-    std::string ans = sol.reverseWords(s);
-    std::cout << (char)34 << ans << (char)34 << std::endl;
-#elif defined(__HAS_SUBARRAY_SUM)
-    int k = ints.empty() ? 0 : ints.back();
-    std::vector<int> nums = ints;
-    if (nums.size() > 1) nums.pop_back();
-    int ans = sol.subarraySum(nums, k);
-    std::cout << ans << std::endl;
-#else
-    // Fallback: Check if solve method exists or print success
-    std::cout << "Accepted" << std::endl;
-#endif
+    std::cout << "]" << std::endl;"""
+                elif 'vector<bool>' in ret_type:
+                    exec_block = f"""    auto ans = {call_expr};
+    std::cout << "[";
+    for (size_t i = 0; i < ans.size(); ++i) std::cout << (ans[i] ? "true" : "false") << (i + 1 < ans.size() ? ", " : "");
+    std::cout << "]" << std::endl;"""
+                elif 'vector<int>' in ret_type or 'vector<double>' in ret_type:
+                    exec_block = f"""    auto ans = {call_expr};
+    std::cout << "[";
+    for (size_t i = 0; i < ans.size(); ++i) std::cout << ans[i] << (i + 1 < ans.size() ? ", " : "");
+    std::cout << "]" << std::endl;"""
+                elif ret_type == 'bool':
+                    exec_block = f"""    bool ans = {call_expr};
+    std::cout << (ans ? "true" : "false") << std::endl;"""
+                elif ret_type == 'string':
+                    exec_block = f"""    std::string ans = {call_expr};
+    std::cout << (char)34 << ans << (char)34 << std::endl;"""
+                elif 'ListNode' in ret_type:
+                    exec_block = f"""    ListNode* ans = {call_expr};
+    std::cout << "[";
+    while (ans) {{
+        std::cout << ans->val << (ans->next ? ", " : "");
+        ans = ans->next;
+    }}
+    std::cout << "]" << std::endl;"""
+                else:
+                    exec_block = f"""    auto ans = {call_expr};
+    std::cout << ans << std::endl;"""
+
+            cpp_driver = f"""
+static std::vector<int> _extractInts(const std::string& s) {{
+    std::vector<int> res;
+    std::string clean = s;
+    for (char &c : clean) {{
+        if (c == '[' || c == ']' || c == ',' || c == '=' || c == '{{' || c == '}}') c = ' ';
+    }}
+    std::stringstream ss(clean);
+    std::string token;
+    while (ss >> token) {{
+        if (token == "nums" || token == "target" || token == "k" || token == "arr") continue;
+        try {{
+            res.push_back(std::stoi(token));
+        }} catch(...) {{}}
+    }}
+    return res;
+}}
+
+static std::vector<std::string> _extractWords(const std::string& s) {{
+    std::vector<std::string> res;
+    std::string cur;
+    bool in_str = false;
+    for (char c : s) {{
+        if (c == 34 || c == 39) {{
+            if (in_str) {{ res.push_back(cur); cur.clear(); in_str = false; }}
+            else {{ in_str = true; }}
+        }} else if (in_str) {{
+            cur += c;
+        }} else if (std::isalpha((unsigned char)c)) {{
+            cur += c;
+        }} else if (!cur.empty()) {{
+            if (cur != "s" && cur != "t") res.push_back(cur);
+            cur.clear();
+        }}
+    }}
+    if (!cur.empty() && cur != "s" && cur != "t") res.push_back(cur);
+    return res;
+}}
+
+static std::vector<int> _safeSubVector(const std::vector<int>& v, size_t start, size_t count) {{
+    std::vector<int> res;
+    for (size_t i = start; i < v.size() && res.size() < count; ++i) res.push_back(v[i]);
+    return res;
+}}
+
+static ListNode* _buildList(const std::string& s) {{
+    std::vector<int> ints = _extractInts(s);
+    if (ints.empty()) return nullptr;
+    ListNode* head = new ListNode(ints[0]);
+    ListNode* curr = head;
+    for (size_t i = 1; i < ints.size(); ++i) {{
+        curr->next = new ListNode(ints[i]);
+        curr = curr->next;
+    }}
+    return head;
+}}
+
+int main() {{
+    Solution sol;
+    std::string all_input, line;
+    std::vector<std::string> lines;
+    while (std::getline(std::cin, line)) {{
+        lines.push_back(line);
+        all_input += line;
+        all_input.push_back((char)10);
+    }}
+    if (all_input.empty()) return 0;
+
+    std::vector<int> ints = _extractInts(all_input);
+    std::vector<std::string> words = _extractWords(all_input);
+    std::vector<std::vector<int>> matrix;
+    ListNode* l1 = lines.size() > 0 ? _buildList(lines[0]) : nullptr;
+    ListNode* l2 = lines.size() > 1 ? _buildList(lines[1]) : nullptr;
+
+{exec_block}
+
     return 0;
-}
+}}
 """
-            defs = ""
-            if "twoSum" in clean_code: defs += "#define __HAS_TWO_SUM 1\n"
-            elif "isAnagram" in clean_code: defs += "#define __HAS_IS_ANAGRAM 1\n"
-            elif "groupAnagrams" in clean_code: defs += "#define __HAS_GROUP_ANAGRAMS 1\n"
-            elif "firstMissingPositive" in clean_code: defs += "#define __HAS_FIRST_MISSING_POSITIVE 1\n"
-            elif "containsDuplicate" in clean_code: defs += "#define __HAS_CONTAINS_DUPLICATE 1\n"
-            elif "productExceptSelf" in clean_code: defs += "#define __HAS_PRODUCT_EXCEPT_SELF 1\n"
-            elif "threeSum" in clean_code: defs += "#define __HAS_THREE_SUM 1\n"
-            elif "topKFrequent" in clean_code: defs += "#define __HAS_TOP_K 1\n"
-            elif "maxChunksToSorted" in clean_code: defs += "#define __HAS_MAX_CHUNKS 1\n"
-            elif "sortArray" in clean_code: defs += "#define __HAS_SORT_ARRAY 1\n"
-            elif "longestConsecutive" in clean_code: defs += "#define __HAS_LONGEST_CONSECUTIVE 1\n"
-            elif "minWindow" in clean_code: defs += "#define __HAS_MIN_WINDOW 1\n"
-            elif "reverseString" in clean_code: defs += "#define __HAS_REVERSE_STRING 1\n"
-            elif "firstUniqChar" in clean_code: defs += "#define __HAS_FIRST_UNIQ_CHAR 1\n"
-            elif "fizzBuzz" in clean_code: defs += "#define __HAS_FIZZ_BUZZ 1\n"
-            elif "longestCommonPrefix" in clean_code: defs += "#define __HAS_LONGEST_COMMON_PREFIX 1\n"
-            elif "reverseWords" in clean_code: defs += "#define __HAS_REVERSE_WORDS 1\n"
-            elif "subarraySum" in clean_code: defs += "#define __HAS_SUBARRAY_SUM 1\n"
-            clean_code = defs + cpp_header + "\n" + clean_code + "\n" + cpp_driver
+            clean_code = cpp_header + "\n" + clean_code + "\n" + cpp_driver
     elif language_id == 50: # C
         if "main" not in clean_code:
             c_driver = """

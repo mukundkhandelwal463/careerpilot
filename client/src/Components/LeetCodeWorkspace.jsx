@@ -281,7 +281,8 @@ export default function LeetCodeWorkspace({
         // preserve indent on blank lines for continuous vertical guide line
         counts.push(currentIndent);
       } else {
-        const leading = (line.match(/^ +/) || [''])[0].length;
+        const expanded = line.replace(/\t/g, '    ');
+        const leading = (expanded.match(/^ +/) || [''])[0].length;
         const lvl = Math.floor(leading / 4);
         currentIndent = lvl;
         counts.push(lvl);
@@ -1237,7 +1238,8 @@ export default function LeetCodeWorkspace({
                           top: 0,
                           bottom: 0,
                           width: '1px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.16)'
+                          backgroundColor: 'rgba(255, 255, 255, 0.28)',
+                          boxShadow: '0 0 1px rgba(255, 255, 255, 0.15)'
                         }}
                       />
                     ))}

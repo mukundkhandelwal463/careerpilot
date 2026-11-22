@@ -3754,8 +3754,78 @@ MOCK_TEST_BANKS = {
     }
 }
 
+import os
+import json
+import random
+
+_CATALOG_CACHE = None
+
+def _get_catalog():
+    global _CATALOG_CACHE
+    if _CATALOG_CACHE is None:
+        cat_path = os.path.join(os.path.dirname(__file__), 'dsa_catalog.json')
+        if os.path.exists(cat_path):
+            try:
+                with open(cat_path, 'r', encoding='utf-8') as f:
+                    _CATALOG_CACHE = json.load(f)
+            except Exception:
+                _CATALOG_CACHE = {}
+        else:
+            _CATALOG_CACHE = {}
+    return _CATALOG_CACHE
+
+def get_random_coding_challenges(difficulty='medium'):
+    diff = str(difficulty or 'medium').lower().strip()
+    catalog = _get_catalog()
+    if not catalog:
+        return MOCK_TEST_BANKS.get(diff, MOCK_TEST_BANKS['medium'])['coding']
+
+    easy_pool = [p for p in catalog.values() if p.get('level') == 'Easy']
+    med_pool = [p for p in catalog.values() if p.get('level') == 'Medium']
+    hard_pool = [p for p in catalog.values() if p.get('level') == 'Hard']
+
+    if diff == 'easy':
+        q1_raw = random.choice(easy_pool) if easy_pool else None
+        pool2 = hard_pool if hard_pool else med_pool
+        q2_raw = random.choice(pool2) if pool2 else None
+    elif diff == 'hard':
+        q1_raw = random.choice(med_pool) if med_pool else (random.choice(easy_pool) if easy_pool else None)
+        q2_raw = random.choice(hard_pool) if hard_pool else None
+    else: # medium
+        q1_raw = random.choice(easy_pool) if easy_pool else None
+        q2_raw = random.choice(hard_pool) if hard_pool else (random.choice(med_pool) if med_pool else None)
+
+    if not q1_raw or not q2_raw:
+        return MOCK_TEST_BANKS.get(diff, MOCK_TEST_BANKS['medium'])['coding']
+
+    def _format_q(raw, cid, diff_label):
+        return {
+            'id': cid,
+            'number': raw.get('id'),
+            'difficulty': diff_label,
+            'title': raw.get('name'),
+            'tags': raw.get('tags', []),
+            'companies': raw.get('companies', []),
+            'description': raw.get('description', ''),
+            'examples': raw.get('examples', []),
+            'constraints': raw.get('constraints', []),
+            'testcases': raw.get('testcases', []),
+            'hiddenTestcases': raw.get('hiddenTestcases', []),
+            'templates': raw.get('templates', {})
+        }
+
+    q1 = _format_q(q1_raw, 'code_easy_1', 'Easy')
+    q2 = _format_q(q2_raw, 'code_hard_2', 'Hard')
+    return [q1, q2]
+
 def get_bank_test_data(difficulty='medium'):
     diff = str(difficulty or 'medium').lower().strip()
     if diff not in MOCK_TEST_BANKS:
         diff = 'medium'
-    return MOCK_TEST_BANKS[diff]
+    base = MOCK_TEST_BANKS[diff]
+    return {
+        'technical': base['technical'],
+        'verbal': base['verbal'],
+        'aptitude': base['aptitude'],
+        'coding': get_random_coding_challenges(diff)
+    }

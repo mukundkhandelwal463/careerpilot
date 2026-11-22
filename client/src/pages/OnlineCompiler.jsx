@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import Navbar from '../Components/navbar.jsx';
 import LeetCodeWorkspace from '../Components/LeetCodeWorkspace.jsx';
+import { DSA_PROBLEM_CATALOG } from '../data/dsaProblemCatalog.js';
+
+const allCatalogProblems = Object.values(DSA_PROBLEM_CATALOG).map(p => ({
+  ...p,
+  patternName: p.tags?.[0] || 'DSA Sheet'
+}));
 
 export const DEFAULT_PROBLEMS = [
   {
@@ -586,13 +592,16 @@ int main() {
 
 export default function OnlineCompiler() {
   const [selectedProbIdx, setSelectedProbIdx] = useState(0);
+  const [customProblem, setCustomProblem] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState('python');
   const [codes, setCodes] = useState({});
   const [evalResult, setEvalResult] = useState(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
 
-  const currentProb = DEFAULT_PROBLEMS[selectedProbIdx];
-  const currentCode = codes[`${currentProb.id}_${selectedLanguage}`] || currentProb.templates[selectedLanguage] || '';
+  const currentProb = customProblem || DEFAULT_PROBLEMS[selectedProbIdx];
+  const currentCode = codes[`${currentProb.id}_${selectedLanguage}`] !== undefined
+    ? codes[`${currentProb.id}_${selectedLanguage}`]
+    : (currentProb.templates?.[selectedLanguage] || '');
 
   const handleCodeChange = (newCode) => {
     setCodes(prev => ({ ...prev, [`${currentProb.id}_${selectedLanguage}`]: newCode }));
@@ -600,7 +609,7 @@ export default function OnlineCompiler() {
 
   const handleLanguageChange = (newLang) => {
     setSelectedLanguage(newLang);
-    if (!codes[`${currentProb.id}_${newLang}`] && currentProb.templates[newLang]) {
+    if (!codes[`${currentProb.id}_${newLang}`] && currentProb.templates?.[newLang]) {
       setCodes(prev => ({ ...prev, [`${currentProb.id}_${newLang}`]: currentProb.templates[newLang] }));
     }
   };
@@ -712,11 +721,26 @@ export default function OnlineCompiler() {
           onSubmit={handleSubmit}
           isEvaluating={isEvaluating}
           evalResult={evalResult}
-          onPrevQuestion={() => setSelectedProbIdx(Math.max(0, selectedProbIdx - 1))}
-          onNextQuestion={() => setSelectedProbIdx(Math.min(DEFAULT_PROBLEMS.length - 1, selectedProbIdx + 1))}
+          onPrevQuestion={() => {
+            setCustomProblem(null);
+            setSelectedProbIdx(Math.max(0, selectedProbIdx - 1));
+          }}
+          onNextQuestion={() => {
+            setCustomProblem(null);
+            setSelectedProbIdx(Math.min(DEFAULT_PROBLEMS.length - 1, selectedProbIdx + 1));
+          }}
           hasPrev={selectedProbIdx > 0}
           hasNext={selectedProbIdx < DEFAULT_PROBLEMS.length - 1}
-          sectionTitle="Problem Solving IDE"
+          sectionTitle={customProblem ? (customProblem.patternName || customProblem.name) : "Problem Solving IDE"}
+          problemList={allCatalogProblems}
+          onSelectProblem={(prob) => {
+            setCustomProblem({
+              ...prob,
+              title: prob.name,
+              difficulty: prob.level
+            });
+            setEvalResult(null);
+          }}
         />
       </div>
     </div>
