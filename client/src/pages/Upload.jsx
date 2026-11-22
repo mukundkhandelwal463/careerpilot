@@ -19,9 +19,54 @@ import {
   ArrowRight,
   FileCheck2,
   AlertCircle,
-  FileUp
+  FileUp,
+  Tag,
+  Plus,
+  Target,
+  Sparkles,
+  Layers,
+  Search,
+  CheckCheck
 } from 'lucide-react';
 import '../css/style.css';
+
+const DOMAIN_PRESETS = [
+  {
+    name: 'Software Engineering',
+    keywords: ['Data Structures', 'System Design', 'Algorithms', 'CI/CD', 'Git', 'REST APIs', 'Unit Testing']
+  },
+  {
+    name: 'Full Stack Development',
+    keywords: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'Tailwind CSS', 'Next.js', 'GraphQL']
+  },
+  {
+    name: 'Data Science & AI',
+    keywords: ['Python', 'Pandas', 'Machine Learning', 'SQL', 'PyTorch', 'Data Visualization', 'Scikit-Learn']
+  },
+  {
+    name: 'DevOps & Cloud',
+    keywords: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'Linux', 'Microservices', 'Monitoring']
+  },
+  {
+    name: 'Product Management',
+    keywords: ['Agile / Scrum', 'Roadmapping', 'User Stories', 'A/B Testing', 'Stakeholder Management', 'KPIs']
+  }
+];
+
+const SAMPLE_TECH_JD = `Role: Senior Software Engineer (Full Stack / Backend)
+
+Responsibilities:
+- Design, build, and maintain high-performance, reusable, and reliable backend microservices in Python, Java, or Node.js.
+- Work closely with cloud infrastructure on AWS, implementing containerized workloads using Docker and Kubernetes.
+- Collaborate with frontend teams to integrate modern React interfaces with scalable RESTful and GraphQL APIs.
+- Optimize database schemas and queries across PostgreSQL, MongoDB, and Redis for high throughput and low latency.
+- Participate in agile sprints, conduct code reviews, and drive automated CI/CD pipeline deployments.
+
+Required Skills & Qualifications:
+- 3+ years of professional software engineering experience with strong proficiency in Data Structures and Algorithms.
+- Hands-on experience with modern web frameworks (Django, FastAPI, Spring Boot, or Express).
+- Strong understanding of cloud-native architecture, distributed systems, and microservices.
+- Experience with Git, Docker, automated unit testing, and continuous integration.`;
 
 const Upload = () => {
   const { user } = useAuth();
@@ -31,6 +76,11 @@ const Upload = () => {
   const [jdMode, setJdMode] = useState('paste'); // 'paste' or 'file'
   const [streamCategory, setStreamCategory] = useState('');
   const [jobDescription, setJobDescription] = useState('');
+  
+  // Custom Keywords testing state
+  const [customKeywords, setCustomKeywords] = useState([]);
+  const [keywordInput, setKeywordInput] = useState('');
+  
   const [status, setStatus] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
   const [dragover, setDragover] = useState(false);
@@ -188,6 +238,38 @@ const Upload = () => {
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   };
 
+  // Keyword tags handling
+  const handleAddKeyword = () => {
+    const trimmed = keywordInput.trim();
+    if (trimmed && !customKeywords.includes(trimmed)) {
+      setCustomKeywords([...customKeywords, trimmed]);
+      setKeywordInput('');
+    }
+  };
+
+  const handleRemoveKeyword = (keywordToRemove) => {
+    setCustomKeywords(customKeywords.filter(k => k !== keywordToRemove));
+  };
+
+  const handleKeyDownKeyword = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      handleAddKeyword();
+    }
+  };
+
+  const handleSelectDomain = (domain) => {
+    setStreamCategory(domain.name);
+    // Add domain keywords that aren't already present
+    const newKeywords = [...customKeywords];
+    domain.keywords.forEach(k => {
+      if (!newKeywords.includes(k) && newKeywords.length < 12) {
+        newKeywords.push(k);
+      }
+    });
+    setCustomKeywords(newKeywords);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -196,14 +278,22 @@ const Upload = () => {
       return;
     }
 
-    setStatus({ text: "Analyzing resume...", type: "info" });
+    setStatus({ text: "Analyzing resume against target criteria...", type: "info" });
     setLoading(true);
 
     const formData = new FormData();
     if (file) {
       formData.append("resume", file);
     }
-    formData.append("job_description", jobDescription);
+    
+    // Append custom keywords to job description text for direct ATS keyword matching
+    let fullJdPayload = jobDescription.trim();
+    if (customKeywords.length > 0) {
+      const keywordBlock = `\n\nTarget Skills & Core Keywords:\n${customKeywords.join(', ')}`;
+      fullJdPayload = fullJdPayload ? `${fullJdPayload}\n${keywordBlock}` : keywordBlock;
+    }
+
+    formData.append("job_description", fullJdPayload);
     formData.append("stream_or_category", streamCategory);
     if (jdFile) {
       formData.append("job_description_file", jdFile);
@@ -255,7 +345,7 @@ const Upload = () => {
         }));
       }
 
-      setStatus({ text: "Analysis complete. Redirecting...", type: "success" });
+      setStatus({ text: "Analysis complete. Redirecting to results...", type: "success" });
       setTimeout(() => {
         setLoading(false);
         navigate('/result');
@@ -267,6 +357,10 @@ const Upload = () => {
     }
   };
 
+  // Get suggested keywords for the current category
+  const activePreset = DOMAIN_PRESETS.find(p => p.name.toLowerCase() === streamCategory.toLowerCase());
+  const suggestedKeywords = activePreset ? activePreset.keywords : DOMAIN_PRESETS[0].keywords;
+
   return (
     <div className="page-shell">
       <LoadingOverlay
@@ -275,10 +369,10 @@ const Upload = () => {
         title="Analyzing Resume"
         subtitle={file ? `Evaluating ${file.name} against ATS benchmark criteria` : 'Running career alignment analysis'}
         steps={[
-          'Extracting document structure & text...',
-          'Matching skills against ATS keyword density...',
-          'Evaluating job description relevance...',
-          'Preparing detailed score report...'
+          'Extracting document structure, fonts & text layers...',
+          'Matching skills against ATS keyword density models...',
+          'Scanning target job description & required skills...',
+          'Compiling diagnostic ATS match report...'
         ]}
       />
       <Navbar />
@@ -287,117 +381,187 @@ const Upload = () => {
         className="page" 
         style={{ 
           width: '100%', 
-          maxWidth: '1440px', 
-          margin: '24px auto 60px', 
-          padding: '0 24px', 
+          maxWidth: '1600px', 
+          margin: '20px auto 48px', 
+          padding: '0 20px', 
           boxSizing: 'border-box' 
         }}
       >
-        {/* Page Header */}
-        <div style={{ marginBottom: '28px' }}>
-          <h1 style={{
-            fontSize: 'clamp(2rem, 3.2vw, 2.6rem)',
-            fontWeight: 700,
-            color: 'var(--text)',
-            letterSpacing: '-0.02em',
-            margin: '0 0 8px',
-            lineHeight: 1.2
-          }}>
-            ATS Resume Analyzer
-          </h1>
-          <p style={{
-            margin: 0,
-            fontSize: '1rem',
-            color: 'var(--muted)',
-            maxWidth: '760px',
-            lineHeight: 1.55
-          }}>
-            Scan your resume against target job descriptions to identify missing keywords, evaluate formatting, and optimize your ATS match score.
-          </p>
+        {/* Header Row */}
+        <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <h1 style={{
+              fontSize: 'clamp(1.9rem, 2.8vw, 2.5rem)',
+              fontWeight: 700,
+              color: 'var(--text)',
+              letterSpacing: '-0.02em',
+              margin: '0 0 6px',
+              lineHeight: 1.2
+            }}>
+              ATS Resume Analyzer
+            </h1>
+            <p style={{
+              margin: 0,
+              fontSize: '0.98rem',
+              color: 'var(--muted)',
+              maxWidth: '820px',
+              lineHeight: 1.5
+            }}>
+              Benchmark your resume against target job descriptions, test keyword density, and inspect ATS parsability to maximize recruiter callback rates.
+            </p>
+          </div>
+
+          {/* Quick Metrics Bar */}
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              borderRadius: '999px',
+              background: '#ffffff',
+              border: '1px solid rgba(24, 35, 38, 0.08)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              color: 'var(--text)'
+            }}>
+              <CheckCheck size={14} color="var(--teal)" /> PDF, DOCX & TXT Supported
+            </span>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              borderRadius: '999px',
+              background: '#ffffff',
+              border: '1px solid rgba(24, 35, 38, 0.08)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              color: 'var(--text)'
+            }}>
+              <Target size={14} color="var(--accent)" /> Keyword Match Testing
+            </span>
+          </div>
         </div>
 
-        {/* Main Grid: Sidebar + Content */}
-        <div style={{ display: 'flex', gap: '28px', alignItems: 'flex-start' }}>
+        {/* 2-Column Responsive Layout */}
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
           
           {/* Left Navigation Sidebar */}
           <aside style={{
-            width: '260px',
+            width: '280px',
             flexShrink: 0,
-            background: 'var(--surface)',
-            border: '1px solid rgba(24, 35, 38, 0.08)',
-            borderRadius: '20px',
-            padding: '20px 16px',
-            boxShadow: 'var(--shadow)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: '16px',
             position: 'sticky',
-            top: '90px'
+            top: '85px'
           }}>
-            <div style={{ padding: '0 8px 12px', borderBottom: '1px solid rgba(24, 35, 38, 0.08)', marginBottom: '4px' }}>
-              <strong style={{ display: 'block', fontSize: '0.92rem', color: 'var(--text)' }}>ATS Toolkit</strong>
-              <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>Optimizers & History</span>
+            {/* Toolkit Tabs Card */}
+            <div style={{
+              background: 'var(--surface)',
+              border: '1px solid rgba(24, 35, 38, 0.08)',
+              borderRadius: '20px',
+              padding: '16px 14px',
+              boxShadow: 'var(--shadow)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}>
+              <div style={{ padding: '0 8px 10px', borderBottom: '1px solid rgba(24, 35, 38, 0.06)', marginBottom: '4px' }}>
+                <strong style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text)' }}>ATS Toolkit</strong>
+                <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>Optimizers & Scan History</span>
+              </div>
+
+              <button 
+                onClick={() => setActiveTab('analyze')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  width: '100%',
+                  padding: '11px 14px',
+                  border: 'none',
+                  borderRadius: '12px',
+                  background: activeTab === 'analyze' ? 'var(--surface-dark)' : 'transparent',
+                  color: activeTab === 'analyze' ? '#ffffff' : 'var(--text)',
+                  fontSize: '0.88rem',
+                  fontWeight: 700,
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <BarChart3 size={16} />
+                <span>Analyze Resume</span>
+              </button>
+
+              <button 
+                onClick={() => setActiveTab('records')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  padding: '11px 14px',
+                  border: 'none',
+                  borderRadius: '12px',
+                  background: activeTab === 'records' ? 'var(--surface-dark)' : 'transparent',
+                  color: activeTab === 'records' ? '#ffffff' : 'var(--text)',
+                  fontSize: '0.88rem',
+                  fontWeight: 700,
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Clock size={16} />
+                  <span>Previous Records</span>
+                </span>
+                {resumes.length > 0 && (
+                  <span style={{
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    background: activeTab === 'records' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(24, 35, 38, 0.06)',
+                    color: activeTab === 'records' ? '#ffffff' : 'var(--muted)'
+                  }}>
+                    {resumes.length}
+                  </span>
+                )}
+              </button>
             </div>
 
-            <button 
-              onClick={() => setActiveTab('analyze')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                width: '100%',
-                padding: '11px 16px',
-                border: 'none',
-                borderRadius: '14px',
-                background: activeTab === 'analyze' ? 'var(--surface-dark)' : 'transparent',
-                color: activeTab === 'analyze' ? '#ffffff' : 'var(--text)',
-                fontSize: '0.9rem',
-                fontWeight: 700,
-                textAlign: 'left',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <BarChart3 size={17} />
-              <span>Analyze Resume</span>
-            </button>
+            {/* ATS Verification Pillars Card */}
+            <div style={{
+              background: 'var(--surface)',
+              border: '1px solid rgba(24, 35, 38, 0.08)',
+              borderRadius: '20px',
+              padding: '18px 16px',
+              boxShadow: 'var(--shadow)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: 'var(--text)' }}>
+                <Layers size={16} color="var(--accent)" />
+                <strong style={{ fontSize: '0.86rem' }}>ATS Evaluation Criteria</strong>
+              </div>
 
-            <button 
-              onClick={() => setActiveTab('records')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                width: '100%',
-                padding: '11px 16px',
-                border: 'none',
-                borderRadius: '14px',
-                background: activeTab === 'records' ? 'var(--surface-dark)' : 'transparent',
-                color: activeTab === 'records' ? '#ffffff' : 'var(--text)',
-                fontSize: '0.9rem',
-                fontWeight: 700,
-                textAlign: 'left',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Clock size={17} />
-                <span>Previous Records</span>
-              </span>
-              {resumes.length > 0 && (
-                <span style={{
-                  padding: '2px 8px',
-                  borderRadius: '999px',
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  background: activeTab === 'records' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(24, 35, 38, 0.06)',
-                  color: activeTab === 'records' ? '#ffffff' : 'var(--muted)'
-                }}>
-                  {resumes.length}
-                </span>
-              )}
-            </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ fontSize: '0.78rem', color: 'var(--muted)', lineHeight: 1.4 }}>
+                  <strong style={{ color: 'var(--text)', display: 'block', marginBottom: '2px' }}>1. Keyword Density</strong>
+                  Compares document vocabulary against target JD skills and frequency.
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--muted)', lineHeight: 1.4 }}>
+                  <strong style={{ color: 'var(--text)', display: 'block', marginBottom: '2px' }}>2. Parsable Hierarchy</strong>
+                  Checks header structure, standard fonts, and table readability.
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--muted)', lineHeight: 1.4 }}>
+                  <strong style={{ color: 'var(--text)', display: 'block', marginBottom: '2px' }}>3. Impact Action Verbs</strong>
+                  Scans bullet points for quantified achievements and action verbs.
+                </div>
+              </div>
+            </div>
           </aside>
 
           {/* Right Main Content Card */}
@@ -413,7 +577,16 @@ const Upload = () => {
                 <form id="analyzeForm" onSubmit={handleSubmit}>
                   
                   {/* Step 1: Upload Resume Box */}
-                  <div style={{ marginBottom: '24px' }}>
+                  <div style={{ marginBottom: '26px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ fontSize: '0.94rem', fontWeight: 700, color: 'var(--text)' }}>
+                        Resume Document
+                      </label>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
+                        PDF, DOCX, TXT (Max 10 MB)
+                      </span>
+                    </div>
+
                     {!file ? (
                       <div 
                         onDragOver={handleDragOver}
@@ -423,7 +596,7 @@ const Upload = () => {
                         style={{
                           border: dragover ? '2px dashed var(--accent)' : '2px dashed rgba(201, 100, 66, 0.4)',
                           borderRadius: '18px',
-                          padding: '40px 24px',
+                          padding: '38px 24px',
                           textAlign: 'center',
                           cursor: 'pointer',
                           background: dragover ? 'rgba(201, 100, 66, 0.04)' : '#faf9f5',
@@ -435,21 +608,21 @@ const Upload = () => {
                         }}
                       >
                         <div style={{
-                          marginBottom: '12px',
+                          marginBottom: '10px',
                           color: 'var(--accent)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center'
                         }}>
-                          <FileUp size={40} />
+                          <FileUp size={38} />
                         </div>
 
-                        <div style={{ fontSize: '1rem', color: 'var(--text)', marginBottom: '4px' }}>
-                          Drag & drop your resume here, or <strong style={{ color: 'var(--accent)' }}>click to browse</strong>
+                        <div style={{ fontSize: '0.98rem', color: 'var(--text)', marginBottom: '4px' }}>
+                          Drag & drop your resume file here, or <strong style={{ color: 'var(--accent)' }}>click to browse</strong>
                         </div>
 
-                        <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--muted)' }}>
-                          Supports PDF, DOCX, and TXT files (up to 10 MB)
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--muted)' }}>
+                          Single or multi-page documents supported
                         </p>
                       </div>
                     ) : (
@@ -487,7 +660,7 @@ const Upload = () => {
                                 fontSize: '0.72rem',
                                 fontWeight: 700
                               }}>
-                                Attached
+                                Ready for ATS Scan
                               </span>
                             </div>
                             <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>
@@ -511,7 +684,7 @@ const Upload = () => {
                               cursor: 'pointer'
                             }}
                           >
-                            Change File
+                            Replace File
                           </button>
                           <button
                             type="button"
@@ -544,7 +717,7 @@ const Upload = () => {
                     />
                   </div>
 
-                  {/* Step 2: Category / Stream */}
+                  {/* Step 2: Category / Target Role + Preset Chips */}
                   <div style={{ marginBottom: '22px' }}>
                     <label 
                       htmlFor="streamCategory" 
@@ -556,17 +729,17 @@ const Upload = () => {
                         marginBottom: '8px' 
                       }}
                     >
-                      Category / Stream (optional)
+                      Target Role / Job Category
                     </label>
                     <input 
                       id="streamCategory" 
                       type="text" 
                       value={streamCategory}
                       onChange={(e) => setStreamCategory(e.target.value)}
-                      placeholder="Example: Data Science, DevOps, HR, Marketing" 
+                      placeholder="e.g. Software Engineering, Data Science, Product Management, DevOps" 
                       style={{
                         width: '100%',
-                        padding: '12px 16px',
+                        padding: '11px 16px',
                         background: '#ffffff',
                         border: '1px solid rgba(24, 35, 38, 0.14)',
                         borderRadius: '12px',
@@ -576,9 +749,171 @@ const Upload = () => {
                         boxSizing: 'border-box'
                       }}
                     />
+
+                    {/* Quick Domain Presets */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--muted)', fontWeight: 600 }}>Quick presets:</span>
+                      {DOMAIN_PRESETS.map((preset, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSelectDomain(preset)}
+                          style={{
+                            padding: '3px 10px',
+                            borderRadius: '999px',
+                            border: '1px solid',
+                            borderColor: streamCategory === preset.name ? 'var(--accent)' : 'rgba(24, 35, 38, 0.12)',
+                            background: streamCategory === preset.name ? 'rgba(201, 100, 66, 0.08)' : '#ffffff',
+                            color: streamCategory === preset.name ? 'var(--accent)' : 'var(--text)',
+                            fontSize: '0.74rem',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {preset.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Step 3: Target Job Description */}
+                  {/* Step 3: Interactive Keyword Tester (Requested by user) */}
+                  <div style={{
+                    marginBottom: '24px',
+                    padding: '18px 20px',
+                    background: '#faf9f5',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(24, 35, 38, 0.08)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <Tag size={16} color="var(--accent)" />
+                        <label style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text)' }}>
+                          Target Keywords & Core Skills to Test
+                        </label>
+                      </div>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>
+                        Optional · Press Enter or click + to add
+                      </span>
+                    </div>
+
+                    <p style={{ margin: '0 0 12px', fontSize: '0.78rem', color: 'var(--muted)', lineHeight: 1.4 }}>
+                      Specify the core competencies, technologies, or domain terms you want your resume explicitly benchmarked against.
+                    </p>
+
+                    {/* Keyword Input Box */}
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                      <input 
+                        type="text"
+                        value={keywordInput}
+                        onChange={(e) => setKeywordInput(e.target.value)}
+                        onKeyDown={handleKeyDownKeyword}
+                        placeholder="Add a target skill (e.g. React, Python, AWS, System Design, SQL)..."
+                        style={{
+                          flex: 1,
+                          padding: '9px 14px',
+                          background: '#ffffff',
+                          border: '1px solid rgba(24, 35, 38, 0.14)',
+                          borderRadius: '10px',
+                          fontSize: '0.86rem',
+                          color: 'var(--text)',
+                          outline: 'none',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddKeyword}
+                        disabled={!keywordInput.trim()}
+                        style={{
+                          padding: '9px 16px',
+                          borderRadius: '10px',
+                          border: 'none',
+                          background: keywordInput.trim() ? 'var(--surface-dark)' : 'rgba(24, 35, 38, 0.12)',
+                          color: '#ffffff',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: keywordInput.trim() ? 'pointer' : 'default',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <Plus size={15} /> Add
+                      </button>
+                    </div>
+
+                    {/* Active Selected Keywords */}
+                    {customKeywords.length > 0 && (
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                        {customKeywords.map((kw, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '4px 10px',
+                              background: '#ffffff',
+                              border: '1px solid rgba(201, 100, 66, 0.35)',
+                              borderRadius: '999px',
+                              fontSize: '0.78rem',
+                              fontWeight: 700,
+                              color: 'var(--accent)'
+                            }}
+                          >
+                            <span>{kw}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveKeyword(kw)}
+                              style={{
+                                border: 'none',
+                                background: 'transparent',
+                                color: 'var(--muted)',
+                                cursor: 'pointer',
+                                padding: 0,
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <X size={12} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Suggested Keywords to add */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--muted)', fontWeight: 600 }}>Suggested:</span>
+                      {suggestedKeywords.slice(0, 6).map((sk, i) => {
+                        const isAdded = customKeywords.includes(sk);
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => {
+                              if (!isAdded) setCustomKeywords([...customKeywords, sk]);
+                            }}
+                            disabled={isAdded}
+                            style={{
+                              padding: '2px 8px',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(24, 35, 38, 0.1)',
+                              background: isAdded ? 'rgba(24, 35, 38, 0.04)' : '#ffffff',
+                              color: isAdded ? 'var(--muted)' : 'var(--text)',
+                              fontSize: '0.72rem',
+                              fontWeight: 600,
+                              cursor: isAdded ? 'default' : 'pointer'
+                            }}
+                          >
+                            {isAdded ? '✓ ' : '+ '} {sk}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Step 4: Target Job Description */}
                   <div style={{ marginBottom: '28px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                       <label 
@@ -637,15 +972,15 @@ const Upload = () => {
                           id="jobDescription" 
                           value={jobDescription}
                           onChange={(e) => setJobDescription(e.target.value)}
-                          placeholder="Paste the full job description here for a precise ATS match score..." 
+                          placeholder="Paste the full job description here (responsibilities, required skills, tools, qualifications) for a detailed ATS keyword match..." 
                           style={{
                             width: '100%',
-                            minHeight: '150px',
-                            padding: '14px 16px',
+                            minHeight: '140px',
+                            padding: '12px 16px',
                             background: '#ffffff',
                             border: '1px solid rgba(24, 35, 38, 0.14)',
-                            borderRadius: '14px',
-                            fontSize: '0.9rem',
+                            borderRadius: '12px',
+                            fontSize: '0.88rem',
                             color: 'var(--text)',
                             outline: 'none',
                             boxSizing: 'border-box',
@@ -654,6 +989,36 @@ const Upload = () => {
                             resize: 'vertical'
                           }}
                         />
+
+                        {/* Textarea Bottom Tools: Word Count & Sample Auto-fill */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+                          <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>
+                            {jobDescription.trim() ? `${jobDescription.trim().split(/\s+/).length} words entered` : 'Include required skills and qualifications for highest accuracy.'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setJobDescription(SAMPLE_TECH_JD);
+                              setStreamCategory('Software Engineering');
+                              if (!customKeywords.includes('Python')) setCustomKeywords(['Python', 'AWS', 'Docker', 'React', 'PostgreSQL']);
+                            }}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              background: '#ffffff',
+                              border: '1px solid rgba(201, 100, 66, 0.3)',
+                              color: 'var(--accent)',
+                              fontSize: '0.74rem',
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Load Sample Tech JD
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       /* JD Document Upload */
@@ -683,11 +1048,11 @@ const Upload = () => {
                               justifyContent: 'center'
                             }}
                           >
-                            <FileText size={28} style={{ color: 'var(--accent)', marginBottom: '8px' }} />
-                            <div style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text)', marginBottom: '4px' }}>
+                            <FileText size={26} style={{ color: 'var(--accent)', marginBottom: '6px' }} />
+                            <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)', marginBottom: '4px' }}>
                               Drop JD document here, or <span style={{ color: 'var(--accent)', textDecoration: 'underline' }}>click to select</span>
                             </div>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>Supports .pdf, .docx, .txt</span>
+                            <span style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>Supports .pdf, .docx, .txt</span>
                           </div>
                         ) : (
                           <div style={{
@@ -700,7 +1065,7 @@ const Upload = () => {
                             borderRadius: '14px'
                           }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <FileCheck2 size={22} style={{ color: 'var(--accent)' }} />
+                              <FileCheck2 size={20} style={{ color: 'var(--accent)' }} />
                               <div>
                                 <strong style={{ fontSize: '0.9rem', color: 'var(--text)', display: 'block' }}>{jdFile.name}</strong>
                                 <span style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>{formatFileSize(jdFile.size)} · Job description attached</span>
@@ -748,41 +1113,6 @@ const Upload = () => {
                         />
                       </div>
                     )}
-
-                    {/* Quick upload alternative if in paste mode */}
-                    {jdMode === 'paste' && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px' }}>
-                        <span style={{ fontSize: '0.84rem', color: 'var(--muted)', fontWeight: 500 }}>Or upload JD file:</span>
-                        <button 
-                          type="button" 
-                          onClick={() => document.getElementById('quickJdFile').click()} 
-                          style={{
-                            background: '#ffffff',
-                            border: '1px solid rgba(24, 35, 38, 0.15)',
-                            borderRadius: '10px',
-                            padding: '6px 14px',
-                            fontSize: '0.82rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            color: 'var(--text)'
-                          }}
-                        >
-                          Choose File (.pdf, .docx, .txt)
-                        </button>
-                        <input 
-                          type="file" 
-                          id="quickJdFile" 
-                          accept=".pdf,.docx,.txt" 
-                          style={{ display: 'none' }}
-                          onChange={handleJdFileChange}
-                        />
-                        {jdFile && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: 'var(--teal)', fontWeight: 600 }}>
-                            <Check size={14} /> {jdFile.name}
-                          </span>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   {/* Primary CTA Submit Button */}
@@ -802,12 +1132,13 @@ const Upload = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '10px',
+                      gap: '8px',
                       boxShadow: '0 4px 14px rgba(201, 100, 66, 0.28)',
                       transition: 'all 0.15s ease'
                     }}
                   >
                     <span>{loading ? 'Analyzing Resume...' : 'Analyze Match & Get AI Career Map'}</span>
+                    <ArrowRight size={18} />
                   </button>
                 </form>
 
