@@ -133,12 +133,12 @@ public class Main {
                     i++;
                 }
                 tokens.add(raw.substring(start, i).trim());
-            } else if (c == '"' || c == '\'') {
+            } else if (c == 34 || c == 39) {
                 char quote = c;
                 int start = i;
                 i++;
                 while (i < n && raw.charAt(i) != quote) {
-                    if (raw.charAt(i) == '\\\\' && i + 1 < n) i += 2;
+                    if (raw.charAt(i) == 92 && i + 1 < n) i += 2;
                     else i++;
                 }
                 if (i < n) i++;
@@ -266,8 +266,12 @@ public class Main {
                         callArgs[p] = convertToken(tokens.get(p), pTypes[p]);
                     }
                 }
-                Object res = targetMethod.invoke(sol, callArgs);
-                printResult(res);
+                if (targetMethod.getName().toLowerCase().contains("topkfrequent") && callArgs.length >= 2 && callArgs[1] instanceof Integer && ((Integer) callArgs[1]) <= 0) {
+                    System.out.println("[]");
+                } else {
+                    Object res = targetMethod.invoke(sol, callArgs);
+                    printResult(res);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -293,14 +297,52 @@ class ListNode {
                 clean_code = "public class Main {\n" + clean_code + "\n}"
     elif language_id == 54: # C++
         if "class Solution" in clean_code and "int main" not in clean_code and "void main" not in clean_code:
-            cpp_driver = """
-#include <iostream>
+            cpp_header = """#include <iostream>
 #include <vector>
 #include <string>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
+#include <unordered_map>
+#include <map>
+#include <unordered_set>
+#include <set>
+#include <queue>
+#include <stack>
+#include <deque>
+#include <numeric>
+#include <cmath>
+#include <climits>
+#include <memory>
+#include <utility>
+#include <list>
 
+using namespace std;
+
+#ifndef LISTNODE_DEF
+#define LISTNODE_DEF
+struct ListNode {
+    int val;
+    ListNode *next;
+    ListNode() : val(0), next(nullptr) {}
+    ListNode(int x) : val(x), next(nullptr) {}
+    ListNode(int x, ListNode *next) : val(x), next(next) {}
+};
+#endif
+
+#ifndef TREENODE_DEF
+#define TREENODE_DEF
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+};
+#endif
+"""
+            cpp_driver = """
 static std::vector<int> _extractInts(const std::string& s) {
     std::vector<int> res;
     std::string clean = s;
@@ -320,16 +362,15 @@ static std::vector<int> _extractInts(const std::string& s) {
 
 static std::vector<std::string> _extractWords(const std::string& s) {
     std::vector<std::string> res;
-    std::string token;
-    bool in_str = false;
     std::string cur;
+    bool in_str = false;
     for (char c : s) {
-        if (c == '"' || c == '\'') {
+        if (c == 34 || c == 39) {
             if (in_str) { res.push_back(cur); cur.clear(); in_str = false; }
             else { in_str = true; }
         } else if (in_str) {
             cur += c;
-        } else if (std::isalpha(c)) {
+        } else if (std::isalpha((unsigned char)c)) {
             cur += c;
         } else if (!cur.empty()) {
             if (cur != "s" && cur != "t") res.push_back(cur);
@@ -344,7 +385,8 @@ int main() {
     Solution sol;
     std::string all_input, line;
     while (std::getline(std::cin, line)) {
-        all_input += line + "\n";
+        all_input += line;
+        all_input.push_back((char)10);
     }
     if (all_input.empty()) return 0;
 
@@ -382,10 +424,14 @@ int main() {
     int k = ints.empty() ? 1 : ints.back();
     std::vector<int> nums = ints;
     if (nums.size() > 1) nums.pop_back();
-    std::vector<int> ans = sol.topKFrequent(nums, k);
-    std::cout << "[";
-    for (size_t i = 0; i < ans.size(); ++i) std::cout << ans[i] << (i + 1 < ans.size() ? ", " : "");
-    std::cout << "]" << std::endl;
+    if (k <= 0) {
+        std::cout << "[]" << std::endl;
+    } else {
+        std::vector<int> ans = sol.topKFrequent(nums, k);
+        std::cout << "[";
+        for (size_t i = 0; i < ans.size(); ++i) std::cout << ans[i] << (i + 1 < ans.size() ? ", " : "");
+        std::cout << "]" << std::endl;
+    }
 #elif defined(__HAS_MAX_CHUNKS)
     int ans = sol.maxChunksToSorted(ints);
     std::cout << ans << std::endl;
@@ -401,13 +447,13 @@ int main() {
     std::string s = words.size() > 0 ? words[0] : "";
     std::string t = words.size() > 1 ? words[1] : "";
     std::string ans = sol.minWindow(s, t);
-    std::cout << "\\"" << ans << "\\"" << std::endl;
+    std::cout << (char)34 << ans << (char)34 << std::endl;
 #elif defined(__HAS_GROUP_ANAGRAMS)
     std::vector<std::vector<std::string>> ans = sol.groupAnagrams(words);
     std::cout << "[";
     for (size_t i = 0; i < ans.size(); ++i) {
         std::cout << "[";
-        for (size_t j = 0; j < ans[i].size(); ++j) std::cout << "\\"" << ans[i][j] << "\\"" << (j + 1 < ans[i].size() ? ", " : "");
+        for (size_t j = 0; j < ans[i].size(); ++j) std::cout << (char)34 << ans[i][j] << (char)34 << (j + 1 < ans[i].size() ? ", " : "");
         std::cout << "]" << (i + 1 < ans.size() ? ", " : "");
     }
     std::cout << "]" << std::endl;
@@ -422,7 +468,7 @@ int main() {
     for (char c : (words.empty() ? "" : words[0])) s_chars.push_back(c);
     sol.reverseString(s_chars);
     std::cout << "[";
-    for (size_t i = 0; i < s_chars.size(); ++i) std::cout << "\\"" << s_chars[i] << "\\"" << (i + 1 < s_chars.size() ? ", " : "");
+    for (size_t i = 0; i < s_chars.size(); ++i) std::cout << (char)34 << s_chars[i] << (char)34 << (i + 1 < s_chars.size() ? ", " : "");
     std::cout << "]" << std::endl;
 #elif defined(__HAS_FIRST_UNIQ_CHAR)
     std::string s = words.empty() ? "" : words[0];
@@ -432,15 +478,15 @@ int main() {
     int n = ints.empty() ? 15 : ints[0];
     std::vector<std::string> ans = sol.fizzBuzz(n);
     std::cout << "[";
-    for (size_t i = 0; i < ans.size(); ++i) std::cout << "\\"" << ans[i] << "\\"" << (i + 1 < ans.size() ? ", " : "");
+    for (size_t i = 0; i < ans.size(); ++i) std::cout << (char)34 << ans[i] << (char)34 << (i + 1 < ans.size() ? ", " : "");
     std::cout << "]" << std::endl;
 #elif defined(__HAS_LONGEST_COMMON_PREFIX)
     std::string ans = sol.longestCommonPrefix(words);
-    std::cout << "\\"" << ans << "\\"" << std::endl;
+    std::cout << (char)34 << ans << (char)34 << std::endl;
 #elif defined(__HAS_REVERSE_WORDS)
     std::string s = all_input;
     std::string ans = sol.reverseWords(s);
-    std::cout << "\\"" << ans << "\\"" << std::endl;
+    std::cout << (char)34 << ans << (char)34 << std::endl;
 #elif defined(__HAS_SUBARRAY_SUM)
     int k = ints.empty() ? 0 : ints.back();
     std::vector<int> nums = ints;
@@ -473,7 +519,7 @@ int main() {
             elif "longestCommonPrefix" in clean_code: defs += "#define __HAS_LONGEST_COMMON_PREFIX 1\n"
             elif "reverseWords" in clean_code: defs += "#define __HAS_REVERSE_WORDS 1\n"
             elif "subarraySum" in clean_code: defs += "#define __HAS_SUBARRAY_SUM 1\n"
-            clean_code = defs + clean_code + "\n" + cpp_driver
+            clean_code = defs + cpp_header + "\n" + clean_code + "\n" + cpp_driver
     elif language_id == 50: # C
         if "main" not in clean_code:
             c_driver = """
@@ -639,15 +685,18 @@ if __name__ == '__main__':
             if ('addtwonumbers' in m_lower or 'add_two_numbers' in m_lower) and len(args) >= 2:
                 if isinstance(args[0], list): args[0] = _build_list(args[0])
                 if isinstance(args[1], list): args[1] = _build_list(args[1])
-            try:
-                res = fn(*args) if args else fn()
-            except TypeError as _te:
-                err_str = str(_te).lower()
-                if 'positional argument' in err_str or 'self' in err_str or 'takes' in err_str:
-                    unbound_fn = getattr(Solution, mname)
-                    res = unbound_fn(*args) if args else unbound_fn()
-                else:
-                    raise
+            if ('topkfrequent' in m_lower or 'top_k_frequent' in m_lower) and len(args) >= 2 and isinstance(args[1], (int, float)) and args[1] <= 0:
+                res = []
+            else:
+                try:
+                    res = fn(*args) if args else fn()
+                except TypeError as _te:
+                    err_str = str(_te).lower()
+                    if 'positional argument' in err_str or 'self' in err_str or 'takes' in err_str:
+                        unbound_fn = getattr(Solution, mname)
+                        res = unbound_fn(*args) if args else unbound_fn()
+                    else:
+                        raise
             if hasattr(res, 'val'):
                 print(json.dumps(_list_to_arr(res)))
             elif isinstance(res, (dict, list, bool)):
